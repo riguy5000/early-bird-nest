@@ -379,7 +379,13 @@ export function PayoutsModule({ currentStore }: PayoutsModuleProps) {
                 <Calendar
                   mode="range"
                   selected={{ from: dateRange.from, to: dateRange.to }}
-                  onSelect={(range) => setDateRange(range || { from: undefined, to: undefined })}
+                  onSelect={(range) => {
+                    if (range) {
+                      setDateRange({ from: range.from, to: range.to });
+                    } else {
+                      setDateRange({ from: undefined, to: undefined });
+                    }
+                  }}
                   numberOfMonths={2}
                 />
               </PopoverContent>
