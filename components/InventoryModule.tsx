@@ -49,7 +49,7 @@ interface InventoryItem {
   smartId: string;
   category: string;
   subcategory: string;
-  status: string;
+  status: 'Quote' | 'In Stock' | 'Melted' | 'Resold' | 'Hold';
   marketValue: number;
   finalPaid: number;
   payoutPercent: number;
