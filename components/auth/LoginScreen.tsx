@@ -8,7 +8,7 @@ import { Separator } from '../ui/separator';
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '../ui/input-otp';
 import { Eye, EyeOff, Mail, Lock, Smartphone, Crown } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { AuthFlow } from '../AuthenticationFlow';
 
 interface LoginScreenProps {

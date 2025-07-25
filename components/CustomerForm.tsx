@@ -8,7 +8,7 @@ import { Textarea } from './ui/textarea';
 import { Separator } from './ui/separator';
 import { GooglePlacesAutocomplete } from './GooglePlacesAutocomplete';
 import { User, Mail, Phone, MapPin, Calendar, Save, X, AlertCircle } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface CustomerData {
   firstName: string;

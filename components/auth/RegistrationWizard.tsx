@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { ScrollArea } from '../ui/scroll-area';
 import { GooglePlacesAutocomplete } from '../GooglePlacesAutocomplete';
 import { ArrowLeft, ArrowRight, Store, User, CheckCircle, Phone, Mail, Eye, EyeOff, Building } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { AuthFlow } from '../AuthenticationFlow';
 
 interface RegistrationWizardProps {

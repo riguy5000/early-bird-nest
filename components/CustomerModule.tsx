@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Alert, AlertDescription } from './ui/alert';
 import { CustomerForm } from './CustomerForm';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { 
   Search, 
   Plus, 
@@ -31,9 +31,11 @@ interface Customer {
   lastName: string;
   email: string;
   phone: string;
+  altPhone: string;
+  dateOfBirth: string;
   address: string;
-  placeId?: string;
-  addressDetails?: any;
+  placeId: string;
+  addressDetails: any;
   city: string;
   state: string;
   zipCode: string;
@@ -86,7 +88,11 @@ export function CustomerModule({ user }: CustomerModuleProps) {
           lastName: 'Smith',
           email: 'john.smith@email.com',
           phone: '(555) 123-4567',
+          altPhone: '',
+          dateOfBirth: '1985-06-15',
           address: '123 Main Street, New York, NY 10001',
+          placeId: 'ChIJOwg_06VPwokRYv534QaPC8g',
+          addressDetails: null,
           city: 'New York',
           state: 'NY',
           zipCode: '10001',
@@ -102,7 +108,11 @@ export function CustomerModule({ user }: CustomerModuleProps) {
           lastName: 'Johnson',
           email: 'sarah.j@email.com',
           phone: '(555) 987-6543',
+          altPhone: '(555) 111-2222',
+          dateOfBirth: '1990-03-22',
           address: '456 Oak Avenue, Los Angeles, CA 90210',
+          placeId: 'ChIJE9on3F3HwoAR9AhGJW_fL-I',
+          addressDetails: null,
           city: 'Los Angeles',
           state: 'CA',
           zipCode: '90210',
@@ -118,7 +128,11 @@ export function CustomerModule({ user }: CustomerModuleProps) {
           lastName: 'Brown',
           email: 'mbrown@email.com',
           phone: '(555) 456-7890',
+          altPhone: '',
+          dateOfBirth: '1978-11-08',
           address: '789 Elm Street, Chicago, IL 60601',
+          placeId: 'ChIJ7cv00DwsDogRAMDACa2m4K8',
+          addressDetails: null,
           city: 'Chicago',
           state: 'IL',
           zipCode: '60601',

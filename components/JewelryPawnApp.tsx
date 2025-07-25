@@ -28,7 +28,7 @@ import {
   Clock,
   Menu
 } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface JewelryPawnAppProps {
   user: any;
@@ -348,7 +348,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
           </div>
         ) : (
           <div className="max-w-7xl mx-auto">
-            {ActiveComponent && <ActiveComponent user={user} />}
+            {ActiveComponent && <ActiveComponent user={user} currentStore={user?.store} />}
           </div>
         )}
       </main>
