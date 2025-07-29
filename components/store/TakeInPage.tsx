@@ -20,7 +20,9 @@ import {
   Printer, 
   Clock,
   User,
-  Package
+  Package,
+  Plus,
+  Minus
 } from 'lucide-react';
 
 interface Item {
@@ -256,44 +258,113 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
   const totals = calculateTotals();
 
   return (
-    <div className="flex flex-col h-screen bg-background">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b bg-card">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Package className="h-5 w-5 text-primary" />
-            <div>
-              <h1 className="text-lg font-semibold">Take-In Portal</h1>
-              <p className="text-sm text-muted-foreground">
-                Batch #{batchId} • {employee.name}
-              </p>
-            </div>
-          </div>
-          
+    <div className="flex flex-col h-screen bg-background max-w-[1280px] mx-auto">
+      {/* Global Header - 64px height */}
+      <div className="h-16 flex items-center justify-between px-6 border-b bg-card shadow-md">
+        <div className="flex items-center gap-3">
+          <Package className="h-5 w-5 text-primary" />
+          <h1 className="text-xl font-semibold">Take-In</h1>
+          <span className="text-slate-400 text-sm">#{batchId}</span>
+        </div>
+
+        <div className="flex items-center gap-6">
           {lastSaved && (
             <Badge variant="outline" className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
               Saved {lastSaved.toLocaleTimeString()}
             </Badge>
           )}
-        </div>
-
-        <div className="flex items-center gap-4">
-          <MetalPriceTicker />
           
-          <div className="flex items-center gap-2">
-            <Label htmlFor="view-mode" className="text-sm">Fast Entry</Label>
-            <Switch
-              id="view-mode"
-              checked={viewMode === 'slim'}
-              onCheckedChange={(checked) => setViewMode(checked ? 'slim' : 'balanced')}
-            />
-          </div>
-
           <Button variant="outline" size="sm" onClick={onClose}>
             Close
           </Button>
         </div>
+      </div>
+
+      {/* Metal Ticker - Translucent strip */}
+      <div className="bg-slate-50/60 backdrop-blur border-b px-6 py-2">
+        <MetalPriceTicker />
+      </div>
+
+      {/* Quick Controls Row */}
+      <div className="px-6 py-4 flex items-center justify-between gap-6 border-b">
+        <div className="flex items-center gap-4">
+          {/* Category Chips - Horizontally scrollable */}
+          <div className="flex gap-2 overflow-x-auto scrollbar-none">
+            {['Jewelry', 'Watch', 'Bullion', 'Stones', 'Silverware'].map((category) => (
+              <button
+                key={category}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                  items.some(item => item.category === category)
+                    ? 'bg-slate-900 text-white' 
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+                onClick={() => {
+                  const newItem: Item = {
+                    id: `item_${Date.now()}`,
+                    category: category as any,
+                    metals: [{ id: `metal_${Date.now()}`, type: 'Gold', karat: 14, weight: 0 }],
+                    stones: [],
+                    marketValue: 0,
+                    payoutPercentage: store.defaultPayoutPercentage,
+                    payoutAmount: 0,
+                    photos: [],
+                    notes: '',
+                    status: 'In Stock'
+                  };
+                  setItems(prev => [...prev, newItem]);
+                  setActiveItemId(newItem.id);
+                }}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+
+          {/* Item Count */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Items:</span>
+            <div className="flex items-center border rounded-md">
+              <button 
+                className="px-2 py-1 hover:bg-muted"
+                onClick={() => items.length > 1 && removeItem(items[items.length - 1].id)}
+                disabled={items.length === 0}
+              >
+                <Minus className="h-3 w-3" />
+              </button>
+              <span className="px-3 py-1 text-sm font-medium min-w-8 text-center">
+                {items.length}
+              </span>
+              <button 
+                className="px-2 py-1 hover:bg-muted"
+                onClick={addNewItem}
+              >
+                <Plus className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
+
+          {/* Fast Entry Toggle */}
+          <div className="flex items-center gap-2">
+            <Label htmlFor="fast-entry" className="text-sm">Fast Entry</Label>
+            <Switch
+              id="fast-entry"
+              checked={viewMode === 'slim'}
+              onCheckedChange={(checked) => setViewMode(checked ? 'slim' : 'balanced')}
+            />
+          </div>
+        </div>
+
+        {/* AI Assist Button - Right edge */}
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={handleAIAssist}
+          className="flex items-center gap-2 text-secondary"
+        >
+          <Zap className="h-4 w-4" />
+          AI Assist
+        </Button>
       </div>
 
       {/* AI Assist Banner */}

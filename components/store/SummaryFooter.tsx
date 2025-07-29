@@ -63,54 +63,85 @@ export function SummaryFooter({
   };
 
   return (
-    <div className="sticky bottom-0 bg-card/95 backdrop-blur border-t border-border/50">
-      <div className="p-4 space-y-4">
-        {/* Summary Stats */}
-        <div className="grid grid-cols-4 gap-4">
-          <div className="text-center">
-            <div className="text-sm text-muted-foreground">Market Value</div>
-            <div className="text-lg font-semibold">
-              ${totals.totalMarketValue.toFixed(2)}
-            </div>
-          </div>
-          
-          {!hidePayout && (
-            <div className="text-center">
-              <div className="text-sm text-muted-foreground">Total Payout</div>
-              <div className="text-2xl font-bold text-primary">
-                ${totals.totalPayout.toFixed(2)}
+    <div className="sticky bottom-0 bg-white border-t shadow-lg">
+      <div className="px-6 py-4 space-y-4">
+        {/* Summary Stats - 4 KPI chips evenly spaced */}
+        <div className="flex justify-between items-center">
+          <div className="flex gap-6">
+            <div className="bg-slate-50 px-4 py-2 rounded-full">
+              <div className="text-xs text-slate-500">Market</div>
+              <div className="text-sm font-semibold">
+                ${totals.totalMarketValue.toFixed(2)}
               </div>
             </div>
-          )}
-          
-          <div className="text-center">
-            <div className="text-sm text-muted-foreground">Avg Payout %</div>
-            <div className="text-lg font-semibold">
-              {totals.avgPayoutPercentage.toFixed(1)}%
-            </div>
-          </div>
-          
-          {!hideProfit && (
-            <div className="text-center">
-              <div className="text-sm text-muted-foreground">Profit</div>
-              <div className="text-lg font-semibold text-green-600">
-                ${totals.profit.toFixed(2)}
+            
+            {!hidePayout && (
+              <div className="bg-blue-50 px-4 py-2 rounded-full">
+                <div className="text-xs text-slate-500">Payout</div>
+                <div className="text-lg font-semibold text-primary">
+                  ${totals.totalPayout.toFixed(2)}
+                </div>
+              </div>
+            )}
+            
+            <div className="bg-slate-50 px-4 py-2 rounded-full">
+              <div className="text-xs text-slate-500">Avg %</div>
+              <div className="text-sm font-semibold">
+                {totals.avgPayoutPercentage.toFixed(1)}%
               </div>
             </div>
-          )}
+            
+            {!hideProfit && (
+              <div className="bg-green-50 px-4 py-2 rounded-full">
+                <div className="text-xs text-slate-500">Profit</div>
+                <div className="text-sm font-semibold text-green-600">
+                  ${totals.profit.toFixed(2)}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Action Buttons - Right aligned */}
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="ghost" 
+              onClick={onSave}
+              disabled={!hasItems}
+              className="flex items-center gap-2"
+            >
+              <Save className="h-4 w-4" />
+              Save Quote
+            </Button>
+
+            <Button 
+              onClick={onSave}
+              disabled={!hasItems}
+              className="flex items-center gap-2 bg-accent hover:bg-accent/90 text-white"
+            >
+              <DollarSign className="h-4 w-4" />
+              Complete Purchase
+            </Button>
+          </div>
         </div>
 
-        <Separator />
+        {/* Customer & Payout Information */}
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <div className="flex items-center gap-6">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={onCustomerInfo}
+              className="flex items-center gap-2"
+            >
+              <User className="h-3 w-3" />
+              Customer Info
+            </Button>
 
-        {/* Payment & Actions */}
-        <div className="flex items-center justify-between gap-4">
-          {/* Payment Section */}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Label className="text-sm font-medium">Payment:</Label>
+            <div className="flex items-center gap-3">
+              <Label className="text-xs">Payment:</Label>
               <Select value={paymentMethod} onValueChange={onPaymentMethodChange}>
-                <SelectTrigger className="w-32">
-                  <div className="flex items-center gap-2">
+                <SelectTrigger className="w-28 h-8">
+                  <div className="flex items-center gap-1">
                     {getPaymentIcon()}
                     <SelectValue />
                   </div>
@@ -118,102 +149,50 @@ export function SummaryFooter({
                 <SelectContent>
                   <SelectItem value="Check">
                     <div className="flex items-center gap-2">
-                      <CreditCard className="h-4 w-4" />
+                      <CreditCard className="h-3 w-3" />
                       Check
                     </div>
                   </SelectItem>
                   <SelectItem value="Cash">
                     <div className="flex items-center gap-2">
-                      <Banknote className="h-4 w-4" />
+                      <Banknote className="h-3 w-3" />
                       Cash
                     </div>
                   </SelectItem>
                   <SelectItem value="Store Credit">
                     <div className="flex items-center gap-2">
-                      <Gift className="h-4 w-4" />
+                      <Gift className="h-3 w-3" />
                       Store Credit
                     </div>
                   </SelectItem>
                 </SelectContent>
               </Select>
-            </div>
 
-            {paymentMethod === 'Check' && (
-              <div className="flex items-center gap-2">
-                <Label className="text-sm">Check #:</Label>
+              {paymentMethod === 'Check' && (
                 <Input 
                   value={checkNumber}
                   onChange={(e) => onCheckNumberChange(e.target.value)}
-                  placeholder="Enter check number"
-                  className="w-32"
+                  placeholder="Check #"
+                  className="w-24 h-8"
                 />
-              </div>
-            )}
-
-            <div className="flex items-center gap-2">
-              <Switch 
-                id="follow-up"
-                checked={followUpReminder}
-                onCheckedChange={onFollowUpReminderChange}
-              />
-              <Label htmlFor="follow-up" className="text-sm flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                7-day follow-up
-              </Label>
+              )}
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              onClick={onCustomerInfo}
-              className="flex items-center gap-2"
-            >
-              <User className="h-4 w-4" />
-              Customer Info
-            </Button>
-
-            <Button 
-              variant="outline" 
-              onClick={onPrintLabels}
-              disabled={!hasItems}
-              className="flex items-center gap-2"
-            >
-              <Printer className="h-4 w-4" />
-              Print Labels
-            </Button>
-
-            <Button 
-              onClick={onSave}
-              disabled={!hasItems}
-              className="flex items-center gap-2 min-w-24"
-            >
-              <Save className="h-4 w-4" />
-              Save Quote
-            </Button>
-          </div>
-        </div>
-
-        {/* Keyboard Shortcuts Help */}
-        <div className="flex justify-center">
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Badge variant="outline" className="px-1 py-0 text-[10px]">Ctrl+S</Badge>
-              <span>Save</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Badge variant="outline" className="px-1 py-0 text-[10px]">+</Badge>
-              <span>Add Item</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Badge variant="outline" className="px-1 py-0 text-[10px]">Shift+D</Badge>
-              <span>Toggle View</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Badge variant="outline" className="px-1 py-0 text-[10px]">⌘+J</Badge>
-              <span>AI Assist</span>
-            </div>
+          {/* Keyboard Shortcuts - Under header tooltip */}
+          <div className="flex items-center gap-3 text-[10px]">
+            <span className="flex items-center gap-1">
+              <Badge variant="outline" className="px-1 py-0 text-[9px]">Tab</Badge>
+              Next field
+            </span>
+            <span className="flex items-center gap-1">
+              <Badge variant="outline" className="px-1 py-0 text-[9px]">Shift+D</Badge>
+              Toggle view
+            </span>
+            <span className="flex items-center gap-1">
+              <Badge variant="outline" className="px-1 py-0 text-[9px]">⌘+J</Badge>
+              AI Assist
+            </span>
           </div>
         </div>
       </div>

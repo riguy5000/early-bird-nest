@@ -71,22 +71,22 @@ export function TakeInSlim({
   const totalPayout = items.reduce((sum, item) => sum + (item.payoutAmount || 0), 0);
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="p-4 border-b bg-muted/30">
+    <div className="flex flex-col h-full max-w-[1280px] mx-auto">
+      {/* Slim Header */}
+      <div className="px-6 py-3 border-b">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h2 className="text-lg font-semibold">Fast Entry Mode</h2>
+            <h2 className="text-lg font-semibold">Fast Entry</h2>
             <Badge variant="secondary" className="flex items-center gap-1">
               <Zap className="h-3 w-3" />
-              Speed Focus
+              Speed Mode
             </Badge>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             {!store.hidePayout && (
               <div className="text-right">
-                <div className="text-lg font-bold text-primary">
+                <div className="text-2xl font-bold text-primary">
                   ${totalPayout.toFixed(2)}
                 </div>
                 <div className="text-xs text-muted-foreground">Total Payout</div>
@@ -95,14 +95,14 @@ export function TakeInSlim({
             
             <Button variant="outline" onClick={onSwitchToDetailed}>
               <Eye className="h-4 w-4 mr-2" />
-              Switch to Detailed
+              Detailed View
             </Button>
           </div>
         </div>
       </div>
 
       {/* Table Header */}
-      <div className="grid grid-cols-6 gap-2 p-4 border-b bg-muted/20 text-sm font-medium text-muted-foreground">
+      <div className="grid grid-cols-6 gap-4 px-6 py-3 border-b bg-slate-50/60 text-sm font-medium text-slate-600">
         <div>#</div>
         <div>Metal Type</div>
         <div>Karat</div>
@@ -111,32 +111,32 @@ export function TakeInSlim({
         <div>Actions</div>
       </div>
 
-      {/* Items List */}
+      {/* Items List - Table format */}
       <div className="flex-1 overflow-auto">
         {items.length === 0 ? (
-          <div className="flex items-center justify-center h-full">
+          <div className="flex items-center justify-center h-96">
             <div className="text-center">
-              <Calculator className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">Quick Entry Ready</h3>
+              <Calculator className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Quick Entry Ready</h3>
               <p className="text-muted-foreground mb-4">Start entering metal details for instant quotes</p>
-              <Button onClick={addNewLine}>
+              <Button onClick={addNewLine} className="bg-primary text-white">
                 <Plus className="h-4 w-4 mr-2" />
                 Add First Item
               </Button>
             </div>
           </div>
         ) : (
-          <div className="space-y-1 p-4">
+          <div className="px-6 py-2">
             {items.map((item, itemIndex) => 
               item.metals?.map((metal: any, metalIndex: number) => (
                 <div 
                   key={`${item.id}-${metalIndex}`}
-                  className={`grid grid-cols-6 gap-2 p-3 rounded-lg border transition-colors ${
-                    focusedRow === item.id ? 'bg-primary/5 border-primary/20' : 'hover:bg-muted/50'
+                  className={`grid grid-cols-6 gap-4 py-2 border-b border-slate-100 transition-colors hover:bg-slate-50/50 ${
+                    focusedRow === item.id ? 'bg-blue-50/50' : ''
                   }`}
                 >
                   {/* Item Number */}
-                  <div className="flex items-center text-sm font-medium">
+                  <div className="flex items-center text-sm font-medium text-slate-600">
                     {itemIndex + 1}.{metalIndex + 1}
                   </div>
 
@@ -146,7 +146,7 @@ export function TakeInSlim({
                       value={metal.type} 
                       onValueChange={(value) => updateMetalInItem(item.id, metalIndex, 'type', value)}
                     >
-                      <SelectTrigger className="h-9">
+                      <SelectTrigger className="h-8 border-0 bg-transparent hover:bg-slate-50">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -164,7 +164,7 @@ export function TakeInSlim({
                       value={metal.karat?.toString()} 
                       onValueChange={(value) => updateMetalInItem(item.id, metalIndex, 'karat', parseInt(value))}
                     >
-                      <SelectTrigger className="h-9">
+                      <SelectTrigger className="h-8 border-0 bg-transparent hover:bg-slate-50">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -178,7 +178,7 @@ export function TakeInSlim({
                     </Select>
                   </div>
 
-                  {/* Weight */}
+                  {/* Weight - Auto-focus on last item */}
                   <div>
                     <Input 
                       type="number" 
@@ -188,15 +188,15 @@ export function TakeInSlim({
                       onFocus={() => setFocusedRow(item.id)}
                       onKeyDown={(e) => handleKeyDown(e, item.id, metalIndex)}
                       placeholder="0.00"
-                      className="h-9"
+                      className="h-8 border-0 border-b-2 border-slate-200 rounded-none bg-transparent focus:border-primary"
                       autoFocus={itemIndex === items.length - 1 && metalIndex === 0}
                     />
                   </div>
 
-                  {/* Payout */}
+                  {/* Payout - Number count animation */}
                   <div className="flex items-center">
                     {!store.hidePayout && (
-                      <div className="font-medium text-primary">
+                      <div className="font-semibold text-primary text-sm">
                         ${((metal.weight || 0) * 50 * (item.payoutPercentage / 100)).toFixed(2)}
                       </div>
                     )}
@@ -205,19 +205,19 @@ export function TakeInSlim({
                   {/* Actions */}
                   <div className="flex items-center gap-1">
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
                       onClick={() => onItemRemove(item.id)}
-                      className="h-8 w-8 p-0"
+                      className="h-6 w-6 p-0 hover:bg-red-50 hover:text-red-600"
                     >
                       <Minus className="h-3 w-3" />
                     </Button>
                     
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
-                      className="h-8 w-8 p-0"
-                      title="More options"
+                      className="h-6 w-6 p-0 hover:bg-slate-100"
+                      title="Save for later"
                     >
                       <MoreHorizontal className="h-3 w-3" />
                     </Button>
@@ -229,31 +229,18 @@ export function TakeInSlim({
         )}
       </div>
 
-      {/* Quick Actions Footer */}
-      <div className="border-t p-4 bg-card">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button onClick={addNewLine} className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Add Line
-            </Button>
-            
-            <div className="text-sm text-muted-foreground">
-              Press <Badge variant="outline" className="px-1 py-0 text-xs">Enter</Badge> to add next line
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-muted-foreground">
-              {items.length} {items.length === 1 ? 'item' : 'items'}
-            </div>
-            
-            <Button variant="outline" size="sm">
-              Save & Print Labels
-            </Button>
-          </div>
+      {/* FAB for Add Item - bottom-right */}
+      {items.length > 0 && (
+        <div className="fixed bottom-20 right-6 z-20">
+          <Button 
+            onClick={addNewLine} 
+            size="lg"
+            className="rounded-full w-14 h-14 shadow-lg bg-primary hover:bg-primary/90"
+          >
+            <Plus className="h-6 w-6" />
+          </Button>
         </div>
-      </div>
+      )}
     </div>
   );
 }
