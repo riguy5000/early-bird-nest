@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { CustomerModule } from './CustomerModule';
-import { EnhancedTakeInModule } from './EnhancedTakeInModule';
+import { TakeInPage } from './store/TakeInPage';
 import { InventoryModule } from './InventoryModule';
 import { PayoutsModule } from './PayoutsModule';
 import { StoreSettingsModule } from './StoreSettingsModule';
@@ -40,7 +40,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
 
   const modules = [
     { id: 'dashboard', name: 'Dashboard', icon: BarChart3, component: StatisticsModule },
-    { id: 'take-in', name: 'Take-In', icon: Plus, component: EnhancedTakeInModule },
+    { id: 'take-in', name: 'Take-In', icon: Plus, component: () => <TakeInPage store={{ id: 'store1', name: user?.store?.name || 'Main Store', defaultPayoutPercentage: 75, hideProfit: false, hidePayout: false, enableFastEntry: false, autoPrintLabels: true }} employee={{ id: 'emp1', name: user?.name || 'Employee' }} onComplete={(data) => toast.success('Transaction saved')} onClose={() => setActiveModule('dashboard')} /> },
     { id: 'inventory', name: 'Inventory', icon: Package, component: InventoryModule },
     { id: 'customers', name: 'Customers', icon: Users, component: CustomerModule },
     { id: 'payouts', name: 'Payouts', icon: DollarSign, component: PayoutsModule },
