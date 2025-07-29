@@ -19,7 +19,8 @@ import {
   Zap,
   Settings,
   Eye,
-  Calculator
+  Calculator,
+  Package
 } from 'lucide-react';
 
 interface TakeInBalancedProps {
