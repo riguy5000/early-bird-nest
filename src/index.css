@@ -17,26 +17,34 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Apple-Clean Design Tokens */
+    --primary: 217 91% 60%; /* #3B82F6 */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
+    --secondary: 220 13% 91%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 217 91% 60%; /* Same as primary for consistency */
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 220 13% 91%;
+    --input: transparent;
+    --ring: 217 91% 60%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem; /* 12px for Apple-style rounded corners */
+
+    /* Apple-Clean specific tokens */
+    --slate-50: 210 40% 98%;
+    --slate-100: 210 40% 96%;
+    --slate-400: 215 20% 65%;
+    --slate-500: 220 9% 46%;
+    --slate-900: 222 47% 11%;
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +108,41 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-inter;
+  }
+
+  /* Apple-Clean Typography */
+  .font-inter {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  }
+
+  /* Borderless inputs with underline focus */
+  .input-clean {
+    @apply border-0 border-b border-border bg-transparent px-0 py-2 focus:border-primary focus:ring-0 transition-colors;
+  }
+
+  /* Pill-style inputs */
+  .input-pill {
+    @apply rounded-full px-4 py-2 bg-slate-100 border-0 focus:bg-background focus:ring-2 focus:ring-primary/20;
+  }
+
+  /* Count-up animation for price changes */
+  @keyframes count-up {
+    from { transform: scale(1.1); }
+    to { transform: scale(1); }
+  }
+
+  .animate-count-up {
+    animation: count-up 0.3s ease-out;
+  }
+
+  /* Scale-in animation for new items */
+  @keyframes scale-in {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.2s ease-out;
   }
 }

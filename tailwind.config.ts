@@ -61,7 +61,21 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				/* Apple-Clean specific colors */
+				slate: {
+					50: 'hsl(var(--slate-50))',
+					100: 'hsl(var(--slate-100))',
+					400: 'hsl(var(--slate-400))',
+					500: 'hsl(var(--slate-500))',
+					900: 'hsl(var(--slate-900))'
 				}
+			},
+			fontFamily: {
+				inter: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
+			},
+			spacing: {
+				'4': '1rem', /* 16px for spacing consistency */
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
