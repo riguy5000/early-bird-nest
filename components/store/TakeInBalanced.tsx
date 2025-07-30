@@ -311,65 +311,70 @@ export function TakeInBalanced({
                       {/* Compact Items Table */}
                       <div className="divide-y divide-slate-100">
                         {(categoryItems as any[]).map((item, index) => (
-                          <div key={item.id} className="group hover:bg-slate-50/50 transition-colors">
-                            {/* Main Item Row - Everything in one compact line */}
-                            <div className="flex items-center gap-3 p-3">
-                              {/* Item Number & Type */}
-                              <div className="flex items-center gap-2 min-w-[120px]">
-                                <div className="w-6 h-6 bg-slate-100 rounded-md flex items-center justify-center text-xs font-bold text-slate-700">
-                                  {items.findIndex(i => i.id === item.id) + 1}
-                                </div>
-                                <div className="text-sm font-medium text-slate-800 truncate">
-                                  {item.subType || `${category} Item`}
-                                </div>
-                              </div>
+                           <div key={item.id} className="group hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/30 transition-all duration-300 border-l-4 border-l-transparent hover:border-l-blue-400">
+                             {/* Main Item Row - Everything in one compact line */}
+                             <div className="flex items-center gap-4 p-4 rounded-lg"
+                               {/* Item Number & Type */}
+                               <div className="flex items-center gap-3 min-w-[140px]">
+                                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-xs font-bold text-white shadow-lg">
+                                   {items.findIndex(i => i.id === item.id) + 1}
+                                 </div>
+                                 <div className="text-sm font-semibold text-slate-800 truncate">
+                                   {item.subType || `${category} Item`}
+                                 </div>
+                               </div>
 
                               {/* Metal Info - Horizontal Layout */}
                               <div className="flex items-center gap-2 flex-1 min-w-0">
                                 {(item.metals || []).slice(0, 1).map((metal: any) => (
                                   <div key={metal.id} className="flex items-center gap-2">
-                                    <Select 
-                                      value={metal.type} 
-                                      onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}
-                                    >
-                                      <SelectTrigger className="w-16 h-7 text-xs bg-white border-slate-300">
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="Gold">Gold</SelectItem>
-                                        <SelectItem value="Silver">Silver</SelectItem>
-                                        <SelectItem value="Platinum">Platinum</SelectItem>
-                                      </SelectContent>
-                                    </Select>
+                                     <Select 
+                                       value={metal.type} 
+                                       onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}
+                                     >
+                                       <SelectTrigger className="w-20 h-8 text-xs bg-gradient-to-r from-white to-slate-50 border border-slate-300/80 rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-300/60 transition-all duration-200 shadow-sm">
+                                         <SelectValue />
+                                       </SelectTrigger>
+                                       <SelectContent className="bg-white/95 backdrop-blur-xl border border-slate-200/80 shadow-xl rounded-xl z-50">
+                                         <SelectItem value="Gold" className="hover:bg-gradient-to-r hover:from-amber-50 hover:to-yellow-50 text-amber-700">Gold</SelectItem>
+                                         <SelectItem value="Silver" className="hover:bg-gradient-to-r hover:from-slate-50 hover:to-gray-50 text-slate-700">Silver</SelectItem>
+                                         <SelectItem value="Platinum" className="hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 text-slate-800">Platinum</SelectItem>
+                                       </SelectContent>
+                                     </Select>
 
-                                    <Select 
-                                      value={metal.karat?.toString()} 
-                                      onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}
-                                    >
-                                      <SelectTrigger className="w-12 h-7 text-xs bg-white border-slate-300">
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="10">10K</SelectItem>
-                                        <SelectItem value="14">14K</SelectItem>
-                                        <SelectItem value="18">18K</SelectItem>
-                                        <SelectItem value="22">22K</SelectItem>
-                                      </SelectContent>
-                                    </Select>
+                                     <Select 
+                                       value={metal.karat?.toString()} 
+                                       onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}
+                                     >
+                                       <SelectTrigger className="w-16 h-8 text-xs bg-gradient-to-r from-white to-slate-50 border border-slate-300/80 rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-300/60 transition-all duration-200 shadow-sm">
+                                         <SelectValue />
+                                       </SelectTrigger>
+                                       <SelectContent className="bg-white/95 backdrop-blur-xl border border-slate-200/80 shadow-xl rounded-xl z-50">
+                                         <SelectItem value="10" className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50">10K</SelectItem>
+                                         <SelectItem value="14" className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50">14K</SelectItem>
+                                         <SelectItem value="18" className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50">18K</SelectItem>
+                                         <SelectItem value="22" className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50">22K</SelectItem>
+                                       </SelectContent>
+                                     </Select>
 
-                                    <div className="flex items-center gap-1">
-                                      <Input 
-                                        ref={(el) => weightInputRefs.current[`${item.id}_${metal.id}`] = el}
-                                        type="number" 
-                                        step="0.01"
-                                        value={metal.weight || ''} 
-                                        onChange={(e) => updateMetal(item.id, metal.id, { weight: parseFloat(e.target.value) || 0 })}
-                                        onKeyDown={(e) => handleKeyPress(e, item.id, metal.id)}
-                                        placeholder="0.00"
-                                        className="w-16 h-7 text-xs bg-white border-slate-300"
-                                      />
-                                      <span className="text-xs text-slate-500">g</span>
-                                    </div>
+                                     <div className="flex items-center gap-1">
+                                       <Input 
+                                         ref={(el) => weightInputRefs.current[`${item.id}_${metal.id}`] = el}
+                                         type="text" 
+                                         value={metal.weight || ''} 
+                                         onChange={(e) => {
+                                           const value = e.target.value;
+                                           if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                             updateMetal(item.id, metal.id, { weight: value === '' ? 0 : parseFloat(value) || 0 });
+                                           }
+                                         }}
+                                         onKeyDown={(e) => handleKeyPress(e, item.id, metal.id)}
+                                         placeholder="0.00"
+                                         className="w-18 h-8 text-xs bg-gradient-to-r from-white to-slate-50 border border-slate-300/80 rounded-lg focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-100 hover:border-slate-400 transition-all duration-200 shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                         style={{ MozAppearance: 'textfield' }}
+                                       />
+                                       <span className="text-xs text-slate-500 font-medium">g</span>
+                                     </div>
                                   </div>
                                 ))}
                                 
@@ -381,16 +386,22 @@ export function TakeInBalanced({
                               </div>
 
                               {/* Payout Info */}
-                              <div className="flex items-center gap-2 min-w-[120px]">
-                                <Input
-                                  type="number"
-                                  value={item.payoutPercentage || 75}
-                                  onChange={(e) => onItemUpdate(item.id, { payoutPercentage: parseFloat(e.target.value) || 75 })}
-                                  className="w-12 h-7 text-xs bg-white border-slate-300"
-                                  min="0"
-                                  max="100"
-                                />
-                                <span className="text-xs text-slate-500">%</span>
+                               <div className="flex items-center gap-2 min-w-[120px]">
+                                 <Input
+                                   type="text"
+                                   value={item.payoutPercentage || 75}
+                                   onChange={(e) => {
+                                     const value = e.target.value;
+                                     if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                       const numValue = value === '' ? 75 : Math.min(100, Math.max(0, parseFloat(value) || 75));
+                                       onItemUpdate(item.id, { payoutPercentage: numValue });
+                                     }
+                                   }}
+                                   placeholder="75"
+                                   className="w-14 h-8 text-xs bg-gradient-to-r from-white to-slate-50 border border-slate-300/80 rounded-lg focus:bg-white focus:border-green-400 focus:ring-2 focus:ring-green-100 hover:border-slate-400 transition-all duration-200 shadow-sm text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                   style={{ MozAppearance: 'textfield' }}
+                                 />
+                                 <span className="text-xs text-slate-500 font-medium">%</span>
                                 <div className="text-sm font-bold text-green-600 min-w-[60px] text-right">
                                   ${(item.payoutAmount || 0).toFixed(2)}
                                 </div>
