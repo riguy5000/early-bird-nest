@@ -313,7 +313,7 @@ export function TakeInBalanced({
                         {(categoryItems as any[]).map((item, index) => (
                            <div key={item.id} className="group hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/30 transition-all duration-300 border-l-4 border-l-transparent hover:border-l-blue-400">
                              {/* Main Item Row - Everything in one compact line */}
-                             <div className="flex items-center gap-4 p-4 rounded-lg"
+                             <div className="flex items-center gap-4 p-4 rounded-lg">
                                {/* Item Number & Type */}
                                <div className="flex items-center gap-3 min-w-[140px]">
                                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-xs font-bold text-white shadow-lg">
