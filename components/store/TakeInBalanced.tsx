@@ -52,6 +52,7 @@ export function TakeInBalanced({
 }: TakeInBalancedProps) {
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set());
   const [customerDrawerOpen, setCustomerDrawerOpen] = useState(false);
+  const [customer, setCustomer] = useState(null);
   const [batchPhotoOpen, setBatchPhotoOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const weightInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
@@ -177,269 +178,299 @@ export function TakeInBalanced({
   }, {} as Record<string, any[]>);
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 overflow-hidden">
-      {/* Top Navigation */}
-      <div className="h-16 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 flex items-center justify-between px-6 flex-shrink-0 shadow-sm">
-        <div className="flex items-center gap-6">
-          <div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-              Take-In #{store?.name || 'STORE'}-{new Date().toLocaleDateString().replace(/\//g, '')}-001
-            </h1>
+    <div className="h-screen flex bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 overflow-hidden">
+      {/* Top Navigation Bar */}
+      <div className="absolute top-0 left-0 right-0 z-50 h-16 bg-white/95 backdrop-blur-xl border-b border-slate-200/60 shadow-sm">
+        <div className="flex items-center justify-between px-6 h-full">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                <Package className="h-4 w-4 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                  Take-In #{store?.name || 'STORE'}-{new Date().toLocaleDateString().replace(/\//g, '')}-001
+                </h1>
+                <div className="text-xs text-slate-500">Live Processing Portal</div>
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setBatchPhotoOpen(true)}
+              className="flex items-center gap-2 h-9 px-4 bg-white/80 hover:bg-white border-slate-300/60 hover:border-slate-400 hover:shadow-md transition-all duration-200"
+            >
+              <Camera className="h-4 w-4" />
+              Batch Photos
+            </Button>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setBatchPhotoOpen(true)}
-            className="flex items-center gap-2 bg-white/50 backdrop-blur border-slate-300 hover:bg-white/80 hover:shadow-md transition-all duration-200"
-          >
-            <Camera className="h-4 w-4" />
-            Batch Photos
-          </Button>
-        </div>
-        <div className="text-xs text-slate-500 flex gap-4 bg-slate-100/50 px-3 py-1.5 rounded-full">
-          <span>⌘+J: AI Assist</span>
-          <span>Tab: Next field</span>
+          <div className="flex items-center gap-4">
+            <div className="text-xs text-slate-500 flex gap-4 bg-slate-100/60 px-3 py-1.5 rounded-full border border-slate-200/50">
+              <span>⌘+J: AI Assist</span>
+              <span>Tab: Next field</span>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Metal Price Ticker */}
-      <div className="bg-gradient-to-r from-amber-50 to-yellow-50 backdrop-blur border-b border-amber-200/50 flex-shrink-0">
+      <div className="absolute top-16 left-0 right-0 z-40 bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-50 border-b border-amber-200/50">
         <MetalPriceTicker />
       </div>
 
-      {/* Main Content - Single Screen Layout */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Panel - Items */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Category Section with Add Buttons */}
-          <div className="p-6 bg-white/60 backdrop-blur border-b border-slate-200/50 flex-shrink-0">
-            <div className="flex flex-wrap gap-3">
+      {/* Main Content Layout */}
+      <div className="flex w-full pt-28 h-screen">
+        {/* Left Panel - Item Processing */}
+        <div className="flex-1 flex flex-col">
+          {/* Category Quick Actions */}
+          <div className="px-6 py-4 bg-white/80 backdrop-blur-sm border-b border-slate-200/50">
+            <div className="flex items-center gap-2 flex-wrap">
               {Object.entries(categoryIcons).map(([category, Icon]) => {
                 const count = itemsByCategory[category]?.length || 0;
                 return (
-                  <div key={category} className="flex items-center gap-2">
-                    <Button
-                      onClick={() => addItemByCategory(category)}
-                      variant={count > 0 ? "default" : "outline"}
-                      size="sm"
-                      className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl transition-all duration-300 ${
-                        count > 0 
-                          ? 'bg-gradient-to-r from-slate-900 to-slate-800 text-white hover:from-slate-800 hover:to-slate-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5' 
-                          : 'bg-white/80 backdrop-blur border-slate-300 hover:bg-white hover:shadow-lg hover:border-slate-400 transform hover:-translate-y-0.5'
-                      }`}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {category}
-                      {count > 0 && (
-                        <Badge variant="secondary" className="ml-1 h-6 w-6 p-0 flex items-center justify-center text-xs bg-white/20 text-white">
-                          {count}
-                        </Badge>
-                      )}
-                      <Plus className="h-3 w-3 opacity-60" />
-                    </Button>
-                  </div>
+                  <Button
+                    key={category}
+                    onClick={() => addItemByCategory(category)}
+                    variant={count > 0 ? "default" : "outline"}
+                    size="sm"
+                    className={`flex items-center gap-2 h-10 px-4 rounded-xl font-medium transition-all duration-300 ${
+                      count > 0 
+                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl scale-105' 
+                        : 'bg-white/90 border-slate-300/60 hover:bg-white hover:border-blue-300 hover:text-blue-600 hover:shadow-md'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span className="text-sm">{category}</span>
+                    {count > 0 && (
+                      <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-white/25 text-white border-0">
+                        {count}
+                      </Badge>
+                    )}
+                    <Plus className="h-3 w-3 opacity-70" />
+                  </Button>
                 );
               })}
             </div>
           </div>
 
-          {/* Items List - Organized by Category */}
-          <div className="flex-1 overflow-auto p-6 space-y-6">
+          {/* Items Processing Area */}
+          <div className="flex-1 overflow-hidden">
             {items.length === 0 ? (
-              <div className="flex items-center justify-center h-64">
-                <div className="text-center p-8 bg-white/60 backdrop-blur rounded-2xl border border-slate-200/50">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center">
-                    <Package className="h-8 w-8 text-slate-400" />
+              <div className="flex items-center justify-center h-full p-6">
+                <div className="text-center max-w-md">
+                  <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-3xl flex items-center justify-center shadow-lg">
+                    <Package className="h-10 w-10 text-blue-600" />
                   </div>
-                  <h3 className="text-xl font-semibold text-slate-800 mb-2">Ready to start</h3>
-                  <p className="text-slate-500 mb-4">Click a category above to add your first item</p>
-                </div>
-              </div>
-            ) : (
-              Object.entries(itemsByCategory).map(([category, categoryItems]) => (
-                <div key={category} className="space-y-3">
-                  {/* Category Header */}
-                  <div className="flex items-center gap-3 mb-4">
-                    {React.createElement(categoryIcons[category as keyof typeof categoryIcons] || Gem, { 
-                      className: "h-5 w-5 text-slate-600" 
-                    })}
-                    <h3 className="text-lg font-semibold text-slate-800">{category}</h3>
-                    <div className="h-px bg-gradient-to-r from-slate-300 to-transparent flex-1"></div>
-                    <Badge variant="outline" className="bg-white/50 text-slate-600">
-                      {categoryItems.length} {categoryItems.length === 1 ? 'item' : 'items'}
-                    </Badge>
-                  </div>
-                  
-                  {/* Category Items Grid */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    {categoryItems.map((item, index) => (
-                      <div key={item.id} className="group bg-white/80 backdrop-blur border border-slate-200/60 rounded-xl p-5 hover:shadow-lg hover:border-slate-300/60 transition-all duration-300 animate-scale-in hover:-translate-y-1">
-                        {/* Item Header */}
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg flex items-center justify-center">
-                              {React.createElement(categoryIcons[item.category as keyof typeof categoryIcons] || Gem, { 
-                                className: "h-5 w-5 text-slate-600" 
-                              })}
-                            </div>
-                            <div>
-                              <div className="font-semibold text-slate-800">Item {items.findIndex(i => i.id === item.id) + 1}</div>
-                              <div className="text-sm text-slate-500">{item.subType || 'No description'}</div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-2">
-                              <Switch
-                                checked={item.saveForLater || false}
-                                onCheckedChange={(checked) => onItemUpdate(item.id, { saveForLater: checked })}
-                                className="scale-90"
-                              />
-                              <span className="text-xs text-slate-500 font-medium">Save Later</span>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => onItemRemove(item.id)}
-                              className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* Metal & Pricing Section */}
-                        <div className="space-y-3">
-                          {item.metals?.map((metal: any, metalIndex: number) => (
-                            <div key={metal.id} className="bg-slate-50/50 rounded-lg p-3 space-y-3">
-                              <div className="flex items-center gap-3 flex-wrap">
-                                <Select 
-                                  value={metal.type} 
-                                  onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}
-                                >
-                                  <SelectTrigger className="w-24 h-10 text-sm bg-white border-slate-300 rounded-lg">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="Gold">Gold</SelectItem>
-                                    <SelectItem value="Silver">Silver</SelectItem>
-                                    <SelectItem value="Platinum">Platinum</SelectItem>
-                                  </SelectContent>
-                                </Select>
-
-                                <Select 
-                                  value={metal.karat?.toString()} 
-                                  onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}
-                                >
-                                  <SelectTrigger className="w-20 h-10 text-sm bg-white border-slate-300 rounded-lg">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="10">10K</SelectItem>
-                                    <SelectItem value="14">14K</SelectItem>
-                                    <SelectItem value="18">18K</SelectItem>
-                                    <SelectItem value="22">22K</SelectItem>
-                                  </SelectContent>
-                                </Select>
-
-                                <div className="flex items-center gap-2">
-                                  <Input 
-                                    ref={(el) => weightInputRefs.current[`${item.id}_${metal.id}`] = el}
-                                    type="number" 
-                                    step="0.01"
-                                    value={metal.weight || ''} 
-                                    onChange={(e) => updateMetal(item.id, metal.id, { weight: parseFloat(e.target.value) || 0 })}
-                                    onKeyDown={(e) => handleKeyPress(e, item.id, metal.id)}
-                                    placeholder="Weight"
-                                    className="w-24 h-10 text-sm bg-white border-slate-300 rounded-lg"
-                                  />
-                                  <span className="text-xs text-slate-500 font-medium">g</span>
-                                </div>
-
-                                {metalIndex > 0 && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => {
-                                      const updatedMetals = item.metals.filter((m: any) => m.id !== metal.id);
-                                      onItemUpdate(item.id, { metals: updatedMetals });
-                                    }}
-                                    className="h-8 w-8 p-0 hover:text-red-600 hover:bg-red-50 rounded-lg"
-                                  >
-                                    <Minus className="h-4 w-4" />
-                                  </Button>
-                                )}
-                              </div>
-
-                              {/* Payout Section */}
-                              <div className="flex items-center justify-between bg-white/50 rounded-lg p-3">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm text-slate-600 font-medium">Payout:</span>
-                                  <Input
-                                    type="number"
-                                    value={item.payoutPercentage || 75}
-                                    onChange={(e) => onItemUpdate(item.id, { payoutPercentage: parseFloat(e.target.value) || 75 })}
-                                    className="w-16 h-8 text-sm bg-white border-slate-300 rounded-md"
-                                    min="0"
-                                    max="100"
-                                  />
-                                  <span className="text-sm text-slate-500">%</span>
-                                </div>
-                                {!store.hidePayout && (
-                                  <div className="text-right">
-                                    <div className="text-lg font-bold text-green-600">
-                                      ${((metal.weight || 0) * 50 * ((item.payoutPercentage || 75) / 100)).toFixed(2)}
-                                    </div>
-                                    <div className="text-xs text-slate-500">this metal</div>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                          
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => addMetal(item.id)}
-                            className="text-sm text-primary hover:bg-primary/10 rounded-lg w-full py-2"
-                          >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add Metal
-                          </Button>
-                        </div>
-
-                        {/* Advanced Details - Collapsible */}
-                        <Collapsible 
-                          open={expandedAdvanced.has(item.id)} 
-                          onOpenChange={() => toggleAdvanced(item.id)}
-                        >
-                          <CollapsibleTrigger className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors mt-4 p-2 hover:bg-slate-50 rounded-lg w-full">
-                            <ChevronRight className={`h-4 w-4 transition-transform ${expandedAdvanced.has(item.id) ? 'rotate-90' : ''}`} />
-                            Advanced Details
-                          </CollapsibleTrigger>
-                          <CollapsibleContent className="mt-3 space-y-4 p-4 bg-slate-50/30 rounded-lg border border-slate-200/50">
-                            <div>
-                              <label className="text-sm text-slate-600 font-medium block mb-2">Notes</label>
-                              <Textarea 
-                                value={item.notes || ''} 
-                                onChange={(e) => onItemUpdate(item.id, { notes: e.target.value })}
-                                placeholder="Additional details..."
-                                className="h-20 text-sm resize-none bg-white border-slate-300 rounded-lg"
-                              />
-                            </div>
-                            <div>
-                              <label className="text-sm text-slate-600 font-medium block mb-2">Photos</label>
-                              <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center bg-white/50 hover:bg-white/80 transition-colors">
-                                <Camera className="h-8 w-8 mx-auto text-slate-400 mb-2" />
-                                <p className="text-sm text-slate-500">Drop photos or click to upload</p>
-                              </div>
-                            </div>
-                          </CollapsibleContent>
-                        </Collapsible>
-                      </div>
+                  <h3 className="text-2xl font-bold text-slate-800 mb-3">Ready to Process Items</h3>
+                  <p className="text-slate-600 text-lg mb-6">Select a category above to begin adding items for evaluation</p>
+                  <div className="flex justify-center gap-2">
+                    {Object.entries(categoryIcons).slice(0, 3).map(([category, Icon]) => (
+                      <Button
+                        key={category}
+                        onClick={() => addItemByCategory(category)}
+                        variant="outline"
+                        className="flex items-center gap-2 bg-white/80 hover:bg-white border-slate-300/60 hover:border-blue-300"
+                      >
+                        <Icon className="h-4 w-4" />
+                        {category}
+                      </Button>
                     ))}
                   </div>
                 </div>
-              ))
+              </div>
+            ) : (
+              <div className="h-full overflow-auto p-6">
+                <div className="max-w-7xl mx-auto space-y-8">
+                  {Object.entries(itemsByCategory).map(([category, categoryItems]) => (
+                    <div key={category} className="bg-white/60 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-lg overflow-hidden">
+                      {/* Category Header */}
+                      <div className="px-6 py-4 bg-gradient-to-r from-slate-50 to-slate-100/50 border-b border-slate-200/50">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-md">
+                              {React.createElement(categoryIcons[category as keyof typeof categoryIcons] || Gem, { 
+                                className: "h-5 w-5 text-white" 
+                              })}
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-bold text-slate-800">{category}</h3>
+                              <p className="text-sm text-slate-600">{(categoryItems as any[]).length} {(categoryItems as any[]).length === 1 ? 'item' : 'items'} in processing</p>
+                            </div>
+                          </div>
+                          <Button
+                            onClick={() => addItemByCategory(category)}
+                            size="sm"
+                            className="bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            Add {category}
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      {/* Category Items - Compact Table Layout */}
+                      <div className="p-6">
+                        <div className="space-y-3">
+                          {(categoryItems as any[]).map((item, index) => (
+                            <div key={item.id} className="group bg-white/80 rounded-xl border border-slate-200/60 hover:border-blue-300/60 hover:shadow-lg transition-all duration-300 overflow-hidden">
+                              {/* Item Header Row */}
+                              <div className="flex items-center justify-between p-4 border-b border-slate-100">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg flex items-center justify-center text-sm font-bold text-slate-700">
+                                    {items.findIndex(i => i.id === item.id) + 1}
+                                  </div>
+                                  <div>
+                                    <div className="font-semibold text-slate-800">{item.subType || `${category} Item`}</div>
+                                    <div className="text-xs text-slate-500">Item #{items.findIndex(i => i.id === item.id) + 1}</div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                  <div className="flex items-center gap-2">
+                                    <Switch
+                                      checked={item.saveForLater || false}
+                                      onCheckedChange={(checked) => onItemUpdate(item.id, { saveForLater: checked })}
+                                      className="scale-90"
+                                    />
+                                    <span className="text-xs text-slate-600 font-medium">Save Later</span>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="text-lg font-bold text-green-600">
+                                      ${(item.payoutAmount || 0).toFixed(2)}
+                                    </div>
+                                    <div className="text-xs text-slate-500">{item.payoutPercentage || 75}% payout</div>
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => onItemRemove(item.id)}
+                                    className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600 rounded-lg"
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+
+                              {/* Metal & Details Compact Row */}
+                              <div className="p-4 space-y-3">
+                                {(item.metals || []).map((metal: any) => (
+                                  <div key={metal.id} className="bg-slate-50/50 rounded-lg p-3">
+                                    <div className="flex items-center gap-3 flex-wrap">
+                                      <div className="flex items-center gap-2">
+                                        <Select 
+                                          value={metal.type} 
+                                          onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}
+                                        >
+                                          <SelectTrigger className="w-20 h-9 text-sm bg-white border-slate-300">
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="Gold">Gold</SelectItem>
+                                            <SelectItem value="Silver">Silver</SelectItem>
+                                            <SelectItem value="Platinum">Platinum</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+
+                                        <Select 
+                                          value={metal.karat?.toString()} 
+                                          onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}
+                                        >
+                                          <SelectTrigger className="w-16 h-9 text-sm bg-white border-slate-300">
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="10">10K</SelectItem>
+                                            <SelectItem value="14">14K</SelectItem>
+                                            <SelectItem value="18">18K</SelectItem>
+                                            <SelectItem value="22">22K</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+
+                                        <div className="flex items-center gap-1">
+                                          <Input 
+                                            ref={(el) => weightInputRefs.current[`${item.id}_${metal.id}`] = el}
+                                            type="number" 
+                                            step="0.01"
+                                            value={metal.weight || ''} 
+                                            onChange={(e) => updateMetal(item.id, metal.id, { weight: parseFloat(e.target.value) || 0 })}
+                                            onKeyDown={(e) => handleKeyPress(e, item.id, metal.id)}
+                                            placeholder="0.00"
+                                            className="w-20 h-9 text-sm bg-white border-slate-300"
+                                          />
+                                          <span className="text-xs text-slate-500 font-medium">g</span>
+                                        </div>
+                                      </div>
+
+                                      <div className="flex items-center gap-2 ml-auto">
+                                        <span className="text-sm text-slate-600">Payout:</span>
+                                        <Input
+                                          type="number"
+                                          value={item.payoutPercentage || 75}
+                                          onChange={(e) => onItemUpdate(item.id, { payoutPercentage: parseFloat(e.target.value) || 75 })}
+                                          className="w-14 h-9 text-sm bg-white border-slate-300"
+                                          min="0"
+                                          max="100"
+                                        />
+                                        <span className="text-sm text-slate-500">%</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                                
+                                <div className="flex items-center justify-between">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => addMetal(item.id)}
+                                    className="text-sm text-blue-600 hover:bg-blue-50"
+                                  >
+                                    <Plus className="h-4 w-4 mr-1" />
+                                    Add Metal
+                                  </Button>
+
+                                  <Collapsible 
+                                    open={expandedAdvanced.has(item.id)} 
+                                    onOpenChange={() => toggleAdvanced(item.id)}
+                                  >
+                                    <CollapsibleTrigger className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 px-3 py-1 hover:bg-slate-50 rounded-lg">
+                                      <ChevronRight className={`h-4 w-4 transition-transform ${expandedAdvanced.has(item.id) ? 'rotate-90' : ''}`} />
+                                      Advanced
+                                    </CollapsibleTrigger>
+                                  </Collapsible>
+                                </div>
+
+                                {/* Advanced Details */}
+                                <Collapsible 
+                                  open={expandedAdvanced.has(item.id)} 
+                                  onOpenChange={() => toggleAdvanced(item.id)}
+                                >
+                                  <CollapsibleContent className="mt-3 space-y-3 p-4 bg-slate-50/50 rounded-lg border border-slate-200/50">
+                                    <div>
+                                      <label className="text-sm font-medium text-slate-700 block mb-2">Notes</label>
+                                      <Textarea 
+                                        value={item.notes || ''} 
+                                        onChange={(e) => onItemUpdate(item.id, { notes: e.target.value })}
+                                        placeholder="Additional details, scratches, condition..."
+                                        className="h-16 text-sm resize-none bg-white"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium text-slate-700 block mb-2">Item Photos</label>
+                                      <div className="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center bg-white hover:bg-slate-50 transition-colors cursor-pointer">
+                                        <Camera className="h-6 w-6 mx-auto text-slate-400 mb-1" />
+                                        <p className="text-sm text-slate-500">Click to upload photos</p>
+                                      </div>
+                                    </div>
+                                  </CollapsibleContent>
+                                </Collapsible>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -549,8 +580,10 @@ export function TakeInBalanced({
 
       {/* Customer Drawer */}
       <CustomerDrawer 
-        open={customerDrawerOpen}
-        onOpenChange={setCustomerDrawerOpen}
+        isOpen={customerDrawerOpen}
+        onClose={() => setCustomerDrawerOpen(false)}
+        customer={customer}
+        onCustomerUpdate={setCustomer}
       />
     </div>
   );
