@@ -360,28 +360,31 @@ export function TakeInBalanced({
                                   <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-xs font-bold text-white shadow-lg">
                                     {items.findIndex(i => i.id === item.id) + 1}
                                   </div>
-                                  <div className="flex flex-col min-w-0">
-                                    <div className="text-sm font-semibold text-slate-800 truncate">
-                                      {item.itemType || `${category} Item`}
-                                    </div>
-                                    <Select 
-                                      value={item.itemType || ''} 
-                                      onValueChange={(value) => {
-                                        onItemUpdate(item.id, { itemType: value });
-                                      }}
-                                    >
-                                      <SelectTrigger className="w-24 h-6 text-xs bg-transparent border-0 p-0 text-slate-500 hover:text-slate-700">
-                                        <SelectValue placeholder="Select type" />
-                                      </SelectTrigger>
-                                      <SelectContent className="bg-white/95 backdrop-blur-xl border border-slate-200/80 shadow-xl rounded-xl z-50">
-                                        {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).map(type => (
-                                          <SelectItem key={type} value={type} className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50">
-                                            {type}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
+                                   <div className="flex flex-col min-w-0 space-y-2">
+                                     <Input
+                                       value={item.itemType || ''}
+                                       onChange={(e) => {
+                                         onItemUpdate(item.id, { itemType: e.target.value });
+                                       }}
+                                       placeholder={`${category} type...`}
+                                       className="h-7 text-sm bg-white/70 border-slate-200 hover:border-slate-300 transition-colors w-36"
+                                       onClick={(e) => e.stopPropagation()}
+                                     />
+                                     <div className="flex flex-wrap gap-1">
+                                       {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).slice(0, 4).map(type => (
+                                         <button
+                                           key={type}
+                                           onClick={(e) => {
+                                             e.stopPropagation();
+                                             onItemUpdate(item.id, { itemType: type });
+                                           }}
+                                           className="px-2 py-0.5 text-xs bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-700 rounded-md border border-slate-200 hover:border-blue-300 transition-all duration-200 cursor-pointer"
+                                         >
+                                           {type}
+                                         </button>
+                                       ))}
+                                     </div>
+                                   </div>
                                 </div>
 
                                {/* Metal Info - Horizontal Layout with Adjusted Widths */}
