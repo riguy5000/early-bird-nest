@@ -279,193 +279,224 @@ export function TakeInBalanced({
                 </div>
               </div>
             ) : (
-              <div className="h-full overflow-auto p-6">
-                <div className="max-w-7xl mx-auto space-y-8">
+              <div className="h-full overflow-auto p-4">
+                <div className="max-w-7xl mx-auto space-y-4">
                   {Object.entries(itemsByCategory).map(([category, categoryItems]) => (
-                    <div key={category} className="bg-white/60 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-lg overflow-hidden">
-                      {/* Category Header */}
-                      <div className="px-6 py-4 bg-gradient-to-r from-slate-50 to-slate-100/50 border-b border-slate-200/50">
+                    <div key={category} className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
+                      {/* Compact Category Header */}
+                      <div className="px-4 py-2 bg-gradient-to-r from-slate-50 to-slate-100/50 border-b border-slate-200/50">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-md">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center">
                               {React.createElement(categoryIcons[category as keyof typeof categoryIcons] || Gem, { 
-                                className: "h-5 w-5 text-white" 
+                                className: "h-3 w-3 text-white" 
                               })}
                             </div>
-                            <div>
-                              <h3 className="text-lg font-bold text-slate-800">{category}</h3>
-                              <p className="text-sm text-slate-600">{(categoryItems as any[]).length} {(categoryItems as any[]).length === 1 ? 'item' : 'items'} in processing</p>
-                            </div>
+                            <h3 className="text-sm font-bold text-slate-800">{category}</h3>
+                            <Badge variant="outline" className="h-5 text-xs bg-white/50 text-slate-600">
+                              {(categoryItems as any[]).length}
+                            </Badge>
                           </div>
                           <Button
                             onClick={() => addItemByCategory(category)}
                             size="sm"
-                            className="bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+                            className="h-6 px-2 text-xs bg-blue-600 hover:bg-blue-700 text-white"
                           >
-                            <Plus className="h-4 w-4 mr-1" />
-                            Add {category}
+                            <Plus className="h-3 w-3 mr-1" />
+                            Add
                           </Button>
                         </div>
                       </div>
                       
-                      {/* Category Items - Compact Table Layout */}
-                      <div className="p-6">
-                        <div className="space-y-3">
-                          {(categoryItems as any[]).map((item, index) => (
-                            <div key={item.id} className="group bg-white/80 rounded-xl border border-slate-200/60 hover:border-blue-300/60 hover:shadow-lg transition-all duration-300 overflow-hidden">
-                              {/* Item Header Row */}
-                              <div className="flex items-center justify-between p-4 border-b border-slate-100">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg flex items-center justify-center text-sm font-bold text-slate-700">
-                                    {items.findIndex(i => i.id === item.id) + 1}
-                                  </div>
-                                  <div>
-                                    <div className="font-semibold text-slate-800">{item.subType || `${category} Item`}</div>
-                                    <div className="text-xs text-slate-500">Item #{items.findIndex(i => i.id === item.id) + 1}</div>
-                                  </div>
+                      {/* Compact Items Table */}
+                      <div className="divide-y divide-slate-100">
+                        {(categoryItems as any[]).map((item, index) => (
+                          <div key={item.id} className="group hover:bg-slate-50/50 transition-colors">
+                            {/* Main Item Row - Everything in one compact line */}
+                            <div className="flex items-center gap-3 p-3">
+                              {/* Item Number & Type */}
+                              <div className="flex items-center gap-2 min-w-[120px]">
+                                <div className="w-6 h-6 bg-slate-100 rounded-md flex items-center justify-center text-xs font-bold text-slate-700">
+                                  {items.findIndex(i => i.id === item.id) + 1}
                                 </div>
-                                <div className="flex items-center gap-3">
-                                  <div className="flex items-center gap-2">
-                                    <Switch
-                                      checked={item.saveForLater || false}
-                                      onCheckedChange={(checked) => onItemUpdate(item.id, { saveForLater: checked })}
-                                      className="scale-90"
-                                    />
-                                    <span className="text-xs text-slate-600 font-medium">Save Later</span>
-                                  </div>
-                                  <div className="text-right">
-                                    <div className="text-lg font-bold text-green-600">
-                                      ${(item.payoutAmount || 0).toFixed(2)}
-                                    </div>
-                                    <div className="text-xs text-slate-500">{item.payoutPercentage || 75}% payout</div>
-                                  </div>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => onItemRemove(item.id)}
-                                    className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600 rounded-lg"
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </Button>
+                                <div className="text-sm font-medium text-slate-800 truncate">
+                                  {item.subType || `${category} Item`}
                                 </div>
                               </div>
 
-                              {/* Metal & Details Compact Row */}
-                              <div className="p-4 space-y-3">
-                                {(item.metals || []).map((metal: any) => (
-                                  <div key={metal.id} className="bg-slate-50/50 rounded-lg p-3">
-                                    <div className="flex items-center gap-3 flex-wrap">
-                                      <div className="flex items-center gap-2">
-                                        <Select 
-                                          value={metal.type} 
-                                          onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}
-                                        >
-                                          <SelectTrigger className="w-20 h-9 text-sm bg-white border-slate-300">
-                                            <SelectValue />
-                                          </SelectTrigger>
-                                          <SelectContent>
-                                            <SelectItem value="Gold">Gold</SelectItem>
-                                            <SelectItem value="Silver">Silver</SelectItem>
-                                            <SelectItem value="Platinum">Platinum</SelectItem>
-                                          </SelectContent>
-                                        </Select>
+                              {/* Metal Info - Horizontal Layout */}
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                {(item.metals || []).slice(0, 1).map((metal: any) => (
+                                  <div key={metal.id} className="flex items-center gap-2">
+                                    <Select 
+                                      value={metal.type} 
+                                      onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}
+                                    >
+                                      <SelectTrigger className="w-16 h-7 text-xs bg-white border-slate-300">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="Gold">Gold</SelectItem>
+                                        <SelectItem value="Silver">Silver</SelectItem>
+                                        <SelectItem value="Platinum">Platinum</SelectItem>
+                                      </SelectContent>
+                                    </Select>
 
-                                        <Select 
-                                          value={metal.karat?.toString()} 
-                                          onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}
-                                        >
-                                          <SelectTrigger className="w-16 h-9 text-sm bg-white border-slate-300">
-                                            <SelectValue />
-                                          </SelectTrigger>
-                                          <SelectContent>
-                                            <SelectItem value="10">10K</SelectItem>
-                                            <SelectItem value="14">14K</SelectItem>
-                                            <SelectItem value="18">18K</SelectItem>
-                                            <SelectItem value="22">22K</SelectItem>
-                                          </SelectContent>
-                                        </Select>
+                                    <Select 
+                                      value={metal.karat?.toString()} 
+                                      onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}
+                                    >
+                                      <SelectTrigger className="w-12 h-7 text-xs bg-white border-slate-300">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="10">10K</SelectItem>
+                                        <SelectItem value="14">14K</SelectItem>
+                                        <SelectItem value="18">18K</SelectItem>
+                                        <SelectItem value="22">22K</SelectItem>
+                                      </SelectContent>
+                                    </Select>
 
-                                        <div className="flex items-center gap-1">
-                                          <Input 
-                                            ref={(el) => weightInputRefs.current[`${item.id}_${metal.id}`] = el}
-                                            type="number" 
-                                            step="0.01"
-                                            value={metal.weight || ''} 
-                                            onChange={(e) => updateMetal(item.id, metal.id, { weight: parseFloat(e.target.value) || 0 })}
-                                            onKeyDown={(e) => handleKeyPress(e, item.id, metal.id)}
-                                            placeholder="0.00"
-                                            className="w-20 h-9 text-sm bg-white border-slate-300"
-                                          />
-                                          <span className="text-xs text-slate-500 font-medium">g</span>
-                                        </div>
-                                      </div>
-
-                                      <div className="flex items-center gap-2 ml-auto">
-                                        <span className="text-sm text-slate-600">Payout:</span>
-                                        <Input
-                                          type="number"
-                                          value={item.payoutPercentage || 75}
-                                          onChange={(e) => onItemUpdate(item.id, { payoutPercentage: parseFloat(e.target.value) || 75 })}
-                                          className="w-14 h-9 text-sm bg-white border-slate-300"
-                                          min="0"
-                                          max="100"
-                                        />
-                                        <span className="text-sm text-slate-500">%</span>
-                                      </div>
+                                    <div className="flex items-center gap-1">
+                                      <Input 
+                                        ref={(el) => weightInputRefs.current[`${item.id}_${metal.id}`] = el}
+                                        type="number" 
+                                        step="0.01"
+                                        value={metal.weight || ''} 
+                                        onChange={(e) => updateMetal(item.id, metal.id, { weight: parseFloat(e.target.value) || 0 })}
+                                        onKeyDown={(e) => handleKeyPress(e, item.id, metal.id)}
+                                        placeholder="0.00"
+                                        className="w-16 h-7 text-xs bg-white border-slate-300"
+                                      />
+                                      <span className="text-xs text-slate-500">g</span>
                                     </div>
                                   </div>
                                 ))}
                                 
-                                <div className="flex items-center justify-between">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => addMetal(item.id)}
-                                    className="text-sm text-blue-600 hover:bg-blue-50"
-                                  >
-                                    <Plus className="h-4 w-4 mr-1" />
-                                    Add Metal
-                                  </Button>
+                                {(item.metals || []).length > 1 && (
+                                  <Badge variant="outline" className="h-5 text-xs">
+                                    +{(item.metals || []).length - 1} more
+                                  </Badge>
+                                )}
+                              </div>
 
-                                  <Collapsible 
-                                    open={expandedAdvanced.has(item.id)} 
-                                    onOpenChange={() => toggleAdvanced(item.id)}
-                                  >
-                                    <CollapsibleTrigger className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 px-3 py-1 hover:bg-slate-50 rounded-lg">
-                                      <ChevronRight className={`h-4 w-4 transition-transform ${expandedAdvanced.has(item.id) ? 'rotate-90' : ''}`} />
-                                      Advanced
-                                    </CollapsibleTrigger>
-                                  </Collapsible>
+                              {/* Payout Info */}
+                              <div className="flex items-center gap-2 min-w-[120px]">
+                                <Input
+                                  type="number"
+                                  value={item.payoutPercentage || 75}
+                                  onChange={(e) => onItemUpdate(item.id, { payoutPercentage: parseFloat(e.target.value) || 75 })}
+                                  className="w-12 h-7 text-xs bg-white border-slate-300"
+                                  min="0"
+                                  max="100"
+                                />
+                                <span className="text-xs text-slate-500">%</span>
+                                <div className="text-sm font-bold text-green-600 min-w-[60px] text-right">
+                                  ${(item.payoutAmount || 0).toFixed(2)}
                                 </div>
+                              </div>
 
-                                {/* Advanced Details */}
+                              {/* Actions */}
+                              <div className="flex items-center gap-1">
+                                <Switch
+                                  checked={item.saveForLater || false}
+                                  onCheckedChange={(checked) => onItemUpdate(item.id, { saveForLater: checked })}
+                                  className="scale-75"
+                                />
+                                <span className="text-xs text-slate-600 min-w-[35px]">Save</span>
+                                
                                 <Collapsible 
                                   open={expandedAdvanced.has(item.id)} 
                                   onOpenChange={() => toggleAdvanced(item.id)}
                                 >
-                                  <CollapsibleContent className="mt-3 space-y-3 p-4 bg-slate-50/50 rounded-lg border border-slate-200/50">
+                                  <CollapsibleTrigger className="flex items-center gap-1 text-xs text-slate-600 hover:text-slate-900 px-2 py-1 hover:bg-slate-100 rounded">
+                                    <ChevronRight className={`h-3 w-3 transition-transform ${expandedAdvanced.has(item.id) ? 'rotate-90' : ''}`} />
+                                    More
+                                  </CollapsibleTrigger>
+                                </Collapsible>
+
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => onItemRemove(item.id)}
+                                  className="h-6 w-6 p-0 hover:bg-red-50 hover:text-red-600 rounded"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+
+                            {/* Additional Metals Row (if more than 1) */}
+                            {(item.metals || []).length > 1 && (
+                              <div className="px-3 pb-2">
+                                <div className="flex flex-wrap gap-2 pl-8">
+                                  {(item.metals || []).slice(1).map((metal: any) => (
+                                    <div key={metal.id} className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1">
+                                      <span className="text-xs text-slate-600">{metal.type} {metal.karat}K</span>
+                                      <Input 
+                                        type="number" 
+                                        step="0.01"
+                                        value={metal.weight || ''} 
+                                        onChange={(e) => updateMetal(item.id, metal.id, { weight: parseFloat(e.target.value) || 0 })}
+                                        className="w-12 h-5 text-xs bg-white border-slate-300"
+                                      />
+                                      <span className="text-xs text-slate-500">g</span>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => {
+                                          const updatedMetals = (item.metals || []).filter((m: any) => m.id !== metal.id);
+                                          onItemUpdate(item.id, { metals: updatedMetals });
+                                        }}
+                                        className="h-4 w-4 p-0 hover:text-red-600"
+                                      >
+                                        <X className="h-2 w-2" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => addMetal(item.id)}
+                                    className="h-6 px-2 text-xs text-blue-600 hover:bg-blue-50"
+                                  >
+                                    <Plus className="h-3 w-3 mr-1" />
+                                    Add Metal
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Advanced Details - Compact */}
+                            <Collapsible 
+                              open={expandedAdvanced.has(item.id)} 
+                              onOpenChange={() => toggleAdvanced(item.id)}
+                            >
+                              <CollapsibleContent className="px-3 pb-3">
+                                <div className="bg-slate-50/50 rounded-lg p-3 space-y-3">
+                                  <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                      <label className="text-sm font-medium text-slate-700 block mb-2">Notes</label>
+                                      <label className="text-xs font-medium text-slate-700 block mb-1">Notes</label>
                                       <Textarea 
                                         value={item.notes || ''} 
                                         onChange={(e) => onItemUpdate(item.id, { notes: e.target.value })}
-                                        placeholder="Additional details, scratches, condition..."
-                                        className="h-16 text-sm resize-none bg-white"
+                                        placeholder="Additional details..."
+                                        className="h-12 text-xs resize-none bg-white"
                                       />
                                     </div>
                                     <div>
-                                      <label className="text-sm font-medium text-slate-700 block mb-2">Item Photos</label>
-                                      <div className="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center bg-white hover:bg-slate-50 transition-colors cursor-pointer">
-                                        <Camera className="h-6 w-6 mx-auto text-slate-400 mb-1" />
-                                        <p className="text-sm text-slate-500">Click to upload photos</p>
+                                      <label className="text-xs font-medium text-slate-700 block mb-1">Photos</label>
+                                      <div className="border-2 border-dashed border-slate-300 rounded-lg p-2 text-center bg-white hover:bg-slate-50 transition-colors cursor-pointer h-12 flex items-center justify-center">
+                                        <Camera className="h-4 w-4 text-slate-400 mr-1" />
+                                        <span className="text-xs text-slate-500">Upload</span>
                                       </div>
                                     </div>
-                                  </CollapsibleContent>
-                                </Collapsible>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                                  </div>
+                                </div>
+                              </CollapsibleContent>
+                            </Collapsible>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   ))}
