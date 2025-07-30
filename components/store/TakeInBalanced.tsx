@@ -170,12 +170,34 @@ export function TakeInBalanced({
     Silverware: Utensils,
   };
 
+  // Item type definitions for each category
+  const itemTypesByCategory = {
+    Jewelry: ['Ring', 'Pendant', 'Earrings', 'Bracelet', 'Necklace', 'Chain', 'Charm'],
+    Watch: ['Watch', 'Watch Band', 'Watch Case'],
+    Bullion: ['Coin', 'Bar', 'Round'],
+    Stones: ['Diamond', 'Ruby', 'Sapphire', 'Emerald', 'Other'],
+    Silverware: ['Spoon', 'Fork', 'Knife', 'Serving Piece', 'Decorative']
+  };
+
   const itemsByCategory = items.reduce((acc, item) => {
     const category = item.category || 'Jewelry';
     if (!acc[category]) acc[category] = [];
     acc[category].push(item);
     return acc;
   }, {} as Record<string, any[]>);
+
+  // Count items by type within each category
+  const getTypeBreakdown = (categoryItems: any[]) => {
+    const typeCounts = categoryItems.reduce((acc, item) => {
+      const type = item.itemType || 'Item';
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    return Object.entries(typeCounts)
+      .map(([type, count]) => `${count} ${type}${count > 1 ? 's' : ''}`)
+      .join(', ');
+  };
 
   return (
     <div className="h-screen flex bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 overflow-hidden">
@@ -283,7 +305,7 @@ export function TakeInBalanced({
                 <div className="max-w-7xl mx-auto space-y-4">
                   {Object.entries(itemsByCategory).map(([category, categoryItems]) => (
                     <div key={category} className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
-                      {/* Compact Category Header */}
+                      {/* Enhanced Category Header with Type Breakdown */}
                       <div className="px-4 py-2 bg-gradient-to-r from-slate-50 to-slate-100/50 border-b border-slate-200/50">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
@@ -292,10 +314,19 @@ export function TakeInBalanced({
                                 className: "h-3 w-3 text-white" 
                               })}
                             </div>
-                            <h3 className="text-sm font-bold text-slate-800">{category}</h3>
-                            <Badge variant="outline" className="h-5 text-xs bg-white/50 text-slate-600">
-                              {(categoryItems as any[]).length}
-                            </Badge>
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-2">
+                                <h3 className="text-sm font-bold text-slate-800">{category}</h3>
+                                <Badge variant="outline" className="h-5 text-xs bg-white/50 text-slate-600">
+                                  {(categoryItems as any[]).length}
+                                </Badge>
+                              </div>
+                              {(categoryItems as any[]).length > 0 && getTypeBreakdown(categoryItems as any[]) && (
+                                <div className="text-xs text-slate-500 ml-0">
+                                  {getTypeBreakdown(categoryItems as any[])}
+                                </div>
+                              )}
+                            </div>
                           </div>
                           <Button
                             onClick={() => addItemByCategory(category)}
@@ -312,130 +343,158 @@ export function TakeInBalanced({
                       <div className="divide-y divide-slate-100">
                         {(categoryItems as any[]).map((item, index) => (
                            <div key={item.id} className="group hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/30 transition-all duration-300 border-l-4 border-l-transparent hover:border-l-blue-400">
-                             {/* Main Item Row - Everything in one compact line */}
-                             <div className="flex items-center gap-4 p-4 rounded-lg">
-                               {/* Item Number & Type */}
-                               <div className="flex items-center gap-3 min-w-[140px]">
-                                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-xs font-bold text-white shadow-lg">
-                                   {items.findIndex(i => i.id === item.id) + 1}
-                                 </div>
-                                 <div className="text-sm font-semibold text-slate-800 truncate">
-                                   {item.subType || `${category} Item`}
+                              {/* Main Item Row - Clickable for Expansion */}
+                              <div 
+                                className="flex items-center gap-4 p-4 rounded-lg cursor-pointer hover:bg-slate-50/50"
+                                onClick={(e) => {
+                                  // Only expand if not clicking on inputs or buttons
+                                  if ((e.target as HTMLElement).tagName !== 'INPUT' && 
+                                      !(e.target as HTMLElement).closest('button') && 
+                                      !(e.target as HTMLElement).closest('[role="combobox"]')) {
+                                    toggleAdvanced(item.id);
+                                  }
+                                }}
+                              >
+                                {/* Item Number & Type */}
+                                <div className="flex items-center gap-3 min-w-[180px]">
+                                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-xs font-bold text-white shadow-lg">
+                                    {items.findIndex(i => i.id === item.id) + 1}
+                                  </div>
+                                  <div className="flex flex-col min-w-0">
+                                    <div className="text-sm font-semibold text-slate-800 truncate">
+                                      {item.itemType || `${category} Item`}
+                                    </div>
+                                    <Select 
+                                      value={item.itemType || ''} 
+                                      onValueChange={(value) => {
+                                        onItemUpdate(item.id, { itemType: value });
+                                      }}
+                                    >
+                                      <SelectTrigger className="w-24 h-6 text-xs bg-transparent border-0 p-0 text-slate-500 hover:text-slate-700">
+                                        <SelectValue placeholder="Select type" />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-white/95 backdrop-blur-xl border border-slate-200/80 shadow-xl rounded-xl z-50">
+                                        {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).map(type => (
+                                          <SelectItem key={type} value={type} className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50">
+                                            {type}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
+
+                               {/* Metal Info - Horizontal Layout with Adjusted Widths */}
+                               <div className="flex items-center gap-2 flex-1 min-w-0">
+                                 {(item.metals || []).slice(0, 1).map((metal: any) => (
+                                   <div key={metal.id} className="flex items-center gap-2">
+                                      <Select 
+                                        value={metal.type} 
+                                        onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}
+                                      >
+                                        <SelectTrigger className="w-28 h-8 text-xs bg-gradient-to-r from-white to-slate-50 border border-slate-300/80 rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-300/60 transition-all duration-200 shadow-sm">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-white/95 backdrop-blur-xl border border-slate-200/80 shadow-xl rounded-xl z-50">
+                                          <SelectItem value="Gold" className="hover:bg-gradient-to-r hover:from-amber-50 hover:to-yellow-50 text-amber-700">Gold</SelectItem>
+                                          <SelectItem value="Silver" className="hover:bg-gradient-to-r hover:from-slate-50 hover:to-gray-50 text-slate-700">Silver</SelectItem>
+                                          <SelectItem value="Platinum" className="hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 text-slate-800">Platinum</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+
+                                      <Select 
+                                        value={metal.karat?.toString()} 
+                                        onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}
+                                      >
+                                        <SelectTrigger className="w-16 h-8 text-xs bg-gradient-to-r from-white to-slate-50 border border-slate-300/80 rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-300/60 transition-all duration-200 shadow-sm">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-white/95 backdrop-blur-xl border border-slate-200/80 shadow-xl rounded-xl z-50">
+                                          <SelectItem value="10" className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50">10K</SelectItem>
+                                          <SelectItem value="14" className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50">14K</SelectItem>
+                                          <SelectItem value="18" className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50">18K</SelectItem>
+                                          <SelectItem value="22" className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50">22K</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+
+                                      <div className="flex items-center gap-1">
+                                        <Input 
+                                          ref={(el) => weightInputRefs.current[`${item.id}_${metal.id}`] = el}
+                                          type="text" 
+                                          value={metal.weight || ''} 
+                                          onChange={(e) => {
+                                            const value = e.target.value;
+                                            if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                              updateMetal(item.id, metal.id, { weight: value === '' ? 0 : parseFloat(value) || 0 });
+                                            }
+                                          }}
+                                          onKeyDown={(e) => handleKeyPress(e, item.id, metal.id)}
+                                          placeholder="0.00"
+                                          className="w-14 h-8 text-xs bg-gradient-to-r from-white to-slate-50 border border-slate-300/80 rounded-lg focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-100 hover:border-slate-400 transition-all duration-200 shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                          style={{ MozAppearance: 'textfield' }}
+                                        />
+                                        <span className="text-xs text-slate-500 font-medium">g</span>
+                                      </div>
+                                   </div>
+                                 ))}
+                                 
+                                 {(item.metals || []).length > 1 && (
+                                   <Badge variant="outline" className="h-5 text-xs">
+                                     +{(item.metals || []).length - 1} more
+                                   </Badge>
+                                 )}
+                               </div>
+
+                               {/* Payout Info */}
+                                <div className="flex items-center gap-2 min-w-[120px]">
+                                  <Input
+                                    type="text"
+                                    value={item.payoutPercentage || 75}
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                        const numValue = value === '' ? 75 : Math.min(100, Math.max(0, parseFloat(value) || 75));
+                                        onItemUpdate(item.id, { payoutPercentage: numValue });
+                                      }
+                                    }}
+                                    placeholder="75"
+                                    className="w-14 h-8 text-xs bg-gradient-to-r from-white to-slate-50 border border-slate-300/80 rounded-lg focus:bg-white focus:border-green-400 focus:ring-2 focus:ring-green-100 hover:border-slate-400 transition-all duration-200 shadow-sm text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    style={{ MozAppearance: 'textfield' }}
+                                  />
+                                  <span className="text-xs text-slate-500 font-medium">%</span>
+                                 <div className="text-sm font-bold text-green-600 min-w-[60px] text-right">
+                                   ${(item.payoutAmount || 0).toFixed(2)}
                                  </div>
                                </div>
 
-                              {/* Metal Info - Horizontal Layout */}
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                {(item.metals || []).slice(0, 1).map((metal: any) => (
-                                  <div key={metal.id} className="flex items-center gap-2">
-                                     <Select 
-                                       value={metal.type} 
-                                       onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}
-                                     >
-                                       <SelectTrigger className="w-20 h-8 text-xs bg-gradient-to-r from-white to-slate-50 border border-slate-300/80 rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-300/60 transition-all duration-200 shadow-sm">
-                                         <SelectValue />
-                                       </SelectTrigger>
-                                       <SelectContent className="bg-white/95 backdrop-blur-xl border border-slate-200/80 shadow-xl rounded-xl z-50">
-                                         <SelectItem value="Gold" className="hover:bg-gradient-to-r hover:from-amber-50 hover:to-yellow-50 text-amber-700">Gold</SelectItem>
-                                         <SelectItem value="Silver" className="hover:bg-gradient-to-r hover:from-slate-50 hover:to-gray-50 text-slate-700">Silver</SelectItem>
-                                         <SelectItem value="Platinum" className="hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 text-slate-800">Platinum</SelectItem>
-                                       </SelectContent>
-                                     </Select>
-
-                                     <Select 
-                                       value={metal.karat?.toString()} 
-                                       onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}
-                                     >
-                                       <SelectTrigger className="w-16 h-8 text-xs bg-gradient-to-r from-white to-slate-50 border border-slate-300/80 rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-300/60 transition-all duration-200 shadow-sm">
-                                         <SelectValue />
-                                       </SelectTrigger>
-                                       <SelectContent className="bg-white/95 backdrop-blur-xl border border-slate-200/80 shadow-xl rounded-xl z-50">
-                                         <SelectItem value="10" className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50">10K</SelectItem>
-                                         <SelectItem value="14" className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50">14K</SelectItem>
-                                         <SelectItem value="18" className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50">18K</SelectItem>
-                                         <SelectItem value="22" className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50">22K</SelectItem>
-                                       </SelectContent>
-                                     </Select>
-
-                                     <div className="flex items-center gap-1">
-                                       <Input 
-                                         ref={(el) => weightInputRefs.current[`${item.id}_${metal.id}`] = el}
-                                         type="text" 
-                                         value={metal.weight || ''} 
-                                         onChange={(e) => {
-                                           const value = e.target.value;
-                                           if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                                             updateMetal(item.id, metal.id, { weight: value === '' ? 0 : parseFloat(value) || 0 });
-                                           }
-                                         }}
-                                         onKeyDown={(e) => handleKeyPress(e, item.id, metal.id)}
-                                         placeholder="0.00"
-                                         className="w-18 h-8 text-xs bg-gradient-to-r from-white to-slate-50 border border-slate-300/80 rounded-lg focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-100 hover:border-slate-400 transition-all duration-200 shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                         style={{ MozAppearance: 'textfield' }}
-                                       />
-                                       <span className="text-xs text-slate-500 font-medium">g</span>
-                                     </div>
-                                  </div>
-                                ))}
-                                
-                                {(item.metals || []).length > 1 && (
-                                  <Badge variant="outline" className="h-5 text-xs">
-                                    +{(item.metals || []).length - 1} more
-                                  </Badge>
-                                )}
-                              </div>
-
-                              {/* Payout Info */}
-                               <div className="flex items-center gap-2 min-w-[120px]">
-                                 <Input
-                                   type="text"
-                                   value={item.payoutPercentage || 75}
-                                   onChange={(e) => {
-                                     const value = e.target.value;
-                                     if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                                       const numValue = value === '' ? 75 : Math.min(100, Math.max(0, parseFloat(value) || 75));
-                                       onItemUpdate(item.id, { payoutPercentage: numValue });
-                                     }
-                                   }}
-                                   placeholder="75"
-                                   className="w-14 h-8 text-xs bg-gradient-to-r from-white to-slate-50 border border-slate-300/80 rounded-lg focus:bg-white focus:border-green-400 focus:ring-2 focus:ring-green-100 hover:border-slate-400 transition-all duration-200 shadow-sm text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                   style={{ MozAppearance: 'textfield' }}
+                               {/* Actions */}
+                               <div className="flex items-center gap-1">
+                                 <Switch
+                                   checked={item.saveForLater || false}
+                                   onCheckedChange={(checked) => onItemUpdate(item.id, { saveForLater: checked })}
+                                   className="scale-75"
                                  />
-                                 <span className="text-xs text-slate-500 font-medium">%</span>
-                                <div className="text-sm font-bold text-green-600 min-w-[60px] text-right">
-                                  ${(item.payoutAmount || 0).toFixed(2)}
-                                </div>
-                              </div>
+                                 <span className="text-xs text-slate-600 min-w-[35px]">Save</span>
+                                 
+                                 {/* Expansion Indicator */}
+                                 <div className="flex items-center gap-1 text-xs text-slate-600 px-2 py-1">
+                                   <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${expandedAdvanced.has(item.id) ? 'rotate-90' : ''}`} />
+                                   <span className="text-xs">Details</span>
+                                 </div>
 
-                              {/* Actions */}
-                              <div className="flex items-center gap-1">
-                                <Switch
-                                  checked={item.saveForLater || false}
-                                  onCheckedChange={(checked) => onItemUpdate(item.id, { saveForLater: checked })}
-                                  className="scale-75"
-                                />
-                                <span className="text-xs text-slate-600 min-w-[35px]">Save</span>
-                                
-                                <Collapsible 
-                                  open={expandedAdvanced.has(item.id)} 
-                                  onOpenChange={() => toggleAdvanced(item.id)}
-                                >
-                                  <CollapsibleTrigger className="flex items-center gap-1 text-xs text-slate-600 hover:text-slate-900 px-2 py-1 hover:bg-slate-100 rounded">
-                                    <ChevronRight className={`h-3 w-3 transition-transform ${expandedAdvanced.has(item.id) ? 'rotate-90' : ''}`} />
-                                    More
-                                  </CollapsibleTrigger>
-                                </Collapsible>
-
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => onItemRemove(item.id)}
-                                  className="h-6 w-6 p-0 hover:bg-red-50 hover:text-red-600 rounded"
-                                >
-                                  <X className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            </div>
+                                 <Button
+                                   variant="ghost"
+                                   size="sm"
+                                   onClick={(e) => {
+                                     e.stopPropagation();
+                                     onItemRemove(item.id);
+                                   }}
+                                   className="h-6 w-6 p-0 hover:bg-red-50 hover:text-red-600 rounded"
+                                 >
+                                   <X className="h-3 w-3" />
+                                 </Button>
+                               </div>
+                             </div>
 
                             {/* Additional Metals Row (if more than 1) */}
                             {(item.metals || []).length > 1 && (
@@ -478,34 +537,149 @@ export function TakeInBalanced({
                               </div>
                             )}
 
-                            {/* Advanced Details - Compact */}
-                            <Collapsible 
-                              open={expandedAdvanced.has(item.id)} 
-                              onOpenChange={() => toggleAdvanced(item.id)}
-                            >
-                              <CollapsibleContent className="px-3 pb-3">
-                                <div className="bg-slate-50/50 rounded-lg p-3 space-y-3">
-                                  <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                      <label className="text-xs font-medium text-slate-700 block mb-1">Notes</label>
-                                      <Textarea 
-                                        value={item.notes || ''} 
-                                        onChange={(e) => onItemUpdate(item.id, { notes: e.target.value })}
-                                        placeholder="Additional details..."
-                                        className="h-12 text-xs resize-none bg-white"
-                                      />
-                                    </div>
-                                    <div>
-                                      <label className="text-xs font-medium text-slate-700 block mb-1">Photos</label>
-                                      <div className="border-2 border-dashed border-slate-300 rounded-lg p-2 text-center bg-white hover:bg-slate-50 transition-colors cursor-pointer h-12 flex items-center justify-center">
-                                        <Camera className="h-4 w-4 text-slate-400 mr-1" />
-                                        <span className="text-xs text-slate-500">Upload</span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </CollapsibleContent>
-                            </Collapsible>
+                             {/* Enhanced Advanced Details - Animated Expansion */}
+                             <Collapsible 
+                               open={expandedAdvanced.has(item.id)} 
+                               onOpenChange={() => toggleAdvanced(item.id)}
+                             >
+                               <CollapsibleContent className="px-4 pb-4 animate-accordion-down data-[state=closed]:animate-accordion-up">
+                                 <div className="bg-gradient-to-br from-slate-50/80 to-slate-100/50 rounded-xl p-4 space-y-4 border border-slate-200/50 shadow-sm">
+                                   
+                                   {/* Item Details Section */}
+                                   <div className="grid grid-cols-3 gap-4">
+                                     <div>
+                                       <label className="text-xs font-medium text-slate-700 block mb-2">Brand/Maker</label>
+                                       <Input 
+                                         value={item.brand || ''} 
+                                         onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })}
+                                         placeholder="e.g., Tiffany & Co"
+                                         className="h-8 text-xs bg-white"
+                                       />
+                                     </div>
+                                     <div>
+                                       <label className="text-xs font-medium text-slate-700 block mb-2">Condition</label>
+                                       <Select 
+                                         value={item.condition || ''} 
+                                         onValueChange={(value) => onItemUpdate(item.id, { condition: value })}
+                                       >
+                                         <SelectTrigger className="h-8 text-xs bg-white">
+                                           <SelectValue placeholder="Select condition" />
+                                         </SelectTrigger>
+                                         <SelectContent>
+                                           <SelectItem value="New">New</SelectItem>
+                                           <SelectItem value="Excellent">Excellent</SelectItem>
+                                           <SelectItem value="Good">Good</SelectItem>
+                                           <SelectItem value="Fair">Fair</SelectItem>
+                                           <SelectItem value="Poor">Poor</SelectItem>
+                                         </SelectContent>
+                                       </Select>
+                                     </div>
+                                     <div>
+                                       <label className="text-xs font-medium text-slate-700 block mb-2">Size</label>
+                                       <Input 
+                                         value={item.size || ''} 
+                                         onChange={(e) => onItemUpdate(item.id, { size: e.target.value })}
+                                         placeholder="e.g., Size 7, 18in"
+                                         className="h-8 text-xs bg-white"
+                                       />
+                                     </div>
+                                   </div>
+
+                                   {/* Additional Metals Section */}
+                                   <div>
+                                     <div className="flex items-center justify-between mb-2">
+                                       <label className="text-xs font-medium text-slate-700">Additional Metals</label>
+                                       <Button
+                                         variant="ghost"
+                                         size="sm"
+                                         onClick={() => addMetal(item.id)}
+                                         className="h-6 px-2 text-xs text-blue-600 hover:bg-blue-50"
+                                       >
+                                         <Plus className="h-3 w-3 mr-1" />
+                                         Add Metal
+                                       </Button>
+                                     </div>
+                                     
+                                     {(item.metals || []).length > 1 && (
+                                       <div className="space-y-2">
+                                         {(item.metals || []).slice(1).map((metal: any) => (
+                                           <div key={metal.id} className="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200/50">
+                                             <Select 
+                                               value={metal.type} 
+                                               onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}
+                                             >
+                                               <SelectTrigger className="w-20 h-7 text-xs">
+                                                 <SelectValue />
+                                               </SelectTrigger>
+                                               <SelectContent>
+                                                 <SelectItem value="Gold">Gold</SelectItem>
+                                                 <SelectItem value="Silver">Silver</SelectItem>
+                                                 <SelectItem value="Platinum">Platinum</SelectItem>
+                                               </SelectContent>
+                                             </Select>
+                                             <Select 
+                                               value={metal.karat?.toString()} 
+                                               onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}
+                                             >
+                                               <SelectTrigger className="w-16 h-7 text-xs">
+                                                 <SelectValue />
+                                               </SelectTrigger>
+                                               <SelectContent>
+                                                 <SelectItem value="10">10K</SelectItem>
+                                                 <SelectItem value="14">14K</SelectItem>
+                                                 <SelectItem value="18">18K</SelectItem>
+                                                 <SelectItem value="22">22K</SelectItem>
+                                               </SelectContent>
+                                             </Select>
+                                             <Input 
+                                               type="number" 
+                                               step="0.01"
+                                               value={metal.weight || ''} 
+                                               onChange={(e) => updateMetal(item.id, metal.id, { weight: parseFloat(e.target.value) || 0 })}
+                                               placeholder="0.00"
+                                               className="w-16 h-7 text-xs"
+                                             />
+                                             <span className="text-xs text-slate-500">g</span>
+                                             <Button
+                                               variant="ghost"
+                                               size="sm"
+                                               onClick={() => {
+                                                 const updatedMetals = (item.metals || []).filter((m: any) => m.id !== metal.id);
+                                                 onItemUpdate(item.id, { metals: updatedMetals });
+                                               }}
+                                               className="h-6 w-6 p-0 hover:text-red-600 ml-auto"
+                                             >
+                                               <X className="h-3 w-3" />
+                                             </Button>
+                                           </div>
+                                         ))}
+                                       </div>
+                                     )}
+                                   </div>
+
+                                   {/* Notes and Photos Section */}
+                                   <div className="grid grid-cols-2 gap-4">
+                                     <div>
+                                       <label className="text-xs font-medium text-slate-700 block mb-2">Notes</label>
+                                       <Textarea 
+                                         value={item.notes || ''} 
+                                         onChange={(e) => onItemUpdate(item.id, { notes: e.target.value })}
+                                         placeholder="Additional details, descriptions, markings..."
+                                         className="h-16 text-xs resize-none bg-white"
+                                       />
+                                     </div>
+                                     <div>
+                                       <label className="text-xs font-medium text-slate-700 block mb-2">Photos</label>
+                                       <div className="border-2 border-dashed border-slate-300 rounded-lg p-3 text-center bg-white hover:bg-slate-50 transition-colors cursor-pointer h-16 flex flex-col items-center justify-center">
+                                         <Camera className="h-5 w-5 text-slate-400 mb-1" />
+                                         <span className="text-xs text-slate-500">Upload Photos</span>
+                                       </div>
+                                     </div>
+                                   </div>
+
+                                 </div>
+                               </CollapsibleContent>
+                             </Collapsible>
                           </div>
                         ))}
                       </div>
