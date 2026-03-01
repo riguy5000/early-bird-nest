@@ -5,6 +5,7 @@ import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { MetalApiKeysSettings } from './admin/MetalApiKeysSettings';
 import { 
   Crown, 
   LogOut, 
@@ -284,8 +285,19 @@ export function RootAdminConsole({ user, onLogout }: RootAdminConsoleProps) {
           </div>
         )}
 
+        {/* Settings section with Metal API Keys */}
+        {activeSection === 'settings' && (
+          <div className="max-w-7xl mx-auto space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold">Platform Settings</h2>
+              <p className="text-muted-foreground">Configure platform-wide integrations and preferences</p>
+            </div>
+            <MetalApiKeysSettings />
+          </div>
+        )}
+
         {/* Other sections placeholder */}
-        {activeSection !== 'overview' && (
+        {activeSection !== 'overview' && activeSection !== 'settings' && (
           <div className="max-w-7xl mx-auto">
             <Card>
               <CardContent className="flex items-center justify-center py-12">
