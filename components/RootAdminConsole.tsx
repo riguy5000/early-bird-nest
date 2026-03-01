@@ -6,6 +6,7 @@ import { Separator } from './ui/separator';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { MetalApiKeysSettings } from './admin/MetalApiKeysSettings';
+import { OpenAIKeySettings } from './admin/OpenAIKeySettings';
 import { 
   Crown, 
   LogOut, 
@@ -292,6 +293,8 @@ export function RootAdminConsole({ user, onLogout }: RootAdminConsoleProps) {
               <h2 className="text-2xl font-bold">Platform Settings</h2>
               <p className="text-muted-foreground">Configure platform-wide integrations and preferences</p>
             </div>
+            <OpenAIKeySettings />
+            <Separator />
             <MetalApiKeysSettings />
           </div>
         )}
