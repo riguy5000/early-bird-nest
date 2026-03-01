@@ -56,7 +56,7 @@ export function OpenAIKeySettings() {
     setSaving(true);
     const { error } = await supabase
       .from('kv_store_62d2b480')
-      .upsert({ key: KV_KEY, value: JSON.stringify({ key: apiKey.trim() }) });
+      .upsert({ key: KV_KEY, value: { key: apiKey.trim() } as any });
 
     if (error) {
       toast.error('Failed to save API key');
