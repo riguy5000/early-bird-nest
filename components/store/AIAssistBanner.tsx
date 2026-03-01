@@ -13,7 +13,7 @@ export function AIAssistBanner({ onActivate }: AIAssistBannerProps) {
 
   return (
     <div className="mx-6 mt-3">
-      <div className="bg-primary/[0.03] border border-primary/10 rounded-xl px-4 py-3 flex items-center justify-between">
+      <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
             <Zap className="h-3.5 w-3.5 text-primary" />
@@ -28,7 +28,7 @@ export function AIAssistBanner({ onActivate }: AIAssistBannerProps) {
             variant="ghost" 
             size="sm" 
             onClick={onActivate}
-            className="flex items-center gap-1.5 text-xs rounded-full bg-primary/5 hover:bg-primary/10 text-primary px-3"
+            className="flex items-center gap-1.5 text-xs rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 px-3"
           >
             <Camera className="h-3 w-3" />
             Try AI Capture
