@@ -134,7 +134,6 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
         setLastSaved(new Date());
       }
     }, 10000);
-
     return () => clearInterval(interval);
   }, [batchId, items, customer, paymentMethod, checkNumber, followUpReminder]);
 
@@ -163,7 +162,6 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
         handleAIAssist();
       }
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
@@ -210,13 +208,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
       ? items.reduce((sum, item) => sum + item.payoutPercentage, 0) / items.length 
       : 0;
     const profit = totalMarketValue - totalPayout;
-
-    return {
-      totalMarketValue,
-      totalPayout,
-      avgPayoutPercentage,
-      profit
-    };
+    return { totalMarketValue, totalPayout, avgPayoutPercentage, profit };
   }, [items]);
 
   const handleSave = useCallback(() => {
@@ -224,7 +216,6 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
       toast.error('Please add at least one item');
       return;
     }
-
     const totals = calculateTotals();
     const transactionData = {
       batchId,
@@ -239,10 +230,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
       status: 'Quote',
       createdAt: new Date().toISOString()
     };
-
     onComplete(transactionData);
-    
-    // Clear draft
     localStorage.removeItem(`takeInDraft_${batchId}`);
     toast.success('Transaction saved successfully');
   }, [batchId, store.id, employee.id, items, customer, paymentMethod, checkNumber, followUpReminder, calculateTotals, onComplete]);
@@ -259,7 +247,6 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
           : ['Coin', 'Bar', 'Round'].includes(detected.type) ? 'Bullion'
           : ['Spoon', 'Fork', 'Knife'].includes(detected.type) ? 'Silverware'
           : 'Jewelry';
-        
         newItems.push({
           id: `item_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
           category: category as Item['category'],
@@ -281,91 +268,94 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
 
   const handlePrintLabels = useCallback(() => {
     toast.success('Printing item labels...');
-    // Implementation would connect to label printer
   }, []);
 
   const totals = calculateTotals();
 
   return (
     <div className="flex flex-col h-screen bg-background max-w-[1280px] mx-auto">
-      {/* Global Header - 64px height */}
-      <div className="h-16 flex items-center justify-between px-6 border-b bg-card shadow-md">
+      {/* Global Header — frosted glass, no shadow */}
+      <div className="h-14 flex items-center justify-between px-6 border-b border-border/60 bg-background/80 backdrop-blur-xl sticky top-0 z-10">
         <div className="flex items-center gap-3">
-          <Package className="h-5 w-5 text-primary" />
-          <h1 className="text-xl font-semibold">Take-In</h1>
-          <span className="text-slate-400 text-sm">#{batchId}</span>
+          <Package className="h-5 w-5 text-muted-foreground" />
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">Take-In</h1>
+          <span className="text-xs text-muted-foreground font-normal bg-muted/60 px-2.5 py-0.5 rounded-full">
+            #{batchId}
+          </span>
         </div>
 
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
           {lastSaved && (
-            <Badge variant="outline" className="flex items-center gap-1">
+            <span className="text-xs text-muted-foreground flex items-center gap-1.5">
               <Clock className="h-3 w-3" />
               Saved {lastSaved.toLocaleTimeString()}
-            </Badge>
+            </span>
           )}
-          
-          <Button variant="outline" size="sm" onClick={onClose}>
+          <Button variant="ghost" size="sm" onClick={onClose} className="text-muted-foreground hover:text-foreground rounded-full">
             Close
           </Button>
         </div>
       </div>
 
-      {/* Metal Ticker - Translucent strip */}
-      <div className="bg-slate-50/60 backdrop-blur border-b px-6 py-2">
+      {/* Metal Ticker — minimal strip */}
+      <div className="border-b border-border/40 px-6 py-1.5">
         <MetalPriceTicker />
       </div>
 
       {/* Quick Controls Row */}
-      <div className="px-6 py-4 flex items-center justify-between gap-6 border-b">
-        <div className="flex items-center gap-4">
-          {/* Category Chips - Horizontally scrollable */}
-          <div className="flex gap-2 overflow-x-auto scrollbar-none">
-            {['Jewelry', 'Watch', 'Bullion', 'Stones', 'Silverware'].map((category) => (
-              <button
-                key={category}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                  items.some(item => item.category === category)
-                    ? 'bg-slate-900 text-white' 
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-                onClick={() => {
-                  const newItem: Item = {
-                    id: `item_${Date.now()}`,
-                    category: category as any,
-                    metals: [{ id: `metal_${Date.now()}`, type: 'Gold', karat: 14, weight: 0 }],
-                    stones: [],
-                    marketValue: 0,
-                    payoutPercentage: store.defaultPayoutPercentage,
-                    payoutAmount: 0,
-                    photos: [],
-                    notes: '',
-                    status: 'In Stock'
-                  };
-                  setItems(prev => [...prev, newItem]);
-                  setActiveItemId(newItem.id);
-                }}
-              >
-                {category}
-              </button>
-            ))}
+      <div className="px-6 py-3 flex items-center justify-between gap-6 border-b border-border/40">
+        <div className="flex items-center gap-5">
+          {/* Category Chips — soft pills */}
+          <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
+            {['Jewelry', 'Watch', 'Bullion', 'Stones', 'Silverware'].map((category) => {
+              const isActive = items.some(item => item.category === category);
+              return (
+                <button
+                  key={category}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 ${
+                    isActive
+                      ? 'bg-primary/10 text-primary border border-primary/20' 
+                      : 'bg-muted/50 text-muted-foreground hover:bg-muted border border-transparent'
+                  }`}
+                  onClick={() => {
+                    const newItem: Item = {
+                      id: `item_${Date.now()}`,
+                      category: category as any,
+                      metals: [{ id: `metal_${Date.now()}`, type: 'Gold', karat: 14, weight: 0 }],
+                      stones: [],
+                      marketValue: 0,
+                      payoutPercentage: store.defaultPayoutPercentage,
+                      payoutAmount: 0,
+                      photos: [],
+                      notes: '',
+                      status: 'In Stock'
+                    };
+                    setItems(prev => [...prev, newItem]);
+                    setActiveItemId(newItem.id);
+                  }}
+                >
+                  {category}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Item Count */}
+          {/* Item Count — segmented control */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Items:</span>
-            <div className="flex items-center border rounded-md">
+            <span className="text-xs text-muted-foreground">Items</span>
+            <div className="flex items-center bg-muted/40 rounded-full overflow-hidden">
               <button 
-                className="px-2 py-1 hover:bg-muted"
+                className="px-2.5 py-1 hover:bg-muted/80 transition-colors text-muted-foreground"
                 onClick={() => items.length > 1 && removeItem(items[items.length - 1].id)}
                 disabled={items.length === 0}
               >
                 <Minus className="h-3 w-3" />
               </button>
-              <span className="px-3 py-1 text-sm font-medium min-w-8 text-center">
+              <span className="px-3 py-1 text-xs font-semibold text-foreground min-w-[28px] text-center">
                 {items.length}
               </span>
               <button 
-                className="px-2 py-1 hover:bg-muted"
+                className="px-2.5 py-1 hover:bg-muted/80 transition-colors text-muted-foreground"
                 onClick={addNewItem}
               >
                 <Plus className="h-3 w-3" />
@@ -375,7 +365,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
 
           {/* Fast Entry Toggle */}
           <div className="flex items-center gap-2">
-            <Label htmlFor="fast-entry" className="text-sm">Fast Entry</Label>
+            <Label htmlFor="fast-entry" className="text-xs text-muted-foreground">Fast Entry</Label>
             <Switch
               id="fast-entry"
               checked={viewMode === 'slim'}
@@ -384,15 +374,15 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
           </div>
         </div>
 
-        {/* AI Assist Button - Right edge */}
+        {/* AI Assist Button — frosted pill */}
         <Button 
-          variant="outline" 
+          variant="ghost" 
           size="sm"
           onClick={handleAIAssist}
-          className="flex items-center gap-2 text-secondary"
+          className="flex items-center gap-2 text-muted-foreground hover:text-primary bg-muted/40 hover:bg-primary/5 rounded-full px-4 transition-all duration-200"
         >
-          <Zap className="h-4 w-4" />
-          AI Assist
+          <Zap className="h-3.5 w-3.5" />
+          <span className="text-xs font-medium">AI Assist</span>
         </Button>
       </div>
 

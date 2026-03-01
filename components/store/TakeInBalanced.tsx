@@ -61,10 +61,8 @@ export function TakeInBalanced({
     const handleKeydown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'j') {
         e.preventDefault();
-        // Open AI Assist
       }
     };
-
     window.addEventListener('keydown', handleKeydown);
     return () => window.removeEventListener('keydown', handleKeydown);
   }, []);
@@ -72,18 +70,14 @@ export function TakeInBalanced({
   const toggleAdvanced = (itemId: string) => {
     setExpandedAdvanced(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(itemId)) {
-        newSet.delete(itemId);
-      } else {
-        newSet.add(itemId);
-      }
+      if (newSet.has(itemId)) newSet.delete(itemId);
+      else newSet.add(itemId);
       return newSet;
     });
   };
 
   const addItemByCategory = (category: string) => {
     onItemAdd();
-    // Auto-set category for new item
     setTimeout(() => {
       if (items.length > 0) {
         const lastItem = items[items.length - 1];
@@ -95,37 +89,18 @@ export function TakeInBalanced({
   const addMetal = (itemId: string) => {
     const item = items.find(i => i.id === itemId);
     if (!item) return;
-
-    const newMetal = {
-      id: `metal_${Date.now()}`,
-      type: 'Gold',
-      karat: 14,
-      weight: 0
-    };
-
-    onItemUpdate(itemId, {
-      metals: [...item.metals, newMetal]
-    });
+    const newMetal = { id: `metal_${Date.now()}`, type: 'Gold', karat: 14, weight: 0 };
+    onItemUpdate(itemId, { metals: [...item.metals, newMetal] });
   };
 
   const updateMetal = (itemId: string, metalId: string, updates: any) => {
     const item = items.find(i => i.id === itemId);
     if (!item) return;
-
-    const updatedMetals = item.metals.map((m: any) => 
-      m.id === metalId ? { ...m, ...updates } : m
-    );
-
-    // Recalculate pricing with animation
+    const updatedMetals = item.metals.map((m: any) => m.id === metalId ? { ...m, ...updates } : m);
     const totalWeight = updatedMetals.reduce((sum: number, m: any) => sum + (m.weight || 0), 0);
-    const marketValue = totalWeight * 50; // Mock pricing
+    const marketValue = totalWeight * 50;
     const payoutAmount = marketValue * (item.payoutPercentage / 100);
-
-    onItemUpdate(itemId, {
-      metals: updatedMetals,
-      marketValue,
-      payoutAmount
-    });
+    onItemUpdate(itemId, { metals: updatedMetals, marketValue, payoutAmount });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent, itemId: string, metalId: string) => {
@@ -133,17 +108,13 @@ export function TakeInBalanced({
       e.preventDefault();
       const item = items.find(i => i.id === itemId);
       if (!item) return;
-
       const currentMetalIndex = item.metals.findIndex((m: any) => m.id === metalId);
       const nextMetalIndex = currentMetalIndex + 1;
-
       if (nextMetalIndex < item.metals.length) {
-        // Focus next weight input in same item
         const nextMetalId = item.metals[nextMetalIndex].id;
         const nextRef = weightInputRefs.current[`${itemId}_${nextMetalId}`];
         if (nextRef) nextRef.focus();
       } else {
-        // Focus first weight input of next item or add new metal
         const currentItemIndex = items.findIndex(i => i.id === itemId);
         if (currentItemIndex < items.length - 1) {
           const nextItem = items[currentItemIndex + 1];
@@ -169,7 +140,6 @@ export function TakeInBalanced({
     Silverware: Utensils,
   };
 
-  // Item type definitions for each category
   const itemTypesByCategory = {
     Jewelry: ['Ring', 'Pendant', 'Earrings', 'Bracelet', 'Necklace', 'Chain', 'Charm'],
     Watch: ['Watch', 'Watch Band', 'Watch Case'],
@@ -185,43 +155,38 @@ export function TakeInBalanced({
     return acc;
   }, {} as Record<string, any[]>);
 
-  // Count items by type within each category
   const getTypeBreakdown = (categoryItems: any[]) => {
     const typeCounts = categoryItems.reduce((acc, item) => {
       const type = item.itemType || 'Item';
       acc[type] = (acc[type] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    
     return Object.entries(typeCounts)
       .map(([type, count]) => `${count} ${type}${(count as number) > 1 ? 's' : ''}`)
       .join(', ');
   };
 
   return (
-    <div className="h-screen flex bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 overflow-hidden">
-      {/* Main Content Layout */}
+    <div className="h-full flex bg-muted/20 overflow-hidden">
       <div className="flex w-full h-full">
         {/* Left Panel - Item Processing */}
         <div className="flex-1 flex flex-col">
-
-          {/* Items Processing Area */}
           <div className="flex-1 overflow-hidden">
             {items.length === 0 ? (
               <div className="flex items-center justify-center h-full p-6">
                 <div className="text-center max-w-md">
-                  <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-3xl flex items-center justify-center shadow-lg">
-                    <Package className="h-10 w-10 text-blue-600" />
+                  <div className="w-16 h-16 mx-auto mb-5 bg-muted/60 rounded-2xl flex items-center justify-center">
+                    <Package className="h-8 w-8 text-muted-foreground" />
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-800 mb-3">Ready to Process Items</h3>
-                  <p className="text-slate-600 text-lg mb-6">Select a category above to begin adding items for evaluation</p>
+                  <h3 className="text-xl font-semibold text-foreground mb-2">Ready to Process Items</h3>
+                  <p className="text-sm text-muted-foreground mb-6">Select a category above to begin adding items for evaluation</p>
                   <div className="flex justify-center gap-2">
                     {Object.entries(categoryIcons).slice(0, 3).map(([category, Icon]) => (
                       <Button
                         key={category}
                         onClick={() => addItemByCategory(category)}
                         variant="outline"
-                        className="flex items-center gap-2 bg-white/80 hover:bg-white border-slate-300/60 hover:border-blue-300"
+                        className="flex items-center gap-2 rounded-full border-border/60 hover:border-primary/30 hover:bg-primary/5 transition-all"
                       >
                         <Icon className="h-4 w-4" />
                         {category}
@@ -232,27 +197,27 @@ export function TakeInBalanced({
               </div>
             ) : (
               <div className="h-full overflow-auto p-4">
-                <div className="max-w-7xl mx-auto space-y-4">
+                <div className="max-w-7xl mx-auto space-y-3">
                   {Object.entries(itemsByCategory).map(([category, categoryItems]) => (
-                    <div key={category} className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/60 shadow-sm overflow-hidden">
-                      {/* Enhanced Category Header with Type Breakdown */}
-                      <div className="px-4 py-2 bg-gradient-to-r from-slate-50 to-slate-100/50 border-b border-slate-200/50">
+                    <div key={category} className="bg-card rounded-xl border border-border/40 shadow-sm overflow-hidden">
+                      {/* Category Header */}
+                      <div className="px-4 py-2.5 bg-muted/30 border-b border-border/30">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-6 h-6 bg-muted/80 rounded-lg flex items-center justify-center">
                               {React.createElement(categoryIcons[category as keyof typeof categoryIcons] || Gem, { 
-                                className: "h-3 w-3 text-white" 
+                                className: "h-3.5 w-3.5 text-muted-foreground" 
                               })}
                             </div>
                             <div className="flex flex-col">
                               <div className="flex items-center gap-2">
-                                <h3 className="text-sm font-bold text-slate-800">{category}</h3>
-                                <Badge variant="outline" className="h-5 text-xs bg-white/50 text-slate-600">
+                                <h3 className="text-sm font-semibold text-foreground">{category}</h3>
+                                <span className="text-xs text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded-full">
                                   {(categoryItems as any[]).length}
-                                </Badge>
+                                </span>
                               </div>
                               {(categoryItems as any[]).length > 0 && getTypeBreakdown(categoryItems as any[]) && (
-                                <div className="text-xs text-slate-500 ml-0">
+                                <div className="text-[11px] text-muted-foreground">
                                   {getTypeBreakdown(categoryItems as any[])}
                                 </div>
                               )}
@@ -261,7 +226,8 @@ export function TakeInBalanced({
                           <Button
                             onClick={() => addItemByCategory(category)}
                             size="sm"
-                            className="h-6 px-2 text-xs bg-blue-600 hover:bg-blue-700 text-white"
+                            variant="ghost"
+                            className="h-7 px-2.5 text-xs text-primary hover:bg-primary/5 rounded-full"
                           >
                             <Plus className="h-3 w-3 mr-1" />
                             Add
@@ -269,15 +235,14 @@ export function TakeInBalanced({
                         </div>
                       </div>
                       
-                      {/* Compact Items Table */}
-                      <div className="divide-y divide-slate-100">
+                      {/* Items */}
+                      <div className="divide-y divide-border/20">
                         {(categoryItems as any[]).map((item, index) => (
-                           <div key={item.id} className="group hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/30 transition-all duration-300 border-l-4 border-l-transparent hover:border-l-blue-400">
-                              {/* Main Item Row - Clickable for Expansion */}
+                           <div key={item.id} className="group hover:bg-muted/20 transition-colors duration-150">
+                              {/* Main Item Row */}
                               <div 
-                                className="flex items-center gap-4 p-4 rounded-lg cursor-pointer hover:bg-slate-50/50"
+                                className="flex items-center gap-4 p-3.5 cursor-pointer"
                                 onClick={(e) => {
-                                  // Only expand if not clicking on inputs or buttons
                                   if ((e.target as HTMLElement).tagName !== 'INPUT' && 
                                       !(e.target as HTMLElement).closest('button') && 
                                       !(e.target as HTMLElement).closest('[role="combobox"]')) {
@@ -287,17 +252,15 @@ export function TakeInBalanced({
                               >
                                 {/* Item Number & Type */}
                                 <div className="flex items-center gap-3 min-w-[180px]">
-                                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-xs font-bold text-white shadow-lg">
+                                  <div className="w-7 h-7 bg-muted/60 rounded-lg flex items-center justify-center text-xs font-semibold text-muted-foreground">
                                     {items.findIndex(i => i.id === item.id) + 1}
                                   </div>
-                                   <div className="flex flex-col min-w-0 space-y-2">
+                                   <div className="flex flex-col min-w-0 space-y-1.5">
                                      <Input
                                        value={item.itemType || ''}
-                                       onChange={(e) => {
-                                         onItemUpdate(item.id, { itemType: e.target.value });
-                                       }}
+                                       onChange={(e) => onItemUpdate(item.id, { itemType: e.target.value })}
                                        placeholder={`${category} type...`}
-                                       className="h-7 text-sm bg-white/70 border-slate-200 hover:border-slate-300 transition-colors w-36"
+                                       className="h-7 text-sm bg-transparent border-0 border-b border-border/40 rounded-none px-0 focus:border-primary focus:ring-0 w-36"
                                        onClick={(e) => e.stopPropagation()}
                                      />
                                      <div className="flex flex-wrap gap-1">
@@ -308,7 +271,7 @@ export function TakeInBalanced({
                                              e.stopPropagation();
                                              onItemUpdate(item.id, { itemType: type });
                                            }}
-                                           className="px-2 py-0.5 text-xs bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-700 rounded-md border border-slate-200 hover:border-blue-300 transition-all duration-200 cursor-pointer"
+                                           className="px-2 py-0.5 text-[11px] bg-muted/40 hover:bg-primary/10 text-muted-foreground hover:text-primary rounded-full border-0 transition-colors duration-150 cursor-pointer"
                                          >
                                            {type}
                                          </button>
@@ -317,7 +280,7 @@ export function TakeInBalanced({
                                    </div>
                                 </div>
 
-                               {/* Metal Info - Horizontal Layout with Adjusted Widths */}
+                               {/* Metal Info */}
                                <div className="flex items-center gap-2 flex-1 min-w-0">
                                  {(item.metals || []).slice(0, 1).map((metal: any) => (
                                    <div key={metal.id} className="flex items-center gap-2">
@@ -325,13 +288,13 @@ export function TakeInBalanced({
                                         value={metal.type} 
                                         onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}
                                       >
-                                        <SelectTrigger className="w-28 h-8 text-xs bg-gradient-to-r from-white to-slate-50 border border-slate-300/80 rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-300/60 transition-all duration-200 shadow-sm">
+                                        <SelectTrigger className="w-24 h-7 text-xs bg-muted/20 border-0 rounded-lg hover:bg-muted/40 transition-colors">
                                           <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-white/95 backdrop-blur-xl border border-slate-200/80 shadow-xl rounded-xl z-50">
-                                          <SelectItem value="Gold" className="hover:bg-gradient-to-r hover:from-amber-50 hover:to-yellow-50 text-amber-700">Gold</SelectItem>
-                                          <SelectItem value="Silver" className="hover:bg-gradient-to-r hover:from-slate-50 hover:to-gray-50 text-slate-700">Silver</SelectItem>
-                                          <SelectItem value="Platinum" className="hover:bg-gradient-to-r hover:from-slate-50 hover:to-slate-100 text-slate-800">Platinum</SelectItem>
+                                        <SelectContent className="rounded-xl">
+                                          <SelectItem value="Gold">Gold</SelectItem>
+                                          <SelectItem value="Silver">Silver</SelectItem>
+                                          <SelectItem value="Platinum">Platinum</SelectItem>
                                         </SelectContent>
                                       </Select>
 
@@ -339,14 +302,14 @@ export function TakeInBalanced({
                                         value={metal.karat?.toString()} 
                                         onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}
                                       >
-                                        <SelectTrigger className="w-16 h-8 text-xs bg-gradient-to-r from-white to-slate-50 border border-slate-300/80 rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-300/60 transition-all duration-200 shadow-sm">
+                                        <SelectTrigger className="w-16 h-7 text-xs bg-muted/20 border-0 rounded-lg hover:bg-muted/40 transition-colors">
                                           <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-white/95 backdrop-blur-xl border border-slate-200/80 shadow-xl rounded-xl z-50">
-                                          <SelectItem value="10" className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50">10K</SelectItem>
-                                          <SelectItem value="14" className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50">14K</SelectItem>
-                                          <SelectItem value="18" className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50">18K</SelectItem>
-                                          <SelectItem value="22" className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50">22K</SelectItem>
+                                        <SelectContent className="rounded-xl">
+                                          <SelectItem value="10">10K</SelectItem>
+                                          <SelectItem value="14">14K</SelectItem>
+                                          <SelectItem value="18">18K</SelectItem>
+                                          <SelectItem value="22">22K</SelectItem>
                                         </SelectContent>
                                       </Select>
 
@@ -363,18 +326,18 @@ export function TakeInBalanced({
                                           }}
                                           onKeyDown={(e) => handleKeyPress(e, item.id, metal.id)}
                                           placeholder="0.00"
-                                          className="w-14 h-8 text-xs bg-gradient-to-r from-white to-slate-50 border border-slate-300/80 rounded-lg focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-100 hover:border-slate-400 transition-all duration-200 shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                          className="w-14 h-7 text-xs bg-muted/20 border-0 rounded-lg focus:bg-background focus:ring-2 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                           style={{ MozAppearance: 'textfield' }}
                                         />
-                                        <span className="text-xs text-slate-500 font-medium">g</span>
+                                        <span className="text-xs text-muted-foreground">g</span>
                                       </div>
                                    </div>
                                  ))}
                                  
                                  {(item.metals || []).length > 1 && (
-                                   <Badge variant="outline" className="h-5 text-xs">
+                                   <span className="text-xs text-muted-foreground bg-muted/30 px-2 py-0.5 rounded-full">
                                      +{(item.metals || []).length - 1} more
-                                   </Badge>
+                                   </span>
                                  )}
                                </div>
 
@@ -391,28 +354,27 @@ export function TakeInBalanced({
                                       }
                                     }}
                                     placeholder="75"
-                                    className="w-14 h-8 text-xs bg-gradient-to-r from-white to-slate-50 border border-slate-300/80 rounded-lg focus:bg-white focus:border-green-400 focus:ring-2 focus:ring-green-100 hover:border-slate-400 transition-all duration-200 shadow-sm text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    className="w-14 h-7 text-xs bg-muted/20 border-0 rounded-lg focus:bg-background focus:ring-2 focus:ring-primary/20 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                     style={{ MozAppearance: 'textfield' }}
                                   />
-                                  <span className="text-xs text-slate-500 font-medium">%</span>
-                                 <div className="text-sm font-bold text-green-600 min-w-[60px] text-right">
+                                  <span className="text-xs text-muted-foreground">%</span>
+                                 <div className="text-sm font-semibold text-green-600 min-w-[60px] text-right tabular-nums">
                                    ${(item.payoutAmount || 0).toFixed(2)}
                                  </div>
                                </div>
 
                                {/* Actions */}
-                               <div className="flex items-center gap-1">
+                               <div className="flex items-center gap-1.5">
                                  <Switch
                                    checked={item.saveForLater || false}
                                    onCheckedChange={(checked) => onItemUpdate(item.id, { saveForLater: checked })}
                                    className="scale-75"
                                  />
-                                 <span className="text-xs text-slate-600 min-w-[35px]">Save</span>
+                                 <span className="text-[11px] text-muted-foreground min-w-[30px]">Save</span>
                                  
-                                 {/* Expansion Indicator */}
-                                 <div className="flex items-center gap-1 text-xs text-slate-600 px-2 py-1">
+                                 <div className="flex items-center gap-0.5 text-[11px] text-muted-foreground px-1.5 py-0.5 rounded-full hover:bg-muted/40 transition-colors">
                                    <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${expandedAdvanced.has(item.id) ? 'rotate-90' : ''}`} />
-                                   <span className="text-xs">Details</span>
+                                   <span>Details</span>
                                  </div>
 
                                  <Button
@@ -422,28 +384,28 @@ export function TakeInBalanced({
                                      e.stopPropagation();
                                      onItemRemove(item.id);
                                    }}
-                                   className="h-6 w-6 p-0 hover:bg-red-50 hover:text-red-600 rounded"
+                                   className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive rounded-full"
                                  >
                                    <X className="h-3 w-3" />
                                  </Button>
                                </div>
                              </div>
 
-                            {/* Additional Metals Row (if more than 1) */}
+                            {/* Additional Metals Row */}
                             {(item.metals || []).length > 1 && (
                               <div className="px-3 pb-2">
                                 <div className="flex flex-wrap gap-2 pl-8">
                                   {(item.metals || []).slice(1).map((metal: any) => (
-                                    <div key={metal.id} className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1">
-                                      <span className="text-xs text-slate-600">{metal.type} {metal.karat}K</span>
+                                    <div key={metal.id} className="flex items-center gap-1 bg-muted/20 rounded-lg px-2 py-1">
+                                      <span className="text-xs text-muted-foreground">{metal.type} {metal.karat}K</span>
                                       <Input 
                                         type="number" 
                                         step="0.01"
                                         value={metal.weight || ''} 
                                         onChange={(e) => updateMetal(item.id, metal.id, { weight: parseFloat(e.target.value) || 0 })}
-                                        className="w-12 h-5 text-xs bg-white border-slate-300"
+                                        className="w-12 h-5 text-xs bg-background border-0 rounded"
                                       />
-                                      <span className="text-xs text-slate-500">g</span>
+                                      <span className="text-xs text-muted-foreground">g</span>
                                       <Button
                                         variant="ghost"
                                         size="sm"
@@ -451,7 +413,7 @@ export function TakeInBalanced({
                                           const updatedMetals = (item.metals || []).filter((m: any) => m.id !== metal.id);
                                           onItemUpdate(item.id, { metals: updatedMetals });
                                         }}
-                                        className="h-4 w-4 p-0 hover:text-red-600"
+                                        className="h-4 w-4 p-0 hover:text-destructive rounded-full"
                                       >
                                         <X className="h-2 w-2" />
                                       </Button>
@@ -461,7 +423,7 @@ export function TakeInBalanced({
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => addMetal(item.id)}
-                                    className="h-6 px-2 text-xs text-blue-600 hover:bg-blue-50"
+                                    className="h-6 px-2 text-xs text-primary hover:bg-primary/5 rounded-full"
                                   >
                                     <Plus className="h-3 w-3 mr-1" />
                                     Add Metal
@@ -470,35 +432,34 @@ export function TakeInBalanced({
                               </div>
                             )}
 
-                             {/* Enhanced Advanced Details - Animated Expansion */}
+                             {/* Advanced Details */}
                              <Collapsible 
                                open={expandedAdvanced.has(item.id)} 
                                onOpenChange={() => toggleAdvanced(item.id)}
                              >
                                <CollapsibleContent className="px-4 pb-4 animate-accordion-down data-[state=closed]:animate-accordion-up">
-                                 <div className="bg-gradient-to-br from-slate-50/80 to-slate-100/50 rounded-xl p-4 space-y-4 border border-slate-200/50 shadow-sm">
+                                 <div className="bg-muted/20 rounded-xl p-4 space-y-4 border border-border/30">
                                    
-                                   {/* Item Details Section */}
                                    <div className="grid grid-cols-3 gap-4">
                                      <div>
-                                       <label className="text-xs font-medium text-slate-700 block mb-2">Brand/Maker</label>
+                                       <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Brand/Maker</label>
                                        <Input 
                                          value={item.brand || ''} 
                                          onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })}
                                          placeholder="e.g., Tiffany & Co"
-                                         className="h-8 text-xs bg-white"
+                                         className="h-8 text-xs bg-background border-border/40 rounded-lg"
                                        />
                                      </div>
                                      <div>
-                                       <label className="text-xs font-medium text-slate-700 block mb-2">Condition</label>
+                                       <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Condition</label>
                                        <Select 
                                          value={item.condition || ''} 
                                          onValueChange={(value) => onItemUpdate(item.id, { condition: value })}
                                        >
-                                         <SelectTrigger className="h-8 text-xs bg-white">
-                                           <SelectValue placeholder="Select condition" />
+                                         <SelectTrigger className="h-8 text-xs bg-background border-border/40 rounded-lg">
+                                           <SelectValue placeholder="Select" />
                                          </SelectTrigger>
-                                         <SelectContent>
+                                         <SelectContent className="rounded-xl">
                                            <SelectItem value="New">New</SelectItem>
                                            <SelectItem value="Excellent">Excellent</SelectItem>
                                            <SelectItem value="Good">Good</SelectItem>
@@ -508,25 +469,25 @@ export function TakeInBalanced({
                                        </Select>
                                      </div>
                                      <div>
-                                       <label className="text-xs font-medium text-slate-700 block mb-2">Size</label>
+                                       <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Size</label>
                                        <Input 
                                          value={item.size || ''} 
                                          onChange={(e) => onItemUpdate(item.id, { size: e.target.value })}
                                          placeholder="e.g., Size 7, 18in"
-                                         className="h-8 text-xs bg-white"
+                                         className="h-8 text-xs bg-background border-border/40 rounded-lg"
                                        />
                                      </div>
                                    </div>
 
-                                   {/* Additional Metals Section */}
+                                   {/* Additional Metals */}
                                    <div>
                                      <div className="flex items-center justify-between mb-2">
-                                       <label className="text-xs font-medium text-slate-700">Additional Metals</label>
+                                       <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Additional Metals</label>
                                        <Button
                                          variant="ghost"
                                          size="sm"
                                          onClick={() => addMetal(item.id)}
-                                         className="h-6 px-2 text-xs text-blue-600 hover:bg-blue-50"
+                                         className="h-6 px-2 text-xs text-primary hover:bg-primary/5 rounded-full"
                                        >
                                          <Plus className="h-3 w-3 mr-1" />
                                          Add Metal
@@ -536,28 +497,18 @@ export function TakeInBalanced({
                                      {(item.metals || []).length > 1 && (
                                        <div className="space-y-2">
                                          {(item.metals || []).slice(1).map((metal: any) => (
-                                           <div key={metal.id} className="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200/50">
-                                             <Select 
-                                               value={metal.type} 
-                                               onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}
-                                             >
-                                               <SelectTrigger className="w-20 h-7 text-xs">
-                                                 <SelectValue />
-                                               </SelectTrigger>
-                                               <SelectContent>
+                                           <div key={metal.id} className="flex items-center gap-2 p-2 bg-background rounded-lg border border-border/30">
+                                             <Select value={metal.type} onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}>
+                                               <SelectTrigger className="w-20 h-7 text-xs border-0 bg-muted/20 rounded-lg"><SelectValue /></SelectTrigger>
+                                               <SelectContent className="rounded-xl">
                                                  <SelectItem value="Gold">Gold</SelectItem>
                                                  <SelectItem value="Silver">Silver</SelectItem>
                                                  <SelectItem value="Platinum">Platinum</SelectItem>
                                                </SelectContent>
                                              </Select>
-                                             <Select 
-                                               value={metal.karat?.toString()} 
-                                               onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}
-                                             >
-                                               <SelectTrigger className="w-16 h-7 text-xs">
-                                                 <SelectValue />
-                                               </SelectTrigger>
-                                               <SelectContent>
+                                             <Select value={metal.karat?.toString()} onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}>
+                                               <SelectTrigger className="w-16 h-7 text-xs border-0 bg-muted/20 rounded-lg"><SelectValue /></SelectTrigger>
+                                               <SelectContent className="rounded-xl">
                                                  <SelectItem value="10">10K</SelectItem>
                                                  <SelectItem value="14">14K</SelectItem>
                                                  <SelectItem value="18">18K</SelectItem>
@@ -565,23 +516,17 @@ export function TakeInBalanced({
                                                </SelectContent>
                                              </Select>
                                              <Input 
-                                               type="number" 
-                                               step="0.01"
+                                               type="number" step="0.01"
                                                value={metal.weight || ''} 
                                                onChange={(e) => updateMetal(item.id, metal.id, { weight: parseFloat(e.target.value) || 0 })}
                                                placeholder="0.00"
-                                               className="w-16 h-7 text-xs"
+                                               className="w-16 h-7 text-xs border-0 bg-muted/20 rounded-lg"
                                              />
-                                             <span className="text-xs text-slate-500">g</span>
-                                             <Button
-                                               variant="ghost"
-                                               size="sm"
-                                               onClick={() => {
-                                                 const updatedMetals = (item.metals || []).filter((m: any) => m.id !== metal.id);
-                                                 onItemUpdate(item.id, { metals: updatedMetals });
-                                               }}
-                                               className="h-6 w-6 p-0 hover:text-red-600 ml-auto"
-                                             >
+                                             <span className="text-xs text-muted-foreground">g</span>
+                                             <Button variant="ghost" size="sm" onClick={() => {
+                                               const updatedMetals = (item.metals || []).filter((m: any) => m.id !== metal.id);
+                                               onItemUpdate(item.id, { metals: updatedMetals });
+                                             }} className="h-6 w-6 p-0 hover:text-destructive ml-auto rounded-full">
                                                <X className="h-3 w-3" />
                                              </Button>
                                            </div>
@@ -590,22 +535,22 @@ export function TakeInBalanced({
                                      )}
                                    </div>
 
-                                   {/* Notes and Photos Section */}
+                                   {/* Notes and Photos */}
                                    <div className="grid grid-cols-2 gap-4">
                                      <div>
-                                       <label className="text-xs font-medium text-slate-700 block mb-2">Notes</label>
+                                       <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Notes</label>
                                        <Textarea 
                                          value={item.notes || ''} 
                                          onChange={(e) => onItemUpdate(item.id, { notes: e.target.value })}
-                                         placeholder="Additional details, descriptions, markings..."
-                                         className="h-16 text-xs resize-none bg-white"
+                                         placeholder="Additional details…"
+                                         className="h-16 text-xs resize-none bg-background border-border/40 rounded-lg"
                                        />
                                      </div>
                                      <div>
-                                       <label className="text-xs font-medium text-slate-700 block mb-2">Photos</label>
-                                       <div className="border-2 border-dashed border-slate-300 rounded-lg p-3 text-center bg-white hover:bg-slate-50 transition-colors cursor-pointer h-16 flex flex-col items-center justify-center">
-                                         <Camera className="h-5 w-5 text-slate-400 mb-1" />
-                                         <span className="text-xs text-slate-500">Upload Photos</span>
+                                       <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Photos</label>
+                                       <div className="border border-dashed border-border/60 rounded-xl p-3 text-center bg-muted/10 hover:bg-muted/20 transition-colors cursor-pointer h-16 flex flex-col items-center justify-center">
+                                         <Camera className="h-4 w-4 text-muted-foreground mb-1" />
+                                         <span className="text-[11px] text-muted-foreground">Upload Photos</span>
                                        </div>
                                      </div>
                                    </div>
@@ -624,27 +569,27 @@ export function TakeInBalanced({
           </div>
         </div>
 
-        {/* Right Panel - Information Summary */}
-        <div className="w-80 border-l bg-slate-50/30 flex flex-col flex-shrink-0">
-          {/* Immediate Quote Box */}
-          <div className="p-6 bg-white border-b">
+        {/* Right Panel — clean white sidebar */}
+        <div className="w-72 border-l border-border/30 bg-card flex flex-col flex-shrink-0">
+          {/* Payout Total */}
+          <div className="p-6 border-b border-border/30">
             <div className="text-center">
-              <div className="text-3xl font-semibold text-primary mb-1">
+              <div className="text-3xl font-light text-primary tabular-nums tracking-tight">
                 ${totalPayout.toFixed(2)}
               </div>
-              <div className="text-sm text-slate-500">
-                Total Payout ({avgPayout.toFixed(0)}%)
+              <div className="text-xs text-muted-foreground mt-1">
+                Total Payout · {avgPayout.toFixed(0)}%
               </div>
             </div>
           </div>
 
           {/* Customer Information */}
-          <div className="p-4 bg-white border-b">
-            <h3 className="text-sm font-medium text-slate-700 mb-3">Customer Information</h3>
+          <div className="p-4 border-b border-border/30">
+            <h3 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-3">Customer</h3>
             <Button 
               variant="outline" 
               onClick={() => setCustomerDrawerOpen(true)}
-              className="w-full flex items-center gap-2"
+              className="w-full flex items-center gap-2 rounded-full border-dashed border-border/60 hover:border-primary/30 hover:bg-primary/5"
             >
               <ScanLine className="h-4 w-4" />
               Scan Customer ID
@@ -653,20 +598,20 @@ export function TakeInBalanced({
               variant="ghost" 
               size="sm"
               onClick={() => setCustomerDrawerOpen(true)}
-              className="w-full mt-2 text-xs"
+              className="w-full mt-1.5 text-xs text-muted-foreground rounded-full"
             >
               Enter Manually
             </Button>
           </div>
 
           {/* Payout Information */}
-          <div className="p-4 bg-white border-b">
-            <h3 className="text-sm font-medium text-slate-700 mb-3">Payout Information</h3>
+          <div className="p-4 border-b border-border/30">
+            <h3 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-3">Payment Method</h3>
             <Select defaultValue="Check">
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full rounded-lg bg-muted/20 border-0">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="rounded-xl">
                 <SelectItem value="Check">Check</SelectItem>
                 <SelectItem value="Cash">Cash</SelectItem>
                 <SelectItem value="Store Credit">Store Credit</SelectItem>
@@ -678,31 +623,31 @@ export function TakeInBalanced({
           <div className="flex-1 p-4 space-y-4">
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-slate-600">Market Value</span>
-                <span className="font-medium">${totalMarket.toFixed(2)}</span>
+                <span className="text-muted-foreground">Market Value</span>
+                <span className="font-medium tabular-nums">${totalMarket.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-600">Total Payout</span>
-                <span className="font-semibold text-primary">${totalPayout.toFixed(2)}</span>
+                <span className="text-muted-foreground">Total Payout</span>
+                <span className="font-semibold text-primary tabular-nums">${totalPayout.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-600">Average %</span>
-                <span className="font-medium">{avgPayout.toFixed(1)}%</span>
+                <span className="text-muted-foreground">Average %</span>
+                <span className="font-medium tabular-nums">{avgPayout.toFixed(1)}%</span>
               </div>
               {!store.hideProfit && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-600">Profit</span>
-                  <span className="font-medium text-green-600">${profit.toFixed(2)}</span>
+                  <span className="text-muted-foreground">Profit</span>
+                  <span className="font-medium text-green-600 tabular-nums">${profit.toFixed(2)}</span>
                 </div>
               )}
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="p-4 space-y-2 border-t bg-white">
+          <div className="p-4 space-y-2 border-t border-border/30">
             <Button 
               variant="ghost" 
-              className="w-full flex items-center gap-2"
+              className="w-full flex items-center gap-2 rounded-full text-muted-foreground hover:text-foreground"
               disabled={items.length === 0}
             >
               <Save className="h-4 w-4" />
@@ -710,14 +655,14 @@ export function TakeInBalanced({
             </Button>
             <Button 
               variant="ghost" 
-              className="w-full flex items-center gap-2"
+              className="w-full flex items-center gap-2 rounded-full text-muted-foreground hover:text-foreground"
               disabled={items.length === 0}
             >
               <Printer className="h-4 w-4" />
               Print Receipt
             </Button>
             <Button 
-              className="w-full flex items-center gap-2 bg-primary hover:bg-primary/90"
+              className="w-full flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
               disabled={items.length === 0}
             >
               <DollarSign className="h-4 w-4" />
