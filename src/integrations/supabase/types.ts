@@ -29,6 +29,78 @@ export type Database = {
         }
         Relationships: []
       }
+      metal_api_keys: {
+        Row: {
+          api_key: string
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          last_reset_at: string
+          last_used_at: string | null
+          monthly_limit: number
+          provider: string
+          requests_used: number
+          sort_order: number
+        }
+        Insert: {
+          api_key: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          last_reset_at?: string
+          last_used_at?: string | null
+          monthly_limit?: number
+          provider?: string
+          requests_used?: number
+          sort_order?: number
+        }
+        Update: {
+          api_key?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          last_reset_at?: string
+          last_used_at?: string | null
+          monthly_limit?: number
+          provider?: string
+          requests_used?: number
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      metal_prices: {
+        Row: {
+          change_percent: number | null
+          fetched_at: string
+          id: string
+          metal: string
+          price_usd: number
+          source: string | null
+          symbol: string
+        }
+        Insert: {
+          change_percent?: number | null
+          fetched_at?: string
+          id?: string
+          metal: string
+          price_usd: number
+          source?: string | null
+          symbol: string
+        }
+        Update: {
+          change_percent?: number | null
+          fetched_at?: string
+          id?: string
+          metal?: string
+          price_usd?: number
+          source?: string | null
+          symbol?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
