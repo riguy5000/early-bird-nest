@@ -168,7 +168,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                   <Button 
                     variant="outline" 
                     onClick={startScan}
-                    className="w-full flex items-center gap-2 h-11 rounded-full border-dashed border-2 border-primary/20 text-primary hover:bg-primary/5 hover:border-primary/40 transition-all"
+                    className="w-full flex items-center gap-2 h-11 rounded-full border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-all"
                   >
                     <Scan className="h-4 w-4" />
                     Scan Customer ID
@@ -176,7 +176,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                 )}
 
                 {scanStep === 'front' && (
-                  <div className="border border-border/60 rounded-xl p-5 text-center space-y-3 bg-muted/20">
+                  <div className="border border-slate-200 rounded-xl p-5 text-center space-y-3 bg-slate-50">
                     <div className="w-12 h-12 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
                       <Camera className="h-5 w-5 text-primary" />
                     </div>
@@ -193,7 +193,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                 )}
 
                 {scanStep === 'back' && (
-                  <div className="border border-border/60 rounded-xl p-5 text-center space-y-3 bg-muted/20">
+                  <div className="border border-slate-200 rounded-xl p-5 text-center space-y-3 bg-slate-50">
                     <div className="flex items-center justify-center gap-1.5 text-green-600 mb-1">
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       <span className="text-xs font-medium">Front captured</span>
@@ -217,7 +217,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                 )}
 
                 {scanStep === 'analyzing' && (
-                  <div className="border border-border/60 rounded-xl p-6 text-center space-y-3 bg-muted/10">
+                  <div className="border border-slate-200 rounded-xl p-6 text-center space-y-3 bg-slate-50">
                     <Loader2 className="h-6 w-6 mx-auto animate-spin text-primary" />
                     <div>
                       <p className="font-medium text-sm">Analyzing License…</p>
@@ -245,7 +245,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                 <div className="col-span-2">
                   <Label className="text-xs text-muted-foreground">Full Name *</Label>
                   {editMode ? (
-                    <Input value={formData.name} onChange={(e) => updateField('name', e.target.value)} placeholder="Full name" className="mt-1 rounded-lg bg-muted/20 border-0 focus:bg-background focus:ring-2 focus:ring-primary/20" />
+                    <Input value={formData.name} onChange={(e) => updateField('name', e.target.value)} placeholder="Full name" className="mt-1 rounded-lg bg-white border border-slate-200" />
                   ) : (
                     <div className="mt-1 text-sm font-medium">{customer?.name || 'Not provided'}</div>
                   )}
@@ -254,7 +254,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                 <div>
                   <Label className="text-xs text-muted-foreground">Date of Birth</Label>
                   {editMode ? (
-                    <Input type="date" value={formData.dateOfBirth} onChange={(e) => updateField('dateOfBirth', e.target.value)} className="mt-1 rounded-lg bg-muted/20 border-0 focus:bg-background focus:ring-2 focus:ring-primary/20" />
+                    <Input type="date" value={formData.dateOfBirth} onChange={(e) => updateField('dateOfBirth', e.target.value)} className="mt-1 rounded-lg bg-white border border-slate-200" />
                   ) : (
                     <div className="mt-1 text-sm">{customer?.dateOfBirth || 'Not provided'}</div>
                   )}
@@ -264,7 +264,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                   <Label className="text-xs text-muted-foreground">Gender</Label>
                   {editMode ? (
                     <Select value={formData.gender} onValueChange={(v) => updateField('gender', v)}>
-                      <SelectTrigger className="mt-1 rounded-lg bg-muted/20 border-0"><SelectValue placeholder="Select" /></SelectTrigger>
+                      <SelectTrigger className="mt-1 rounded-lg bg-white border border-slate-200"><SelectValue placeholder="Select" /></SelectTrigger>
                       <SelectContent className="rounded-xl">
                         <SelectItem value="M">Male</SelectItem>
                         <SelectItem value="F">Female</SelectItem>
@@ -279,7 +279,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                 <div className="col-span-2">
                   <Label className="text-xs text-muted-foreground">Driver License #</Label>
                   {editMode ? (
-                    <Input value={formData.licenseNumber} onChange={(e) => updateField('licenseNumber', e.target.value)} placeholder="License number" className="mt-1 rounded-lg bg-muted/20 border-0 focus:bg-background focus:ring-2 focus:ring-primary/20 font-mono" />
+                    <Input value={formData.licenseNumber} onChange={(e) => updateField('licenseNumber', e.target.value)} placeholder="License number" className="mt-1 rounded-lg bg-white border border-slate-200 font-mono" />
                   ) : (
                     <div className="mt-1 text-sm font-mono">{customer?.licenseNumber || 'Not provided'}</div>
                   )}
@@ -297,7 +297,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                 <div>
                   <Label className="text-xs text-muted-foreground">Email</Label>
                   {editMode ? (
-                    <Input type="email" value={formData.email} onChange={(e) => updateField('email', e.target.value)} placeholder="customer@example.com" className="mt-1 rounded-lg bg-muted/20 border-0 focus:bg-background focus:ring-2 focus:ring-primary/20" />
+                    <Input type="email" value={formData.email} onChange={(e) => updateField('email', e.target.value)} placeholder="customer@example.com" className="mt-1 rounded-lg bg-white border border-slate-200" />
                   ) : (
                     <div className="mt-1 text-sm flex items-center gap-2"><Mail className="h-3 w-3 text-muted-foreground" />{customer?.email || 'Not provided'}</div>
                   )}
@@ -306,7 +306,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                 <div>
                   <Label className="text-xs text-muted-foreground">Phone</Label>
                   {editMode ? (
-                    <Input type="tel" value={formData.phone} onChange={(e) => updateField('phone', e.target.value)} placeholder="(555) 123-4567" className="mt-1 rounded-lg bg-muted/20 border-0 focus:bg-background focus:ring-2 focus:ring-primary/20" />
+                    <Input type="tel" value={formData.phone} onChange={(e) => updateField('phone', e.target.value)} placeholder="(555) 123-4567" className="mt-1 rounded-lg bg-white border border-slate-200" />
                   ) : (
                     <div className="mt-1 text-sm flex items-center gap-2"><Phone className="h-3 w-3 text-muted-foreground" />{customer?.phone || 'Not provided'}</div>
                   )}
@@ -315,7 +315,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                 <div>
                   <Label className="text-xs text-muted-foreground">Address</Label>
                   {editMode ? (
-                    <Textarea value={formData.address} onChange={(e) => updateField('address', e.target.value)} placeholder="Full address" rows={2} className="mt-1 rounded-lg bg-muted/20 border-0 focus:bg-background focus:ring-2 focus:ring-primary/20 resize-none" />
+                    <Textarea value={formData.address} onChange={(e) => updateField('address', e.target.value)} placeholder="Full address" rows={2} className="mt-1 rounded-lg bg-white border border-slate-200 resize-none" />
                   ) : (
                     <div className="mt-1 text-sm flex items-start gap-2"><MapPin className="h-3 w-3 mt-0.5 text-muted-foreground" /><span>{customer?.address || 'Not provided'}</span></div>
                   )}
@@ -338,7 +338,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
             )}
 
             {/* Compliance Notice */}
-            <div className="bg-muted/30 p-3.5 rounded-xl">
+            <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl">
               <div className="flex items-start gap-2.5">
                 <CreditCard className="h-3.5 w-3.5 mt-0.5 text-muted-foreground" />
                 <div className="text-xs text-muted-foreground">

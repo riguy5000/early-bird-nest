@@ -62,15 +62,15 @@ export function SummaryFooter({
         {/* Summary Stats + Actions */}
         <div className="flex justify-between items-center">
           <div className="flex gap-3">
-            <div className="bg-muted/40 px-4 py-2 rounded-full">
-              <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Market</div>
+            <div className="bg-slate-100 border border-slate-200 px-4 py-2 rounded-full">
+              <div className="text-[10px] text-slate-500 uppercase tracking-wider">Market</div>
               <div className="text-sm font-semibold text-foreground tabular-nums">
                 ${totals.totalMarketValue.toFixed(2)}
               </div>
             </div>
             
             {!hidePayout && (
-              <div className="bg-primary/5 px-4 py-2 rounded-full border border-primary/10">
+              <div className="bg-blue-50 px-4 py-2 rounded-full border border-blue-200">
                 <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Payout</div>
                 <div className="text-base font-semibold text-primary tabular-nums">
                   ${totals.totalPayout.toFixed(2)}
@@ -78,15 +78,15 @@ export function SummaryFooter({
               </div>
             )}
             
-            <div className="bg-muted/40 px-4 py-2 rounded-full">
-              <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Avg %</div>
+            <div className="bg-slate-100 border border-slate-200 px-4 py-2 rounded-full">
+              <div className="text-[10px] text-slate-500 uppercase tracking-wider">Avg %</div>
               <div className="text-sm font-semibold text-foreground tabular-nums">
                 {totals.avgPayoutPercentage.toFixed(1)}%
               </div>
             </div>
             
             {!hideProfit && (
-              <div className="bg-green-500/5 px-4 py-2 rounded-full border border-green-500/10">
+              <div className="bg-green-50 px-4 py-2 rounded-full border border-green-200">
                 <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Profit</div>
                 <div className="text-sm font-semibold text-green-600 tabular-nums">
                   ${totals.profit.toFixed(2)}
@@ -101,7 +101,7 @@ export function SummaryFooter({
               variant="ghost" 
               onClick={onSave}
               disabled={!hasItems}
-              className="flex items-center gap-2 rounded-xl text-muted-foreground hover:text-foreground"
+              className="flex items-center gap-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
             >
               <Save className="h-4 w-4" />
               Save Quote
@@ -125,7 +125,7 @@ export function SummaryFooter({
               variant="ghost" 
               size="sm"
               onClick={onCustomerInfo}
-              className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground rounded-full"
+              className="flex items-center gap-2 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-full"
             >
               <User className="h-3 w-3" />
               Customer Info
@@ -134,7 +134,7 @@ export function SummaryFooter({
             <div className="flex items-center gap-2">
               <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Payment</Label>
               <Select value={paymentMethod} onValueChange={onPaymentMethodChange}>
-                <SelectTrigger className="w-28 h-7 text-xs rounded-full bg-muted/30 border-0">
+                <SelectTrigger className="w-28 h-7 text-xs rounded-full bg-white border border-slate-200">
                   <div className="flex items-center gap-1.5">
                     {getPaymentIcon()}
                     <SelectValue />
@@ -167,7 +167,7 @@ export function SummaryFooter({
                   value={checkNumber}
                   onChange={(e) => onCheckNumberChange(e.target.value)}
                   placeholder="Check #"
-                  className="w-24 h-7 text-xs rounded-full bg-muted/30 border-0"
+                  className="w-24 h-7 text-xs rounded-full bg-white border border-slate-200"
                 />
               )}
             </div>
@@ -176,15 +176,15 @@ export function SummaryFooter({
           {/* Keyboard Shortcuts */}
           <div className="flex items-center gap-3 text-[10px] text-muted-foreground/60">
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 bg-muted/40 rounded text-[9px] font-mono">Tab</kbd>
+              <kbd className="px-1.5 py-0.5 bg-slate-200 rounded text-[9px] font-mono">Tab</kbd>
               Next
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 bg-muted/40 rounded text-[9px] font-mono">⇧D</kbd>
+              <kbd className="px-1.5 py-0.5 bg-slate-200 rounded text-[9px] font-mono">⇧D</kbd>
               View
             </span>
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 bg-muted/40 rounded text-[9px] font-mono">⌘J</kbd>
+              <kbd className="px-1.5 py-0.5 bg-slate-200 rounded text-[9px] font-mono">⌘J</kbd>
               AI
             </span>
           </div>

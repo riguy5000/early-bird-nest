@@ -313,9 +313,9 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
                 <button
                   key={category}
                   className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 ${
-                    isActive
-                      ? 'bg-primary/10 text-primary border border-primary/20' 
-                      : 'bg-muted/50 text-muted-foreground hover:bg-muted border border-transparent'
+                  isActive
+                      ? 'bg-blue-600 text-white shadow-sm' 
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'
                   }`}
                   onClick={() => {
                     const newItem: Item = {
@@ -343,9 +343,9 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
           {/* Item Count — segmented control */}
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">Items</span>
-            <div className="flex items-center bg-muted/40 rounded-full overflow-hidden">
+            <div className="flex items-center bg-slate-100 border border-slate-200 rounded-full overflow-hidden">
               <button 
-                className="px-2.5 py-1 hover:bg-muted/80 transition-colors text-muted-foreground"
+                className="px-2.5 py-1 hover:bg-slate-200 transition-colors text-slate-500"
                 onClick={() => items.length > 1 && removeItem(items[items.length - 1].id)}
                 disabled={items.length === 0}
               >
@@ -355,7 +355,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
                 {items.length}
               </span>
               <button 
-                className="px-2.5 py-1 hover:bg-muted/80 transition-colors text-muted-foreground"
+                className="px-2.5 py-1 hover:bg-slate-200 transition-colors text-slate-500"
                 onClick={addNewItem}
               >
                 <Plus className="h-3 w-3" />
@@ -379,7 +379,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
           variant="ghost" 
           size="sm"
           onClick={handleAIAssist}
-          className="flex items-center gap-2 text-muted-foreground hover:text-primary bg-muted/40 hover:bg-primary/5 rounded-full px-4 transition-all duration-200"
+          className="flex items-center gap-2 text-slate-600 hover:text-primary bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-full px-4 transition-all duration-200"
         >
           <Zap className="h-3.5 w-3.5" />
           <span className="text-xs font-medium">AI Assist</span>
