@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Badge } from '@/components/ui/badge';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -30,29 +29,31 @@ export function MetalPriceTicker() {
       }
     };
     load();
-
-    // Refresh every 5 minutes from cache
     const interval = setInterval(load, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="flex items-center gap-2">
-      {prices.map(({ metal, price_usd, change_percent }) => (
-        <Badge key={metal} variant="outline" className="flex items-center gap-1">
-          <span className="text-xs font-medium">{metal}</span>
-          <span className="text-xs">${Number(price_usd).toFixed(2)}</span>
+    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+      {prices.map(({ metal, price_usd, change_percent }, i) => (
+        <React.Fragment key={metal}>
+          {i > 0 && <span className="mx-1.5 text-border">·</span>}
+          <span className="font-medium text-foreground/70">{metal}</span>
+          <span className="tabular-nums">${Number(price_usd).toFixed(2)}</span>
           {Number(change_percent) >= 0 ? (
             <TrendingUp className="h-3 w-3 text-green-500" />
           ) : (
             <TrendingDown className="h-3 w-3 text-red-500" />
           )}
-        </Badge>
+        </React.Fragment>
       ))}
       {prices[0]?.fetched_at && (
-        <span className="text-xs text-muted-foreground ml-1">
-          {new Date(prices[0].fetched_at).toLocaleTimeString()}
-        </span>
+        <>
+          <span className="mx-1.5 text-border">·</span>
+          <span className="text-muted-foreground/60">
+            {new Date(prices[0].fetched_at).toLocaleTimeString()}
+          </span>
+        </>
       )}
     </div>
   );
