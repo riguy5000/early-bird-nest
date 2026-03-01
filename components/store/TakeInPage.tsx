@@ -11,6 +11,7 @@ import { CustomerDrawer } from './CustomerDrawer';
 import { SummaryFooter } from './SummaryFooter';
 import { MetalPriceTicker } from './MetalPriceTicker';
 import { AIAssistBanner } from './AIAssistBanner';
+import { AICaptureModal } from './AICaptureModal';
 import { toast } from 'sonner';
 import { 
   Settings, 
@@ -102,6 +103,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
   const [isCustomerDrawerOpen, setIsCustomerDrawerOpen] = useState(false);
   const [batchId, setBatchId] = useState('');
   const [showAIAssist, setShowAIAssist] = useState(false);
+  const [showAICaptureModal, setShowAICaptureModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'Check' | 'Cash' | 'Store Credit'>('Check');
   const [checkNumber, setCheckNumber] = useState('');
   const [followUpReminder, setFollowUpReminder] = useState(false);
@@ -246,9 +248,36 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
   }, [batchId, store.id, employee.id, items, customer, paymentMethod, checkNumber, followUpReminder, calculateTotals, onComplete]);
 
   const handleAIAssist = useCallback(() => {
-    toast.info('AI Assist: Take a photo of your tray to auto-detect items');
-    // Implementation would connect to AI service
+    setShowAICaptureModal(true);
   }, []);
+
+  const handleItemsDetected = useCallback((detectedItems: Array<{ type: string; count: number; notes?: string }>, batchPhotoUrl: string) => {
+    const newItems: Item[] = [];
+    for (const detected of detectedItems) {
+      for (let i = 0; i < detected.count; i++) {
+        const category = ['Watch'].includes(detected.type) ? 'Watch' 
+          : ['Coin', 'Bar', 'Round'].includes(detected.type) ? 'Bullion'
+          : ['Spoon', 'Fork', 'Knife'].includes(detected.type) ? 'Silverware'
+          : 'Jewelry';
+        
+        newItems.push({
+          id: `item_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          category: category as Item['category'],
+          subType: detected.type,
+          metals: [{ id: `metal_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`, type: 'Gold', karat: 14, weight: 0 }],
+          stones: [],
+          marketValue: 0,
+          payoutPercentage: store.defaultPayoutPercentage,
+          payoutAmount: 0,
+          photos: batchPhotoUrl ? [batchPhotoUrl] : [],
+          notes: detected.notes || '',
+          status: 'In Stock',
+        });
+      }
+    }
+    setItems(prev => [...prev, ...newItems]);
+    if (newItems.length > 0) setActiveItemId(newItems[0].id);
+  }, [store.defaultPayoutPercentage]);
 
   const handlePrintLabels = useCallback(() => {
     toast.success('Printing item labels...');
@@ -419,6 +448,14 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
         onClose={() => setIsCustomerDrawerOpen(false)}
         customer={customer}
         onCustomerUpdate={setCustomer}
+      />
+
+      {/* AI Capture Modal */}
+      <AICaptureModal
+        open={showAICaptureModal}
+        onClose={() => setShowAICaptureModal(false)}
+        onItemsDetected={handleItemsDetected}
+        batchId={batchId}
       />
     </div>
   );
