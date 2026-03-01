@@ -22,7 +22,7 @@ export function AuthenticationFlow({ onLogin }: AuthenticationFlowProps) {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-[380px]">
+      <div className="w-full max-w-[420px] md:max-w-[420px]">
         {currentFlow === 'login' && (
           <LoginScreen 
             onLogin={onLogin}

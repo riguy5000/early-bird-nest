@@ -195,7 +195,7 @@ export function TakeInBalanced({
     }, {} as Record<string, number>);
     
     return Object.entries(typeCounts)
-      .map(([type, count]) => `${count} ${type}${(count as number) > 1 ? 's' : ''}`)
+      .map(([type, count]) => `${count} ${type}${count > 1 ? 's' : ''}`)
       .join(', ');
   };
 
