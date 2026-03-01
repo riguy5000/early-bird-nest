@@ -28,7 +28,6 @@ import {
   Save,
   Printer
 } from 'lucide-react';
-import { MetalPriceTicker } from './MetalPriceTicker';
 import { CustomerDrawer } from './CustomerDrawer';
 
 interface TakeInBalancedProps {
@@ -201,79 +200,10 @@ export function TakeInBalanced({
 
   return (
     <div className="h-screen flex bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 overflow-hidden">
-      {/* Top Navigation Bar */}
-      <div className="absolute top-0 left-0 right-0 z-50 h-16 bg-white/95 backdrop-blur-xl border-b border-slate-200/60 shadow-sm">
-        <div className="flex items-center justify-between px-6 h-full">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                <Package className="h-4 w-4 text-white" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                  Take-In #{store?.name || 'STORE'}-{new Date().toLocaleDateString().replace(/\//g, '')}-001
-                </h1>
-                <div className="text-xs text-slate-500">Live Processing Portal</div>
-              </div>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setBatchPhotoOpen(true)}
-              className="flex items-center gap-2 h-9 px-4 bg-white/80 hover:bg-white border-slate-300/60 hover:border-slate-400 hover:shadow-md transition-all duration-200"
-            >
-              <Camera className="h-4 w-4" />
-              Batch Photos
-            </Button>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="text-xs text-slate-500 flex gap-4 bg-slate-100/60 px-3 py-1.5 rounded-full border border-slate-200/50">
-              <span>⌘+J: AI Assist</span>
-              <span>Tab: Next field</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Metal Price Ticker */}
-      <div className="absolute top-16 left-0 right-0 z-40 bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-50 border-b border-amber-200/50">
-        <MetalPriceTicker />
-      </div>
-
       {/* Main Content Layout */}
-      <div className="flex w-full pt-28 h-screen">
+      <div className="flex w-full h-full">
         {/* Left Panel - Item Processing */}
         <div className="flex-1 flex flex-col">
-          {/* Category Quick Actions */}
-          <div className="px-6 py-4 bg-white/80 backdrop-blur-sm border-b border-slate-200/50">
-            <div className="flex items-center gap-2 flex-wrap">
-              {Object.entries(categoryIcons).map(([category, Icon]) => {
-                const count = itemsByCategory[category]?.length || 0;
-                return (
-                  <Button
-                    key={category}
-                    onClick={() => addItemByCategory(category)}
-                    variant={count > 0 ? "default" : "outline"}
-                    size="sm"
-                    className={`flex items-center gap-2 h-10 px-4 rounded-xl font-medium transition-all duration-300 ${
-                      count > 0 
-                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl scale-105' 
-                        : 'bg-white/90 border-slate-300/60 hover:bg-white hover:border-blue-300 hover:text-blue-600 hover:shadow-md'
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span className="text-sm">{category}</span>
-                    {count > 0 && (
-                      <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-white/25 text-white border-0">
-                        {count}
-                      </Badge>
-                    )}
-                    <Plus className="h-3 w-3 opacity-70" />
-                  </Button>
-                );
-              })}
-            </div>
-          </div>
 
           {/* Items Processing Area */}
           <div className="flex-1 overflow-hidden">

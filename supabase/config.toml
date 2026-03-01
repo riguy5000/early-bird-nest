@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.ai-capture]
 verify_jwt = false
+
+[functions.scan-license]
+verify_jwt = false
