@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { adminSettingsQuery } from '@/lib/admin-api';
 import { Key, Eye, EyeOff, Save, Trash2, CheckCircle, AlertCircle, Brain } from 'lucide-react';
 
 const KV_KEY = 'openai_api_key';
