@@ -168,7 +168,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                   <Button 
                     variant="outline" 
                     onClick={startScan}
-                    className="w-full flex items-center gap-2 h-11 rounded-full border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-all"
+                    className="w-full flex items-center gap-2 h-11 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-all"
                   >
                     <Scan className="h-4 w-4" />
                     Scan Customer ID
