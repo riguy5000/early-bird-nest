@@ -59,12 +59,16 @@ export function MetalApiKeysSettings() {
 
   const loadData = async () => {
     setLoading(true);
-    const [keysRes, pricesRes] = await Promise.all([
-      supabase.from('metal_api_keys').select('*').order('sort_order'),
-      supabase.from('metal_prices').select('*').order('metal'),
-    ]);
-    if (keysRes.data) setApiKeys(keysRes.data as ApiKey[]);
-    if (pricesRes.data) setPrices(pricesRes.data as MetalPrice[]);
+    try {
+      const [keysRes, pricesRes] = await Promise.all([
+        adminSettingsQuery('metal_api_keys', 'select', { order: 'sort_order' }),
+        supabase.from('metal_prices').select('*').order('metal'),
+      ]);
+      if (keysRes?.data) setApiKeys(keysRes.data as ApiKey[]);
+      if (pricesRes.data) setPrices(pricesRes.data as MetalPrice[]);
+    } catch (err) {
+      console.error('Failed to load data', err);
+    }
     setLoading(false);
   };
 
