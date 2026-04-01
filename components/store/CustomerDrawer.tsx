@@ -176,7 +176,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                 )}
 
                 {scanStep === 'front' && (
-                  <div className="border border-slate-200 rounded-xl p-5 text-center space-y-3 bg-slate-50">
+                  <div className="border border-slate-200 rounded-lg p-5 text-center space-y-3 bg-slate-50">
                     <div className="w-12 h-12 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
                       <Camera className="h-5 w-5 text-primary" />
                     </div>
