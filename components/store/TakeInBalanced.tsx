@@ -78,13 +78,7 @@ export function TakeInBalanced({
   };
 
   const addItemByCategory = (category: string) => {
-    onItemAdd();
-    setTimeout(() => {
-      if (items.length > 0) {
-        const lastItem = items[items.length - 1];
-        onItemUpdate(lastItem.id, { category });
-      }
-    }, 100);
+    onItemAdd(category);
   };
 
   const addMetal = (itemId: string) => {
