@@ -203,7 +203,7 @@ export function TakeInBalanced({
               <div className="h-full overflow-auto p-4">
                 <div className="max-w-7xl mx-auto space-y-3">
                   {Object.entries(itemsByCategory).map(([category, categoryItems]) => (
-                    <div key={category} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div key={category} className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
                       {/* Category Header */}
                       <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200">
                         <div className="flex items-center justify-between">
