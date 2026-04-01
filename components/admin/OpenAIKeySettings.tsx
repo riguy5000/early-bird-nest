@@ -57,15 +57,14 @@ export function OpenAIKeySettings() {
     }
 
     setSaving(true);
-    const { error } = await supabase
-      .from('kv_store_62d2b480')
-      .upsert({ key: KV_KEY, value: { key: apiKey.trim() } as any });
-
-    if (error) {
-      toast.error('Failed to save API key');
-    } else {
+    try {
+      await adminSettingsQuery('kv_store_62d2b480', 'upsert', {
+        row: { key: KV_KEY, value: { key: apiKey.trim() } }
+      });
       setSavedKey(apiKey.trim());
       toast.success('OpenAI API key saved');
+    } catch (err) {
+      toast.error('Failed to save API key');
     }
     setSaving(false);
   };
