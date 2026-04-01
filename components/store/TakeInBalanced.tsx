@@ -25,7 +25,7 @@ import {
   Utensils,
   Heart,
   DollarSign,
-  Save,
+  Save as SaveIcon,
   Printer
 } from 'lucide-react';
 import { CustomerDrawer } from './CustomerDrawer';
