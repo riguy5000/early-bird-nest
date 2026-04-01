@@ -589,7 +589,7 @@ export function TakeInBalanced({
           {/* Payout Information */}
           <div className="p-4 border-b border-slate-200">
             <h3 className="text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-3">Payment Method</h3>
-            <Select defaultValue="Check">
+            <Select value={paymentMethod} onValueChange={setPaymentMethod}>
               <SelectTrigger className="w-full rounded-lg bg-white border border-slate-200">
                 <SelectValue />
               </SelectTrigger>
@@ -599,6 +599,22 @@ export function TakeInBalanced({
                 <SelectItem value="Store Credit">Store Credit</SelectItem>
               </SelectContent>
             </Select>
+            {paymentMethod === 'Check' && (
+              <Input
+                value={checkNumber}
+                onChange={(e) => setCheckNumber(e.target.value)}
+                placeholder="Check #"
+                className="mt-2 h-9 text-sm rounded-lg bg-white border border-slate-200"
+              />
+            )}
+            {paymentMethod === 'Store Credit' && (
+              <Input
+                value={storeCreditNumber}
+                onChange={(e) => setStoreCreditNumber(e.target.value)}
+                placeholder="Store Credit #"
+                className="mt-2 h-9 text-sm rounded-lg bg-white border border-slate-200"
+              />
+            )}
           </div>
 
           {/* Summary Stats */}
