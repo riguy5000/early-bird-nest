@@ -227,7 +227,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                 )}
 
                 {imageQualityWarning && (
-                  <div className="flex items-start gap-2.5 p-3 rounded-xl bg-yellow-50 border border-yellow-200/60 text-yellow-800">
+                  <div className="flex items-start gap-2.5 p-3 rounded-lg bg-yellow-50 border border-yellow-200/60 text-yellow-800">
                     <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                     <p className="text-xs">{imageQualityWarning}</p>
                   </div>
