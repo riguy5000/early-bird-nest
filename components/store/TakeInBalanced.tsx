@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/hooks/use-toast';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { 
   Plus, 
@@ -25,7 +25,7 @@ import {
   Utensils,
   Heart,
   DollarSign,
-  Save,
+  Save as SaveIcon,
   Printer
 } from 'lucide-react';
 import { CustomerDrawer } from './CustomerDrawer';
@@ -49,6 +49,7 @@ export function TakeInBalanced({
   onItemSelect,
   store
 }: TakeInBalancedProps) {
+  const { toast } = useToast();
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set());
   const [customerDrawerOpen, setCustomerDrawerOpen] = useState(false);
   const [customer, setCustomer] = useState(null);
@@ -365,17 +366,10 @@ export function TakeInBalanced({
 
                                {/* Actions */}
                                <div className="flex items-center gap-1.5">
-                                 <Switch
-                                   checked={item.saveForLater || false}
-                                   onCheckedChange={(checked) => onItemUpdate(item.id, { saveForLater: checked })}
-                                   className="scale-75"
-                                 />
-                                 <span className="text-xs text-slate-600 min-w-[30px]">Save</span>
-                                 
-                                 <div className="flex items-center gap-0.5 text-xs text-slate-600 px-1.5 py-0.5 rounded-full hover:bg-slate-100 transition-colors">
-                                   <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${expandedAdvanced.has(item.id) ? 'rotate-90' : ''}`} />
-                                   <span>Details</span>
-                                 </div>
+                                  <div className="flex items-center gap-0.5 text-xs text-slate-600 px-1.5 py-0.5 rounded-full hover:bg-slate-100 transition-colors">
+                                    <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${expandedAdvanced.has(item.id) ? 'rotate-90' : ''}`} />
+                                    <span>Item Specs</span>
+                                  </div>
 
                                  <Button
                                    variant="ghost"
@@ -553,9 +547,39 @@ export function TakeInBalanced({
                                          <span className="text-[11px] text-muted-foreground">Upload Photos</span>
                                        </div>
                                      </div>
-                                   </div>
+                                    </div>
 
-                                 </div>
+                                    {/* Clear / Save buttons */}
+                                    <div className="flex justify-end gap-2 pt-3 border-t border-border/40 mt-3">
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="rounded-full text-xs px-4"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          onItemUpdate(item.id, { brand: '', condition: '', size: '', notes: '' });
+                                        }}
+                                      >
+                                        Clear
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        className="rounded-full text-xs px-4"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setExpandedAdvanced(prev => {
+                                            const newSet = new Set(prev);
+                                            newSet.delete(item.id);
+                                            return newSet;
+                                          });
+                                          toast({ title: 'Item specs saved', description: 'Specifications have been saved.' });
+                                        }}
+                                      >
+                                        Save
+                                      </Button>
+                                    </div>
+
+                                  </div>
                                </CollapsibleContent>
                              </Collapsible>
                           </div>
