@@ -577,11 +577,12 @@ export function TakeInBalanced({
               Scan Customer ID
             </Button>
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm"
               onClick={() => setCustomerDrawerOpen(true)}
-              className="w-full mt-1.5 text-xs text-muted-foreground rounded-lg"
+              className="w-full mt-1.5 text-xs text-slate-600 rounded-lg border border-slate-200 bg-white hover:bg-slate-50"
             >
+              <Edit className="h-3.5 w-3.5 mr-1.5" />
               Enter Manually
             </Button>
           </div>
