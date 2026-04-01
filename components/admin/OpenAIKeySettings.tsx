@@ -25,16 +25,18 @@ export function OpenAIKeySettings() {
 
   const loadKey = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from('kv_store_62d2b480')
-      .select('value')
-      .eq('key', KV_KEY)
-      .maybeSingle();
-    
-    if (data?.value) {
-      const key = typeof data.value === 'string' ? data.value : (data.value as any)?.key || '';
-      setSavedKey(key);
-      setApiKey(key);
+    try {
+      const res = await adminSettingsQuery('kv_store_62d2b480', 'select', {
+        eq: { key: KV_KEY },
+        single: true,
+      });
+      if (res?.data?.value) {
+        const key = typeof res.data.value === 'string' ? res.data.value : (res.data as any)?.value?.key || '';
+        setSavedKey(key);
+        setApiKey(key);
+      }
+    } catch (err) {
+      console.error('Failed to load key', err);
     }
     setLoading(false);
   };
