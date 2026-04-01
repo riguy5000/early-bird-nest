@@ -213,12 +213,12 @@ export function TakeInBalanced({
                   {Object.entries(itemsByCategory).map(([category, categoryItems]) => (
                     <div key={category} className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
                       {/* Category Header */}
-                      <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200">
+                      <div className={`px-4 py-2.5 ${categoryColors[category]?.bg || 'bg-slate-50'} border-b ${categoryColors[category]?.border || 'border-slate-200'}`}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-6 h-6 bg-slate-200 rounded-lg flex items-center justify-center">
+                            <div className={`w-6 h-6 ${categoryColors[category]?.icon || 'bg-slate-200 text-muted-foreground'} rounded-lg flex items-center justify-center`}>
                               {React.createElement(categoryIcons[category as keyof typeof categoryIcons] || Gem, { 
-                                className: "h-3.5 w-3.5 text-muted-foreground" 
+                                className: "h-3.5 w-3.5" 
                               })}
                             </div>
                             <div className="flex flex-col">
