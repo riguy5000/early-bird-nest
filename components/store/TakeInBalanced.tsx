@@ -547,9 +547,39 @@ export function TakeInBalanced({
                                          <span className="text-[11px] text-muted-foreground">Upload Photos</span>
                                        </div>
                                      </div>
-                                   </div>
+                                    </div>
 
-                                 </div>
+                                    {/* Clear / Save buttons */}
+                                    <div className="flex justify-end gap-2 pt-3 border-t border-border/40 mt-3">
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="rounded-full text-xs px-4"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          onItemUpdate(item.id, { brand: '', condition: '', size: '', notes: '' });
+                                        }}
+                                      >
+                                        Clear
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        className="rounded-full text-xs px-4"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setExpandedAdvanced(prev => {
+                                            const newSet = new Set(prev);
+                                            newSet.delete(item.id);
+                                            return newSet;
+                                          });
+                                          toast({ title: 'Item specs saved', description: 'Specifications have been saved.' });
+                                        }}
+                                      >
+                                        Save
+                                      </Button>
+                                    </div>
+
+                                  </div>
                                </CollapsibleContent>
                              </Collapsible>
                           </div>
