@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { adminSettingsQuery } from '@/lib/admin-api';
 import { 
   Plus, 
   Trash2, 
@@ -58,12 +59,16 @@ export function MetalApiKeysSettings() {
 
   const loadData = async () => {
     setLoading(true);
-    const [keysRes, pricesRes] = await Promise.all([
-      supabase.from('metal_api_keys').select('*').order('sort_order'),
-      supabase.from('metal_prices').select('*').order('metal'),
-    ]);
-    if (keysRes.data) setApiKeys(keysRes.data as ApiKey[]);
-    if (pricesRes.data) setPrices(pricesRes.data as MetalPrice[]);
+    try {
+      const [keysRes, pricesRes] = await Promise.all([
+        adminSettingsQuery('metal_api_keys', 'select', { order: 'sort_order' }),
+        supabase.from('metal_prices').select('*').order('metal'),
+      ]);
+      if (keysRes?.data) setApiKeys(keysRes.data as ApiKey[]);
+      if (pricesRes.data) setPrices(pricesRes.data as MetalPrice[]);
+    } catch (err) {
+      console.error('Failed to load data', err);
+    }
     setLoading(false);
   };
 
@@ -72,34 +77,35 @@ export function MetalApiKeysSettings() {
       toast.error('API key is required');
       return;
     }
-    const { error } = await supabase.from('metal_api_keys').insert({
-      label: newKey.label || `Key ${apiKeys.length + 1}`,
-      api_key: newKey.api_key.trim(),
-      monthly_limit: newKey.monthly_limit,
-      sort_order: apiKeys.length,
-    });
-    if (error) {
+    try {
+      await adminSettingsQuery('metal_api_keys', 'insert', {
+        row: {
+          label: newKey.label || `Key ${apiKeys.length + 1}`,
+          api_key: newKey.api_key.trim(),
+          monthly_limit: newKey.monthly_limit,
+          sort_order: apiKeys.length,
+        }
+      toast.success('API key added');
+      setNewKey({ label: '', api_key: '', monthly_limit: 100 });
+      setShowAddForm(false);
+      loadData();
+    } catch (err) {
       toast.error('Failed to add API key');
-      return;
     }
-    toast.success('API key added');
-    setNewKey({ label: '', api_key: '', monthly_limit: 100 });
-    setShowAddForm(false);
-    loadData();
   };
 
   const handleDeleteKey = async (id: string) => {
-    const { error } = await supabase.from('metal_api_keys').delete().eq('id', id);
-    if (error) {
+    try {
+      await adminSettingsQuery('metal_api_keys', 'delete', { eq: { id } });
+      toast.success('API key deleted');
+      loadData();
+    } catch (err) {
       toast.error('Failed to delete key');
-      return;
     }
-    toast.success('API key deleted');
-    loadData();
   };
 
   const handleToggleActive = async (id: string, isActive: boolean) => {
-    await supabase.from('metal_api_keys').update({ is_active: isActive }).eq('id', id);
+    await adminSettingsQuery('metal_api_keys', 'update', { row: { is_active: isActive }, eq: { id } });
     loadData();
   };
 
@@ -109,8 +115,8 @@ export function MetalApiKeysSettings() {
     
     const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
     await Promise.all([
-      supabase.from('metal_api_keys').update({ sort_order: swapIdx }).eq('id', apiKeys[idx].id),
-      supabase.from('metal_api_keys').update({ sort_order: idx }).eq('id', apiKeys[swapIdx].id),
+      adminSettingsQuery('metal_api_keys', 'update', { row: { sort_order: swapIdx }, eq: { id: apiKeys[idx].id } }),
+      adminSettingsQuery('metal_api_keys', 'update', { row: { sort_order: idx }, eq: { id: apiKeys[swapIdx].id } }),
     ]);
     loadData();
   };

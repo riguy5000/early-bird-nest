@@ -674,7 +674,7 @@ export function TakeInBalanced({
               className="w-full flex items-center gap-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700"
               disabled={items.length === 0}
             >
-              <Save className="h-4 w-4" />
+              <SaveIcon className="h-4 w-4" />
               Save as Quote
             </Button>
             <Button 

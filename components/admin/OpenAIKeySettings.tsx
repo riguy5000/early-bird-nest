@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { adminSettingsQuery } from '@/lib/admin-api';
 import { Key, Eye, EyeOff, Save, Trash2, CheckCircle, AlertCircle, Brain } from 'lucide-react';
 
 const KV_KEY = 'openai_api_key';
@@ -24,16 +25,18 @@ export function OpenAIKeySettings() {
 
   const loadKey = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from('kv_store_62d2b480')
-      .select('value')
-      .eq('key', KV_KEY)
-      .maybeSingle();
-    
-    if (data?.value) {
-      const key = typeof data.value === 'string' ? data.value : (data.value as any)?.key || '';
-      setSavedKey(key);
-      setApiKey(key);
+    try {
+      const res = await adminSettingsQuery('kv_store_62d2b480', 'select', {
+        eq: { key: KV_KEY },
+        single: true,
+      });
+      if (res?.data?.value) {
+        const key = typeof res.data.value === 'string' ? res.data.value : (res.data as any)?.value?.key || '';
+        setSavedKey(key);
+        setApiKey(key);
+      }
+    } catch (err) {
+      console.error('Failed to load key', err);
     }
     setLoading(false);
   };
@@ -54,31 +57,26 @@ export function OpenAIKeySettings() {
     }
 
     setSaving(true);
-    const { error } = await supabase
-      .from('kv_store_62d2b480')
-      .upsert({ key: KV_KEY, value: { key: apiKey.trim() } as any });
-
-    if (error) {
-      toast.error('Failed to save API key');
-    } else {
+    try {
+      await adminSettingsQuery('kv_store_62d2b480', 'upsert', {
+        row: { key: KV_KEY, value: { key: apiKey.trim() } }
+      });
       setSavedKey(apiKey.trim());
       toast.success('OpenAI API key saved');
+    } catch (err) {
+      toast.error('Failed to save API key');
     }
     setSaving(false);
   };
 
   const handleDelete = async () => {
-    const { error } = await supabase
-      .from('kv_store_62d2b480')
-      .delete()
-      .eq('key', KV_KEY);
-
-    if (error) {
-      toast.error('Failed to delete API key');
-    } else {
+    try {
+      await adminSettingsQuery('kv_store_62d2b480', 'delete', { eq: { key: KV_KEY } });
       setApiKey('');
       setSavedKey('');
       toast.success('OpenAI API key removed');
+    } catch (err) {
+      toast.error('Failed to delete API key');
     }
   };
 
