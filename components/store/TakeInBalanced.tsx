@@ -366,17 +366,10 @@ export function TakeInBalanced({
 
                                {/* Actions */}
                                <div className="flex items-center gap-1.5">
-                                 <Switch
-                                   checked={item.saveForLater || false}
-                                   onCheckedChange={(checked) => onItemUpdate(item.id, { saveForLater: checked })}
-                                   className="scale-75"
-                                 />
-                                 <span className="text-xs text-slate-600 min-w-[30px]">Save</span>
-                                 
-                                 <div className="flex items-center gap-0.5 text-xs text-slate-600 px-1.5 py-0.5 rounded-full hover:bg-slate-100 transition-colors">
-                                   <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${expandedAdvanced.has(item.id) ? 'rotate-90' : ''}`} />
-                                   <span>Details</span>
-                                 </div>
+                                  <div className="flex items-center gap-0.5 text-xs text-slate-600 px-1.5 py-0.5 rounded-full hover:bg-slate-100 transition-colors">
+                                    <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${expandedAdvanced.has(item.id) ? 'rotate-90' : ''}`} />
+                                    <span>Item Specs</span>
+                                  </div>
 
                                  <Button
                                    variant="ghost"
