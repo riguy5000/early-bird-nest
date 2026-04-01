@@ -33,7 +33,7 @@ import { CustomerDrawer } from './CustomerDrawer';
 interface TakeInBalancedProps {
   items: any[];
   activeItemId: string | null;
-  onItemAdd: () => void;
+  onItemAdd: (category?: string) => void;
   onItemUpdate: (itemId: string, updates: any) => void;
   onItemRemove: (itemId: string) => void;
   onItemSelect: (itemId: string) => void;
