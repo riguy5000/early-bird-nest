@@ -488,13 +488,7 @@ export function TakeInBalanced({
                                           ))}
                                         </div>
                                       </div>
-                                    )
-                                             </Button>
-                                           </div>
-                                         ))}
-                                       </div>
-                                     )}
-                                   </div>
+                                    }
 
                                    {/* Notes and Photos */}
                                    <div className="grid grid-cols-2 gap-4">
