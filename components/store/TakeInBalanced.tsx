@@ -281,65 +281,84 @@ export function TakeInBalanced({
                                    </div>
                                 </div>
 
-                               {/* Metal Info */}
+                               {/* Primary Metal Info */}
                                <div className="flex items-center gap-2 flex-1 min-w-0">
-                                 {(item.metals || []).slice(0, 1).map((metal: any) => (
-                                   <div key={metal.id} className="flex items-center gap-2">
-                                      <Select 
-                                        value={metal.type} 
-                                        onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}
-                                      >
-                                        <SelectTrigger className="w-24 h-7 text-xs bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent className="rounded-xl">
-                                          <SelectItem value="Gold">Gold</SelectItem>
-                                          <SelectItem value="Silver">Silver</SelectItem>
-                                          <SelectItem value="Platinum">Platinum</SelectItem>
-                                        </SelectContent>
-                                      </Select>
+                                 {(item.metals || []).length > 0 && (() => {
+                                   const metal = item.metals[0];
+                                   return (
+                                    <div key={metal.id} className="flex items-center gap-2">
+                                       <Select 
+                                         value={metal.type} 
+                                         onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}
+                                       >
+                                         <SelectTrigger className="w-24 h-7 text-xs bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                                           <SelectValue />
+                                         </SelectTrigger>
+                                         <SelectContent className="rounded-xl">
+                                           <SelectItem value="Gold">Gold</SelectItem>
+                                           <SelectItem value="Silver">Silver</SelectItem>
+                                           <SelectItem value="Platinum">Platinum</SelectItem>
+                                           <SelectItem value="Palladium">Palladium</SelectItem>
+                                         </SelectContent>
+                                       </Select>
 
-                                      <Select 
-                                        value={metal.karat?.toString()} 
-                                        onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}
-                                      >
-                                        <SelectTrigger className="w-16 h-7 text-xs bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent className="rounded-xl">
-                                          <SelectItem value="10">10K</SelectItem>
-                                          <SelectItem value="14">14K</SelectItem>
-                                          <SelectItem value="18">18K</SelectItem>
-                                          <SelectItem value="22">22K</SelectItem>
-                                        </SelectContent>
-                                      </Select>
+                                       <Select 
+                                         value={metal.karat?.toString()} 
+                                         onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}
+                                       >
+                                         <SelectTrigger className="w-16 h-7 text-xs bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                                           <SelectValue />
+                                         </SelectTrigger>
+                                         <SelectContent className="rounded-xl">
+                                           <SelectItem value="10">10K</SelectItem>
+                                           <SelectItem value="14">14K</SelectItem>
+                                           <SelectItem value="18">18K</SelectItem>
+                                           <SelectItem value="22">22K</SelectItem>
+                                           <SelectItem value="24">24K</SelectItem>
+                                         </SelectContent>
+                                       </Select>
 
-                                      <div className="flex items-center gap-1">
-                                        <Input 
-                                          ref={(el) => weightInputRefs.current[`${item.id}_${metal.id}`] = el}
-                                          type="text" 
-                                          value={metal.weight || ''} 
-                                          onChange={(e) => {
-                                            const value = e.target.value;
-                                            if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                                              updateMetal(item.id, metal.id, { weight: value === '' ? 0 : parseFloat(value) || 0 });
-                                            }
-                                          }}
-                                          onKeyDown={(e) => handleKeyPress(e, item.id, metal.id)}
-                                          placeholder="0.00"
-                                          className="w-14 h-7 text-xs bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                          style={{ MozAppearance: 'textfield' }}
-                                        />
-                                        <span className="text-xs text-muted-foreground">g</span>
-                                      </div>
-                                   </div>
-                                 ))}
-                                 
-                                 {(item.metals || []).length > 1 && (
-                                   <span className="text-xs text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full">
-                                     +{(item.metals || []).length - 1} more
-                                   </span>
-                                 )}
+                                       <div className="flex items-center gap-1">
+                                         <Input 
+                                           ref={(el) => weightInputRefs.current[`${item.id}_${metal.id}`] = el}
+                                           type="text" 
+                                           value={metal.weight || ''} 
+                                           onChange={(e) => {
+                                             const value = e.target.value;
+                                             if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                               updateMetal(item.id, metal.id, { weight: value === '' ? 0 : parseFloat(value) || 0 });
+                                             }
+                                           }}
+                                           onKeyDown={(e) => handleKeyPress(e, item.id, metal.id)}
+                                           placeholder="0.00"
+                                           className="w-14 h-7 text-xs bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                           style={{ MozAppearance: 'textfield' as any }}
+                                           onClick={(e) => e.stopPropagation()}
+                                         />
+                                         <span className="text-xs text-muted-foreground">g</span>
+                                       </div>
+
+                                       {(item.metals || []).length > 1 && (
+                                         <span className="text-xs text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full">
+                                           +{(item.metals || []).length - 1} more
+                                         </span>
+                                       )}
+                                    </div>
+                                   );
+                                 })()}
+
+                                 <Button
+                                   variant="ghost"
+                                   size="sm"
+                                   onClick={(e) => {
+                                     e.stopPropagation();
+                                     addMetal(item.id);
+                                   }}
+                                   className="h-6 px-2 text-xs text-primary hover:bg-primary/5 rounded-full"
+                                 >
+                                   <Plus className="h-3 w-3 mr-1" />
+                                   Add Metal
+                                 </Button>
                                </div>
 
                                {/* Payout Info */}
@@ -385,44 +404,70 @@ export function TakeInBalanced({
                                </div>
                              </div>
 
-                            {/* Additional Metals Row */}
+                            {/* Additional Metal Rows - full rows below main item */}
                             {(item.metals || []).length > 1 && (
-                              <div className="px-3 pb-2">
-                                <div className="flex flex-wrap gap-2 pl-8">
-                                  {(item.metals || []).slice(1).map((metal: any) => (
-                                    <div key={metal.id} className="flex items-center gap-1 bg-slate-100 border border-slate-200 rounded-lg px-2 py-1">
-                                      <span className="text-xs text-muted-foreground">{metal.type} {metal.karat}K</span>
-                                      <Input 
-                                        type="number" 
-                                        step="0.01"
-                                        value={metal.weight || ''} 
-                                        onChange={(e) => updateMetal(item.id, metal.id, { weight: parseFloat(e.target.value) || 0 })}
-                                        className="w-12 h-5 text-xs bg-background border-0 rounded"
-                                      />
-                                      <span className="text-xs text-muted-foreground">g</span>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => {
-                                          const updatedMetals = (item.metals || []).filter((m: any) => m.id !== metal.id);
-                                          onItemUpdate(item.id, { metals: updatedMetals });
-                                        }}
-                                        className="h-4 w-4 p-0 hover:text-destructive rounded-full"
-                                      >
-                                        <X className="h-2 w-2" />
-                                      </Button>
+                              <div className="pb-2 space-y-1">
+                                {(item.metals || []).slice(1).map((metal: any) => (
+                                  <div key={metal.id} className="flex items-center gap-4 px-3.5 pl-[52px]">
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                      <Select value={metal.type} onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}>
+                                        <SelectTrigger className="w-24 h-7 text-xs bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-xl">
+                                          <SelectItem value="Gold">Gold</SelectItem>
+                                          <SelectItem value="Silver">Silver</SelectItem>
+                                          <SelectItem value="Platinum">Platinum</SelectItem>
+                                          <SelectItem value="Palladium">Palladium</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+
+                                      <Select value={metal.karat?.toString()} onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}>
+                                        <SelectTrigger className="w-16 h-7 text-xs bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-xl">
+                                          <SelectItem value="10">10K</SelectItem>
+                                          <SelectItem value="14">14K</SelectItem>
+                                          <SelectItem value="18">18K</SelectItem>
+                                          <SelectItem value="22">22K</SelectItem>
+                                          <SelectItem value="24">24K</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+
+                                      <div className="flex items-center gap-1">
+                                        <Input 
+                                          ref={(el) => weightInputRefs.current[`${item.id}_${metal.id}`] = el}
+                                          type="text"
+                                          value={metal.weight || ''} 
+                                          onChange={(e) => {
+                                            const value = e.target.value;
+                                            if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                              updateMetal(item.id, metal.id, { weight: value === '' ? 0 : parseFloat(value) || 0 });
+                                            }
+                                          }}
+                                          onKeyDown={(e) => handleKeyPress(e, item.id, metal.id)}
+                                          placeholder="0.00"
+                                          className="w-14 h-7 text-xs bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                          style={{ MozAppearance: 'textfield' as any }}
+                                        />
+                                        <span className="text-xs text-muted-foreground">g</span>
+                                      </div>
                                     </div>
-                                  ))}
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => addMetal(item.id)}
-                                    className="h-6 px-2 text-xs text-primary hover:bg-primary/5 rounded-full"
-                                  >
-                                    <Plus className="h-3 w-3 mr-1" />
-                                    Add Metal
-                                  </Button>
-                                </div>
+
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        const updatedMetals = (item.metals || []).filter((m: any) => m.id !== metal.id);
+                                        onItemUpdate(item.id, { metals: updatedMetals });
+                                      }}
+                                      className="h-6 w-6 p-0 hover:text-destructive rounded-full"
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                ))}
                               </div>
                             )}
 
@@ -488,36 +533,44 @@ export function TakeInBalanced({
                                        </Button>
                                      </div>
                                      
-                                     {(item.metals || []).length > 1 && (
-                                       <div className="space-y-2">
-                                         {(item.metals || []).slice(1).map((metal: any) => (
-                                           <div key={metal.id} className="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200">
-                                             <Select value={metal.type} onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}>
-                                               <SelectTrigger className="w-20 h-7 text-xs bg-slate-50 border border-slate-200 rounded-lg"><SelectValue /></SelectTrigger>
-                                               <SelectContent className="rounded-xl">
-                                                 <SelectItem value="Gold">Gold</SelectItem>
-                                                 <SelectItem value="Silver">Silver</SelectItem>
-                                                 <SelectItem value="Platinum">Platinum</SelectItem>
-                                               </SelectContent>
-                                             </Select>
-                                             <Select value={metal.karat?.toString()} onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}>
-                                               <SelectTrigger className="w-16 h-7 text-xs bg-slate-50 border border-slate-200 rounded-lg"><SelectValue /></SelectTrigger>
-                                               <SelectContent className="rounded-xl">
-                                                 <SelectItem value="10">10K</SelectItem>
-                                                 <SelectItem value="14">14K</SelectItem>
-                                                 <SelectItem value="18">18K</SelectItem>
-                                                 <SelectItem value="22">22K</SelectItem>
-                                               </SelectContent>
-                                             </Select>
-                                             <Input 
-                                               type="number" step="0.01"
-                                               value={metal.weight || ''} 
-                                               onChange={(e) => updateMetal(item.id, metal.id, { weight: parseFloat(e.target.value) || 0 })}
-                                               placeholder="0.00"
-                                               className="w-16 h-7 text-xs bg-slate-50 border border-slate-200 rounded-lg"
-                                             />
-                                             <span className="text-xs text-muted-foreground">g</span>
-                                             <Button variant="ghost" size="sm" onClick={() => {
+                                      {(item.metals || []).length > 1 && (
+                                        <div className="space-y-2">
+                                          {(item.metals || []).slice(1).map((metal: any) => (
+                                            <div key={metal.id} className="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-200">
+                                              <Select value={metal.type} onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}>
+                                                <SelectTrigger className="w-20 h-7 text-xs bg-slate-50 border border-slate-200 rounded-lg"><SelectValue /></SelectTrigger>
+                                                <SelectContent className="rounded-xl">
+                                                  <SelectItem value="Gold">Gold</SelectItem>
+                                                  <SelectItem value="Silver">Silver</SelectItem>
+                                                  <SelectItem value="Platinum">Platinum</SelectItem>
+                                                  <SelectItem value="Palladium">Palladium</SelectItem>
+                                                </SelectContent>
+                                              </Select>
+                                              <Select value={metal.karat?.toString()} onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}>
+                                                <SelectTrigger className="w-16 h-7 text-xs bg-slate-50 border border-slate-200 rounded-lg"><SelectValue /></SelectTrigger>
+                                                <SelectContent className="rounded-xl">
+                                                  <SelectItem value="10">10K</SelectItem>
+                                                  <SelectItem value="14">14K</SelectItem>
+                                                  <SelectItem value="18">18K</SelectItem>
+                                                  <SelectItem value="22">22K</SelectItem>
+                                                  <SelectItem value="24">24K</SelectItem>
+                                                </SelectContent>
+                                              </Select>
+                                              <Input 
+                                                type="text"
+                                                value={metal.weight || ''} 
+                                                onChange={(e) => {
+                                                  const value = e.target.value;
+                                                  if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                                    updateMetal(item.id, metal.id, { weight: value === '' ? 0 : parseFloat(value) || 0 });
+                                                  }
+                                                }}
+                                                placeholder="0.00"
+                                                className="w-16 h-7 text-xs bg-slate-50 border border-slate-200 rounded-lg [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                style={{ MozAppearance: 'textfield' as any }}
+                                              />
+                                              <span className="text-xs text-muted-foreground">g</span>
+                                              <Button variant="ghost" size="sm" onClick={() => {
                                                const updatedMetals = (item.metals || []).filter((m: any) => m.id !== metal.id);
                                                onItemUpdate(item.id, { metals: updatedMetals });
                                              }} className="h-6 w-6 p-0 hover:text-destructive ml-auto rounded-full">

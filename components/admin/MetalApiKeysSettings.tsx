@@ -85,6 +85,7 @@ export function MetalApiKeysSettings() {
           monthly_limit: newKey.monthly_limit,
           sort_order: apiKeys.length,
         }
+      });
       toast.success('API key added');
       setNewKey({ label: '', api_key: '', monthly_limit: 100 });
       setShowAddForm(false);
