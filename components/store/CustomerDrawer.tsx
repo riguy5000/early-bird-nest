@@ -217,7 +217,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                 )}
 
                 {scanStep === 'analyzing' && (
-                  <div className="border border-slate-200 rounded-xl p-6 text-center space-y-3 bg-slate-50">
+                  <div className="border border-slate-200 rounded-lg p-6 text-center space-y-3 bg-slate-50">
                     <Loader2 className="h-6 w-6 mx-auto animate-spin text-primary" />
                     <div>
                       <p className="font-medium text-sm">Analyzing License…</p>
