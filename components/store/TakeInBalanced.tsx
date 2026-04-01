@@ -292,7 +292,7 @@ export function TakeInBalanced({
                                         <SelectTrigger className="w-[72px] h-6 text-[11px] bg-white border border-slate-200 rounded-md hover:bg-slate-50 transition-colors">
                                           <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent className="rounded-xl">
+                                        <SelectContent className="rounded-lg">
                                           <SelectItem value="Gold">Gold</SelectItem>
                                           <SelectItem value="Silver">Silver</SelectItem>
                                           <SelectItem value="Platinum">Platinum</SelectItem>
@@ -304,7 +304,7 @@ export function TakeInBalanced({
                                         <SelectTrigger className="w-14 h-6 text-[11px] bg-white border border-slate-200 rounded-md hover:bg-slate-50 transition-colors">
                                           <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent className="rounded-xl">
+                                        <SelectContent className="rounded-lg">
                                           <SelectItem value="10">10K</SelectItem>
                                           <SelectItem value="14">14K</SelectItem>
                                           <SelectItem value="18">18K</SelectItem>
@@ -416,7 +416,7 @@ export function TakeInBalanced({
                                onOpenChange={() => toggleAdvanced(item.id)}
                              >
                                <CollapsibleContent className="px-4 pb-4 animate-accordion-down data-[state=closed]:animate-accordion-up">
-                                 <div className="bg-slate-50 rounded-xl p-4 space-y-4 border border-slate-200">
+                                 <div className="bg-slate-50 rounded-lg p-4 space-y-4 border border-slate-200">
                                    
                                    <div className="grid grid-cols-3 gap-4">
                                      <div>
@@ -437,7 +437,7 @@ export function TakeInBalanced({
                                          <SelectTrigger className="h-8 text-xs bg-background border-border/40 rounded-lg">
                                            <SelectValue placeholder="Select" />
                                          </SelectTrigger>
-                                         <SelectContent className="rounded-xl">
+                                         <SelectContent className="rounded-lg">
                                            <SelectItem value="New">New</SelectItem>
                                            <SelectItem value="Excellent">Excellent</SelectItem>
                                            <SelectItem value="Good">Good</SelectItem>
@@ -489,7 +489,7 @@ export function TakeInBalanced({
                                      </div>
                                      <div>
                                        <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Photos</label>
-                                       <div className="border border-dashed border-slate-300 rounded-xl p-3 text-center bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer h-16 flex flex-col items-center justify-center">
+                                       <div className="border border-dashed border-slate-300 rounded-lg p-3 text-center bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer h-16 flex flex-col items-center justify-center">
                                          <Camera className="h-4 w-4 text-muted-foreground mb-1" />
                                          <span className="text-[11px] text-muted-foreground">Upload Photos</span>
                                        </div>
