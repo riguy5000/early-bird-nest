@@ -147,7 +147,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                 </Button>
               )}
               {editMode && (
-                <Button size="sm" onClick={handleSave} className="rounded-full text-xs bg-primary hover:bg-primary/90">
+                <Button size="sm" onClick={handleSave} className="rounded-lg text-xs bg-primary hover:bg-primary/90">
                   <Save className="h-3.5 w-3.5 mr-1" />
                   Save
                 </Button>
