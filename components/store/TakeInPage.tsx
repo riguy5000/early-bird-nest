@@ -308,34 +308,19 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
       {/* Quick Controls Row */}
       <div className="px-6 py-3 flex items-center justify-between gap-6 border-b border-border/40">
         <div className="flex items-center gap-5">
-          {/* Category Chips — soft pills */}
+          {/* Category Chips */}
           <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
             {['Jewelry', 'Watch', 'Bullion', 'Stones', 'Silverware'].map((category) => {
               const isActive = items.some(item => item.category === category);
               return (
                 <button
                   key={category}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 ${
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-200 ${
                   isActive
                       ? 'bg-blue-600 text-white shadow-sm' 
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'
                   }`}
-                  onClick={() => {
-                    const newItem: Item = {
-                      id: `item_${Date.now()}`,
-                      category: category as any,
-                      metals: [{ id: `metal_${Date.now()}`, type: 'Gold', karat: 14, weight: 0 }],
-                      stones: [],
-                      marketValue: 0,
-                      payoutPercentage: store.defaultPayoutPercentage,
-                      payoutAmount: 0,
-                      photos: [],
-                      notes: '',
-                      status: 'In Stock'
-                    };
-                    setItems(prev => [...prev, newItem]);
-                    setActiveItemId(newItem.id);
-                  }}
+                  onClick={() => addNewItem(category)}
                 >
                   {category}
                 </button>
@@ -343,10 +328,10 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
             })}
           </div>
 
-          {/* Item Count — segmented control */}
+          {/* Item Count */}
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">Items</span>
-            <div className="flex items-center bg-slate-100 border border-slate-200 rounded-full overflow-hidden">
+            <div className="flex items-center bg-slate-100 border border-slate-200 rounded-lg overflow-hidden">
               <button 
                 className="px-2.5 py-1 hover:bg-slate-200 transition-colors text-slate-500"
                 onClick={() => items.length > 1 && removeItem(items[items.length - 1].id)}
@@ -359,7 +344,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
               </span>
               <button 
                 className="px-2.5 py-1 hover:bg-slate-200 transition-colors text-slate-500"
-                onClick={addNewItem}
+                onClick={() => addNewItem()}
               >
                 <Plus className="h-3 w-3" />
               </button>
@@ -377,19 +362,19 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
           </div>
         </div>
 
-        {/* AI Assist Button — frosted pill */}
+        {/* AI Assist Button */}
         <Button 
           variant="ghost" 
           size="sm"
           onClick={handleAIAssist}
-          className="flex items-center gap-2 text-slate-600 hover:text-primary bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-full px-4 transition-all duration-200"
+          className="flex items-center gap-2 text-slate-600 hover:text-primary bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg px-4 transition-all duration-200"
         >
           <Zap className="h-3.5 w-3.5" />
           <span className="text-xs font-medium">AI Assist</span>
         </Button>
       </div>
 
-      {/* AI Assist Banner */}
+      {/* AI Assist Banner — full-width strip */}
       {showAIAssist && (
         <AIAssistBanner onActivate={handleAIAssist} />
       )}

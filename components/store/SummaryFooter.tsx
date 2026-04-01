@@ -61,36 +61,26 @@ export function SummaryFooter({
       <div className="px-6 py-3 space-y-3">
         {/* Summary Stats + Actions */}
         <div className="flex justify-between items-center">
-          <div className="flex gap-3">
-            <div className="bg-slate-100 border border-slate-200 px-4 py-2 rounded-full">
-              <div className="text-[10px] text-slate-500 uppercase tracking-wider">Market</div>
-              <div className="text-sm font-semibold text-foreground tabular-nums">
-                ${totals.totalMarketValue.toFixed(2)}
-              </div>
+          {/* Stats - clean inline layout */}
+          <div className="flex items-center gap-6 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">Market</span>
+              <span className="font-semibold tabular-nums">${totals.totalMarketValue.toFixed(2)}</span>
             </div>
-            
             {!hidePayout && (
-              <div className="bg-blue-50 px-4 py-2 rounded-full border border-blue-200">
-                <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Payout</div>
-                <div className="text-base font-semibold text-primary tabular-nums">
-                  ${totals.totalPayout.toFixed(2)}
-                </div>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">Payout</span>
+                <span className="font-semibold text-primary tabular-nums">${totals.totalPayout.toFixed(2)}</span>
               </div>
             )}
-            
-            <div className="bg-slate-100 border border-slate-200 px-4 py-2 rounded-full">
-              <div className="text-[10px] text-slate-500 uppercase tracking-wider">Avg %</div>
-              <div className="text-sm font-semibold text-foreground tabular-nums">
-                {totals.avgPayoutPercentage.toFixed(1)}%
-              </div>
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">Avg</span>
+              <span className="font-semibold tabular-nums">{totals.avgPayoutPercentage.toFixed(1)}%</span>
             </div>
-            
             {!hideProfit && (
-              <div className="bg-green-50 px-4 py-2 rounded-full border border-green-200">
-                <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Profit</div>
-                <div className="text-sm font-semibold text-green-600 tabular-nums">
-                  ${totals.profit.toFixed(2)}
-                </div>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">Profit</span>
+                <span className="font-semibold text-green-600 tabular-nums">${totals.profit.toFixed(2)}</span>
               </div>
             )}
           </div>
@@ -101,7 +91,7 @@ export function SummaryFooter({
               variant="ghost" 
               onClick={onSave}
               disabled={!hasItems}
-              className="flex items-center gap-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
+              className="flex items-center gap-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
             >
               <Save className="h-4 w-4" />
               Save Quote
@@ -110,7 +100,7 @@ export function SummaryFooter({
             <Button 
               onClick={onSave}
               disabled={!hasItems}
-              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl px-6"
+              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-6"
             >
               <DollarSign className="h-4 w-4" />
               Complete Purchase
@@ -125,7 +115,7 @@ export function SummaryFooter({
               variant="ghost" 
               size="sm"
               onClick={onCustomerInfo}
-              className="flex items-center gap-2 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-full"
+              className="flex items-center gap-2 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg"
             >
               <User className="h-3 w-3" />
               Customer Info
@@ -134,13 +124,13 @@ export function SummaryFooter({
             <div className="flex items-center gap-2">
               <Label className="text-[10px] text-muted-foreground uppercase tracking-wider">Payment</Label>
               <Select value={paymentMethod} onValueChange={onPaymentMethodChange}>
-                <SelectTrigger className="w-28 h-7 text-xs rounded-full bg-white border border-slate-200">
+                <SelectTrigger className="w-28 h-7 text-xs rounded-lg bg-white border border-slate-200">
                   <div className="flex items-center gap-1.5">
                     {getPaymentIcon()}
                     <SelectValue />
                   </div>
                 </SelectTrigger>
-                <SelectContent className="rounded-xl">
+                <SelectContent className="rounded-lg">
                   <SelectItem value="Check">
                     <div className="flex items-center gap-2">
                       <CreditCard className="h-3 w-3" />
@@ -167,7 +157,7 @@ export function SummaryFooter({
                   value={checkNumber}
                   onChange={(e) => onCheckNumberChange(e.target.value)}
                   placeholder="Check #"
-                  className="w-24 h-7 text-xs rounded-full bg-white border border-slate-200"
+                  className="w-24 h-7 text-xs rounded-lg bg-white border border-slate-200"
                 />
               )}
             </div>

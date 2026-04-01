@@ -190,7 +190,7 @@ export function TakeInBalanced({
                         key={category}
                         onClick={() => addItemByCategory(category)}
                         variant="outline"
-                        className="flex items-center gap-2 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 transition-all"
+                        className="flex items-center gap-2 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 transition-all"
                       >
                         <Icon className="h-4 w-4" />
                         {category}
@@ -203,7 +203,7 @@ export function TakeInBalanced({
               <div className="h-full overflow-auto p-4">
                 <div className="max-w-7xl mx-auto space-y-3">
                   {Object.entries(itemsByCategory).map(([category, categoryItems]) => (
-                    <div key={category} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div key={category} className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
                       {/* Category Header */}
                       <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200">
                         <div className="flex items-center justify-between">
@@ -216,7 +216,7 @@ export function TakeInBalanced({
                             <div className="flex flex-col">
                               <div className="flex items-center gap-2">
                                 <h3 className="text-sm font-semibold text-foreground">{category}</h3>
-                                <span className="text-xs text-slate-500 bg-slate-200 px-1.5 py-0.5 rounded-full">
+                                <span className="text-xs text-slate-500 bg-slate-200 px-1.5 py-0.5 rounded-lg">
                                   {(categoryItems as any[]).length}
                                 </span>
                               </div>
@@ -231,7 +231,7 @@ export function TakeInBalanced({
                             onClick={() => addItemByCategory(category)}
                             size="sm"
                             variant="ghost"
-                            className="h-7 px-2.5 text-xs text-primary hover:bg-primary/5 rounded-full"
+                            className="h-7 px-2.5 text-xs text-primary hover:bg-primary/5 rounded-lg"
                           >
                             <Plus className="h-3 w-3 mr-1" />
                             Add
@@ -276,7 +276,7 @@ export function TakeInBalanced({
                                           e.stopPropagation();
                                           onItemUpdate(item.id, { itemType: type });
                                         }}
-                                        className="px-1.5 py-0 text-[10px] bg-slate-100 hover:bg-blue-50 text-slate-500 hover:text-blue-600 rounded-full border border-slate-200 transition-colors cursor-pointer leading-4"
+                                        className="px-1.5 py-0 text-[10px] bg-slate-100 hover:bg-blue-50 text-slate-500 hover:text-blue-600 rounded-lg border border-slate-200 transition-colors cursor-pointer leading-4"
                                       >
                                         {type}
                                       </button>
@@ -292,7 +292,7 @@ export function TakeInBalanced({
                                         <SelectTrigger className="w-[72px] h-6 text-[11px] bg-white border border-slate-200 rounded-md hover:bg-slate-50 transition-colors">
                                           <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent className="rounded-xl">
+                                        <SelectContent className="rounded-lg">
                                           <SelectItem value="Gold">Gold</SelectItem>
                                           <SelectItem value="Silver">Silver</SelectItem>
                                           <SelectItem value="Platinum">Platinum</SelectItem>
@@ -304,7 +304,7 @@ export function TakeInBalanced({
                                         <SelectTrigger className="w-14 h-6 text-[11px] bg-white border border-slate-200 rounded-md hover:bg-slate-50 transition-colors">
                                           <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent className="rounded-xl">
+                                        <SelectContent className="rounded-lg">
                                           <SelectItem value="10">10K</SelectItem>
                                           <SelectItem value="14">14K</SelectItem>
                                           <SelectItem value="18">18K</SelectItem>
@@ -363,7 +363,7 @@ export function TakeInBalanced({
                                             const totalPayoutAmount = updatedMetals.reduce((sum: number, m: any) => sum + (m.payoutAmount || 0), 0);
                                             onItemUpdate(item.id, { metals: updatedMetals, marketValue: totalMarketValue, payoutAmount: totalPayoutAmount });
                                           }}
-                                          className="h-5 w-5 p-0 hover:text-destructive rounded-full"
+                                          className="h-5 w-5 p-0 hover:text-destructive rounded-lg"
                                         >
                                           <X className="h-2.5 w-2.5" />
                                         </Button>
@@ -381,7 +381,7 @@ export function TakeInBalanced({
                                       e.stopPropagation();
                                       addMetal(item.id);
                                     }}
-                                    className="h-5 px-1.5 text-[10px] text-primary hover:bg-primary/5 rounded-full"
+                                    className="h-5 px-1.5 text-[10px] text-primary hover:bg-primary/5 rounded-lg"
                                   >
                                     <Plus className="h-2.5 w-2.5 mr-0.5" />
                                     Metal
@@ -391,7 +391,7 @@ export function TakeInBalanced({
                                     ${(item.payoutAmount || 0).toFixed(2)}
                                   </div>
 
-                                  <div className="flex items-center gap-0.5 text-[11px] text-slate-500 px-1 py-0.5 rounded-full hover:bg-slate-100 transition-colors cursor-pointer">
+                                  <div className="flex items-center gap-0.5 text-[11px] text-slate-500 px-1 py-0.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer">
                                     <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${expandedAdvanced.has(item.id) ? 'rotate-90' : ''}`} />
                                     <span>Specs</span>
                                   </div>
@@ -403,7 +403,7 @@ export function TakeInBalanced({
                                       e.stopPropagation();
                                       onItemRemove(item.id);
                                     }}
-                                    className="h-5 w-5 p-0 hover:bg-destructive/10 hover:text-destructive rounded-full"
+                                    className="h-5 w-5 p-0 hover:bg-destructive/10 hover:text-destructive rounded-lg"
                                   >
                                     <X className="h-3 w-3" />
                                   </Button>
@@ -416,7 +416,7 @@ export function TakeInBalanced({
                                onOpenChange={() => toggleAdvanced(item.id)}
                              >
                                <CollapsibleContent className="px-4 pb-4 animate-accordion-down data-[state=closed]:animate-accordion-up">
-                                 <div className="bg-slate-50 rounded-xl p-4 space-y-4 border border-slate-200">
+                                 <div className="bg-slate-50 rounded-lg p-4 space-y-4 border border-slate-200">
                                    
                                    <div className="grid grid-cols-3 gap-4">
                                      <div>
@@ -437,7 +437,7 @@ export function TakeInBalanced({
                                          <SelectTrigger className="h-8 text-xs bg-background border-border/40 rounded-lg">
                                            <SelectValue placeholder="Select" />
                                          </SelectTrigger>
-                                         <SelectContent className="rounded-xl">
+                                         <SelectContent className="rounded-lg">
                                            <SelectItem value="New">New</SelectItem>
                                            <SelectItem value="Excellent">Excellent</SelectItem>
                                            <SelectItem value="Good">Good</SelectItem>
@@ -489,7 +489,7 @@ export function TakeInBalanced({
                                      </div>
                                      <div>
                                        <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Photos</label>
-                                       <div className="border border-dashed border-slate-300 rounded-xl p-3 text-center bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer h-16 flex flex-col items-center justify-center">
+                                       <div className="border border-dashed border-slate-300 rounded-lg p-3 text-center bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer h-16 flex flex-col items-center justify-center">
                                          <Camera className="h-4 w-4 text-muted-foreground mb-1" />
                                          <span className="text-[11px] text-muted-foreground">Upload Photos</span>
                                        </div>
@@ -501,7 +501,7 @@ export function TakeInBalanced({
                                       <Button
                                         variant="outline"
                                         size="sm"
-                                        className="rounded-full text-xs px-4"
+                                        className="rounded-lg text-xs px-4"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           onItemUpdate(item.id, { brand: '', condition: '', size: '', notes: '' });
@@ -511,7 +511,7 @@ export function TakeInBalanced({
                                       </Button>
                                       <Button
                                         size="sm"
-                                        className="rounded-full text-xs px-4"
+                                        className="rounded-lg text-xs px-4"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           setExpandedAdvanced(prev => {
@@ -554,13 +554,13 @@ export function TakeInBalanced({
             </div>
           </div>
 
-          {/* Customer Information */}
+           {/* Customer Information */}
           <div className="p-4 border-b border-slate-200">
             <h3 className="text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-3">Customer</h3>
             <Button 
               variant="outline" 
               onClick={() => setCustomerDrawerOpen(true)}
-              className="w-full flex items-center gap-2 rounded-full border border-slate-300 bg-white hover:bg-slate-50"
+              className="w-full flex items-center gap-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50"
             >
               <ScanLine className="h-4 w-4" />
               Scan Customer ID
@@ -569,7 +569,7 @@ export function TakeInBalanced({
               variant="ghost" 
               size="sm"
               onClick={() => setCustomerDrawerOpen(true)}
-              className="w-full mt-1.5 text-xs text-muted-foreground rounded-full"
+              className="w-full mt-1.5 text-xs text-muted-foreground rounded-lg"
             >
               Enter Manually
             </Button>
@@ -582,7 +582,7 @@ export function TakeInBalanced({
               <SelectTrigger className="w-full rounded-lg bg-white border border-slate-200">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="rounded-xl">
+              <SelectContent className="rounded-lg">
                 <SelectItem value="Check">Check</SelectItem>
                 <SelectItem value="Cash">Cash</SelectItem>
                 <SelectItem value="Store Credit">Store Credit</SelectItem>
@@ -618,7 +618,7 @@ export function TakeInBalanced({
           <div className="p-4 space-y-2 border-t border-slate-200">
             <Button 
               variant="ghost" 
-              className="w-full flex items-center gap-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700"
+              className="w-full flex items-center gap-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
               disabled={items.length === 0}
             >
               <SaveIcon className="h-4 w-4" />
@@ -626,14 +626,14 @@ export function TakeInBalanced({
             </Button>
             <Button 
               variant="ghost" 
-              className="w-full flex items-center gap-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700"
+              className="w-full flex items-center gap-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
               disabled={items.length === 0}
             >
               <Printer className="h-4 w-4" />
               Print Receipt
             </Button>
             <Button 
-              className="w-full flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
+              className="w-full flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg"
               disabled={items.length === 0}
             >
               <DollarSign className="h-4 w-4" />
