@@ -403,22 +403,6 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
         )}
       </div>
 
-      {/* Summary Footer */}
-      <SummaryFooter
-        totals={totals}
-        paymentMethod={paymentMethod}
-        onPaymentMethodChange={setPaymentMethod}
-        checkNumber={checkNumber}
-        onCheckNumberChange={setCheckNumber}
-        followUpReminder={followUpReminder}
-        onFollowUpReminderChange={setFollowUpReminder}
-        onCustomerInfo={() => setIsCustomerDrawerOpen(true)}
-        onSave={handleSave}
-        onPrintLabels={handlePrintLabels}
-        hideProfit={store.hideProfit}
-        hidePayout={store.hidePayout}
-        hasItems={items.length > 0}
-      />
 
       {/* Customer Drawer */}
       <CustomerDrawer
