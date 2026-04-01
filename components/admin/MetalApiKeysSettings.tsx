@@ -77,12 +77,15 @@ export function MetalApiKeysSettings() {
       toast.error('API key is required');
       return;
     }
-    const { error } = await supabase.from('metal_api_keys').insert({
-      label: newKey.label || `Key ${apiKeys.length + 1}`,
-      api_key: newKey.api_key.trim(),
-      monthly_limit: newKey.monthly_limit,
-      sort_order: apiKeys.length,
-    });
+    try {
+      await adminSettingsQuery('metal_api_keys', 'insert', {
+        row: {
+          label: newKey.label || `Key ${apiKeys.length + 1}`,
+          api_key: newKey.api_key.trim(),
+          monthly_limit: newKey.monthly_limit,
+          sort_order: apiKeys.length,
+        }
+      });
     if (error) {
       toast.error('Failed to add API key');
       return;
