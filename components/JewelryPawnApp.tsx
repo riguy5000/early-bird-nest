@@ -359,6 +359,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
           </div>
         )}
       </main>
+      )}
     </div>
   );
 }
