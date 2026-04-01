@@ -184,7 +184,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                       <p className="font-medium text-sm">Front of License</p>
                       <p className="text-xs text-muted-foreground mt-0.5">Take a photo or upload the front side</p>
                     </div>
-                    <Button onClick={() => frontInputRef.current?.click()} className="w-full rounded-full">
+                    <Button onClick={() => frontInputRef.current?.click()} className="w-full rounded-lg">
                       <Upload className="h-4 w-4 mr-2" />
                       Capture Front
                     </Button>
