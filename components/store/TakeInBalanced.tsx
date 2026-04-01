@@ -90,18 +90,27 @@ export function TakeInBalanced({
   const addMetal = (itemId: string) => {
     const item = items.find(i => i.id === itemId);
     if (!item) return;
-    const newMetal = { id: `metal_${Date.now()}`, type: 'Gold', karat: 14, weight: 0 };
+    const newMetal = { id: `metal_${Date.now()}`, type: 'Gold', karat: 14, weight: 0, payoutPercentage: 75, marketValue: 0, payoutAmount: 0 };
     onItemUpdate(itemId, { metals: [...item.metals, newMetal] });
   };
 
   const updateMetal = (itemId: string, metalId: string, updates: any) => {
     const item = items.find(i => i.id === itemId);
     if (!item) return;
-    const updatedMetals = item.metals.map((m: any) => m.id === metalId ? { ...m, ...updates } : m);
-    const totalWeight = updatedMetals.reduce((sum: number, m: any) => sum + (m.weight || 0), 0);
-    const marketValue = totalWeight * 50;
-    const payoutAmount = marketValue * (item.payoutPercentage / 100);
-    onItemUpdate(itemId, { metals: updatedMetals, marketValue, payoutAmount });
+    const updatedMetals = item.metals.map((m: any) => {
+      if (m.id !== metalId) return m;
+      const updated = { ...m, ...updates };
+      // Recalculate per-metal values
+      const metalMarket = (updated.weight || 0) * 50; // placeholder price per gram
+      const pct = updated.payoutPercentage ?? 75;
+      updated.marketValue = metalMarket;
+      updated.payoutAmount = metalMarket * (pct / 100);
+      return updated;
+    });
+    // Recalculate item totals from all metals
+    const totalMarketValue = updatedMetals.reduce((sum: number, m: any) => sum + (m.marketValue || 0), 0);
+    const totalPayoutAmount = updatedMetals.reduce((sum: number, m: any) => sum + (m.payoutAmount || 0), 0);
+    onItemUpdate(itemId, { metals: updatedMetals, marketValue: totalMarketValue, payoutAmount: totalPayoutAmount });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent, itemId: string, metalId: string) => {
