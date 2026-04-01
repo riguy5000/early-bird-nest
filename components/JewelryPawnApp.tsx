@@ -86,10 +86,12 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
 
   const ActiveComponent = modules.find(m => m.id === activeModule)?.component;
 
+  const isTakeIn = activeModule === 'take-in';
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`${isTakeIn ? 'h-screen flex flex-col overflow-hidden' : 'min-h-screen'} bg-background`}>
       {/* Header */}
-      <header className="border-b bg-card px-6 py-4">
+      <header className={`border-b bg-card px-6 py-4 ${isTakeIn ? 'flex-shrink-0' : ''}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-2">
