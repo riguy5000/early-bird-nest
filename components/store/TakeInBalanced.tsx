@@ -49,6 +49,7 @@ export function TakeInBalanced({
   onItemSelect,
   store
 }: TakeInBalancedProps) {
+  const { toast } = useToast();
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set());
   const [customerDrawerOpen, setCustomerDrawerOpen] = useState(false);
   const [customer, setCustomer] = useState(null);
