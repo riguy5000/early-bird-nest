@@ -351,12 +351,13 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
           </div>
 
           {/* Fast Entry Toggle */}
-          <div className="flex items-center gap-2">
-            <Label htmlFor="fast-entry" className="text-xs text-muted-foreground">Fast Entry</Label>
+          <div className="flex items-center gap-2 bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5">
+            <Label htmlFor="fast-entry" className="text-xs font-medium text-slate-700 cursor-pointer">Fast Entry</Label>
             <Switch
               id="fast-entry"
               checked={viewMode === 'slim'}
               onCheckedChange={(checked) => setViewMode(checked ? 'slim' : 'balanced')}
+              className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-slate-300"
             />
           </div>
         </div>
