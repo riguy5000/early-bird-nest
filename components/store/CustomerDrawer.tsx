@@ -330,8 +330,8 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                 <div className="space-y-2">
                   <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</h4>
                   <div className="flex gap-2">
-                    <Badge variant="outline" className="rounded-full text-xs">First Time Customer</Badge>
-                    <Badge variant="secondary" className="rounded-full text-xs">Verified ID</Badge>
+                    <Badge variant="outline" className="rounded-lg text-xs">First Time Customer</Badge>
+                    <Badge variant="secondary" className="rounded-lg text-xs">Verified ID</Badge>
                   </div>
                 </div>
               </>
