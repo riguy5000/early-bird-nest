@@ -85,25 +85,23 @@ export function MetalApiKeysSettings() {
           monthly_limit: newKey.monthly_limit,
           sort_order: apiKeys.length,
         }
-      });
-    if (error) {
+      toast.success('API key added');
+      setNewKey({ label: '', api_key: '', monthly_limit: 100 });
+      setShowAddForm(false);
+      loadData();
+    } catch (err) {
       toast.error('Failed to add API key');
-      return;
     }
-    toast.success('API key added');
-    setNewKey({ label: '', api_key: '', monthly_limit: 100 });
-    setShowAddForm(false);
-    loadData();
   };
 
   const handleDeleteKey = async (id: string) => {
-    const { error } = await supabase.from('metal_api_keys').delete().eq('id', id);
-    if (error) {
+    try {
+      await adminSettingsQuery('metal_api_keys', 'delete', { eq: { id } });
+      toast.success('API key deleted');
+      loadData();
+    } catch (err) {
       toast.error('Failed to delete key');
-      return;
     }
-    toast.success('API key deleted');
-    loadData();
   };
 
   const handleToggleActive = async (id: string, isActive: boolean) => {
