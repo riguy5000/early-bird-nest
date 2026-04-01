@@ -275,7 +275,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
   const totals = calculateTotals();
 
   return (
-    <div className="flex flex-col h-screen bg-background max-w-[1280px] mx-auto">
+    <div className="flex flex-col h-full bg-background">
       {/* Global Header — frosted glass, no shadow */}
       <div className="h-14 flex items-center justify-between px-6 border-b border-border/60 bg-background/80 backdrop-blur-xl sticky top-0 z-10">
         <div className="flex items-center gap-3">
