@@ -248,10 +248,10 @@ export function TakeInBalanced({
                       {/* Items */}
                       <div className="divide-y divide-slate-100">
                         {(categoryItems as any[]).map((item, index) => (
-                           <div key={item.id} className="group hover:bg-slate-50 transition-colors duration-150">
-                              {/* Main Item Row */}
+                           <div key={item.id} className="group hover:bg-slate-50/50 transition-colors duration-150">
+                              {/* Single compact row: Number | Type chips | Metal | Karat | Grams | % | Price | +Metal | Specs | ✕ */}
                               <div 
-                                className="flex items-center gap-4 p-3.5 cursor-pointer"
+                                className="flex items-start gap-2 px-3 py-2 cursor-pointer"
                                 onClick={(e) => {
                                   if ((e.target as HTMLElement).tagName !== 'INPUT' && 
                                       !(e.target as HTMLElement).closest('button') && 
@@ -260,169 +260,161 @@ export function TakeInBalanced({
                                   }
                                 }}
                               >
-                               {/* Item Number & Type */}
-                                <div className="flex items-center gap-3 min-w-[180px]">
-                                  <div className="w-7 h-7 bg-slate-200 rounded-lg flex items-center justify-center text-xs font-semibold text-slate-600">
-                                    {items.findIndex(i => i.id === item.id) + 1}
+                                {/* Item number */}
+                                <div className="w-6 h-6 bg-slate-200 rounded-md flex items-center justify-center text-[11px] font-semibold text-slate-600 mt-0.5 flex-shrink-0">
+                                  {items.findIndex(i => i.id === item.id) + 1}
+                                </div>
+
+                                {/* Item type - compact inline */}
+                                <div className="flex flex-col gap-1 min-w-[120px] flex-shrink-0">
+                                  <Input
+                                    value={item.itemType || ''}
+                                    onChange={(e) => onItemUpdate(item.id, { itemType: e.target.value })}
+                                    placeholder={`Type...`}
+                                    className="h-6 text-xs bg-transparent border-0 border-b border-slate-300 rounded-none px-0 focus:border-primary focus:ring-0 w-28"
+                                    onClick={(e) => e.stopPropagation()}
+                                  />
+                                  <div className="flex flex-wrap gap-0.5">
+                                    {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).slice(0, 4).map(type => (
+                                      <button
+                                        key={type}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          onItemUpdate(item.id, { itemType: type });
+                                        }}
+                                        className="px-1.5 py-0 text-[10px] bg-slate-100 hover:bg-blue-50 text-slate-500 hover:text-blue-600 rounded-full border border-slate-200 transition-colors cursor-pointer leading-4"
+                                      >
+                                        {type}
+                                      </button>
+                                    ))}
                                   </div>
-                                   <div className="flex flex-col min-w-0 space-y-1.5">
-                                     <Input
-                                       value={item.itemType || ''}
-                                       onChange={(e) => onItemUpdate(item.id, { itemType: e.target.value })}
-                                       placeholder={`${category} type...`}
-                                       className="h-7 text-sm bg-transparent border-0 border-b border-slate-300 rounded-none px-0 focus:border-primary focus:ring-0 w-36"
-                                       onClick={(e) => e.stopPropagation()}
-                                     />
-                                     <div className="flex flex-wrap gap-1">
-                                       {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).slice(0, 4).map(type => (
-                                         <button
-                                           key={type}
-                                           onClick={(e) => {
-                                             e.stopPropagation();
-                                             onItemUpdate(item.id, { itemType: type });
-                                           }}
-                                           className="px-2 py-0.5 text-[11px] bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-600 rounded-full border border-slate-200 transition-colors duration-150 cursor-pointer"
-                                         >
-                                           {type}
-                                         </button>
-                                       ))}
-                                     </div>
-                                   </div>
                                 </div>
 
-                                {/* Spacer to push actions right */}
-                                <div className="flex-1" />
+                                {/* Metals column */}
+                                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                                  {(item.metals || []).map((metal: any) => (
+                                    <div key={metal.id} className="flex items-center gap-1.5">
+                                      <Select value={metal.type} onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}>
+                                        <SelectTrigger className="w-[72px] h-6 text-[11px] bg-white border border-slate-200 rounded-md hover:bg-slate-50 transition-colors">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-xl">
+                                          <SelectItem value="Gold">Gold</SelectItem>
+                                          <SelectItem value="Silver">Silver</SelectItem>
+                                          <SelectItem value="Platinum">Platinum</SelectItem>
+                                          <SelectItem value="Palladium">Palladium</SelectItem>
+                                        </SelectContent>
+                                      </Select>
 
-                                {/* Total Payout for item */}
-                                <div className="text-sm font-semibold text-green-600 min-w-[70px] text-right tabular-nums">
-                                  ${(item.payoutAmount || 0).toFixed(2)}
+                                      <Select value={metal.karat?.toString()} onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}>
+                                        <SelectTrigger className="w-14 h-6 text-[11px] bg-white border border-slate-200 rounded-md hover:bg-slate-50 transition-colors">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-xl">
+                                          <SelectItem value="10">10K</SelectItem>
+                                          <SelectItem value="14">14K</SelectItem>
+                                          <SelectItem value="18">18K</SelectItem>
+                                          <SelectItem value="22">22K</SelectItem>
+                                          <SelectItem value="24">24K</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+
+                                      <Input 
+                                        ref={(el) => weightInputRefs.current[`${item.id}_${metal.id}`] = el}
+                                        type="text"
+                                        value={metal.weight || ''} 
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                            updateMetal(item.id, metal.id, { weight: value === '' ? 0 : parseFloat(value) || 0 });
+                                          }
+                                        }}
+                                        onKeyDown={(e) => handleKeyPress(e, item.id, metal.id)}
+                                        placeholder="0.00"
+                                        className="w-12 h-6 text-[11px] bg-white border border-slate-200 rounded-md [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        style={{ MozAppearance: 'textfield' as any }}
+                                        onClick={(e) => e.stopPropagation()}
+                                      />
+                                      <span className="text-[10px] text-muted-foreground">g</span>
+
+                                      <Input
+                                        type="text"
+                                        value={metal.payoutPercentage ?? 75}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                            const numValue = value === '' ? 75 : Math.min(100, Math.max(0, parseFloat(value) || 75));
+                                            updateMetal(item.id, metal.id, { payoutPercentage: numValue });
+                                          }
+                                        }}
+                                        placeholder="75"
+                                        className="w-10 h-6 text-[11px] bg-white border border-slate-200 rounded-md text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        style={{ MozAppearance: 'textfield' as any }}
+                                        onClick={(e) => e.stopPropagation()}
+                                      />
+                                      <span className="text-[10px] text-muted-foreground">%</span>
+
+                                      <span className="text-[11px] font-medium text-green-600 min-w-[45px] text-right tabular-nums">
+                                        ${(metal.payoutAmount || 0).toFixed(2)}
+                                      </span>
+
+                                      {(item.metals || []).length > 1 && (
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            const updatedMetals = (item.metals || []).filter((m: any) => m.id !== metal.id);
+                                            const totalMarketValue = updatedMetals.reduce((sum: number, m: any) => sum + (m.marketValue || 0), 0);
+                                            const totalPayoutAmount = updatedMetals.reduce((sum: number, m: any) => sum + (m.payoutAmount || 0), 0);
+                                            onItemUpdate(item.id, { metals: updatedMetals, marketValue: totalMarketValue, payoutAmount: totalPayoutAmount });
+                                          }}
+                                          className="h-5 w-5 p-0 hover:text-destructive rounded-full"
+                                        >
+                                          <X className="h-2.5 w-2.5" />
+                                        </Button>
+                                      )}
+                                    </div>
+                                  ))}
                                 </div>
 
-                                {/* Actions */}
-                                <div className="flex items-center gap-1.5">
-                                  <div className="flex items-center gap-0.5 text-xs text-slate-600 px-1.5 py-0.5 rounded-full hover:bg-slate-100 transition-colors">
+                                {/* Right side: Add Metal + Total + Specs + Remove */}
+                                <div className="flex items-center gap-2 flex-shrink-0 mt-0.5">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      addMetal(item.id);
+                                    }}
+                                    className="h-5 px-1.5 text-[10px] text-primary hover:bg-primary/5 rounded-full"
+                                  >
+                                    <Plus className="h-2.5 w-2.5 mr-0.5" />
+                                    Metal
+                                  </Button>
+
+                                  <div className="text-xs font-semibold text-green-600 min-w-[55px] text-right tabular-nums">
+                                    ${(item.payoutAmount || 0).toFixed(2)}
+                                  </div>
+
+                                  <div className="flex items-center gap-0.5 text-[11px] text-slate-500 px-1 py-0.5 rounded-full hover:bg-slate-100 transition-colors cursor-pointer">
                                     <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${expandedAdvanced.has(item.id) ? 'rotate-90' : ''}`} />
-                                    <span>Item Specs</span>
+                                    <span>Specs</span>
                                   </div>
 
-                                 <Button
-                                   variant="ghost"
-                                   size="sm"
-                                   onClick={(e) => {
-                                     e.stopPropagation();
-                                     onItemRemove(item.id);
-                                   }}
-                                   className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive rounded-full"
-                                 >
-                                   <X className="h-3 w-3" />
-                                 </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onItemRemove(item.id);
+                                    }}
+                                    className="h-5 w-5 p-0 hover:bg-destructive/10 hover:text-destructive rounded-full"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
                                 </div>
                               </div>
-
-                            {/* Metal Rows - each metal gets its own full row */}
-                            <div className="pb-2 space-y-1 px-3.5">
-                              {(item.metals || []).map((metal: any, metalIndex: number) => (
-                                <div key={metal.id} className="flex items-center gap-2 pl-10 py-1">
-                                  <Select value={metal.type} onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}>
-                                    <SelectTrigger className="w-24 h-7 text-xs bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent className="rounded-xl">
-                                      <SelectItem value="Gold">Gold</SelectItem>
-                                      <SelectItem value="Silver">Silver</SelectItem>
-                                      <SelectItem value="Platinum">Platinum</SelectItem>
-                                      <SelectItem value="Palladium">Palladium</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-
-                                  <Select value={metal.karat?.toString()} onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}>
-                                    <SelectTrigger className="w-16 h-7 text-xs bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent className="rounded-xl">
-                                      <SelectItem value="10">10K</SelectItem>
-                                      <SelectItem value="14">14K</SelectItem>
-                                      <SelectItem value="18">18K</SelectItem>
-                                      <SelectItem value="22">22K</SelectItem>
-                                      <SelectItem value="24">24K</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-
-                                  <div className="flex items-center gap-1">
-                                    <Input 
-                                      ref={(el) => weightInputRefs.current[`${item.id}_${metal.id}`] = el}
-                                      type="text"
-                                      value={metal.weight || ''} 
-                                      onChange={(e) => {
-                                        const value = e.target.value;
-                                        if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                                          updateMetal(item.id, metal.id, { weight: value === '' ? 0 : parseFloat(value) || 0 });
-                                        }
-                                      }}
-                                      onKeyDown={(e) => handleKeyPress(e, item.id, metal.id)}
-                                      placeholder="0.00"
-                                      className="w-14 h-7 text-xs bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                      style={{ MozAppearance: 'textfield' as any }}
-                                    />
-                                    <span className="text-xs text-muted-foreground">g</span>
-                                  </div>
-
-                                  <div className="flex items-center gap-1 ml-2">
-                                    <Input
-                                      type="text"
-                                      value={metal.payoutPercentage ?? 75}
-                                      onChange={(e) => {
-                                        const value = e.target.value;
-                                        if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                                          const numValue = value === '' ? 75 : Math.min(100, Math.max(0, parseFloat(value) || 75));
-                                          updateMetal(item.id, metal.id, { payoutPercentage: numValue });
-                                        }
-                                      }}
-                                      placeholder="75"
-                                      className="w-12 h-7 text-xs bg-white border border-slate-200 rounded-lg text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                      style={{ MozAppearance: 'textfield' as any }}
-                                    />
-                                    <span className="text-xs text-muted-foreground">%</span>
-                                  </div>
-
-                                  <div className="text-xs font-medium text-green-600 min-w-[55px] text-right tabular-nums">
-                                    ${(metal.payoutAmount || 0).toFixed(2)}
-                                  </div>
-
-                                  {(item.metals || []).length > 1 && (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => {
-                                        const updatedMetals = (item.metals || []).filter((m: any) => m.id !== metal.id);
-                                        const totalMarketValue = updatedMetals.reduce((sum: number, m: any) => sum + (m.marketValue || 0), 0);
-                                        const totalPayoutAmount = updatedMetals.reduce((sum: number, m: any) => sum + (m.payoutAmount || 0), 0);
-                                        onItemUpdate(item.id, { metals: updatedMetals, marketValue: totalMarketValue, payoutAmount: totalPayoutAmount });
-                                      }}
-                                      className="h-6 w-6 p-0 hover:text-destructive rounded-full"
-                                    >
-                                      <X className="h-3 w-3" />
-                                    </Button>
-                                  )}
-                                </div>
-                              ))}
-
-                              {/* Add Metal button */}
-                              <div className="pl-10 pt-1">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    addMetal(item.id);
-                                  }}
-                                  className="h-6 px-2 text-xs text-primary hover:bg-primary/5 rounded-full"
-                                >
-                                  <Plus className="h-3 w-3 mr-1" />
-                                  Add Metal
-                                </Button>
-                              </div>
-                            </div>
 
                              {/* Advanced Details */}
                              <Collapsible 
