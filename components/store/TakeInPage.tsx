@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TakeInBalanced } from './TakeInBalanced';
 import { TakeInSlim } from './TakeInSlim';
 import { CustomerDrawer } from './CustomerDrawer';
-import { SummaryFooter } from './SummaryFooter';
+import { MetalPriceTicker } from './MetalPriceTicker';
 import { MetalPriceTicker } from './MetalPriceTicker';
 import { AIAssistBanner } from './AIAssistBanner';
 import { AICaptureModal } from './AICaptureModal';
