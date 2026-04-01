@@ -141,7 +141,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
             </div>
             <div className="flex items-center gap-2">
               {customer && !editMode && (
-                <Button variant="ghost" size="sm" onClick={() => setEditMode(true)} className="rounded-full text-xs">
+                <Button variant="ghost" size="sm" onClick={() => setEditMode(true)} className="rounded-lg text-xs">
                   <Edit className="h-3.5 w-3.5 mr-1" />
                   Edit
                 </Button>
