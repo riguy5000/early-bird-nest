@@ -105,7 +105,7 @@ export function MetalApiKeysSettings() {
   };
 
   const handleToggleActive = async (id: string, isActive: boolean) => {
-    await supabase.from('metal_api_keys').update({ is_active: isActive }).eq('id', id);
+    await adminSettingsQuery('metal_api_keys', 'update', { row: { is_active: isActive }, eq: { id } });
     loadData();
   };
 
@@ -115,8 +115,8 @@ export function MetalApiKeysSettings() {
     
     const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
     await Promise.all([
-      supabase.from('metal_api_keys').update({ sort_order: swapIdx }).eq('id', apiKeys[idx].id),
-      supabase.from('metal_api_keys').update({ sort_order: idx }).eq('id', apiKeys[swapIdx].id),
+      adminSettingsQuery('metal_api_keys', 'update', { row: { sort_order: swapIdx }, eq: { id: apiKeys[idx].id } }),
+      adminSettingsQuery('metal_api_keys', 'update', { row: { sort_order: idx }, eq: { id: apiKeys[swapIdx].id } }),
     ]);
     loadData();
   };
