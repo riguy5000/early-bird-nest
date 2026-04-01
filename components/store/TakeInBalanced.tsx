@@ -33,7 +33,7 @@ import { CustomerDrawer } from './CustomerDrawer';
 interface TakeInBalancedProps {
   items: any[];
   activeItemId: string | null;
-  onItemAdd: () => void;
+  onItemAdd: (category?: string) => void;
   onItemUpdate: (itemId: string, updates: any) => void;
   onItemRemove: (itemId: string) => void;
   onItemSelect: (itemId: string) => void;
@@ -78,13 +78,7 @@ export function TakeInBalanced({
   };
 
   const addItemByCategory = (category: string) => {
-    onItemAdd();
-    setTimeout(() => {
-      if (items.length > 0) {
-        const lastItem = items[items.length - 1];
-        onItemUpdate(lastItem.id, { category });
-      }
-    }, 100);
+    onItemAdd(category);
   };
 
   const addMetal = (itemId: string) => {
@@ -246,9 +240,9 @@ export function TakeInBalanced({
                       </div>
                       
                       {/* Items */}
-                      <div className="divide-y divide-slate-100">
+                      <div className="p-2 space-y-1.5">
                         {(categoryItems as any[]).map((item, index) => (
-                           <div key={item.id} className="group hover:bg-slate-50/50 transition-colors duration-150">
+                           <div key={item.id} className="bg-white rounded-lg border border-slate-150 shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.06)] transition-shadow duration-150">
                               {/* Single compact row: Number | Type chips | Metal | Karat | Grams | % | Price | +Metal | Specs | ✕ */}
                               <div 
                                 className="flex items-start gap-2 px-3 py-2 cursor-pointer"

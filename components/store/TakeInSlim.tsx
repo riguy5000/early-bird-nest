@@ -15,7 +15,7 @@ import {
 
 interface TakeInSlimProps {
   items: any[];
-  onItemAdd: () => void;
+  onItemAdd: (category?: string) => void;
   onItemUpdate: (itemId: string, updates: any) => void;
   onItemRemove: (itemId: string) => void;
   store: any;
