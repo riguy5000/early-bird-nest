@@ -200,6 +200,11 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
       </header>
 
       {/* Main Content */}
+      {isTakeIn ? (
+        <div className="flex-1 min-h-0 overflow-hidden">
+          {ActiveComponent && <ActiveComponent user={user} currentStore={user?.store} />}
+        </div>
+      ) : (
       <main className="p-6">
         {activeModule === 'dashboard' ? (
           <div className="max-w-7xl mx-auto space-y-6">
