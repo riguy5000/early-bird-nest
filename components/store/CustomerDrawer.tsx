@@ -209,7 +209,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                       <Upload className="h-4 w-4 mr-2" />
                       Capture Back
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={skipBack} className="w-full text-xs text-muted-foreground rounded-full">
+                    <Button variant="ghost" size="sm" onClick={skipBack} className="w-full text-xs text-muted-foreground rounded-lg">
                       Skip — analyze front only
                     </Button>
                     <input ref={backInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleBackCapture} />
