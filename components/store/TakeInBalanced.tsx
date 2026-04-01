@@ -551,8 +551,8 @@ export function TakeInBalanced({
           </div>
         </div>
 
-        {/* Right Panel — clean white sidebar */}
-        <div className="w-72 border-l border-slate-200 bg-white flex flex-col flex-shrink-0">
+        {/* Right Panel — fixed sidebar, never scrolls with items */}
+        <div className="w-72 border-l border-slate-200 bg-white flex flex-col flex-shrink-0 h-full overflow-auto">
           {/* Payout Total */}
           <div className="p-6 border-b border-slate-200">
             <div className="text-center">

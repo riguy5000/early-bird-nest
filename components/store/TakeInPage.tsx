@@ -379,8 +379,8 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
         <AIAssistBanner onActivate={handleAIAssist} />
       )}
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
+      {/* Main Content — fills remaining viewport, no page-level scroll */}
+      <div className="flex-1 overflow-hidden min-h-0">
         {viewMode === 'balanced' ? (
           <TakeInBalanced
             items={items}
