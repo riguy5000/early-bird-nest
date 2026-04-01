@@ -265,7 +265,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                   {editMode ? (
                     <Select value={formData.gender} onValueChange={(v) => updateField('gender', v)}>
                       <SelectTrigger className="mt-1 rounded-lg bg-white border border-slate-200"><SelectValue placeholder="Select" /></SelectTrigger>
-                      <SelectContent className="rounded-xl">
+                      <SelectContent className="rounded-lg">
                         <SelectItem value="M">Male</SelectItem>
                         <SelectItem value="F">Female</SelectItem>
                         <SelectItem value="Other">Other</SelectItem>
