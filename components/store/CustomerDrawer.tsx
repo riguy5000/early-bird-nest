@@ -205,7 +205,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                       <p className="font-medium text-sm">Back of License</p>
                       <p className="text-xs text-muted-foreground mt-0.5">Take a photo of the back side</p>
                     </div>
-                    <Button onClick={() => backInputRef.current?.click()} className="w-full rounded-full">
+                    <Button onClick={() => backInputRef.current?.click()} className="w-full rounded-lg">
                       <Upload className="h-4 w-4 mr-2" />
                       Capture Back
                     </Button>
