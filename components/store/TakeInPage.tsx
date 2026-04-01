@@ -351,12 +351,13 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
           </div>
 
           {/* Fast Entry Toggle */}
-          <div className="flex items-center gap-2">
-            <Label htmlFor="fast-entry" className="text-xs text-muted-foreground">Fast Entry</Label>
+          <div className="flex items-center gap-2 bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5">
+            <Label htmlFor="fast-entry" className="text-xs font-medium text-slate-700 cursor-pointer">Fast Entry</Label>
             <Switch
               id="fast-entry"
               checked={viewMode === 'slim'}
               onCheckedChange={(checked) => setViewMode(checked ? 'slim' : 'balanced')}
+              className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-slate-300"
             />
           </div>
         </div>
@@ -378,8 +379,8 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
         <AIAssistBanner onActivate={handleAIAssist} />
       )}
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
+      {/* Main Content — fills remaining viewport, no page-level scroll */}
+      <div className="flex-1 overflow-hidden min-h-0">
         {viewMode === 'balanced' ? (
           <TakeInBalanced
             items={items}

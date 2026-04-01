@@ -184,9 +184,9 @@ export function TakeInBalanced({
   return (
     <div className="h-full flex bg-slate-50 overflow-hidden">
       <div className="flex w-full h-full">
-        {/* Left Panel - Item Processing */}
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1 overflow-hidden">
+        {/* Left Panel - Item Processing (scrollable) */}
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 overflow-auto min-h-0">
             {items.length === 0 ? (
               <div className="flex items-center justify-center h-full p-6">
                 <div className="text-center max-w-md">
@@ -551,8 +551,8 @@ export function TakeInBalanced({
           </div>
         </div>
 
-        {/* Right Panel — clean white sidebar */}
-        <div className="w-72 border-l border-slate-200 bg-white flex flex-col flex-shrink-0">
+        {/* Right Panel — fixed sidebar, never scrolls with items */}
+        <div className="w-72 border-l border-slate-200 bg-white flex flex-col flex-shrink-0 h-full overflow-auto">
           {/* Payout Total */}
           <div className="p-6 border-b border-slate-200">
             <div className="text-center">
@@ -577,11 +577,12 @@ export function TakeInBalanced({
               Scan Customer ID
             </Button>
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm"
               onClick={() => setCustomerDrawerOpen(true)}
-              className="w-full mt-1.5 text-xs text-muted-foreground rounded-lg"
+              className="w-full mt-1.5 text-xs text-slate-600 rounded-lg border border-slate-200 bg-white hover:bg-slate-50"
             >
+              <Edit className="h-3.5 w-3.5 mr-1.5" />
               Enter Manually
             </Button>
           </div>
