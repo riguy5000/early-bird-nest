@@ -193,7 +193,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                 )}
 
                 {scanStep === 'back' && (
-                  <div className="border border-slate-200 rounded-xl p-5 text-center space-y-3 bg-slate-50">
+                  <div className="border border-slate-200 rounded-lg p-5 text-center space-y-3 bg-slate-50">
                     <div className="flex items-center justify-center gap-1.5 text-green-600 mb-1">
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       <span className="text-xs font-medium">Front captured</span>
