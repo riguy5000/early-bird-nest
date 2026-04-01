@@ -338,7 +338,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
             )}
 
             {/* Compliance Notice */}
-            <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl">
+            <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-lg">
               <div className="flex items-start gap-2.5">
                 <CreditCard className="h-3.5 w-3.5 mt-0.5 text-muted-foreground" />
                 <div className="text-xs text-muted-foreground">
