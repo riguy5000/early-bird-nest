@@ -554,13 +554,13 @@ export function TakeInBalanced({
             </div>
           </div>
 
-          {/* Customer Information */}
+           {/* Customer Information */}
           <div className="p-4 border-b border-slate-200">
             <h3 className="text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-3">Customer</h3>
             <Button 
               variant="outline" 
               onClick={() => setCustomerDrawerOpen(true)}
-              className="w-full flex items-center gap-2 rounded-full border border-slate-300 bg-white hover:bg-slate-50"
+              className="w-full flex items-center gap-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50"
             >
               <ScanLine className="h-4 w-4" />
               Scan Customer ID
@@ -569,7 +569,7 @@ export function TakeInBalanced({
               variant="ghost" 
               size="sm"
               onClick={() => setCustomerDrawerOpen(true)}
-              className="w-full mt-1.5 text-xs text-muted-foreground rounded-full"
+              className="w-full mt-1.5 text-xs text-muted-foreground rounded-lg"
             >
               Enter Manually
             </Button>
@@ -582,7 +582,7 @@ export function TakeInBalanced({
               <SelectTrigger className="w-full rounded-lg bg-white border border-slate-200">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="rounded-xl">
+              <SelectContent className="rounded-lg">
                 <SelectItem value="Check">Check</SelectItem>
                 <SelectItem value="Cash">Cash</SelectItem>
                 <SelectItem value="Store Credit">Store Credit</SelectItem>
@@ -618,7 +618,7 @@ export function TakeInBalanced({
           <div className="p-4 space-y-2 border-t border-slate-200">
             <Button 
               variant="ghost" 
-              className="w-full flex items-center gap-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700"
+              className="w-full flex items-center gap-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
               disabled={items.length === 0}
             >
               <SaveIcon className="h-4 w-4" />
@@ -626,14 +626,14 @@ export function TakeInBalanced({
             </Button>
             <Button 
               variant="ghost" 
-              className="w-full flex items-center gap-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700"
+              className="w-full flex items-center gap-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
               disabled={items.length === 0}
             >
               <Printer className="h-4 w-4" />
               Print Receipt
             </Button>
             <Button 
-              className="w-full flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
+              className="w-full flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg"
               disabled={items.length === 0}
             >
               <DollarSign className="h-4 w-4" />
