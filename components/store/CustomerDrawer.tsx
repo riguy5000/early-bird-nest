@@ -141,13 +141,13 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
             </div>
             <div className="flex items-center gap-2">
               {customer && !editMode && (
-                <Button variant="ghost" size="sm" onClick={() => setEditMode(true)} className="rounded-full text-xs">
+                <Button variant="ghost" size="sm" onClick={() => setEditMode(true)} className="rounded-lg text-xs">
                   <Edit className="h-3.5 w-3.5 mr-1" />
                   Edit
                 </Button>
               )}
               {editMode && (
-                <Button size="sm" onClick={handleSave} className="rounded-full text-xs bg-primary hover:bg-primary/90">
+                <Button size="sm" onClick={handleSave} className="rounded-lg text-xs bg-primary hover:bg-primary/90">
                   <Save className="h-3.5 w-3.5 mr-1" />
                   Save
                 </Button>
@@ -168,7 +168,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                   <Button 
                     variant="outline" 
                     onClick={startScan}
-                    className="w-full flex items-center gap-2 h-11 rounded-full border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-all"
+                    className="w-full flex items-center gap-2 h-11 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-all"
                   >
                     <Scan className="h-4 w-4" />
                     Scan Customer ID
@@ -176,7 +176,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                 )}
 
                 {scanStep === 'front' && (
-                  <div className="border border-slate-200 rounded-xl p-5 text-center space-y-3 bg-slate-50">
+                  <div className="border border-slate-200 rounded-lg p-5 text-center space-y-3 bg-slate-50">
                     <div className="w-12 h-12 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
                       <Camera className="h-5 w-5 text-primary" />
                     </div>
@@ -184,7 +184,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                       <p className="font-medium text-sm">Front of License</p>
                       <p className="text-xs text-muted-foreground mt-0.5">Take a photo or upload the front side</p>
                     </div>
-                    <Button onClick={() => frontInputRef.current?.click()} className="w-full rounded-full">
+                    <Button onClick={() => frontInputRef.current?.click()} className="w-full rounded-lg">
                       <Upload className="h-4 w-4 mr-2" />
                       Capture Front
                     </Button>
@@ -193,7 +193,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                 )}
 
                 {scanStep === 'back' && (
-                  <div className="border border-slate-200 rounded-xl p-5 text-center space-y-3 bg-slate-50">
+                  <div className="border border-slate-200 rounded-lg p-5 text-center space-y-3 bg-slate-50">
                     <div className="flex items-center justify-center gap-1.5 text-green-600 mb-1">
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       <span className="text-xs font-medium">Front captured</span>
@@ -205,11 +205,11 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                       <p className="font-medium text-sm">Back of License</p>
                       <p className="text-xs text-muted-foreground mt-0.5">Take a photo of the back side</p>
                     </div>
-                    <Button onClick={() => backInputRef.current?.click()} className="w-full rounded-full">
+                    <Button onClick={() => backInputRef.current?.click()} className="w-full rounded-lg">
                       <Upload className="h-4 w-4 mr-2" />
                       Capture Back
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={skipBack} className="w-full text-xs text-muted-foreground rounded-full">
+                    <Button variant="ghost" size="sm" onClick={skipBack} className="w-full text-xs text-muted-foreground rounded-lg">
                       Skip — analyze front only
                     </Button>
                     <input ref={backInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleBackCapture} />
@@ -217,7 +217,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                 )}
 
                 {scanStep === 'analyzing' && (
-                  <div className="border border-slate-200 rounded-xl p-6 text-center space-y-3 bg-slate-50">
+                  <div className="border border-slate-200 rounded-lg p-6 text-center space-y-3 bg-slate-50">
                     <Loader2 className="h-6 w-6 mx-auto animate-spin text-primary" />
                     <div>
                       <p className="font-medium text-sm">Analyzing License…</p>
@@ -227,7 +227,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                 )}
 
                 {imageQualityWarning && (
-                  <div className="flex items-start gap-2.5 p-3 rounded-xl bg-yellow-50 border border-yellow-200/60 text-yellow-800">
+                  <div className="flex items-start gap-2.5 p-3 rounded-lg bg-yellow-50 border border-yellow-200/60 text-yellow-800">
                     <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                     <p className="text-xs">{imageQualityWarning}</p>
                   </div>
@@ -265,7 +265,7 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                   {editMode ? (
                     <Select value={formData.gender} onValueChange={(v) => updateField('gender', v)}>
                       <SelectTrigger className="mt-1 rounded-lg bg-white border border-slate-200"><SelectValue placeholder="Select" /></SelectTrigger>
-                      <SelectContent className="rounded-xl">
+                      <SelectContent className="rounded-lg">
                         <SelectItem value="M">Male</SelectItem>
                         <SelectItem value="F">Female</SelectItem>
                         <SelectItem value="Other">Other</SelectItem>
@@ -330,15 +330,15 @@ export function CustomerDrawer({ isOpen, onClose, customer, onCustomerUpdate }: 
                 <div className="space-y-2">
                   <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</h4>
                   <div className="flex gap-2">
-                    <Badge variant="outline" className="rounded-full text-xs">First Time Customer</Badge>
-                    <Badge variant="secondary" className="rounded-full text-xs">Verified ID</Badge>
+                    <Badge variant="outline" className="rounded-lg text-xs">First Time Customer</Badge>
+                    <Badge variant="secondary" className="rounded-lg text-xs">Verified ID</Badge>
                   </div>
                 </div>
               </>
             )}
 
             {/* Compliance Notice */}
-            <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-xl">
+            <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-lg">
               <div className="flex items-start gap-2.5">
                 <CreditCard className="h-3.5 w-3.5 mt-0.5 text-muted-foreground" />
                 <div className="text-xs text-muted-foreground">

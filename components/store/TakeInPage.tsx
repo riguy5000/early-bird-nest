@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TakeInBalanced } from './TakeInBalanced';
 import { TakeInSlim } from './TakeInSlim';
 import { CustomerDrawer } from './CustomerDrawer';
-import { SummaryFooter } from './SummaryFooter';
+import { MetalPriceTicker } from './MetalPriceTicker';
 import { MetalPriceTicker } from './MetalPriceTicker';
 import { AIAssistBanner } from './AIAssistBanner';
 import { AICaptureModal } from './AICaptureModal';
@@ -403,22 +403,6 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
         )}
       </div>
 
-      {/* Summary Footer */}
-      <SummaryFooter
-        totals={totals}
-        paymentMethod={paymentMethod}
-        onPaymentMethodChange={setPaymentMethod}
-        checkNumber={checkNumber}
-        onCheckNumberChange={setCheckNumber}
-        followUpReminder={followUpReminder}
-        onFollowUpReminderChange={setFollowUpReminder}
-        onCustomerInfo={() => setIsCustomerDrawerOpen(true)}
-        onSave={handleSave}
-        onPrintLabels={handlePrintLabels}
-        hideProfit={store.hideProfit}
-        hidePayout={store.hidePayout}
-        hasItems={items.length > 0}
-      />
 
       {/* Customer Drawer */}
       <CustomerDrawer

@@ -54,6 +54,9 @@ export function TakeInBalanced({
   const [customerDrawerOpen, setCustomerDrawerOpen] = useState(false);
   const [customer, setCustomer] = useState(null);
   const [batchPhotoOpen, setBatchPhotoOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('Check');
+  const [checkNumber, setCheckNumber] = useState('');
+  const [storeCreditNumber, setStoreCreditNumber] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const weightInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
@@ -144,6 +147,14 @@ export function TakeInBalanced({
     Silverware: Utensils,
   };
 
+  const categoryColors: Record<string, { bg: string; icon: string; border: string }> = {
+    Jewelry: { bg: 'bg-amber-50', icon: 'bg-amber-200 text-amber-700', border: 'border-amber-200' },
+    Watch: { bg: 'bg-blue-50', icon: 'bg-blue-200 text-blue-700', border: 'border-blue-200' },
+    Bullion: { bg: 'bg-yellow-50', icon: 'bg-yellow-200 text-yellow-700', border: 'border-yellow-200' },
+    Stones: { bg: 'bg-purple-50', icon: 'bg-purple-200 text-purple-700', border: 'border-purple-200' },
+    Silverware: { bg: 'bg-slate-100', icon: 'bg-slate-300 text-slate-700', border: 'border-slate-300' },
+  };
+
   const itemTypesByCategory = {
     Jewelry: ['Ring', 'Pendant', 'Earrings', 'Bracelet', 'Necklace', 'Chain', 'Charm'],
     Watch: ['Watch', 'Watch Band', 'Watch Case'],
@@ -205,12 +216,12 @@ export function TakeInBalanced({
                   {Object.entries(itemsByCategory).map(([category, categoryItems]) => (
                     <div key={category} className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
                       {/* Category Header */}
-                      <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200">
+                      <div className={`px-4 py-2.5 ${categoryColors[category]?.bg || 'bg-slate-50'} border-b ${categoryColors[category]?.border || 'border-slate-200'}`}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-6 h-6 bg-slate-200 rounded-lg flex items-center justify-center">
+                            <div className={`w-6 h-6 ${categoryColors[category]?.icon || 'bg-slate-200 text-muted-foreground'} rounded-lg flex items-center justify-center`}>
                               {React.createElement(categoryIcons[category as keyof typeof categoryIcons] || Gem, { 
-                                className: "h-3.5 w-3.5 text-muted-foreground" 
+                                className: "h-3.5 w-3.5" 
                               })}
                             </div>
                             <div className="flex flex-col">
@@ -578,7 +589,7 @@ export function TakeInBalanced({
           {/* Payout Information */}
           <div className="p-4 border-b border-slate-200">
             <h3 className="text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-3">Payment Method</h3>
-            <Select defaultValue="Check">
+            <Select value={paymentMethod} onValueChange={setPaymentMethod}>
               <SelectTrigger className="w-full rounded-lg bg-white border border-slate-200">
                 <SelectValue />
               </SelectTrigger>
@@ -588,6 +599,22 @@ export function TakeInBalanced({
                 <SelectItem value="Store Credit">Store Credit</SelectItem>
               </SelectContent>
             </Select>
+            {paymentMethod === 'Check' && (
+              <Input
+                value={checkNumber}
+                onChange={(e) => setCheckNumber(e.target.value)}
+                placeholder="Check #"
+                className="mt-2 h-9 text-sm rounded-lg bg-white border border-slate-200"
+              />
+            )}
+            {paymentMethod === 'Store Credit' && (
+              <Input
+                value={storeCreditNumber}
+                onChange={(e) => setStoreCreditNumber(e.target.value)}
+                placeholder="Store Credit #"
+                className="mt-2 h-9 text-sm rounded-lg bg-white border border-slate-200"
+              />
+            )}
           </div>
 
           {/* Summary Stats */}
