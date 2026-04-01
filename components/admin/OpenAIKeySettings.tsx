@@ -70,17 +70,13 @@ export function OpenAIKeySettings() {
   };
 
   const handleDelete = async () => {
-    const { error } = await supabase
-      .from('kv_store_62d2b480')
-      .delete()
-      .eq('key', KV_KEY);
-
-    if (error) {
-      toast.error('Failed to delete API key');
-    } else {
+    try {
+      await adminSettingsQuery('kv_store_62d2b480', 'delete', { eq: { key: KV_KEY } });
       setApiKey('');
       setSavedKey('');
       toast.success('OpenAI API key removed');
+    } catch (err) {
+      toast.error('Failed to delete API key');
     }
   };
 
