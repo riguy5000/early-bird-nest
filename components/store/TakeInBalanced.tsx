@@ -184,9 +184,9 @@ export function TakeInBalanced({
   return (
     <div className="h-full flex bg-slate-50 overflow-hidden">
       <div className="flex w-full h-full">
-        {/* Left Panel - Item Processing */}
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1 overflow-hidden">
+        {/* Left Panel - Item Processing (scrollable) */}
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 overflow-auto min-h-0">
             {items.length === 0 ? (
               <div className="flex items-center justify-center h-full p-6">
                 <div className="text-center max-w-md">
