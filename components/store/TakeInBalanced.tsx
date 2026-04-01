@@ -144,6 +144,14 @@ export function TakeInBalanced({
     Silverware: Utensils,
   };
 
+  const categoryColors: Record<string, { bg: string; icon: string; border: string }> = {
+    Jewelry: { bg: 'bg-amber-50', icon: 'bg-amber-200 text-amber-700', border: 'border-amber-200' },
+    Watch: { bg: 'bg-blue-50', icon: 'bg-blue-200 text-blue-700', border: 'border-blue-200' },
+    Bullion: { bg: 'bg-yellow-50', icon: 'bg-yellow-200 text-yellow-700', border: 'border-yellow-200' },
+    Stones: { bg: 'bg-purple-50', icon: 'bg-purple-200 text-purple-700', border: 'border-purple-200' },
+    Silverware: { bg: 'bg-slate-100', icon: 'bg-slate-300 text-slate-700', border: 'border-slate-300' },
+  };
+
   const itemTypesByCategory = {
     Jewelry: ['Ring', 'Pendant', 'Earrings', 'Bracelet', 'Necklace', 'Chain', 'Charm'],
     Watch: ['Watch', 'Watch Band', 'Watch Case'],
