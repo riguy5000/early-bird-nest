@@ -190,7 +190,7 @@ export function TakeInBalanced({
                         key={category}
                         onClick={() => addItemByCategory(category)}
                         variant="outline"
-                        className="flex items-center gap-2 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 transition-all"
+                        className="flex items-center gap-2 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 transition-all"
                       >
                         <Icon className="h-4 w-4" />
                         {category}
@@ -216,7 +216,7 @@ export function TakeInBalanced({
                             <div className="flex flex-col">
                               <div className="flex items-center gap-2">
                                 <h3 className="text-sm font-semibold text-foreground">{category}</h3>
-                                <span className="text-xs text-slate-500 bg-slate-200 px-1.5 py-0.5 rounded-full">
+                                <span className="text-xs text-slate-500 bg-slate-200 px-1.5 py-0.5 rounded-lg">
                                   {(categoryItems as any[]).length}
                                 </span>
                               </div>
@@ -231,7 +231,7 @@ export function TakeInBalanced({
                             onClick={() => addItemByCategory(category)}
                             size="sm"
                             variant="ghost"
-                            className="h-7 px-2.5 text-xs text-primary hover:bg-primary/5 rounded-full"
+                            className="h-7 px-2.5 text-xs text-primary hover:bg-primary/5 rounded-lg"
                           >
                             <Plus className="h-3 w-3 mr-1" />
                             Add
@@ -276,7 +276,7 @@ export function TakeInBalanced({
                                           e.stopPropagation();
                                           onItemUpdate(item.id, { itemType: type });
                                         }}
-                                        className="px-1.5 py-0 text-[10px] bg-slate-100 hover:bg-blue-50 text-slate-500 hover:text-blue-600 rounded-full border border-slate-200 transition-colors cursor-pointer leading-4"
+                                        className="px-1.5 py-0 text-[10px] bg-slate-100 hover:bg-blue-50 text-slate-500 hover:text-blue-600 rounded-lg border border-slate-200 transition-colors cursor-pointer leading-4"
                                       >
                                         {type}
                                       </button>
@@ -363,7 +363,7 @@ export function TakeInBalanced({
                                             const totalPayoutAmount = updatedMetals.reduce((sum: number, m: any) => sum + (m.payoutAmount || 0), 0);
                                             onItemUpdate(item.id, { metals: updatedMetals, marketValue: totalMarketValue, payoutAmount: totalPayoutAmount });
                                           }}
-                                          className="h-5 w-5 p-0 hover:text-destructive rounded-full"
+                                          className="h-5 w-5 p-0 hover:text-destructive rounded-lg"
                                         >
                                           <X className="h-2.5 w-2.5" />
                                         </Button>
@@ -381,7 +381,7 @@ export function TakeInBalanced({
                                       e.stopPropagation();
                                       addMetal(item.id);
                                     }}
-                                    className="h-5 px-1.5 text-[10px] text-primary hover:bg-primary/5 rounded-full"
+                                    className="h-5 px-1.5 text-[10px] text-primary hover:bg-primary/5 rounded-lg"
                                   >
                                     <Plus className="h-2.5 w-2.5 mr-0.5" />
                                     Metal
@@ -391,7 +391,7 @@ export function TakeInBalanced({
                                     ${(item.payoutAmount || 0).toFixed(2)}
                                   </div>
 
-                                  <div className="flex items-center gap-0.5 text-[11px] text-slate-500 px-1 py-0.5 rounded-full hover:bg-slate-100 transition-colors cursor-pointer">
+                                  <div className="flex items-center gap-0.5 text-[11px] text-slate-500 px-1 py-0.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer">
                                     <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${expandedAdvanced.has(item.id) ? 'rotate-90' : ''}`} />
                                     <span>Specs</span>
                                   </div>
@@ -403,7 +403,7 @@ export function TakeInBalanced({
                                       e.stopPropagation();
                                       onItemRemove(item.id);
                                     }}
-                                    className="h-5 w-5 p-0 hover:bg-destructive/10 hover:text-destructive rounded-full"
+                                    className="h-5 w-5 p-0 hover:bg-destructive/10 hover:text-destructive rounded-lg"
                                   >
                                     <X className="h-3 w-3" />
                                   </Button>
@@ -501,7 +501,7 @@ export function TakeInBalanced({
                                       <Button
                                         variant="outline"
                                         size="sm"
-                                        className="rounded-full text-xs px-4"
+                                        className="rounded-lg text-xs px-4"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           onItemUpdate(item.id, { brand: '', condition: '', size: '', notes: '' });
@@ -511,7 +511,7 @@ export function TakeInBalanced({
                                       </Button>
                                       <Button
                                         size="sm"
-                                        className="rounded-full text-xs px-4"
+                                        className="rounded-lg text-xs px-4"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           setExpandedAdvanced(prev => {
