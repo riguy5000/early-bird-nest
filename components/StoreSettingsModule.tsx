@@ -332,8 +332,9 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate, onSettingsSav
   };
 
   const handleReset = () => {
-    // Re-trigger load from DB
-    window.location.reload();
+    refetch();
+    setHasUnsavedChanges(false);
+    toast.success('Settings reset to saved values');
   };
 
   // ── Tab config ──
