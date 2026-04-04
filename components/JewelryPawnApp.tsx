@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useStoreSettings } from '../hooks/useStoreSettings';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
@@ -37,10 +38,11 @@ interface JewelryPawnAppProps {
 
 export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
   const [activeModule, setActiveModule] = useState('dashboard');
+  const { visibility, refetch: refetchSettings } = useStoreSettings('store1', 'emp1');
 
   const modules = [
     { id: 'dashboard', name: 'Dashboard', icon: BarChart3, component: StatisticsModule },
-    { id: 'take-in', name: 'Take-In', icon: Plus, component: () => <TakeInPage store={{ id: 'store1', name: user?.store?.name || 'Main Store', defaultPayoutPercentage: 75, hideProfit: false, hidePayout: false, enableFastEntry: false, autoPrintLabels: true }} employee={{ id: 'emp1', name: user?.name || 'Employee' }} onComplete={(data) => toast.success('Transaction saved')} onClose={() => setActiveModule('dashboard')} /> },
+    { id: 'take-in', name: 'Take-In', icon: Plus, component: () => <TakeInPage store={{ id: 'store1', name: user?.store?.name || 'Main Store', defaultPayoutPercentage: 75, hideProfit: visibility.hideProfit, hidePayout: visibility.hidePayout, hideMarketValue: visibility.hideMarketValue, enableFastEntry: false, autoPrintLabels: true }} employee={{ id: 'emp1', name: user?.name || 'Employee' }} onComplete={(data) => toast.success('Transaction saved')} onClose={() => setActiveModule('dashboard')} /> },
     { id: 'inventory', name: 'Inventory', icon: Package, component: InventoryModule },
     { id: 'customers', name: 'Customers', icon: Users, component: CustomerModule },
     { id: 'payouts', name: 'Payouts', icon: DollarSign, component: PayoutsModule },

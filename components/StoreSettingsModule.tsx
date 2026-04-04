@@ -15,7 +15,7 @@ import { Separator } from './ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Checkbox } from './ui/checkbox';
 import { toast } from 'sonner';
-import { apiCall } from '../utils/supabase/simple-client';
+import { useStoreSettings } from '../hooks/useStoreSettings';
 import {
   Camera, Plus, Trash2, Edit, Save, RotateCcw, GripVertical,
   Check, X, AlertCircle, Store, DollarSign, CreditCard, Users,
@@ -236,9 +236,16 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate }: StoreSettin
     confirmChangePayoutMethod: true, confirmRemoveSavedForLater: true,
   });
 
-  // ── Load settings ──
+  // ── Load settings from Supabase ──
+  const { settings: dbSettings, loading: dbLoading, saveSettings } = useStoreSettings(currentStore?.id || '');
+
   useEffect(() => {
-    if (currentStore) {
+    if (dbLoading || !currentStore) return;
+    
+    // Merge DB settings with defaults
+    if (dbSettings.general && Object.keys(dbSettings.general).length > 0) {
+      setGeneral(prev => ({ ...prev, ...dbSettings.general }));
+    } else if (currentStore) {
       setGeneral(prev => ({
         ...prev,
         name: currentStore.name || '',
@@ -254,16 +261,67 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate }: StoreSettin
         logo: currentStore.logo || '',
       }));
     }
-  }, [currentStore]);
+
+    if (dbSettings.globalVisibility) {
+      setGlobalVisibility(prev => ({ ...prev, ...dbSettings.globalVisibility }));
+    }
+    if (dbSettings.intakeDefaults && Object.keys(dbSettings.intakeDefaults).length > 0) {
+      setIntakeDefaults(prev => ({ ...prev, ...dbSettings.intakeDefaults }));
+    }
+    if (dbSettings.payoutDefaults && Object.keys(dbSettings.payoutDefaults).length > 0) {
+      setPayoutDefaults(prev => ({ ...prev, ...dbSettings.payoutDefaults }));
+    }
+    if (dbSettings.rateDefaults && Object.keys(dbSettings.rateDefaults).length > 0) {
+      setRateDefaults(prev => ({ ...prev, ...dbSettings.rateDefaults }));
+    }
+    if (dbSettings.customerSettings && Object.keys(dbSettings.customerSettings).length > 0) {
+      setCustomerSettings(prev => ({ ...prev, ...dbSettings.customerSettings }));
+    }
+    if (dbSettings.complianceSettings && Object.keys(dbSettings.complianceSettings).length > 0) {
+      setComplianceSettings(prev => ({ ...prev, ...dbSettings.complianceSettings }));
+    }
+    if (dbSettings.printSettings && Object.keys(dbSettings.printSettings).length > 0) {
+      setPrintSettings(prev => ({ ...prev, ...dbSettings.printSettings }));
+    }
+    if (dbSettings.notificationSettings && Object.keys(dbSettings.notificationSettings).length > 0) {
+      setNotifSettings(prev => ({ ...prev, ...dbSettings.notificationSettings }));
+    }
+    if (dbSettings.appearance && Object.keys(dbSettings.appearance).length > 0) {
+      setAppearance(prev => ({ ...prev, ...dbSettings.appearance }));
+    }
+    if (dbSettings.advanced && Object.keys(dbSettings.advanced).length > 0) {
+      setAdvanced(prev => ({ ...prev, ...dbSettings.advanced }));
+    }
+    if (dbSettings.employees && dbSettings.employees.length > 0) {
+      setEmployees(dbSettings.employees);
+    }
+  }, [dbLoading, dbSettings, currentStore]);
 
   const markDirty = () => setHasUnsavedChanges(true);
 
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      // In production, save all settings via API
-      toast.success('Settings saved successfully');
-      setHasUnsavedChanges(false);
+      const success = await saveSettings({
+        general,
+        globalVisibility,
+        intakeDefaults,
+        payoutDefaults,
+        rateDefaults,
+        customerSettings,
+        complianceSettings,
+        printSettings,
+        notificationSettings: notifSettings,
+        appearance,
+        advanced,
+        employees,
+      });
+      if (success) {
+        toast.success('Settings saved successfully');
+        setHasUnsavedChanges(false);
+      } else {
+        toast.error('Failed to save settings');
+      }
     } catch {
       toast.error('Failed to save settings');
     } finally {
@@ -272,11 +330,8 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate }: StoreSettin
   };
 
   const handleReset = () => {
-    if (currentStore) {
-      // reload from store
-      setHasUnsavedChanges(false);
-      toast.success('Settings reset to saved values');
-    }
+    // Re-trigger load from DB
+    window.location.reload();
   };
 
   // ── Tab config ──

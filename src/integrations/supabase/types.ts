@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      employee_visibility_overrides: {
+        Row: {
+          employee_id: string
+          hide_market_value: boolean | null
+          hide_percentage_paid: boolean | null
+          hide_profit: boolean | null
+          hide_total_payout_breakdown: boolean | null
+          id: string
+          store_id: string
+        }
+        Insert: {
+          employee_id: string
+          hide_market_value?: boolean | null
+          hide_percentage_paid?: boolean | null
+          hide_profit?: boolean | null
+          hide_total_payout_breakdown?: boolean | null
+          id?: string
+          store_id: string
+        }
+        Update: {
+          employee_id?: string
+          hide_market_value?: boolean | null
+          hide_percentage_paid?: boolean | null
+          hide_profit?: boolean | null
+          hide_total_payout_breakdown?: boolean | null
+          id?: string
+          store_id?: string
+        }
+        Relationships: []
+      }
       kv_store_62d2b480: {
         Row: {
           key: string
@@ -98,6 +128,63 @@ export type Database = {
           price_usd?: number
           source?: string | null
           symbol?: string
+        }
+        Relationships: []
+      }
+      store_settings: {
+        Row: {
+          advanced: Json
+          appearance: Json
+          compliance_settings: Json
+          created_at: string
+          customer_settings: Json
+          employees: Json
+          general: Json
+          global_visibility: Json
+          id: string
+          intake_defaults: Json
+          notification_settings: Json
+          payout_defaults: Json
+          print_settings: Json
+          rate_defaults: Json
+          store_id: string
+          updated_at: string
+        }
+        Insert: {
+          advanced?: Json
+          appearance?: Json
+          compliance_settings?: Json
+          created_at?: string
+          customer_settings?: Json
+          employees?: Json
+          general?: Json
+          global_visibility?: Json
+          id?: string
+          intake_defaults?: Json
+          notification_settings?: Json
+          payout_defaults?: Json
+          print_settings?: Json
+          rate_defaults?: Json
+          store_id: string
+          updated_at?: string
+        }
+        Update: {
+          advanced?: Json
+          appearance?: Json
+          compliance_settings?: Json
+          created_at?: string
+          customer_settings?: Json
+          employees?: Json
+          general?: Json
+          global_visibility?: Json
+          id?: string
+          intake_defaults?: Json
+          notification_settings?: Json
+          payout_defaults?: Json
+          print_settings?: Json
+          rate_defaults?: Json
+          store_id?: string
+          updated_at?: string
         }
         Relationships: []
       }
