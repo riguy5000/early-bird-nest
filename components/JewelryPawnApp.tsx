@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useStoreSettings } from '../hooks/useStoreSettings';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
