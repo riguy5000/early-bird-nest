@@ -226,6 +226,10 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
       toast.error('Please add at least one item');
       return;
     }
+    if (store.requireCustomerInfoBeforeCompletion && !customer) {
+      toast.error('Customer information is required before completing');
+      return;
+    }
     const totals = calculateTotals();
     const transactionData = {
       batchId,
