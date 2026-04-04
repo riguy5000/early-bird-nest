@@ -165,7 +165,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const addNewItem = useCallback((category: string = 'Jewelry') => {
+  const addNewItem = useCallback((category: Item['category'] = 'Jewelry') => {
     const newItem: Item = {
       id: `item_${Date.now()}`,
       category,
@@ -174,9 +174,6 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
         type: 'Gold',
         karat: 14,
         weight: 0,
-        payoutPercentage: 75,
-        marketValue: 0,
-        payoutAmount: 0
       }],
       stones: [],
       marketValue: 0,
