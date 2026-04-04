@@ -46,7 +46,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
     { id: 'inventory', name: 'Inventory', icon: Package, component: InventoryModule },
     { id: 'customers', name: 'Customers', icon: Users, component: CustomerModule },
     { id: 'payouts', name: 'Payouts', icon: DollarSign, component: PayoutsModule },
-    { id: 'settings', name: 'Settings', icon: Settings, component: StoreSettingsModule }
+    { id: 'settings', name: 'Settings', icon: Settings, component: () => <StoreSettingsModule currentStore={{ id: 'store1', name: user?.store?.name || 'Main Store', type: 'jewelry' }} /> }
   ];
 
   const quickStats = [
