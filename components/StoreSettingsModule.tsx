@@ -320,6 +320,7 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate, onSettingsSav
       if (success) {
         toast.success('Settings saved successfully');
         setHasUnsavedChanges(false);
+        onSettingsSaved?.();
       } else {
         toast.error('Failed to save settings');
       }
