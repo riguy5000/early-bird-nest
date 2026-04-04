@@ -114,7 +114,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
   const [batchId, setBatchId] = useState('');
   const [showAIAssist, setShowAIAssist] = useState(false);
   const [showAICaptureModal, setShowAICaptureModal] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'Check' | 'Cash' | 'Store Credit'>('Check');
+  const [paymentMethod, setPaymentMethod] = useState<'Check' | 'Cash' | 'Store Credit'>(store.defaultPayoutMethod || 'Check');
   const [checkNumber, setCheckNumber] = useState('');
   const [followUpReminder, setFollowUpReminder] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
