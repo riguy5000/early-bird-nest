@@ -84,6 +84,16 @@ interface TakeInPageProps {
     hideMarketValue: boolean;
     enableFastEntry: boolean;
     autoPrintLabels: boolean;
+    requireCustomerInfoBeforeCompletion: boolean;
+    defaultPayoutMethod: 'Check' | 'Cash' | 'Store Credit';
+    enablePrintReceipt: boolean;
+    enablePrintLabels: boolean;
+    enableAiAssist: boolean;
+    confirmCompletePurchase: boolean;
+    confirmDeleteItem: boolean;
+    requireIdScan: boolean;
+    allowManualEntry: boolean;
+    rateDefaults: Record<string, number>;
   };
   employee: {
     id: string;
