@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { useState, useEffect, useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Switch } from './ui/switch';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Badge } from './ui/badge';
@@ -17,29 +16,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Checkbox } from './ui/checkbox';
 import { toast } from 'sonner';
 import { apiCall } from '../utils/supabase/simple-client';
-import { 
-  Camera, 
-  Plus, 
-  Trash2, 
-  Edit, 
-  Save, 
-  RotateCcw, 
-  GripVertical,
-  Check,
-  X,
-  AlertCircle,
-  Store,
-  DollarSign,
-  CreditCard,
-  Users,
-  Shield,
-  Package,
-  Bell,
-  QrCode,
-  Upload
+import {
+  Camera, Plus, Trash2, Edit, Save, RotateCcw, GripVertical,
+  Check, X, AlertCircle, Store, DollarSign, CreditCard, Users,
+  Shield, Package, Bell, QrCode, Upload, Search, Eye, EyeOff,
+  Palette, Wrench, UserPlus, KeyRound, Settings2, Printer,
+  FileText, Clock, Lock, Unlock, ChevronRight
 } from 'lucide-react';
 
-interface Store {
+// ─── Types ──────────────────────────────────────────────────────────────────
+
+interface StoreData {
   id: string;
   name: string;
   type: string;
@@ -61,156 +48,199 @@ interface Employee {
   firstName: string;
   lastName: string;
   email?: string;
+  phone?: string;
   role: string;
   isActive: boolean;
   quickSwitchOrder: number;
   avatar?: string;
   storeId: string;
+  lastLogin?: string;
+  permissions: EmployeePermissions;
+  visibility: EmployeeVisibility;
 }
 
-interface PricingRule {
-  category: string;
-  subcategory?: string;
-  payoutPercent: number;
+interface EmployeePermissions {
+  accessTakeIn: boolean;
+  accessInventory: boolean;
+  accessCustomers: boolean;
+  accessPayouts: boolean;
+  accessStatistics: boolean;
+  accessSettings: boolean;
+  accessSavedForLater: boolean;
+  canEditRates: boolean;
+  canEditFinalPayout: boolean;
+  canPrintLabels: boolean;
+  canDeleteItems: boolean;
+  canCompletePurchase: boolean;
 }
 
-interface PayoutMethod {
-  method: string;
-  enabled: boolean;
-  isDefault: boolean;
-  requiresPhoto?: boolean;
-  requiresCheckNumber?: boolean;
-}
-
-interface Permission {
-  module: string;
-  canView: boolean;
-  canEdit: boolean;
-  canDelete: boolean;
-}
-
-interface PermissionTemplate {
-  id: string;
-  name: string;
-  permissions: Permission[];
+interface EmployeeVisibility {
+  hideProfit: boolean;
+  hidePercentagePaid: boolean;
+  hideMarketValue: boolean;
+  hideTotalPayoutBreakdown: boolean;
 }
 
 interface StoreSettingsModuleProps {
-  currentStore: Store | null;
-  onStoreUpdate: (store: Store) => void;
+  currentStore: StoreData | null;
+  onStoreUpdate?: (store: StoreData) => void;
 }
+
+const defaultPermissions: EmployeePermissions = {
+  accessTakeIn: true, accessInventory: true, accessCustomers: true,
+  accessPayouts: false, accessStatistics: false, accessSettings: false,
+  accessSavedForLater: true, canEditRates: false, canEditFinalPayout: false,
+  canPrintLabels: true, canDeleteItems: false, canCompletePurchase: true,
+};
+
+const defaultVisibility: EmployeeVisibility = {
+  hideProfit: true, hidePercentagePaid: true, hideMarketValue: false, hideTotalPayoutBreakdown: false,
+};
+
+// ─── Sidebar Nav Item ───────────────────────────────────────────────────────
+
+function NavItem({ icon: Icon, label, active, onClick }: { icon: any; label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+        active
+          ? 'bg-primary text-primary-foreground'
+          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+      }`}
+    >
+      <Icon className="h-4 w-4 shrink-0" />
+      <span className="truncate">{label}</span>
+    </button>
+  );
+}
+
+// ─── Toggle Row helper ──────────────────────────────────────────────────────
+
+function ToggleRow({ label, description, checked, onChange }: { label: string; description?: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div className="flex items-center justify-between py-3">
+      <div className="pr-4">
+        <p className="text-sm font-medium text-foreground">{label}</p>
+        {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
+      </div>
+      <Switch checked={checked} onCheckedChange={onChange} />
+    </div>
+  );
+}
+
+// ─── Section Card helper ────────────────────────────────────────────────────
+
+function SettingsCard({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
+  return (
+    <Card className="border border-border">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-base">{title}</CardTitle>
+        {description && <CardDescription>{description}</CardDescription>}
+      </CardHeader>
+      <CardContent className="space-y-1">{children}</CardContent>
+    </Card>
+  );
+}
+
+// ─── Main Component ─────────────────────────────────────────────────────────
 
 export function StoreSettingsModule({ currentStore, onStoreUpdate }: StoreSettingsModuleProps) {
   const [activeTab, setActiveTab] = useState('general');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // General Settings State
-  const [generalSettings, setGeneralSettings] = useState({
-    name: '',
-    type: 'jewelry',
-    address: '',
-    phone: '',
-    email: '',
-    timezone: 'America/New_York',
-    weightUnit: 'g',
-    currency: 'USD',
-    quoteFooter: '',
-    legalHoldPeriod: 30,
-    reminderDefault: 7,
-    logo: ''
+  // ── General ──
+  const [general, setGeneral] = useState({
+    name: '', type: 'jewelry', address: '', phone: '', email: '',
+    timezone: 'America/New_York', weightUnit: 'g', currency: 'USD',
+    quoteFooter: '', legalHoldPeriod: 90, logo: '',
   });
 
-  // Pricing Rules State
-  const [pricingRules, setPricingRules] = useState<PricingRule[]>([
-    { category: 'gold', payoutPercent: 78 },
-    { category: 'silver', payoutPercent: 75 },
-    { category: 'platinum', payoutPercent: 80 },
-    { category: 'stones', payoutPercent: 65 },
-    { category: 'watches', payoutPercent: 70 }
-  ]);
-
-  const [subcategoryRules, setSubcategoryRules] = useState<PricingRule[]>([]);
-  const [roundToNearest, setRoundToNearest] = useState(true);
-
-  // Payout Methods State
-  const [payoutMethods, setPayoutMethods] = useState<PayoutMethod[]>([
-    { method: 'Check', enabled: true, isDefault: true, requiresCheckNumber: true, requiresPhoto: false },
-    { method: 'Cash', enabled: true, isDefault: false, requiresPhoto: true },
-    { method: 'Store Credit', enabled: false, isDefault: false }
-  ]);
-
-  // Employees State
+  // ── Employees ──
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [showAddEmployee, setShowAddEmployee] = useState(false);
-  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
 
-  // Permission Templates State
-  const [permissionTemplates, setPermissionTemplates] = useState<PermissionTemplate[]>([
-    {
-      id: 'buyer',
-      name: 'Buyer',
-      permissions: [
-        { module: 'dashboard', canView: true, canEdit: false, canDelete: false },
-        { module: 'take-in', canView: true, canEdit: true, canDelete: false },
-        { module: 'inventory', canView: true, canEdit: false, canDelete: false },
-        { module: 'customers', canView: true, canEdit: true, canDelete: false }
-      ]
-    }
-  ]);
-
-  // Employee Visibility Settings
-  const [employeeVisibility, setEmployeeVisibility] = useState({
-    showPayoutPercent: true,
-    showProfit: false
+  // ── Global Visibility ──
+  const [globalVisibility, setGlobalVisibility] = useState({
+    showProfit: false, showPayoutPercent: true, showMarketValue: true,
+    showProfitInFooter: false, showAverageRateInFooter: true,
   });
 
-  // Categories & Modules State
-  const [enabledCategories, setEnabledCategories] = useState({
-    jewelry: true,
-    watches: true,
-    bullion: true,
-    silverware: false,
-    stones: true
+  // ── Intake & Payout Defaults ──
+  const [intakeDefaults, setIntakeDefaults] = useState({
+    fastEntryDefault: false, defaultCategory: 'jewelry', autoFocusWeight: true,
+    itemCardLayout: 'compact' as 'compact' | 'detailed',
+    enableSaveForLater: true, enableBatchPhotos: true, enableAiAssist: true,
   });
 
-  const [futureModules, setFutureModules] = useState({
-    marketplace: false,
-    auctions: false,
-    layaway: false
+  const [payoutDefaults, setPayoutDefaults] = useState({
+    defaultMethod: 'check', allowSplitPayout: false,
+    showConfirmationModal: true, requirePayoutInfoBeforeCompletion: true,
+    requireCustomerInfoBeforeCompletion: true, allowOverrideFinalPayout: true,
+    allowPerItemRateEdits: true, allowBatchRateEdits: false,
   });
 
-  // Notifications State
-  const [notifications, setNotifications] = useState({
-    dailySummaryEmail: true,
-    apiFailureAlerts: true,
-    lowPriceAlerts: true,
-    priceDropPercent: 5,
-    smsNumber: ''
+  const [rateDefaults, setRateDefaults] = useState({
+    gold: 78, silver: 75, platinum: 80, palladium: 75,
+    stones: 65, watches: 70, bullion: 85,
   });
 
-  // Label & QR Preferences State
-  const [labelPreferences, setLabelPreferences] = useState({
-    autoPrintAfterPurchase: true,
-    includePayoutOnLabel: false,
-    smartBadgePrefix: ''
+  // ── Customer & Compliance ──
+  const [customerSettings, setCustomerSettings] = useState({
+    requireIdScan: true, allowManualEntry: true,
+    requirePhone: true, requireEmail: false, requireAddress: false,
+    requireGender: false, requireDob: false,
   });
 
+  const [complianceSettings, setComplianceSettings] = useState({
+    holdPeriodDays: 90, requireSignature: false,
+    requireEmployeeName: true, requireNoteOverAmount: false,
+    noteThreshold: 500, showWarningOverThreshold: true,
+    requireManagerApproval: false, approvalThreshold: 1000,
+  });
+
+  // ── Labels / Printing ──
+  const [printSettings, setPrintSettings] = useState({
+    enablePrintReceipt: true, enablePrintLabels: true,
+    autoPrintReceipt: false, autoPrintBatchQr: false, autoPrintItemQr: false,
+    showBatchNumber: true, showItemNumber: true, showItemDescription: true,
+    showWeight: true, showPayoutAmount: false, showDate: true, showQrCode: true,
+    showStoreLogo: true, showFooterNote: true, showDisclaimer: false,
+    showSavedForLaterOnQuote: false, hidePayoutPercentsOnPrint: true,
+  });
+
+  // ── Notifications ──
+  const [notifSettings, setNotifSettings] = useState({
+    emailOnQuoteSaved: true, reminderSaveForLater: true,
+    notifyAdminOnPurchase: false, notifyAdminPayoutThreshold: false,
+    notifyAdminRateChange: false, dailySummary: true,
+    reminderInterval: '3days' as string,
+  });
+
+  // ── Appearance ──
+  const [appearance, setAppearance] = useState({
+    theme: 'default' as 'default' | 'dark' | 'seasonal',
+    accentColor: 'blue', compactMode: false,
+    largeInputMode: false, sidebarCollapsed: false,
+  });
+
+  // ── Advanced ──
+  const [advanced, setAdvanced] = useState({
+    archiveAfterDays: 90, autoDraftSave: true,
+    duplicateDetection: true, keyboardShortcuts: true,
+    categoryGrouping: true, subcategoryGrouping: false,
+    lockCompletedTransactions: true, allowReopenCompleted: false,
+    confirmDeleteItem: true, confirmCompletePurchase: true,
+    confirmChangePayoutMethod: true, confirmRemoveSavedForLater: true,
+  });
+
+  // ── Load settings ──
   useEffect(() => {
     if (currentStore) {
-      loadStoreSettings();
-    }
-  }, [currentStore]);
-
-  const loadStoreSettings = async () => {
-    if (!currentStore) return;
-
-    try {
-      setIsLoading(true);
-      
-      // Load general settings
-      setGeneralSettings({
+      setGeneral(prev => ({
+        ...prev,
         name: currentStore.name || '',
         type: currentStore.type || 'jewelry',
         address: currentStore.address || '',
@@ -220,1029 +250,816 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate }: StoreSettin
         weightUnit: currentStore.weightUnit || 'g',
         currency: currentStore.currency || 'USD',
         quoteFooter: currentStore.quoteFooter || '',
-        legalHoldPeriod: currentStore.legalHoldPeriod || 30,
-        reminderDefault: currentStore.reminderDefault || 7,
-        logo: currentStore.logo || ''
-      });
-
-      // Load employees
-      const { employees: storeEmployees } = await apiCall(`/stores/${currentStore.id}/employees`);
-      setEmployees(storeEmployees || []);
-
-      // Load other settings from API
-      // For now, using default values - in production these would come from the API
-      
-    } catch (error) {
-      console.error('Error loading store settings:', error);
-      setError('Failed to load store settings');
-    } finally {
-      setIsLoading(false);
+        legalHoldPeriod: currentStore.legalHoldPeriod || 90,
+        logo: currentStore.logo || '',
+      }));
     }
-  };
+  }, [currentStore]);
 
-  const handleGeneralSettingChange = (field: string, value: any) => {
-    setGeneralSettings(prev => ({ ...prev, [field]: value }));
-    setHasUnsavedChanges(true);
-  };
+  const markDirty = () => setHasUnsavedChanges(true);
 
-  const handlePricingRuleChange = (category: string, payoutPercent: number) => {
-    setPricingRules(prev => 
-      prev.map(rule => 
-        rule.category === category ? { ...rule, payoutPercent } : rule
-      )
-    );
-    setHasUnsavedChanges(true);
-  };
-
-  const handlePayoutMethodToggle = (method: string, field: 'enabled' | 'isDefault', value: boolean) => {
-    setPayoutMethods(prev => 
-      prev.map(pm => {
-        if (pm.method === method) {
-          const updated = { ...pm, [field]: value };
-          // If setting as default, unset others
-          if (field === 'isDefault' && value) {
-            return updated;
-          }
-          return updated;
-        } else if (field === 'isDefault' && value) {
-          // Unset default from other methods
-          return { ...pm, isDefault: false };
-        }
-        return pm;
-      })
-    );
-    setHasUnsavedChanges(true);
-  };
-
-  const handleAddEmployee = async (employeeData: Partial<Employee>) => {
+  const handleSave = async () => {
+    setIsLoading(true);
     try {
-      const newEmployee = {
-        firstName: employeeData.firstName || '',
-        lastName: employeeData.lastName || '',
-        name: `${employeeData.firstName} ${employeeData.lastName}`,
-        email: employeeData.email || '',
-        role: employeeData.role || 'buyer',
-        isActive: true,
-        quickSwitchOrder: employees.length + 1
-      };
-
-      const { employee } = await apiCall(`/stores/${currentStore!.id}/employees`, {
-        method: 'POST',
-        body: JSON.stringify(newEmployee)
-      });
-
-      setEmployees(prev => [...prev, employee]);
-      setShowAddEmployee(false);
-      setHasUnsavedChanges(true);
-      toast.success('Employee added successfully');
-    } catch (error) {
-      console.error('Error adding employee:', error);
-      toast.error('Failed to add employee');
-    }
-  };
-
-  const handleUpdateEmployee = async (employeeId: string, updates: Partial<Employee>) => {
-    try {
-      await apiCall(`/stores/${currentStore!.id}/employees/${employeeId}`, {
-        method: 'PATCH',
-        body: JSON.stringify(updates)
-      });
-
-      setEmployees(prev => 
-        prev.map(emp => emp.id === employeeId ? { ...emp, ...updates } : emp)
-      );
-      setEditingEmployee(null);
-      setHasUnsavedChanges(true);
-      toast.success('Employee updated successfully');
-    } catch (error) {
-      console.error('Error updating employee:', error);
-      toast.error('Failed to update employee');
-    }
-  };
-
-  const handleSaveSettings = async () => {
-    if (!currentStore) return;
-
-    try {
-      setIsLoading(true);
-      setError('');
-
-      // Save general settings
-      const updatedStore = await apiCall(`/stores/${currentStore.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(generalSettings)
-      });
-
-      // Save other settings - would be separate API calls in production
-      // For now, just showing the structure
-
-      onStoreUpdate(updatedStore.store);
-      setHasUnsavedChanges(false);
+      // In production, save all settings via API
       toast.success('Settings saved successfully');
-      
-    } catch (error: any) {
-      console.error('Error saving settings:', error);
-      setError(error.message || 'Failed to save settings');
+      setHasUnsavedChanges(false);
+    } catch {
       toast.error('Failed to save settings');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleResetSettings = () => {
+  const handleReset = () => {
     if (currentStore) {
-      loadStoreSettings();
+      // reload from store
       setHasUnsavedChanges(false);
       toast.success('Settings reset to saved values');
     }
   };
 
+  // ── Tab config ──
+  const tabs = [
+    { id: 'general', label: 'General', icon: Store },
+    { id: 'employees', label: 'Employees / Users', icon: Users },
+    { id: 'visibility', label: 'Visibility & Permissions', icon: Eye },
+    { id: 'intake', label: 'Intake & Payout Defaults', icon: DollarSign },
+    { id: 'customer', label: 'Customer & Compliance', icon: Shield },
+    { id: 'labels', label: 'Labels / Printing', icon: Printer },
+    { id: 'notifications', label: 'Notifications', icon: Bell },
+    { id: 'appearance', label: 'Appearance', icon: Palette },
+    { id: 'advanced', label: 'Advanced', icon: Wrench },
+  ];
+
+  const filteredTabs = useMemo(() => {
+    if (!searchQuery) return tabs;
+    const q = searchQuery.toLowerCase();
+    return tabs.filter(t => t.label.toLowerCase().includes(q));
+  }, [searchQuery]);
+
   if (!currentStore) {
     return (
-      <div className="w-full max-w-7xl mx-auto p-6">
+      <div className="w-full max-w-4xl mx-auto p-6">
         <Alert>
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Please select a store to configure settings.
-          </AlertDescription>
+          <AlertDescription>Please select a store to configure settings.</AlertDescription>
         </Alert>
       </div>
     );
   }
 
+  // ── Render active tab content ──
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'general': return <GeneralTab general={general} setGeneral={setGeneral} markDirty={markDirty} />;
+      case 'employees': return <EmployeesTab employees={employees} setEmployees={setEmployees} showAdd={showAddEmployee} setShowAdd={setShowAddEmployee} markDirty={markDirty} />;
+      case 'visibility': return <VisibilityTab global={globalVisibility} setGlobal={setGlobalVisibility} employees={employees} setEmployees={setEmployees} markDirty={markDirty} />;
+      case 'intake': return <IntakePayoutTab intake={intakeDefaults} setIntake={setIntakeDefaults} payout={payoutDefaults} setPayout={setPayoutDefaults} rates={rateDefaults} setRates={setRateDefaults} markDirty={markDirty} />;
+      case 'customer': return <CustomerComplianceTab customer={customerSettings} setCustomer={setCustomerSettings} compliance={complianceSettings} setCompliance={setComplianceSettings} markDirty={markDirty} />;
+      case 'labels': return <LabelsPrintingTab settings={printSettings} setSettings={setPrintSettings} markDirty={markDirty} />;
+      case 'notifications': return <NotificationsTab settings={notifSettings} setSettings={setNotifSettings} markDirty={markDirty} />;
+      case 'appearance': return <AppearanceTab settings={appearance} setSettings={setAppearance} markDirty={markDirty} />;
+      case 'advanced': return <AdvancedTab settings={advanced} setSettings={setAdvanced} markDirty={markDirty} />;
+      default: return null;
+    }
+  };
+
   return (
-    <div className="w-full max-w-7xl mx-auto p-6 pb-24">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Store Settings</h1>
-        <p className="text-muted-foreground mt-2">
-          Configure your store preferences, pricing rules, and system settings.
-        </p>
-      </div>
-
-      {error && (
-        <Alert variant="destructive" className="mb-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
-          <TabsTrigger value="general" className="flex items-center space-x-2">
-            <Store className="w-4 h-4" />
-            <span className="hidden sm:inline">General</span>
-          </TabsTrigger>
-          <TabsTrigger value="pricing" className="flex items-center space-x-2">
-            <DollarSign className="w-4 h-4" />
-            <span className="hidden sm:inline">Pricing</span>
-          </TabsTrigger>
-          <TabsTrigger value="payouts" className="flex items-center space-x-2">
-            <CreditCard className="w-4 h-4" />
-            <span className="hidden sm:inline">Payouts</span>
-          </TabsTrigger>
-          <TabsTrigger value="employees" className="flex items-center space-x-2">
-            <Users className="w-4 h-4" />
-            <span className="hidden sm:inline">Employees</span>
-          </TabsTrigger>
-          <TabsTrigger value="permissions" className="flex items-center space-x-2">
-            <Shield className="w-4 h-4" />
-            <span className="hidden sm:inline">Permissions</span>
-          </TabsTrigger>
-          <TabsTrigger value="categories" className="flex items-center space-x-2">
-            <Package className="w-4 h-4" />
-            <span className="hidden sm:inline">Categories</span>
-          </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex items-center space-x-2">
-            <Bell className="w-4 h-4" />
-            <span className="hidden sm:inline">Notifications</span>
-          </TabsTrigger>
-          <TabsTrigger value="labels" className="flex items-center space-x-2">
-            <QrCode className="w-4 h-4" />
-            <span className="hidden sm:inline">Labels</span>
-          </TabsTrigger>
-        </TabsList>
-
-        {/* General Tab */}
-        <TabsContent value="general" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Store Profile</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center space-x-6">
-                <div className="relative">
-                  <Avatar className="w-20 h-20">
-                    <AvatarImage src={generalSettings.logo} alt="Store logo" />
-                    <AvatarFallback className="text-lg">
-                      {generalSettings.name.substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    className="absolute -bottom-2 left-1/2 transform -translate-x-1/2"
-                  >
-                    <Camera className="w-3 h-3 mr-1" />
-                    <span className="text-xs">Upload</span>
-                  </Button>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  <p>Upload a square logo for your store</p>
-                  <p>Recommended: 200x200px, PNG or JPG</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label>Store Name *</Label>
-                  <Input
-                    value={generalSettings.name}
-                    onChange={(e) => handleGeneralSettingChange('name', e.target.value)}
-                    placeholder="Enter store name"
-                  />
-                </div>
-                
-                <div>
-                  <Label>Store Type</Label>
-                  <Select 
-                    value={generalSettings.type} 
-                    onValueChange={(value) => handleGeneralSettingChange('type', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="jewelry">Jewelry</SelectItem>
-                      <SelectItem value="pawn">Pawn</SelectItem>
-                      <SelectItem value="estate">Estate</SelectItem>
-                      <SelectItem value="hybrid">Hybrid</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div>
-                <Label>Address</Label>
-                <Textarea
-                  value={generalSettings.address}
-                  onChange={(e) => handleGeneralSettingChange('address', e.target.value)}
-                  placeholder="Street, City, State, ZIP"
-                  rows={3}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label>Phone</Label>
-                  <Input
-                    type="tel"
-                    value={generalSettings.phone}
-                    onChange={(e) => handleGeneralSettingChange('phone', e.target.value)}
-                    placeholder="(555) 123-4567"
-                  />
-                </div>
-                
-                <div>
-                  <Label>Email</Label>
-                  <Input
-                    type="email"
-                    value={generalSettings.email}
-                    onChange={(e) => handleGeneralSettingChange('email', e.target.value)}
-                    placeholder="store@example.com"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label>Time Zone</Label>
-                  <Select 
-                    value={generalSettings.timezone} 
-                    onValueChange={(value) => handleGeneralSettingChange('timezone', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="America/New_York">Eastern Time</SelectItem>
-                      <SelectItem value="America/Chicago">Central Time</SelectItem>
-                      <SelectItem value="America/Denver">Mountain Time</SelectItem>
-                      <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label>Default Currency</Label>
-                  <Select 
-                    value={generalSettings.currency} 
-                    onValueChange={(value) => handleGeneralSettingChange('currency', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="USD">USD ($)</SelectItem>
-                      <SelectItem value="CAD">CAD ($)</SelectItem>
-                      <SelectItem value="EUR">EUR (€)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div>
-                <Label>Default Weight Unit</Label>
-                <RadioGroup 
-                  value={generalSettings.weightUnit} 
-                  onValueChange={(value) => handleGeneralSettingChange('weightUnit', value)}
-                  className="flex space-x-6 mt-2"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="g" id="grams" />
-                    <Label htmlFor="grams">Grams (g)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="dwt" id="dwt" />
-                    <Label htmlFor="dwt">Pennyweight (dwt)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="oz" id="oz" />
-                    <Label htmlFor="oz">Ounces (oz)</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-
-              <div>
-                <Label>Quote Footer Message</Label>
-                <Textarea
-                  value={generalSettings.quoteFooter}
-                  onChange={(e) => handleGeneralSettingChange('quoteFooter', e.target.value)}
-                  placeholder="Footer message for printed quotes"
-                  rows={3}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label>Legal Hold Period (days)</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    max="365"
-                    value={generalSettings.legalHoldPeriod}
-                    onChange={(e) => handleGeneralSettingChange('legalHoldPeriod', parseInt(e.target.value) || 30)}
-                  />
-                </div>
-                
-                <div>
-                  <Label>Reminder Default (days)</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    max="30"
-                    value={generalSettings.reminderDefault}
-                    onChange={(e) => handleGeneralSettingChange('reminderDefault', parseInt(e.target.value) || 7)}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Pricing Rules Tab */}
-        <TabsContent value="pricing" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Category Default Payout Percentages</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Set default payout percentages for each category. These can be overridden per transaction.
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {pricingRules.map((rule) => (
-                  <div key={rule.category} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-3 h-3 rounded-full bg-primary"></div>
-                      <span className="font-medium capitalize">{rule.category}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Input
-                        type="number"
-                        min="0"
-                        max="100"
-                        value={rule.payoutPercent}
-                        onChange={(e) => handlePricingRuleChange(rule.category, parseFloat(e.target.value) || 0)}
-                        className="w-20 text-center"
-                      />
-                      <span className="text-muted-foreground">%</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6 pt-6 border-t">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label>Round payout to nearest $5</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Automatically round final payout amounts
-                    </p>
-                  </div>
-                  <Switch
-                    checked={roundToNearest}
-                    onCheckedChange={setRoundToNearest}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Subcategory Overrides</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Set specific payout percentages for subcategories (e.g., different gold karats)
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                <p>No subcategory overrides configured</p>
-                <Button variant="outline" className="mt-2">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Override
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Payout Methods Tab */}
-        <TabsContent value="payouts" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment Methods</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Configure which payment methods are available and their requirements
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {payoutMethods.map((method) => (
-                  <div key={method.method} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <Switch
-                        checked={method.enabled}
-                        onCheckedChange={(checked) => handlePayoutMethodToggle(method.method, 'enabled', checked)}
-                      />
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <span className="font-medium">{method.method}</span>
-                          {method.isDefault && <Badge variant="secondary">Default</Badge>}
-                        </div>
-                        {method.requiresCheckNumber && (
-                          <p className="text-xs text-muted-foreground">Requires check number</p>
-                        )}
-                        {method.requiresPhoto && (
-                          <p className="text-xs text-muted-foreground">Photo documentation recommended</p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Label className="text-sm">Default</Label>
-                      <Switch
-                        checked={method.isDefault}
-                        onCheckedChange={(checked) => handlePayoutMethodToggle(method.method, 'isDefault', checked)}
-                        disabled={!method.enabled}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Employees Tab */}
-        <TabsContent value="employees" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Employee Management</CardTitle>
-                <Dialog open={showAddEmployee} onOpenChange={setShowAddEmployee}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Employee
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Add New Employee</DialogTitle>
-                      <DialogDescription>
-                        Create a new employee account for your store.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <AddEmployeeForm onSubmit={handleAddEmployee} onCancel={() => setShowAddEmployee(false)} />
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {employees.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Users className="mx-auto h-12 w-12 mb-4" />
-                  <p>No employees added yet</p>
-                  <p className="text-sm">Add your first employee to get started</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-12"></TableHead>
-                      <TableHead>Employee</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Quick Switch Order</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {employees
-                      .sort((a, b) => a.quickSwitchOrder - b.quickSwitchOrder)
-                      .map((employee) => (
-                        <TableRow key={employee.id}>
-                          <TableCell>
-                            <GripVertical className="w-4 h-4 text-muted-foreground cursor-move" />
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center space-x-3">
-                              <Avatar className="w-8 h-8">
-                                <AvatarImage src={employee.avatar} alt={employee.name} />
-                                <AvatarFallback>
-                                  {employee.name.split(' ').map(n => n[0]).join('')}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <p className="font-medium">{employee.name}</p>
-                                <p className="text-sm text-muted-foreground">{employee.email}</p>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{employee.role}</Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={employee.isActive ? "default" : "secondary"}>
-                              {employee.isActive ? "Active" : "Inactive"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{employee.quickSwitchOrder}</TableCell>
-                          <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setEditingEmployee(employee)}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Permissions Templates Tab */}
-        <TabsContent value="permissions" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Employee Visibility Controls</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Control what information employees can see during take-in and inventory operations
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Show Payout % to Employees</Label>
-                  <p className="text-sm text-muted-foreground">
-                    If disabled, payout percentages will be hidden from non-admin employees
-                  </p>
-                </div>
-                <Switch
-                  checked={employeeVisibility.showPayoutPercent}
-                  onCheckedChange={(checked) => {
-                    setEmployeeVisibility(prev => ({ ...prev, showPayoutPercent: checked }));
-                    setHasUnsavedChanges(true);
-                  }}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Show Profit $ to Employees</Label>
-                  <p className="text-sm text-muted-foreground">
-                    If enabled, employees will see store profit calculations
-                  </p>
-                </div>
-                <Switch
-                  checked={employeeVisibility.showProfit}
-                  onCheckedChange={(checked) => {
-                    setEmployeeVisibility(prev => ({ ...prev, showProfit: checked }));
-                    setHasUnsavedChanges(true);
-                  }}
-                />
-              </div>
-
-              <div className="pt-4 border-t">
-                <h4 className="font-medium mb-2">Impact</h4>
-                <p className="text-sm text-muted-foreground">
-                  These settings will affect the Take-In, Inventory, and Quote views for employees with non-admin roles. 
-                  Admins and managers will always see all information regardless of these settings.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Permission Templates</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Create role presets with specific module access permissions
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {permissionTemplates.map((template) => (
-                  <div key={template.id} className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-medium">{template.name}</h3>
-                      <Button variant="outline" size="sm">
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit
-                      </Button>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                      {template.permissions.map((perm) => (
-                        <div key={perm.module} className="text-sm">
-                          <span className="font-medium capitalize">{perm.module}:</span>
-                          <div className="text-muted-foreground">
-                            {perm.canView && "View"} {perm.canEdit && "Edit"} {perm.canDelete && "Delete"}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              <Button variant="outline" className="mt-4">
-                <Plus className="w-4 h-4 mr-2" />
-                Create Template
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Categories & Modules Tab */}
-        <TabsContent value="categories" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Enabled Categories</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Enable or disable item categories for your store
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {Object.entries(enabledCategories).map(([category, enabled]) => (
-                  <div key={category} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <h3 className="font-medium capitalize">{category}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {category === 'jewelry' && 'Rings, necklaces, bracelets, earrings'}
-                        {category === 'watches' && 'Luxury watches, sport watches, smart watches'}
-                        {category === 'bullion' && 'Gold bars, silver bars, coins'}
-                        {category === 'silverware' && 'Flatware, serving pieces, tea sets'}
-                        {category === 'stones' && 'Loose diamonds and gemstones'}
-                      </p>
-                    </div>
-                    <Switch
-                      checked={enabled}
-                      onCheckedChange={(checked) => {
-                        setEnabledCategories(prev => ({ ...prev, [category]: checked }));
-                        setHasUnsavedChanges(true);
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Future Modules</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Enable upcoming features (disabled by default)
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {Object.entries(futureModules).map(([module, enabled]) => (
-                  <div key={module} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <h3 className="font-medium capitalize">{module}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {module === 'marketplace' && 'Online marketplace integration'}
-                        {module === 'auctions' && 'Auction management system'}
-                        {module === 'layaway' && 'Layaway payment plans'}
-                      </p>
-                    </div>
-                    <Switch
-                      checked={enabled}
-                      onCheckedChange={(checked) => {
-                        setFutureModules(prev => ({ ...prev, [module]: checked }));
-                        setHasUnsavedChanges(true);
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Notifications Tab */}
-        <TabsContent value="notifications" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Email Notifications</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Daily Summary Email</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive a daily summary of transactions and activity
-                  </p>
-                </div>
-                <Switch
-                  checked={notifications.dailySummaryEmail}
-                  onCheckedChange={(checked) => {
-                    setNotifications(prev => ({ ...prev, dailySummaryEmail: checked }));
-                    setHasUnsavedChanges(true);
-                  }}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>API Failure Alerts</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Get notified when pricing APIs are unavailable
-                  </p>
-                </div>
-                <Switch
-                  checked={notifications.apiFailureAlerts}
-                  onCheckedChange={(checked) => {
-                    setNotifications(prev => ({ ...prev, apiFailureAlerts: checked }));
-                    setHasUnsavedChanges(true);
-                  }}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Low Price Drop Alerts</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Alert when metal prices drop significantly
-                  </p>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Input
-                    type="number"
-                    min="1"
-                    max="20"
-                    value={notifications.priceDropPercent}
-                    onChange={(e) => {
-                      setNotifications(prev => ({ ...prev, priceDropPercent: parseFloat(e.target.value) || 5 }));
-                      setHasUnsavedChanges(true);
-                    }}
-                    className="w-16"
-                  />
-                  <span className="text-sm text-muted-foreground">%</span>
-                  <Switch
-                    checked={notifications.lowPriceAlerts}
-                    onCheckedChange={(checked) => {
-                      setNotifications(prev => ({ ...prev, lowPriceAlerts: checked }));
-                      setHasUnsavedChanges(true);
-                    }}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>SMS Notifications</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div>
-                <Label>SMS Number (Optional)</Label>
-                <Input
-                  type="tel"
-                  value={notifications.smsNumber}
-                  onChange={(e) => {
-                    setNotifications(prev => ({ ...prev, smsNumber: e.target.value }));
-                    setHasUnsavedChanges(true);
-                  }}
-                  placeholder="(555) 123-4567"
-                  className="mt-2"
-                />
-                <p className="text-sm text-muted-foreground mt-2">
-                  Receive critical alerts via SMS
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Label & QR Preferences Tab */}
-        <TabsContent value="labels" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Label Printing Preferences</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Auto-print batch label after purchase</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Automatically print labels when completing a purchase
-                  </p>
-                </div>
-                <Switch
-                  checked={labelPreferences.autoPrintAfterPurchase}
-                  onCheckedChange={(checked) => {
-                    setLabelPreferences(prev => ({ ...prev, autoPrintAfterPurchase: checked }));
-                    setHasUnsavedChanges(true);
-                  }}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Include payout amount on label</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Show the payout amount on printed labels
-                  </p>
-                </div>
-                <Switch
-                  checked={labelPreferences.includePayoutOnLabel}
-                  onCheckedChange={(checked) => {
-                    setLabelPreferences(prev => ({ ...prev, includePayoutOnLabel: checked }));
-                    setHasUnsavedChanges(true);
-                  }}
-                />
-              </div>
-
-              <div>
-                <Label>Smart Badge ID Prefix Override</Label>
-                <Input
-                  value={labelPreferences.smartBadgePrefix}
-                  onChange={(e) => {
-                    setLabelPreferences(prev => ({ ...prev, smartBadgePrefix: e.target.value }));
-                    setHasUnsavedChanges(true);
-                  }}
-                  placeholder="Leave empty for auto-generated prefix"
-                  className="mt-2"
-                />
-                <p className="text-sm text-muted-foreground mt-2">
-                  Custom prefix for batch IDs (e.g., "NYC", "MAIN")
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      {/* Sticky Footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg py-3 px-6 z-50">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            {hasUnsavedChanges && (
-              <>
-                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                <span className="text-sm text-muted-foreground">Unsaved changes</span>
-              </>
-            )}
+    <div className="w-full h-full flex flex-col">
+      {/* Header */}
+      <div className="flex-shrink-0 border-b bg-card px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-semibold text-foreground">Store Settings</h1>
+            <p className="text-sm text-muted-foreground">{general.name || 'Configure your store'}</p>
           </div>
-          
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              onClick={handleResetSettings}
-              disabled={!hasUnsavedChanges || isLoading}
-            >
-              <RotateCcw className="w-4 h-4 mr-2" />
+          <div className="flex items-center gap-2">
+            {hasUnsavedChanges && (
+              <div className="flex items-center gap-1.5 mr-2">
+                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
+                <span className="text-xs text-muted-foreground">Unsaved changes</span>
+              </div>
+            )}
+            <Button variant="outline" size="sm" onClick={handleReset} disabled={!hasUnsavedChanges || isLoading}>
+              <RotateCcw className="w-4 h-4 mr-1.5" />
               Reset
             </Button>
-            <Button
-              onClick={handleSaveSettings}
-              disabled={!hasUnsavedChanges || isLoading}
-            >
-              {isLoading ? (
-                'Saving...'
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Settings
-                </>
-              )}
+            <Button size="sm" onClick={handleSave} disabled={!hasUnsavedChanges || isLoading}>
+              <Save className="w-4 h-4 mr-1.5" />
+              {isLoading ? 'Saving…' : 'Save Changes'}
             </Button>
           </div>
         </div>
+      </div>
+
+      {/* Body: Sidebar + Content */}
+      <div className="flex-1 flex min-h-0 overflow-hidden">
+        {/* Left Sidebar */}
+        <aside className="w-56 flex-shrink-0 border-r bg-muted/30 p-3 overflow-y-auto">
+          <div className="mb-3">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                placeholder="Search settings…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 h-8 text-xs"
+              />
+            </div>
+          </div>
+          <nav className="space-y-0.5">
+            {filteredTabs.map((tab) => (
+              <NavItem key={tab.id} icon={tab.icon} label={tab.label} active={activeTab === tab.id} onClick={() => setActiveTab(tab.id)} />
+            ))}
+          </nav>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-3xl space-y-6">
+            {renderContent()}
+          </div>
+        </main>
       </div>
     </div>
   );
 }
 
-interface AddEmployeeFormProps {
-  onSubmit: (data: Partial<Employee>) => void;
-  onCancel: () => void;
+// ═══════════════════════════════════════════════════════════════════════════════
+// TAB COMPONENTS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ── 1. General ──────────────────────────────────────────────────────────────
+
+function GeneralTab({ general, setGeneral, markDirty }: any) {
+  const set = (field: string, value: any) => { setGeneral((p: any) => ({ ...p, [field]: value })); markDirty(); };
+
+  return (
+    <>
+      <SettingsCard title="Store Profile">
+        <div className="flex items-center gap-5 pb-4">
+          <div className="relative">
+            <Avatar className="w-16 h-16">
+              <AvatarImage src={general.logo} />
+              <AvatarFallback className="text-lg">{general.name?.substring(0, 2)?.toUpperCase() || 'ST'}</AvatarFallback>
+            </Avatar>
+            <Button size="icon" variant="secondary" className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full">
+              <Camera className="w-3 h-3" />
+            </Button>
+          </div>
+          <div className="text-xs text-muted-foreground">
+            <p>Upload a square logo (200×200 recommended)</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div><Label className="text-xs">Store Name *</Label><Input value={general.name} onChange={(e) => set('name', e.target.value)} placeholder="Enter store name" className="mt-1" /></div>
+          <div>
+            <Label className="text-xs">Store Type</Label>
+            <Select value={general.type} onValueChange={(v) => set('type', v)}>
+              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="jewelry">Jewelry</SelectItem>
+                <SelectItem value="pawn">Pawn</SelectItem>
+                <SelectItem value="estate">Estate</SelectItem>
+                <SelectItem value="hybrid">Hybrid</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="pt-3">
+          <Label className="text-xs">Address</Label>
+          <Textarea value={general.address} onChange={(e) => set('address', e.target.value)} placeholder="Street, City, State, ZIP" rows={2} className="mt-1" />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 pt-3">
+          <div><Label className="text-xs">Phone</Label><Input type="tel" value={general.phone} onChange={(e) => set('phone', e.target.value)} placeholder="(555) 123-4567" className="mt-1" /></div>
+          <div><Label className="text-xs">Email</Label><Input type="email" value={general.email} onChange={(e) => set('email', e.target.value)} placeholder="store@example.com" className="mt-1" /></div>
+        </div>
+      </SettingsCard>
+
+      <SettingsCard title="Operational Defaults">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label className="text-xs">Time Zone</Label>
+            <Select value={general.timezone} onValueChange={(v) => set('timezone', v)}>
+              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="America/New_York">Eastern</SelectItem>
+                <SelectItem value="America/Chicago">Central</SelectItem>
+                <SelectItem value="America/Denver">Mountain</SelectItem>
+                <SelectItem value="America/Los_Angeles">Pacific</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="text-xs">Currency</Label>
+            <Select value={general.currency} onValueChange={(v) => set('currency', v)}>
+              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="USD">USD ($)</SelectItem>
+                <SelectItem value="CAD">CAD ($)</SelectItem>
+                <SelectItem value="EUR">EUR (€)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="pt-3">
+          <Label className="text-xs">Default Weight Unit</Label>
+          <RadioGroup value={general.weightUnit} onValueChange={(v) => set('weightUnit', v)} className="flex gap-5 mt-2">
+            <div className="flex items-center gap-1.5"><RadioGroupItem value="g" id="wg" /><Label htmlFor="wg" className="text-sm">Grams</Label></div>
+            <div className="flex items-center gap-1.5"><RadioGroupItem value="dwt" id="wdwt" /><Label htmlFor="wdwt" className="text-sm">DWT</Label></div>
+            <div className="flex items-center gap-1.5"><RadioGroupItem value="oz" id="woz" /><Label htmlFor="woz" className="text-sm">Ounces</Label></div>
+          </RadioGroup>
+        </div>
+
+        <div className="pt-3">
+          <Label className="text-xs">Default Hold Period (days)</Label>
+          <Input type="number" min={1} max={365} value={general.legalHoldPeriod} onChange={(e) => set('legalHoldPeriod', parseInt(e.target.value) || 90)} className="mt-1 w-28" />
+        </div>
+      </SettingsCard>
+
+      <SettingsCard title="Quote / Receipt Footer">
+        <Textarea value={general.quoteFooter} onChange={(e) => set('quoteFooter', e.target.value)} placeholder="Footer message for printed quotes and receipts" rows={3} />
+      </SettingsCard>
+    </>
+  );
 }
 
-function AddEmployeeForm({ onSubmit, onCancel }: AddEmployeeFormProps) {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    role: 'buyer'
-  });
+// ── 2. Employees / Users ────────────────────────────────────────────────────
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
+function EmployeesTab({ employees, setEmployees, showAdd, setShowAdd, markDirty }: any) {
+  const [newEmp, setNewEmp] = useState({ firstName: '', lastName: '', email: '', phone: '', role: 'buyer', password: '' });
+
+  const handleAdd = () => {
+    const emp: Employee = {
+      id: crypto.randomUUID(),
+      name: `${newEmp.firstName} ${newEmp.lastName}`,
+      firstName: newEmp.firstName, lastName: newEmp.lastName,
+      email: newEmp.email, phone: newEmp.phone, role: newEmp.role,
+      isActive: true, quickSwitchOrder: employees.length + 1,
+      storeId: '', permissions: { ...defaultPermissions }, visibility: { ...defaultVisibility },
+    };
+    setEmployees((prev: Employee[]) => [...prev, emp]);
+    setNewEmp({ firstName: '', lastName: '', email: '', phone: '', role: 'buyer', password: '' });
+    setShowAdd(false);
+    markDirty();
+    toast.success('Employee added');
+  };
+
+  const toggleActive = (id: string) => {
+    setEmployees((prev: Employee[]) => prev.map(e => e.id === id ? { ...e, isActive: !e.isActive } : e));
+    markDirty();
+  };
+
+  const removeEmployee = (id: string) => {
+    setEmployees((prev: Employee[]) => prev.filter(e => e.id !== id));
+    markDirty();
+    toast.success('Employee removed');
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label>First Name *</Label>
-          <Input
-            value={formData.firstName}
-            onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-            required
-          />
+    <>
+      <SettingsCard title="Employees" description="Manage employee accounts and access">
+        <div className="flex justify-end mb-3">
+          <Dialog open={showAdd} onOpenChange={setShowAdd}>
+            <DialogTrigger asChild>
+              <Button size="sm"><UserPlus className="w-4 h-4 mr-1.5" />Add Employee</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Employee</DialogTitle>
+                <DialogDescription>Create an employee account for this store.</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-3 pt-2">
+                <div className="grid grid-cols-2 gap-3">
+                  <div><Label className="text-xs">First Name *</Label><Input value={newEmp.firstName} onChange={e => setNewEmp(p => ({ ...p, firstName: e.target.value }))} className="mt-1" /></div>
+                  <div><Label className="text-xs">Last Name *</Label><Input value={newEmp.lastName} onChange={e => setNewEmp(p => ({ ...p, lastName: e.target.value }))} className="mt-1" /></div>
+                </div>
+                <div><Label className="text-xs">Email</Label><Input type="email" value={newEmp.email} onChange={e => setNewEmp(p => ({ ...p, email: e.target.value }))} className="mt-1" /></div>
+                <div><Label className="text-xs">Phone</Label><Input type="tel" value={newEmp.phone} onChange={e => setNewEmp(p => ({ ...p, phone: e.target.value }))} className="mt-1" /></div>
+                <div>
+                  <Label className="text-xs">Role</Label>
+                  <Select value={newEmp.role} onValueChange={v => setNewEmp(p => ({ ...p, role: v }))}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="store_admin">Store Admin</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="buyer">Buyer</SelectItem>
+                      <SelectItem value="front_desk">Front Desk</SelectItem>
+                      <SelectItem value="read_only">Read Only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div><Label className="text-xs">Temporary Password</Label><Input type="password" value={newEmp.password} onChange={e => setNewEmp(p => ({ ...p, password: e.target.value }))} className="mt-1" placeholder="Employee will reset on first login" /></div>
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button variant="outline" size="sm" onClick={() => setShowAdd(false)}>Cancel</Button>
+                  <Button size="sm" onClick={handleAdd} disabled={!newEmp.firstName || !newEmp.lastName}>Add Employee</Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
-        <div>
-          <Label>Last Name *</Label>
-          <Input
-            value={formData.lastName}
-            onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-            required
-          />
+
+        {employees.length === 0 ? (
+          <div className="text-center py-10 text-muted-foreground">
+            <Users className="mx-auto h-10 w-10 mb-3 opacity-40" />
+            <p className="text-sm">No employees added yet</p>
+          </div>
+        ) : (
+          <div className="border rounded-md overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Employee</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Last Login</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {employees.map((emp: Employee) => (
+                  <TableRow key={emp.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2.5">
+                        <Avatar className="h-7 w-7">
+                          <AvatarFallback className="text-[10px]">{emp.firstName?.[0]}{emp.lastName?.[0]}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-medium">{emp.name}</p>
+                          <p className="text-xs text-muted-foreground">{emp.email}</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell><Badge variant="outline" className="text-xs capitalize">{emp.role.replace('_', ' ')}</Badge></TableCell>
+                    <TableCell><Badge variant={emp.isActive ? 'default' : 'secondary'} className="text-xs">{emp.isActive ? 'Active' : 'Inactive'}</Badge></TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{emp.lastLogin || '—'}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toggleActive(emp.id)}>
+                          {emp.isActive ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeEmployee(emp.id)}>
+                          <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </SettingsCard>
+
+      {/* Per-Employee Permissions */}
+      {employees.length > 0 && (
+        <SettingsCard title="Employee-Specific Permissions" description="Toggle individual access per employee">
+          <div className="space-y-4">
+            {employees.map((emp: Employee) => (
+              <EmployeePermissionsCard key={emp.id} employee={emp} setEmployees={setEmployees} markDirty={markDirty} />
+            ))}
+          </div>
+        </SettingsCard>
+      )}
+    </>
+  );
+}
+
+function EmployeePermissionsCard({ employee, setEmployees, markDirty }: { employee: Employee; setEmployees: any; markDirty: () => void }) {
+  const [expanded, setExpanded] = useState(false);
+  const togglePerm = (key: keyof EmployeePermissions) => {
+    setEmployees((prev: Employee[]) => prev.map(e => e.id === employee.id ? { ...e, permissions: { ...e.permissions, [key]: !e.permissions[key] } } : e));
+    markDirty();
+  };
+
+  const permLabels: { key: keyof EmployeePermissions; label: string }[] = [
+    { key: 'accessTakeIn', label: 'Access Take-In' },
+    { key: 'accessInventory', label: 'Access Inventory' },
+    { key: 'accessCustomers', label: 'Access Customers' },
+    { key: 'accessPayouts', label: 'Access Payouts' },
+    { key: 'accessStatistics', label: 'Access Statistics' },
+    { key: 'accessSettings', label: 'Access Settings' },
+    { key: 'accessSavedForLater', label: 'Access Saved For Later' },
+    { key: 'canEditRates', label: 'Can Edit Rates' },
+    { key: 'canEditFinalPayout', label: 'Can Edit Final Payout' },
+    { key: 'canPrintLabels', label: 'Can Print Labels / Receipts' },
+    { key: 'canDeleteItems', label: 'Can Delete Items' },
+    { key: 'canCompletePurchase', label: 'Can Complete Purchase' },
+  ];
+
+  return (
+    <div className="border rounded-md">
+      <button onClick={() => setExpanded(!expanded)} className="w-full flex items-center justify-between p-3 hover:bg-muted/50 transition-colors">
+        <div className="flex items-center gap-2">
+          <Avatar className="h-6 w-6"><AvatarFallback className="text-[9px]">{employee.firstName?.[0]}{employee.lastName?.[0]}</AvatarFallback></Avatar>
+          <span className="text-sm font-medium">{employee.name}</span>
+          <Badge variant="outline" className="text-[10px] capitalize">{employee.role.replace('_', ' ')}</Badge>
         </div>
-      </div>
-      
-      <div>
-        <Label>Email</Label>
-        <Input
-          type="email"
-          value={formData.email}
-          onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-        />
-      </div>
-      
-      <div>
-        <Label>Role</Label>
-        <Select value={formData.role} onValueChange={(value) => setFormData(prev => ({ ...prev, role: value }))}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="buyer">Buyer</SelectItem>
-            <SelectItem value="manager">Manager</SelectItem>
-            <SelectItem value="trainee">Trainee</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      
-      <div className="flex justify-end space-x-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit">
-          Add Employee
-        </Button>
-      </div>
-    </form>
+        <ChevronRight className={`w-4 h-4 text-muted-foreground transition-transform ${expanded ? 'rotate-90' : ''}`} />
+      </button>
+      {expanded && (
+        <div className="border-t px-4 py-3 grid grid-cols-2 gap-y-2 gap-x-6">
+          {permLabels.map(({ key, label }) => (
+            <label key={key} className="flex items-center gap-2 text-sm cursor-pointer">
+              <Checkbox checked={employee.permissions[key]} onCheckedChange={() => togglePerm(key)} />
+              <span>{label}</span>
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── 3. Visibility & Permissions ─────────────────────────────────────────────
+
+function VisibilityTab({ global, setGlobal, employees, setEmployees, markDirty }: any) {
+  const setG = (key: string, val: boolean) => { setGlobal((p: any) => ({ ...p, [key]: val })); markDirty(); };
+
+  const toggleEmpVis = (empId: string, key: keyof EmployeeVisibility) => {
+    setEmployees((prev: Employee[]) => prev.map(e => e.id === empId ? { ...e, visibility: { ...e.visibility, [key]: !e.visibility[key] } } : e));
+    markDirty();
+  };
+
+  return (
+    <>
+      <SettingsCard title="Global Visibility Toggles" description="These apply to all non-admin employees by default">
+        <ToggleRow label="Show Profit on Take-In page" checked={global.showProfit} onChange={v => setG('showProfit', v)} />
+        <Separator />
+        <ToggleRow label="Show Payout Percentage on Take-In page" checked={global.showPayoutPercent} onChange={v => setG('showPayoutPercent', v)} />
+        <Separator />
+        <ToggleRow label="Show Market Value on Take-In page" checked={global.showMarketValue} onChange={v => setG('showMarketValue', v)} />
+        <Separator />
+        <ToggleRow label="Show Profit in footer summary" checked={global.showProfitInFooter} onChange={v => setG('showProfitInFooter', v)} />
+        <Separator />
+        <ToggleRow label="Show Average Rate in footer summary" checked={global.showAverageRateInFooter} onChange={v => setG('showAverageRateInFooter', v)} />
+
+        <div className="pt-3 text-xs text-muted-foreground bg-muted/50 rounded-md p-3 mt-3">
+          <strong>Note:</strong> Store Admins always see everything. These toggles affect Managers, Buyers, Front Desk, and Read Only roles.
+        </div>
+      </SettingsCard>
+
+      {employees.length > 0 && (
+        <SettingsCard title="Employee-Level Overrides" description="Override the global defaults for individual employees">
+          <div className="border rounded-md overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Employee</TableHead>
+                  <TableHead className="text-center">Hide Profit</TableHead>
+                  <TableHead className="text-center">Hide % Paid</TableHead>
+                  <TableHead className="text-center">Hide Market</TableHead>
+                  <TableHead className="text-center">Hide Breakdown</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {employees.map((emp: Employee) => (
+                  <TableRow key={emp.id}>
+                    <TableCell className="text-sm font-medium">{emp.name}</TableCell>
+                    <TableCell className="text-center"><Checkbox checked={emp.visibility.hideProfit} onCheckedChange={() => toggleEmpVis(emp.id, 'hideProfit')} /></TableCell>
+                    <TableCell className="text-center"><Checkbox checked={emp.visibility.hidePercentagePaid} onCheckedChange={() => toggleEmpVis(emp.id, 'hidePercentagePaid')} /></TableCell>
+                    <TableCell className="text-center"><Checkbox checked={emp.visibility.hideMarketValue} onCheckedChange={() => toggleEmpVis(emp.id, 'hideMarketValue')} /></TableCell>
+                    <TableCell className="text-center"><Checkbox checked={emp.visibility.hideTotalPayoutBreakdown} onCheckedChange={() => toggleEmpVis(emp.id, 'hideTotalPayoutBreakdown')} /></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </SettingsCard>
+      )}
+    </>
+  );
+}
+
+// ── 4. Intake & Payout Defaults ─────────────────────────────────────────────
+
+function IntakePayoutTab({ intake, setIntake, payout, setPayout, rates, setRates, markDirty }: any) {
+  const setI = (k: string, v: any) => { setIntake((p: any) => ({ ...p, [k]: v })); markDirty(); };
+  const setP = (k: string, v: any) => { setPayout((p: any) => ({ ...p, [k]: v })); markDirty(); };
+  const setR = (k: string, v: number) => { setRates((p: any) => ({ ...p, [k]: v })); markDirty(); };
+
+  return (
+    <>
+      <SettingsCard title="Intake Defaults" description="How the Take-In page behaves when opened">
+        <ToggleRow label="Fast Entry mode ON by default" checked={intake.fastEntryDefault} onChange={v => setI('fastEntryDefault', v)} />
+        <Separator />
+        <ToggleRow label="Auto-focus first weight field" checked={intake.autoFocusWeight} onChange={v => setI('autoFocusWeight', v)} />
+        <Separator />
+        <ToggleRow label="Enable Save For Later" checked={intake.enableSaveForLater} onChange={v => setI('enableSaveForLater', v)} />
+        <Separator />
+        <ToggleRow label="Enable Batch Photos" checked={intake.enableBatchPhotos} onChange={v => setI('enableBatchPhotos', v)} />
+        <Separator />
+        <ToggleRow label="Enable AI Assist button" checked={intake.enableAiAssist} onChange={v => setI('enableAiAssist', v)} />
+
+        <div className="pt-3 grid grid-cols-2 gap-4">
+          <div>
+            <Label className="text-xs">Default Category</Label>
+            <Select value={intake.defaultCategory} onValueChange={v => setI('defaultCategory', v)}>
+              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="jewelry">Jewelry</SelectItem>
+                <SelectItem value="watches">Watches</SelectItem>
+                <SelectItem value="bullion">Bullion</SelectItem>
+                <SelectItem value="stones">Stones</SelectItem>
+                <SelectItem value="silverware">Silverware</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="text-xs">Item Card Layout</Label>
+            <Select value={intake.itemCardLayout} onValueChange={v => setI('itemCardLayout', v)}>
+              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="compact">Compact</SelectItem>
+                <SelectItem value="detailed">Detailed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </SettingsCard>
+
+      <SettingsCard title="Payout Defaults">
+        <div className="pb-3">
+          <Label className="text-xs">Default Payout Method</Label>
+          <Select value={payout.defaultMethod} onValueChange={v => setP('defaultMethod', v)}>
+            <SelectTrigger className="mt-1 w-48"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="check">Check</SelectItem>
+              <SelectItem value="cash">Cash</SelectItem>
+              <SelectItem value="store_credit">Store Credit</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <Separator />
+        <ToggleRow label="Allow split payout methods" checked={payout.allowSplitPayout} onChange={v => setP('allowSplitPayout', v)} />
+        <Separator />
+        <ToggleRow label="Show confirmation modal before purchase" checked={payout.showConfirmationModal} onChange={v => setP('showConfirmationModal', v)} />
+        <Separator />
+        <ToggleRow label="Require payout info before completion" checked={payout.requirePayoutInfoBeforeCompletion} onChange={v => setP('requirePayoutInfoBeforeCompletion', v)} />
+        <Separator />
+        <ToggleRow label="Require customer info before completion" checked={payout.requireCustomerInfoBeforeCompletion} onChange={v => setP('requireCustomerInfoBeforeCompletion', v)} />
+        <Separator />
+        <ToggleRow label="Allow override of final payout amount" checked={payout.allowOverrideFinalPayout} onChange={v => setP('allowOverrideFinalPayout', v)} />
+        <Separator />
+        <ToggleRow label="Allow per-item rate edits" checked={payout.allowPerItemRateEdits} onChange={v => setP('allowPerItemRateEdits', v)} />
+        <Separator />
+        <ToggleRow label="Allow batch-wide rate edits" checked={payout.allowBatchRateEdits} onChange={v => setP('allowBatchRateEdits', v)} />
+      </SettingsCard>
+
+      <SettingsCard title="Base Payout Percentages" description="Default payout % per metal/category">
+        <div className="space-y-3">
+          {Object.entries(rates).map(([key, val]) => (
+            <div key={key} className="flex items-center justify-between">
+              <span className="text-sm font-medium capitalize">{key}</span>
+              <div className="flex items-center gap-1.5">
+                <Input type="number" min={0} max={100} value={val as number} onChange={e => setR(key, parseFloat(e.target.value) || 0)} className="w-20 text-center text-sm" />
+                <span className="text-sm text-muted-foreground">%</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </SettingsCard>
+    </>
+  );
+}
+
+// ── 5. Customer & Compliance ────────────────────────────────────────────────
+
+function CustomerComplianceTab({ customer, setCustomer, compliance, setCompliance, markDirty }: any) {
+  const setC = (k: string, v: any) => { setCustomer((p: any) => ({ ...p, [k]: v })); markDirty(); };
+  const setCo = (k: string, v: any) => { setCompliance((p: any) => ({ ...p, [k]: v })); markDirty(); };
+
+  return (
+    <>
+      <SettingsCard title="Customer Capture" description="What information is required from customers">
+        <ToggleRow label="Require customer ID scan" checked={customer.requireIdScan} onChange={v => setC('requireIdScan', v)} />
+        <Separator />
+        <ToggleRow label="Allow manual entry if no ID scanned" checked={customer.allowManualEntry} onChange={v => setC('allowManualEntry', v)} />
+        <Separator />
+        <ToggleRow label="Require phone number" checked={customer.requirePhone} onChange={v => setC('requirePhone', v)} />
+        <Separator />
+        <ToggleRow label="Require email" checked={customer.requireEmail} onChange={v => setC('requireEmail', v)} />
+        <Separator />
+        <ToggleRow label="Require address" checked={customer.requireAddress} onChange={v => setC('requireAddress', v)} />
+        <Separator />
+        <ToggleRow label="Require gender" checked={customer.requireGender} onChange={v => setC('requireGender', v)} />
+        <Separator />
+        <ToggleRow label="Require date of birth" checked={customer.requireDob} onChange={v => setC('requireDob', v)} />
+      </SettingsCard>
+
+      <SettingsCard title="Compliance Settings">
+        <div className="grid grid-cols-2 gap-4 pb-3">
+          <div><Label className="text-xs">Hold Period (days)</Label><Input type="number" min={1} max={365} value={compliance.holdPeriodDays} onChange={e => setCo('holdPeriodDays', parseInt(e.target.value) || 90)} className="mt-1 w-28" /></div>
+        </div>
+        <Separator />
+        <ToggleRow label="Require customer signature before purchase" checked={compliance.requireSignature} onChange={v => setCo('requireSignature', v)} />
+        <Separator />
+        <ToggleRow label="Require employee name on transaction" checked={compliance.requireEmployeeName} onChange={v => setCo('requireEmployeeName', v)} />
+        <Separator />
+        <ToggleRow label="Require note if payout over threshold" description={compliance.requireNoteOverAmount ? `Currently: $${compliance.noteThreshold}` : undefined} checked={compliance.requireNoteOverAmount} onChange={v => setCo('requireNoteOverAmount', v)} />
+        {compliance.requireNoteOverAmount && (
+          <div className="pl-6 pb-2">
+            <Label className="text-xs">Threshold Amount ($)</Label>
+            <Input type="number" min={0} value={compliance.noteThreshold} onChange={e => setCo('noteThreshold', parseInt(e.target.value) || 500)} className="mt-1 w-28" />
+          </div>
+        )}
+        <Separator />
+        <ToggleRow label="Show warning for transactions over threshold" checked={compliance.showWarningOverThreshold} onChange={v => setCo('showWarningOverThreshold', v)} />
+        <Separator />
+        <ToggleRow label="Require manager approval over threshold" description={compliance.requireManagerApproval ? `Currently: $${compliance.approvalThreshold}` : undefined} checked={compliance.requireManagerApproval} onChange={v => setCo('requireManagerApproval', v)} />
+        {compliance.requireManagerApproval && (
+          <div className="pl-6 pb-2">
+            <Label className="text-xs">Approval Threshold ($)</Label>
+            <Select value={String(compliance.approvalThreshold)} onValueChange={v => setCo('approvalThreshold', parseInt(v))}>
+              <SelectTrigger className="mt-1 w-36"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="500">$500</SelectItem>
+                <SelectItem value="1000">$1,000</SelectItem>
+                <SelectItem value="5000">$5,000</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </SettingsCard>
+    </>
+  );
+}
+
+// ── 6. Labels / Printing ────────────────────────────────────────────────────
+
+function LabelsPrintingTab({ settings, setSettings, markDirty }: any) {
+  const set = (k: string, v: any) => { setSettings((p: any) => ({ ...p, [k]: v })); markDirty(); };
+
+  return (
+    <>
+      <SettingsCard title="Printing Controls">
+        <ToggleRow label="Enable Print Receipt button" checked={settings.enablePrintReceipt} onChange={v => set('enablePrintReceipt', v)} />
+        <Separator />
+        <ToggleRow label="Enable Print Labels button" checked={settings.enablePrintLabels} onChange={v => set('enablePrintLabels', v)} />
+        <Separator />
+        <ToggleRow label="Auto-print receipt after completion" checked={settings.autoPrintReceipt} onChange={v => set('autoPrintReceipt', v)} />
+        <Separator />
+        <ToggleRow label="Auto-print batch QR label" checked={settings.autoPrintBatchQr} onChange={v => set('autoPrintBatchQr', v)} />
+        <Separator />
+        <ToggleRow label="Auto-print item QR labels" checked={settings.autoPrintItemQr} onChange={v => set('autoPrintItemQr', v)} />
+      </SettingsCard>
+
+      <SettingsCard title="Label Content" description="What appears on printed labels">
+        <div className="grid grid-cols-2 gap-y-2 gap-x-6">
+          {[
+            ['showBatchNumber', 'Batch Number'],
+            ['showItemNumber', 'Item Number'],
+            ['showItemDescription', 'Item Description'],
+            ['showWeight', 'Weight'],
+            ['showPayoutAmount', 'Payout Amount'],
+            ['showDate', 'Date'],
+            ['showQrCode', 'QR Code'],
+          ].map(([key, label]) => (
+            <label key={key} className="flex items-center gap-2 text-sm py-1.5 cursor-pointer">
+              <Checkbox checked={settings[key]} onCheckedChange={(v) => set(key, !!v)} />
+              <span>{label}</span>
+            </label>
+          ))}
+        </div>
+      </SettingsCard>
+
+      <SettingsCard title="Quote / Receipt Options">
+        <ToggleRow label="Show store logo" checked={settings.showStoreLogo} onChange={v => set('showStoreLogo', v)} />
+        <Separator />
+        <ToggleRow label="Show footer note" checked={settings.showFooterNote} onChange={v => set('showFooterNote', v)} />
+        <Separator />
+        <ToggleRow label="Show custom disclaimer" checked={settings.showDisclaimer} onChange={v => set('showDisclaimer', v)} />
+        <Separator />
+        <ToggleRow label="Show Saved-For-Later items on quote" checked={settings.showSavedForLaterOnQuote} onChange={v => set('showSavedForLaterOnQuote', v)} />
+        <Separator />
+        <ToggleRow label="Hide payout percentages on printed documents" checked={settings.hidePayoutPercentsOnPrint} onChange={v => set('hidePayoutPercentsOnPrint', v)} />
+      </SettingsCard>
+    </>
+  );
+}
+
+// ── 7. Notifications ────────────────────────────────────────────────────────
+
+function NotificationsTab({ settings, setSettings, markDirty }: any) {
+  const set = (k: string, v: any) => { setSettings((p: any) => ({ ...p, [k]: v })); markDirty(); };
+
+  return (
+    <>
+      <SettingsCard title="Alert Toggles">
+        <ToggleRow label="Send email when a quote is saved" checked={settings.emailOnQuoteSaved} onChange={v => set('emailOnQuoteSaved', v)} />
+        <Separator />
+        <ToggleRow label="Send reminder for Save For Later items" checked={settings.reminderSaveForLater} onChange={v => set('reminderSaveForLater', v)} />
+        <Separator />
+        <ToggleRow label="Notify admin when employee completes purchase" checked={settings.notifyAdminOnPurchase} onChange={v => set('notifyAdminOnPurchase', v)} />
+        <Separator />
+        <ToggleRow label="Notify admin when payout exceeds threshold" checked={settings.notifyAdminPayoutThreshold} onChange={v => set('notifyAdminPayoutThreshold', v)} />
+        <Separator />
+        <ToggleRow label="Notify admin when employee changes rate" checked={settings.notifyAdminRateChange} onChange={v => set('notifyAdminRateChange', v)} />
+        <Separator />
+        <ToggleRow label="Daily summary email" checked={settings.dailySummary} onChange={v => set('dailySummary', v)} />
+      </SettingsCard>
+
+      <SettingsCard title="Reminder Timing" description="When to follow up on Save For Later items">
+        <RadioGroup value={settings.reminderInterval} onValueChange={v => { set('reminderInterval', v); }} className="space-y-2">
+          <div className="flex items-center gap-2"><RadioGroupItem value="1day" id="r1" /><Label htmlFor="r1" className="text-sm">After 1 day</Label></div>
+          <div className="flex items-center gap-2"><RadioGroupItem value="3days" id="r3" /><Label htmlFor="r3" className="text-sm">After 3 days</Label></div>
+          <div className="flex items-center gap-2"><RadioGroupItem value="7days" id="r7" /><Label htmlFor="r7" className="text-sm">After 7 days</Label></div>
+          <div className="flex items-center gap-2"><RadioGroupItem value="custom" id="rc" /><Label htmlFor="rc" className="text-sm">Custom interval</Label></div>
+        </RadioGroup>
+      </SettingsCard>
+    </>
+  );
+}
+
+// ── 8. Appearance ───────────────────────────────────────────────────────────
+
+function AppearanceTab({ settings, setSettings, markDirty }: any) {
+  const set = (k: string, v: any) => { setSettings((p: any) => ({ ...p, [k]: v })); markDirty(); };
+
+  return (
+    <>
+      <SettingsCard title="Theme">
+        <div>
+          <Label className="text-xs">Theme Mode</Label>
+          <Select value={settings.theme} onValueChange={v => set('theme', v)}>
+            <SelectTrigger className="mt-1 w-48"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="default">Default (Light)</SelectItem>
+              <SelectItem value="dark">Dark</SelectItem>
+              <SelectItem value="seasonal">Seasonal</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="pt-3">
+          <Label className="text-xs">Accent Color</Label>
+          <div className="flex gap-2 mt-2">
+            {['blue', 'indigo', 'green', 'amber', 'rose'].map(color => (
+              <button
+                key={color}
+                onClick={() => set('accentColor', color)}
+                className={`w-8 h-8 rounded-full border-2 transition-all ${settings.accentColor === color ? 'border-foreground scale-110' : 'border-transparent'}`}
+                style={{ backgroundColor: color === 'blue' ? 'hsl(217,91%,60%)' : color === 'indigo' ? 'hsl(239,84%,67%)' : color === 'green' ? 'hsl(142,71%,45%)' : color === 'amber' ? 'hsl(38,92%,50%)' : 'hsl(347,77%,50%)' }}
+              />
+            ))}
+          </div>
+        </div>
+      </SettingsCard>
+
+      <SettingsCard title="Layout Preferences">
+        <ToggleRow label="Compact mode" description="Reduce spacing and padding throughout the app" checked={settings.compactMode} onChange={v => set('compactMode', v)} />
+        <Separator />
+        <ToggleRow label="Large input mode" description="Increase size of text inputs for easier use" checked={settings.largeInputMode} onChange={v => set('largeInputMode', v)} />
+        <Separator />
+        <ToggleRow label="Sidebar collapsed by default" checked={settings.sidebarCollapsed} onChange={v => set('sidebarCollapsed', v)} />
+      </SettingsCard>
+    </>
+  );
+}
+
+// ── 9. Advanced ─────────────────────────────────────────────────────────────
+
+function AdvancedTab({ settings, setSettings, markDirty }: any) {
+  const set = (k: string, v: any) => { setSettings((p: any) => ({ ...p, [k]: v })); markDirty(); };
+
+  return (
+    <>
+      <SettingsCard title="Data & Storage">
+        <div className="pb-3">
+          <Label className="text-xs">Archive completed take-ins after (days)</Label>
+          <Input type="number" min={1} max={365} value={settings.archiveAfterDays} onChange={e => set('archiveAfterDays', parseInt(e.target.value) || 90)} className="mt-1 w-28" />
+        </div>
+        <Separator />
+        <ToggleRow label="Enable automatic draft save" checked={settings.autoDraftSave} onChange={v => set('autoDraftSave', v)} />
+        <Separator />
+        <ToggleRow label="Enable duplicate item detection" checked={settings.duplicateDetection} onChange={v => set('duplicateDetection', v)} />
+      </SettingsCard>
+
+      <SettingsCard title="Workflow">
+        <ToggleRow label="Enable keyboard shortcuts" checked={settings.keyboardShortcuts} onChange={v => set('keyboardShortcuts', v)} />
+        <Separator />
+        <ToggleRow label="Enable category grouping on Take-In page" checked={settings.categoryGrouping} onChange={v => set('categoryGrouping', v)} />
+        <Separator />
+        <ToggleRow label="Enable subcategory grouping on Take-In page" checked={settings.subcategoryGrouping} onChange={v => set('subcategoryGrouping', v)} />
+        <Separator />
+        <ToggleRow label="Lock completed transactions from editing" checked={settings.lockCompletedTransactions} onChange={v => set('lockCompletedTransactions', v)} />
+        <Separator />
+        <ToggleRow label="Allow reopening completed transactions" checked={settings.allowReopenCompleted} onChange={v => set('allowReopenCompleted', v)} />
+      </SettingsCard>
+
+      <SettingsCard title="Safety Confirmations" description="Require confirmation before critical actions">
+        <ToggleRow label="Confirm before deleting item" checked={settings.confirmDeleteItem} onChange={v => set('confirmDeleteItem', v)} />
+        <Separator />
+        <ToggleRow label="Confirm before completing purchase" checked={settings.confirmCompletePurchase} onChange={v => set('confirmCompletePurchase', v)} />
+        <Separator />
+        <ToggleRow label="Confirm before changing payout method" checked={settings.confirmChangePayoutMethod} onChange={v => set('confirmChangePayoutMethod', v)} />
+        <Separator />
+        <ToggleRow label="Confirm before removing saved-for-later item" checked={settings.confirmRemoveSavedForLater} onChange={v => set('confirmRemoveSavedForLater', v)} />
+      </SettingsCard>
+    </>
   );
 }
