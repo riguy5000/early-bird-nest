@@ -81,6 +81,7 @@ interface TakeInPageProps {
     defaultPayoutPercentage: number;
     hideProfit: boolean;
     hidePayout: boolean;
+    hideMarketValue: boolean;
     enableFastEntry: boolean;
     autoPrintLabels: boolean;
   };
