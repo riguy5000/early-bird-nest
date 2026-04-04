@@ -626,18 +626,22 @@ export function TakeInBalanced({
           {/* Summary Stats */}
           <div className="flex-1 p-4 space-y-4">
             <div className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Market Value</span>
-                <span className="font-medium tabular-nums">${totalMarket.toFixed(2)}</span>
-              </div>
+              {!store.hideMarketValue && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Market Value</span>
+                  <span className="font-medium tabular-nums">${totalMarket.toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Total Payout</span>
                 <span className="font-semibold text-primary tabular-nums">${totalPayout.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Average %</span>
-                <span className="font-medium tabular-nums">{avgPayout.toFixed(1)}%</span>
-              </div>
+              {!store.hidePayout && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Average %</span>
+                  <span className="font-medium tabular-nums">{avgPayout.toFixed(1)}%</span>
+                </div>
+              )}
               {!store.hideProfit && (
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Profit</span>
