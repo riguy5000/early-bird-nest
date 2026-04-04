@@ -146,7 +146,7 @@ function SettingsCard({ title, description, children }: { title: string; descrip
 
 // ─── Main Component ─────────────────────────────────────────────────────────
 
-export function StoreSettingsModule({ currentStore, onStoreUpdate }: StoreSettingsModuleProps) {
+export function StoreSettingsModule({ currentStore, onStoreUpdate, onSettingsSaved }: StoreSettingsModuleProps) {
   const [activeTab, setActiveTab] = useState('general');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
