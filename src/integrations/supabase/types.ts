@@ -14,36 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      employee_visibility_overrides: {
-        Row: {
-          employee_id: string
-          hide_market_value: boolean | null
-          hide_percentage_paid: boolean | null
-          hide_profit: boolean | null
-          hide_total_payout_breakdown: boolean | null
-          id: string
-          store_id: string
-        }
-        Insert: {
-          employee_id: string
-          hide_market_value?: boolean | null
-          hide_percentage_paid?: boolean | null
-          hide_profit?: boolean | null
-          hide_total_payout_breakdown?: boolean | null
-          id?: string
-          store_id: string
-        }
-        Update: {
-          employee_id?: string
-          hide_market_value?: boolean | null
-          hide_percentage_paid?: boolean | null
-          hide_profit?: boolean | null
-          hide_total_payout_breakdown?: boolean | null
-          id?: string
-          store_id?: string
-        }
-        Relationships: []
-      }
       kv_store_62d2b480: {
         Row: {
           key: string

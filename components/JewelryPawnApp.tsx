@@ -38,15 +38,52 @@ interface JewelryPawnAppProps {
 
 export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
   const [activeModule, setActiveModule] = useState('dashboard');
-  const { visibility, refetch: refetchSettings } = useStoreSettings('store1', 'emp1');
+  
+  // Derive store/employee IDs from user object
+  const storeId = user?.storeId || user?.store?.id || 'default_store';
+  const employeeId = user?.id || 'default_employee';
+  const storeName = user?.store?.name || 'Main Store';
+
+  const { resolved, refetch: refetchSettings, settings: storeSettings } = useStoreSettings(storeId, employeeId);
 
   const modules = [
     { id: 'dashboard', name: 'Dashboard', icon: BarChart3, component: StatisticsModule },
-    { id: 'take-in', name: 'Take-In', icon: Plus, component: () => <TakeInPage store={{ id: 'store1', name: user?.store?.name || 'Main Store', defaultPayoutPercentage: 75, hideProfit: visibility.hideProfit, hidePayout: visibility.hidePayout, hideMarketValue: visibility.hideMarketValue, enableFastEntry: false, autoPrintLabels: true }} employee={{ id: 'emp1', name: user?.name || 'Employee' }} onComplete={(data) => toast.success('Transaction saved')} onClose={() => setActiveModule('dashboard')} /> },
+    { id: 'take-in', name: 'Take-In', icon: Plus, component: () => (
+      <TakeInPage 
+        store={{ 
+          id: storeId, 
+          name: storeName, 
+          defaultPayoutPercentage: 75, 
+          hideProfit: resolved.visibility.hideProfit, 
+          hidePayout: resolved.visibility.hidePayout, 
+          hideMarketValue: resolved.visibility.hideMarketValue, 
+          enableFastEntry: resolved.enableFastEntry, 
+          autoPrintLabels: resolved.enablePrintLabels,
+          requireCustomerInfoBeforeCompletion: resolved.requireCustomerInfoBeforeCompletion,
+          defaultPayoutMethod: resolved.defaultPayoutMethod,
+          enablePrintReceipt: resolved.enablePrintReceipt,
+          enablePrintLabels: resolved.enablePrintLabels,
+          enableAiAssist: resolved.enableAiAssist,
+          confirmCompletePurchase: resolved.confirmCompletePurchase,
+          confirmDeleteItem: resolved.confirmDeleteItem,
+          requireIdScan: resolved.requireIdScan,
+          allowManualEntry: resolved.allowManualEntry,
+          rateDefaults: resolved.rateDefaults,
+        }} 
+        employee={{ id: employeeId, name: user?.name || 'Employee' }} 
+        onComplete={(data) => toast.success('Transaction saved')} 
+        onClose={() => setActiveModule('dashboard')} 
+      />
+    )},
     { id: 'inventory', name: 'Inventory', icon: Package, component: InventoryModule },
     { id: 'customers', name: 'Customers', icon: Users, component: CustomerModule },
     { id: 'payouts', name: 'Payouts', icon: DollarSign, component: PayoutsModule },
-    { id: 'settings', name: 'Settings', icon: Settings, component: () => <StoreSettingsModule currentStore={{ id: 'store1', name: user?.store?.name || 'Main Store', type: 'jewelry' }} /> }
+    { id: 'settings', name: 'Settings', icon: Settings, component: () => (
+      <StoreSettingsModule 
+        currentStore={{ id: storeId, name: storeName, type: 'jewelry' }} 
+        onSettingsSaved={refetchSettings}
+      />
+    )}
   ];
 
   const quickStats = [
@@ -99,7 +136,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
             <div className="flex items-center space-x-2">
               <Store className="h-6 w-6 text-primary" />
               <div>
-                <h1 className="text-xl font-bold">{user?.store?.name || 'Jewelry & Pawn Store'}</h1>
+                <h1 className="text-xl font-bold">{storeName || 'Jewelry & Pawn Store'}</h1>
                 <p className="text-sm text-muted-foreground">Management System</p>
               </div>
             </div>
@@ -202,33 +239,9 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
       </header>
 
       {/* Main Content */}
-      {isTakeIn ? (
-        <div className="flex-1 min-h-0 overflow-hidden">
-          {ActiveComponent && <ActiveComponent user={user} currentStore={user?.store} />}
-        </div>
-      ) : (
-      <main className="p-6">
+      <main className={isTakeIn ? 'flex-1 min-h-0 overflow-hidden' : 'p-6'}>
         {activeModule === 'dashboard' ? (
           <div className="max-w-7xl mx-auto space-y-6">
-            {/* Welcome Section */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">Welcome back, {user?.name?.split(' ')[0] || 'User'}!</h2>
-                <p className="text-muted-foreground">
-                  Here's what's happening at your store today
-                </p>
-              </div>
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                <span>{new Date().toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}</span>
-              </div>
-            </div>
-
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {quickStats.map((stat, index) => (
@@ -239,129 +252,85 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
                         <p className="text-sm text-muted-foreground">{stat.label}</p>
                         <p className="text-2xl font-bold">{stat.value}</p>
                       </div>
-                      <div className={`flex items-center space-x-1 text-sm ${
-                        stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        <TrendingUp className={`h-3 w-3 ${stat.trend === 'down' ? 'rotate-180' : ''}`} />
-                        <span>{stat.change}</span>
-                      </div>
+                      <Badge 
+                        variant={stat.trend === 'up' ? 'default' : 'destructive'}
+                        className="text-xs"
+                      >
+                        <TrendingUp className={`h-3 w-3 mr-1 ${stat.trend === 'down' ? 'rotate-180' : ''}`} />
+                        {stat.change}
+                      </Badge>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
 
-            {/* Main Dashboard Content */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Quick Actions */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
-                  <CardDescription>Common tasks and shortcuts</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button 
-                    className="w-full justify-start" 
-                    variant="outline"
-                    onClick={() => handleQuickAction('take-in')}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    New Take-In
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+                <CardDescription>Common tasks at your fingertips</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Button onClick={() => handleQuickAction('take-in')} className="flex flex-col items-center gap-2 h-auto py-4">
+                    <Plus className="h-5 w-5" />
+                    <span>New Take-In</span>
                   </Button>
-                  <Button 
-                    className="w-full justify-start" 
-                    variant="outline"
-                    onClick={() => handleQuickAction('find-customer')}
-                  >
-                    <Search className="h-4 w-4 mr-2" />
-                    Find Customer
+                  <Button variant="outline" onClick={() => handleQuickAction('find-customer')} className="flex flex-col items-center gap-2 h-auto py-4">
+                    <Users className="h-5 w-5" />
+                    <span>Find Customer</span>
                   </Button>
-                  <Button 
-                    className="w-full justify-start" 
-                    variant="outline"
-                    onClick={() => handleQuickAction('inventory')}
-                  >
-                    <Package className="h-4 w-4 mr-2" />
-                    Check Inventory
+                  <Button variant="outline" onClick={() => handleQuickAction('inventory')} className="flex flex-col items-center gap-2 h-auto py-4">
+                    <Package className="h-5 w-5" />
+                    <span>View Inventory</span>
                   </Button>
-                  <Button 
-                    className="w-full justify-start" 
-                    variant="outline"
-                    onClick={() => handleQuickAction('payout')}
-                  >
-                    <DollarSign className="h-4 w-4 mr-2" />
-                    Process Payout
+                  <Button variant="outline" onClick={() => handleQuickAction('payout')} className="flex flex-col items-center gap-2 h-auto py-4">
+                    <DollarSign className="h-5 w-5" />
+                    <span>Process Payout</span>
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </CardContent>
+            </Card>
 
-              {/* Recent Activity */}
-              <Card className="lg:col-span-2">
-                <CardHeader>
-                  <CardTitle>Recent Activity</CardTitle>
-                  <CardDescription>Latest transactions and updates</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {recentActivities.map((activity, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className={`w-2 h-2 rounded-full ${
-                            activity.type === 'take-in' ? 'bg-blue-500' :
-                            activity.type === 'customer' ? 'bg-green-500' :
-                            activity.type === 'payout' ? 'bg-yellow-500' :
-                            'bg-purple-500'
-                          }`} />
-                          <div>
-                            <p className="text-sm font-medium">{activity.description}</p>
-                            <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                              <Clock className="h-3 w-3" />
-                              <span>{activity.time}</span>
-                            </div>
-                          </div>
+            {/* Recent Activity */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Activity</CardTitle>
+                <CardDescription>Latest transactions and events</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {recentActivities.map((activity, index) => (
+                    <div key={index} className="flex items-center justify-between py-2 border-b last:border-0">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                          {activity.type === 'take-in' && <Plus className="h-4 w-4 text-primary" />}
+                          {activity.type === 'customer' && <User className="h-4 w-4 text-primary" />}
+                          {activity.type === 'payout' && <DollarSign className="h-4 w-4 text-primary" />}
+                          {activity.type === 'inventory' && <Package className="h-4 w-4 text-primary" />}
                         </div>
-                        {activity.value && (
-                          <Badge variant="secondary">{activity.value}</Badge>
-                        )}
+                        <div>
+                          <p className="text-sm font-medium">{activity.description}</p>
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {activity.time}
+                          </p>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Development Status */}
-            <Card className="border-dashed border-2">
-              <CardContent className="flex items-center justify-center py-8 text-center">
-                <div className="space-y-4">
-                  <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
-                    <Package className="h-8 w-8 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-medium">All Modules Available</h3>
-                    <p className="text-muted-foreground max-w-md">
-                      Click on the navigation buttons above to access Take-In, Inventory, 
-                      Customers, Payouts, and Settings modules. Each module is fully functional.
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap items-center justify-center gap-2">
-                    <Badge variant="outline">✅ Take-In Module</Badge>
-                    <Badge variant="outline">✅ Inventory System</Badge>
-                    <Badge variant="outline">✅ Customer CRM</Badge>
-                    <Badge variant="outline">✅ Payouts Module</Badge>
-                    <Badge variant="outline">✅ Store Settings</Badge>
-                  </div>
+                      {activity.value && (
+                        <span className="text-sm font-semibold">{activity.value}</span>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
           </div>
         ) : (
-          <div className="max-w-7xl mx-auto">
-            {ActiveComponent && <ActiveComponent user={user} currentStore={user?.store} />}
-          </div>
+          ActiveComponent && <ActiveComponent />
         )}
       </main>
-      )}
     </div>
   );
 }

@@ -84,6 +84,7 @@ interface EmployeeVisibility {
 interface StoreSettingsModuleProps {
   currentStore: StoreData | null;
   onStoreUpdate?: (store: StoreData) => void;
+  onSettingsSaved?: () => void;
 }
 
 const defaultPermissions: EmployeePermissions = {
@@ -145,7 +146,7 @@ function SettingsCard({ title, description, children }: { title: string; descrip
 
 // ─── Main Component ─────────────────────────────────────────────────────────
 
-export function StoreSettingsModule({ currentStore, onStoreUpdate }: StoreSettingsModuleProps) {
+export function StoreSettingsModule({ currentStore, onStoreUpdate, onSettingsSaved }: StoreSettingsModuleProps) {
   const [activeTab, setActiveTab] = useState('general');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -237,7 +238,7 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate }: StoreSettin
   });
 
   // ── Load settings from Supabase ──
-  const { settings: dbSettings, loading: dbLoading, saveSettings } = useStoreSettings(currentStore?.id || '');
+  const { settings: dbSettings, loading: dbLoading, saveSettings, refetch } = useStoreSettings(currentStore?.id || '');
 
   useEffect(() => {
     if (dbLoading || !currentStore) return;
@@ -319,6 +320,7 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate }: StoreSettin
       if (success) {
         toast.success('Settings saved successfully');
         setHasUnsavedChanges(false);
+        onSettingsSaved?.();
       } else {
         toast.error('Failed to save settings');
       }
@@ -330,8 +332,9 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate }: StoreSettin
   };
 
   const handleReset = () => {
-    // Re-trigger load from DB
-    window.location.reload();
+    refetch();
+    setHasUnsavedChanges(false);
+    toast.success('Settings reset to saved values');
   };
 
   // ── Tab config ──

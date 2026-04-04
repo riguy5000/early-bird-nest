@@ -84,6 +84,16 @@ interface TakeInPageProps {
     hideMarketValue: boolean;
     enableFastEntry: boolean;
     autoPrintLabels: boolean;
+    requireCustomerInfoBeforeCompletion: boolean;
+    defaultPayoutMethod: 'Check' | 'Cash' | 'Store Credit';
+    enablePrintReceipt: boolean;
+    enablePrintLabels: boolean;
+    enableAiAssist: boolean;
+    confirmCompletePurchase: boolean;
+    confirmDeleteItem: boolean;
+    requireIdScan: boolean;
+    allowManualEntry: boolean;
+    rateDefaults: Record<string, number>;
   };
   employee: {
     id: string;
@@ -104,7 +114,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
   const [batchId, setBatchId] = useState('');
   const [showAIAssist, setShowAIAssist] = useState(false);
   const [showAICaptureModal, setShowAICaptureModal] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'Check' | 'Cash' | 'Store Credit'>('Check');
+  const [paymentMethod, setPaymentMethod] = useState<'Check' | 'Cash' | 'Store Credit'>(store.defaultPayoutMethod || 'Check');
   const [checkNumber, setCheckNumber] = useState('');
   const [followUpReminder, setFollowUpReminder] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -214,6 +224,10 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
   const handleSave = useCallback(() => {
     if (items.length === 0) {
       toast.error('Please add at least one item');
+      return;
+    }
+    if (store.requireCustomerInfoBeforeCompletion && !customer) {
+      toast.error('Customer information is required before completing');
       return;
     }
     const totals = calculateTotals();

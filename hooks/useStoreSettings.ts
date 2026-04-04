@@ -28,6 +28,31 @@ export interface ResolvedVisibility {
   hideMarketValue: boolean;
 }
 
+export interface ResolvedSettings {
+  visibility: ResolvedVisibility;
+  requireCustomerInfoBeforeCompletion: boolean;
+  defaultPayoutMethod: 'Check' | 'Cash' | 'Store Credit';
+  enableFastEntry: boolean;
+  enableAiAssist: boolean;
+  enableBatchPhotos: boolean;
+  enablePrintReceipt: boolean;
+  enablePrintLabels: boolean;
+  autoPrintReceipt: boolean;
+  requireIdScan: boolean;
+  allowManualEntry: boolean;
+  requireSignature: boolean;
+  requireManagerApproval: boolean;
+  approvalThreshold: number;
+  showWarningOverThreshold: boolean;
+  noteThreshold: number;
+  requireNoteOverAmount: boolean;
+  holdPeriodDays: number;
+  confirmCompletePurchase: boolean;
+  confirmDeleteItem: boolean;
+  confirmChangePayoutMethod: boolean;
+  rateDefaults: Record<string, number>;
+}
+
 const defaultSettings: StoreSettings = {
   general: {},
   globalVisibility: {
@@ -98,7 +123,7 @@ export function useStoreSettings(storeId: string, employeeId?: string) {
 
   const refetch = useCallback(() => setVersion(v => v + 1), []);
 
-  // Resolve visibility for a specific employee
+  // Resolve visibility for a specific employee (single source: employees JSON)
   const resolveVisibility = useCallback((): ResolvedVisibility => {
     const gv = settings.globalVisibility;
     const base: ResolvedVisibility = {
@@ -109,7 +134,7 @@ export function useStoreSettings(storeId: string, employeeId?: string) {
 
     if (!employeeId) return base;
 
-    // Check employee-level overrides
+    // Employee-level overrides from employees JSON array
     const emp = settings.employees.find((e: any) => e.id === employeeId);
     if (emp?.visibility) {
       return {
@@ -121,6 +146,50 @@ export function useStoreSettings(storeId: string, employeeId?: string) {
 
     return base;
   }, [settings, employeeId]);
+
+  // Resolve all behavioral settings into a flat object for consumers
+  const resolveSettings = useCallback((): ResolvedSettings => {
+    const pd = settings.payoutDefaults as any;
+    const id = settings.intakeDefaults as any;
+    const cs = settings.customerSettings as any;
+    const comp = settings.complianceSettings as any;
+    const ps = settings.printSettings as any;
+    const adv = settings.advanced as any;
+    const rd = settings.rateDefaults as any;
+
+    return {
+      visibility: resolveVisibility(),
+      requireCustomerInfoBeforeCompletion: pd?.requireCustomerInfoBeforeCompletion ?? true,
+      defaultPayoutMethod: (pd?.defaultMethod === 'cash' ? 'Cash' : pd?.defaultMethod === 'store_credit' ? 'Store Credit' : 'Check') as 'Check' | 'Cash' | 'Store Credit',
+      enableFastEntry: id?.fastEntryDefault ?? false,
+      enableAiAssist: id?.enableAiAssist ?? true,
+      enableBatchPhotos: id?.enableBatchPhotos ?? true,
+      enablePrintReceipt: ps?.enablePrintReceipt ?? true,
+      enablePrintLabels: ps?.enablePrintLabels ?? true,
+      autoPrintReceipt: ps?.autoPrintReceipt ?? false,
+      requireIdScan: cs?.requireIdScan ?? true,
+      allowManualEntry: cs?.allowManualEntry ?? true,
+      requireSignature: comp?.requireSignature ?? false,
+      requireManagerApproval: comp?.requireManagerApproval ?? false,
+      approvalThreshold: comp?.approvalThreshold ?? 1000,
+      showWarningOverThreshold: comp?.showWarningOverThreshold ?? true,
+      noteThreshold: comp?.noteThreshold ?? 500,
+      requireNoteOverAmount: comp?.requireNoteOverAmount ?? false,
+      holdPeriodDays: comp?.holdPeriodDays ?? 90,
+      confirmCompletePurchase: adv?.confirmCompletePurchase ?? true,
+      confirmDeleteItem: adv?.confirmDeleteItem ?? true,
+      confirmChangePayoutMethod: adv?.confirmChangePayoutMethod ?? true,
+      rateDefaults: {
+        gold: rd?.gold ?? 78,
+        silver: rd?.silver ?? 75,
+        platinum: rd?.platinum ?? 80,
+        palladium: rd?.palladium ?? 75,
+        stones: rd?.stones ?? 65,
+        watches: rd?.watches ?? 70,
+        bullion: rd?.bullion ?? 85,
+      },
+    };
+  }, [settings, resolveVisibility]);
 
   const saveSettings = useCallback(async (newSettings: StoreSettings) => {
     try {
@@ -155,6 +224,7 @@ export function useStoreSettings(storeId: string, employeeId?: string) {
     settings,
     loading,
     visibility: resolveVisibility(),
+    resolved: resolveSettings(),
     saveSettings,
     refetch,
   };
