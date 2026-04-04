@@ -316,7 +316,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
                       ? 'bg-blue-600 text-white shadow-sm' 
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200'
                   }`}
-                  onClick={() => addNewItem(category)}
+                  onClick={() => addNewItem(category as Item['category'])}
                 >
                   {category}
                 </button>
