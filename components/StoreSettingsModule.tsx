@@ -84,6 +84,7 @@ interface EmployeeVisibility {
 interface StoreSettingsModuleProps {
   currentStore: StoreData | null;
   onStoreUpdate?: (store: StoreData) => void;
+  onSettingsSaved?: () => void;
 }
 
 const defaultPermissions: EmployeePermissions = {
