@@ -238,7 +238,7 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate, onSettingsSav
   });
 
   // ── Load settings from Supabase ──
-  const { settings: dbSettings, loading: dbLoading, saveSettings } = useStoreSettings(currentStore?.id || '');
+  const { settings: dbSettings, loading: dbLoading, saveSettings, refetch } = useStoreSettings(currentStore?.id || '');
 
   useEffect(() => {
     if (dbLoading || !currentStore) return;
