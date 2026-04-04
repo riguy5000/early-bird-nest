@@ -343,22 +343,26 @@ export function TakeInBalanced({
                                       />
                                       <span className="text-[10px] text-muted-foreground">g</span>
 
-                                      <Input
-                                        type="text"
-                                        value={metal.payoutPercentage ?? 75}
-                                        onChange={(e) => {
-                                          const value = e.target.value;
-                                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                                            const numValue = value === '' ? 75 : Math.min(100, Math.max(0, parseFloat(value) || 75));
-                                            updateMetal(item.id, metal.id, { payoutPercentage: numValue });
-                                          }
-                                        }}
-                                        placeholder="75"
-                                        className="w-10 h-6 text-[11px] bg-white border border-slate-200 rounded-md text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                        style={{ MozAppearance: 'textfield' as any }}
-                                        onClick={(e) => e.stopPropagation()}
-                                      />
-                                      <span className="text-[10px] text-muted-foreground">%</span>
+                                      {!store.hidePayout && (
+                                        <>
+                                          <Input
+                                            type="text"
+                                            value={metal.payoutPercentage ?? 75}
+                                            onChange={(e) => {
+                                              const value = e.target.value;
+                                              if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                                const numValue = value === '' ? 75 : Math.min(100, Math.max(0, parseFloat(value) || 75));
+                                                updateMetal(item.id, metal.id, { payoutPercentage: numValue });
+                                              }
+                                            }}
+                                            placeholder="75"
+                                            className="w-10 h-6 text-[11px] bg-white border border-slate-200 rounded-md text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                            style={{ MozAppearance: 'textfield' as any }}
+                                            onClick={(e) => e.stopPropagation()}
+                                          />
+                                          <span className="text-[10px] text-muted-foreground">%</span>
+                                        </>
+                                      )}
 
                                       <span className="text-[11px] font-medium text-green-600 min-w-[45px] text-right tabular-nums">
                                         ${(metal.payoutAmount || 0).toFixed(2)}
