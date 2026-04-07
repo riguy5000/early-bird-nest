@@ -77,7 +77,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
     )},
     { id: 'inventory', name: 'Inventory', icon: Package, component: () => <InventoryModule currentStore={{ id: storeId, name: storeName }} /> },
     { id: 'customers', name: 'Customers', icon: Users, component: () => <CustomerModule user={user} /> },
-    { id: 'payouts', name: 'Payouts', icon: DollarSign, component: PayoutsModule },
+    { id: 'payouts', name: 'Payouts', icon: DollarSign, component: () => <PayoutsModule currentStore={{ id: storeId, name: storeName }} /> },
     { id: 'settings', name: 'Settings', icon: Settings, component: () => (
       <StoreSettingsModule 
         currentStore={{ id: storeId, name: storeName, type: 'jewelry' }} 
