@@ -47,8 +47,6 @@ Deno.serve(async (req) => {
     // Get caller (may be null for unauthenticated actions)
     const caller = (body as any)._caller || null
 
-    const body = await req.json()
-    const { action } = body
 
     // Helper: verify caller owns the store
     async function verifyStoreOwner(storeId: string) {
