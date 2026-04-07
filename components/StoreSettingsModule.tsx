@@ -549,34 +549,155 @@ function GeneralTab({ general, setGeneral, markDirty }: any) {
 
 // ── 2. Employees / Users ────────────────────────────────────────────────────
 
-function EmployeesTab({ employees, setEmployees, showAdd, setShowAdd, markDirty }: any) {
+function EmployeesTab({ employees, setEmployees, showAdd, setShowAdd, markDirty, storeId }: any) {
   const [newEmp, setNewEmp] = useState({ firstName: '', lastName: '', email: '', phone: '', role: 'buyer', password: '' });
+  const [isCreating, setIsCreating] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('buyer');
+  const [showInvite, setShowInvite] = useState(false);
+  const [isInviting, setIsInviting] = useState(false);
 
-  const handleAdd = () => {
-    const emp: Employee = {
-      id: crypto.randomUUID(),
-      name: `${newEmp.firstName} ${newEmp.lastName}`,
-      firstName: newEmp.firstName, lastName: newEmp.lastName,
-      email: newEmp.email, phone: newEmp.phone, role: newEmp.role,
-      isActive: true, quickSwitchOrder: employees.length + 1,
-      storeId: '', permissions: { ...defaultPermissions }, visibility: { ...defaultVisibility },
-    };
-    setEmployees((prev: Employee[]) => [...prev, emp]);
-    setNewEmp({ firstName: '', lastName: '', email: '', phone: '', role: 'buyer', password: '' });
-    setShowAdd(false);
-    markDirty();
-    toast.success('Employee added');
+  const handleAdd = async () => {
+    if (!newEmp.firstName || !newEmp.lastName || !newEmp.email) {
+      toast.error('First name, last name, and email are required');
+      return;
+    }
+    setIsCreating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('employee-management', {
+        body: {
+          action: 'create-employee',
+          storeId,
+          firstName: newEmp.firstName,
+          lastName: newEmp.lastName,
+          email: newEmp.email,
+          phone: newEmp.phone,
+          role: newEmp.role,
+          password: newEmp.password || undefined,
+          isActive: true,
+        },
+      });
+      if (error || data?.error) throw new Error(data?.error || error?.message);
+      
+      // Refresh employee list
+      await refreshEmployees();
+      setNewEmp({ firstName: '', lastName: '', email: '', phone: '', role: 'buyer', password: '' });
+      setShowAdd(false);
+      toast.success('Employee created with real login credentials');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to create employee');
+    } finally {
+      setIsCreating(false);
+    }
   };
 
-  const toggleActive = (id: string) => {
-    setEmployees((prev: Employee[]) => prev.map(e => e.id === id ? { ...e, isActive: !e.isActive } : e));
-    markDirty();
+  const handleInvite = async () => {
+    if (!inviteEmail) { toast.error('Email is required'); return; }
+    setIsInviting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('employee-management', {
+        body: { action: 'invite-employee', storeId, email: inviteEmail, role: inviteRole },
+      });
+      if (error || data?.error) throw new Error(data?.error || error?.message);
+      await refreshEmployees();
+      setInviteEmail('');
+      setShowInvite(false);
+      toast.success('Invite sent! Employee will complete setup via link.');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to send invite');
+    } finally {
+      setIsInviting(false);
+    }
   };
 
-  const removeEmployee = (id: string) => {
-    setEmployees((prev: Employee[]) => prev.filter(e => e.id !== id));
-    markDirty();
-    toast.success('Employee removed');
+  const refreshEmployees = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('employee-management', {
+        body: { action: 'list-employees', storeId },
+      });
+      if (!error && data?.employees) {
+        // Convert DB format to local format
+        const mapped = data.employees.map((e: any) => ({
+          id: e.id,
+          authUserId: e.auth_user_id,
+          name: `${e.first_name} ${e.last_name}`.trim(),
+          firstName: e.first_name,
+          lastName: e.last_name,
+          email: e.email,
+          phone: e.phone,
+          role: e.role,
+          isActive: e.is_active,
+          quickSwitchOrder: 0,
+          storeId: e.store_id,
+          lastLogin: e.last_login_at ? new Date(e.last_login_at).toLocaleDateString() : null,
+          inviteStatus: e.invite_status,
+          permissions: e.employee_permissions?.[0] ? {
+            accessTakeIn: e.employee_permissions[0].can_access_take_in,
+            accessInventory: e.employee_permissions[0].can_access_inventory,
+            accessCustomers: e.employee_permissions[0].can_access_customers,
+            accessPayouts: e.employee_permissions[0].can_access_payouts,
+            accessStatistics: e.employee_permissions[0].can_access_statistics,
+            accessSettings: e.employee_permissions[0].can_access_settings,
+            accessSavedForLater: e.employee_permissions[0].can_access_saved_for_later,
+            canEditRates: e.employee_permissions[0].can_edit_rates,
+            canEditFinalPayout: e.employee_permissions[0].can_edit_final_payout_amount,
+            canPrintLabels: e.employee_permissions[0].can_print_labels,
+            canDeleteItems: e.employee_permissions[0].can_delete_items,
+            canCompletePurchase: e.employee_permissions[0].can_complete_purchase,
+          } : { ...defaultPermissions },
+          visibility: e.employee_visibility_overrides?.[0] ? {
+            hideProfit: e.employee_visibility_overrides[0].hide_profit,
+            hidePercentagePaid: e.employee_visibility_overrides[0].hide_percentage_paid,
+            hideMarketValue: e.employee_visibility_overrides[0].hide_market_value,
+            hideTotalPayoutBreakdown: e.employee_visibility_overrides[0].hide_total_payout_breakdown,
+          } : { ...defaultVisibility },
+        }));
+        setEmployees(mapped);
+      }
+    } catch (err) {
+      console.error('Failed to refresh employees:', err);
+    }
+  };
+
+  // Load employees from DB on mount
+  useState(() => { if (storeId) refreshEmployees(); });
+
+  const toggleActive = async (id: string, currentlyActive: boolean) => {
+    try {
+      const { error } = await supabase.functions.invoke('employee-management', {
+        body: { action: 'toggle-employee-status', storeId, employeeProfileId: id, isActive: !currentlyActive },
+      });
+      if (error) throw error;
+      setEmployees((prev: Employee[]) => prev.map(e => e.id === id ? { ...e, isActive: !e.isActive } : e));
+      toast.success(`Employee ${!currentlyActive ? 'activated' : 'deactivated'}`);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update status');
+    }
+  };
+
+  const removeEmployee = async (id: string) => {
+    try {
+      const { error } = await supabase.functions.invoke('employee-management', {
+        body: { action: 'delete-employee', storeId, employeeProfileId: id },
+      });
+      if (error) throw error;
+      setEmployees((prev: Employee[]) => prev.filter(e => e.id !== id));
+      toast.success('Employee removed');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to remove employee');
+    }
+  };
+
+  const handleResetPassword = async (id: string) => {
+    try {
+      const { error } = await supabase.functions.invoke('employee-management', {
+        body: { action: 'reset-employee-password', storeId, employeeProfileId: id },
+      });
+      if (error) throw error;
+      toast.success('Password reset email sent');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to send reset');
+    }
   };
 
   return (
