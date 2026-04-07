@@ -47,7 +47,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
   const { resolved, refetch: refetchSettings, settings: storeSettings } = useStoreSettings(storeId, employeeId);
 
   const modules = [
-    { id: 'dashboard', name: 'Dashboard', icon: BarChart3, component: StatisticsModule },
+    { id: 'dashboard', name: 'Dashboard', icon: BarChart3, component: () => <StatisticsModule currentStore={{ id: storeId, name: storeName, address: '', phone: '', email: '', type: 'jewelry', timezone: 'America/New_York', settings: {} as any, createdAt: '' }} /> },
     { id: 'take-in', name: 'Take-In', icon: Plus, component: () => (
       <TakeInPage 
         store={{ 
