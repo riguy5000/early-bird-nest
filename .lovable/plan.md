@@ -1,134 +1,142 @@
+# Full Backend Implementation — Phased Plan
 
+## Why Phases?
+This touches every layer: DB schema, auth, edge functions, RLS, UI, and runtime enforcement. Doing it all at once risks breaking the app entirely. Each phase delivers working, testable functionality.
 
-# Persist Store Settings to Supabase + Wire Visibility Toggles
+---
 
-## Overview
+## Phase 1: Database Schema + Real Auth Login
+**Goal:** Replace mock localStorage auth with real Supabase Auth. Create normalized tables.
 
-Create a `store_settings` table in Supabase to persist all 9 tabs of settings. Then wire the visibility toggles so the Take-In page dynamically hides/shows profit, payout percentage, and market value based on the saved settings and current employee overrides.
+### Database Changes
+- Create `stores` table (id, name, type, address, phone, email, timezone, logo_url, owner_auth_user_id)
+- Create `employee_profiles` table (id, auth_user_id, store_id, first_name, last_name, email, phone, role, is_active, avatar_url, invited_by, invite_status, last_login_at)
+- Create `employee_permissions` table (id, employee_profile_id, all permission booleans)
+- Create `employee_visibility_overrides` table (id, employee_profile_id, all visibility booleans)
+- Add proper foreign keys and RLS policies
+- Keep existing `store_settings` table but stop using its `employees` JSON blob for auth
 
-## Database
+### Auth Changes
+- Replace localStorage/sessionStorage login with `supabase.auth.signInWithEmailAndPassword()`
+- After login: resolve employee_profile → store_id → role → permissions → visibility
+- Block inactive employees
+- Route to correct UI based on role
+- Update `last_login_at` on successful login
 
-### New table: `store_settings`
+### Deliverable: Users can log in with real Supabase Auth, and the app resolves their store/role/permissions from the database.
 
-```sql
-CREATE TABLE public.store_settings (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  store_id text NOT NULL UNIQUE,
-  general jsonb NOT NULL DEFAULT '{}',
-  global_visibility jsonb NOT NULL DEFAULT '{}',
-  intake_defaults jsonb NOT NULL DEFAULT '{}',
-  payout_defaults jsonb NOT NULL DEFAULT '{}',
-  rate_defaults jsonb NOT NULL DEFAULT '{}',
-  customer_settings jsonb NOT NULL DEFAULT '{}',
-  compliance_settings jsonb NOT NULL DEFAULT '{}',
-  print_settings jsonb NOT NULL DEFAULT '{}',
-  notification_settings jsonb NOT NULL DEFAULT '{}',
-  appearance jsonb NOT NULL DEFAULT '{}',
-  advanced jsonb NOT NULL DEFAULT '{}',
-  employees jsonb NOT NULL DEFAULT '[]',
-  updated_at timestamptz NOT NULL DEFAULT now(),
-  created_at timestamptz NOT NULL DEFAULT now()
-);
+---
 
-ALTER TABLE public.store_settings ENABLE ROW LEVEL SECURITY;
+## Phase 2: Employee Creation + Invite Flow
+**Goal:** Store Admin can create employees (Method A: manual) and invite them (Method B: email link).
 
-CREATE POLICY "Allow all access to store_settings"
-  ON public.store_settings FOR ALL
-  TO public USING (true) WITH CHECK (true);
-```
+### Manual Creation (Method A)
+- Edge function `create-employee` that:
+  - Creates Supabase Auth user (using service role)
+  - Creates employee_profile row
+  - Creates employee_permissions row with role defaults
+  - Creates employee_visibility_overrides row with store defaults
+- Wire the Store Settings → Employees tab to use this
 
-Each settings section is stored as a JSONB column matching the existing state shape in `StoreSettingsModule.tsx`. This avoids needing a column per toggle and makes adding new settings trivial.
+### Email Invite (Method B)
+- Edge function `invite-employee` that:
+  - Creates a pending employee_profile with invite_status = 'pending'
+  - Generates a secure invite token
+  - Sends invite email
+- Invite acceptance page where employee completes profile + sets password
+- Updates invite_status to 'accepted'
 
-### New table: `employee_visibility_overrides`
+### Password Reset
+- Wire Supabase Auth password reset for employees
+- Store Admin can trigger reset from employee list
 
-```sql
-CREATE TABLE public.employee_visibility_overrides (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  store_id text NOT NULL,
-  employee_id text NOT NULL,
-  hide_profit boolean DEFAULT false,
-  hide_percentage_paid boolean DEFAULT false,
-  hide_market_value boolean DEFAULT false,
-  hide_total_payout_breakdown boolean DEFAULT false,
-  UNIQUE(store_id, employee_id)
-);
+### Deliverable: Full employee lifecycle — create, invite, accept, login, reset password.
 
-ALTER TABLE public.employee_visibility_overrides ENABLE ROW LEVEL SECURITY;
+---
 
-CREATE POLICY "Allow all access to employee_visibility_overrides"
-  ON public.employee_visibility_overrides FOR ALL
-  TO public USING (true) WITH CHECK (true);
-```
+## Phase 3: Permissions + Visibility Enforcement
+**Goal:** All permissions and visibility settings actually control the UI.
 
-## Code Changes
+### Navigation Enforcement
+- Hide sidebar modules based on employee permissions (can_access_take_in, can_access_inventory, etc.)
+- Block direct route access for unauthorized modules
 
-### 1. `StoreSettingsModule.tsx` — Save/Load from Supabase
+### Take-In Page Enforcement
+- Hide profit/payout%/market value based on resolved visibility
+- Disable rate editing if !can_edit_rates
+- Hide Save For Later if disabled in store settings
+- Hide batch photos if disabled
+- Block Complete Purchase if customer info required but missing
+- Block completion if payout info required but missing
+- Enforce default payout method
+- Enforce split payout setting
 
-- **On mount**: Query `store_settings` by `store_id`. If a row exists, populate all state variables (`general`, `globalVisibility`, `intakeDefaults`, etc.) from the JSONB columns. If no row exists, keep defaults.
-- **handleSave**: Upsert the row into `store_settings` with all current state values. Also upsert any employee visibility overrides into `employee_visibility_overrides`.
-- **handleReset**: Re-fetch from Supabase instead of just clearing the dirty flag.
-- Use the existing `supabase` client from `@/integrations/supabase/client`.
+### Other Module Enforcement
+- can_print_labels, can_print_receipts → hide print buttons
+- can_delete_items → hide delete actions
+- can_complete_purchase → hide/disable Complete Purchase
+- can_reopen_transactions → hide reopen action
 
-### 2. New hook: `hooks/useStoreSettings.ts`
+### Deliverable: Every permission toggle and visibility toggle actually controls the UI.
 
-A shared React hook that loads settings for a given `store_id`:
+---
 
-```typescript
-export function useStoreSettings(storeId: string) {
-  // Fetches from store_settings table
-  // Returns { settings, visibility, loading }
-  // visibility = resolved visibility for current employee
-}
-```
+## Phase 4: Settings Enforcement (Intake, Payout, Compliance, Print, etc.)
+**Goal:** All remaining store settings drive actual runtime behavior.
 
-This hook will be consumed by both `StoreSettingsModule` (for editing) and `TakeInPage` (for reading visibility rules).
+### Intake Defaults
+- Default fast entry mode, default category, auto-focus, card layout
+- AI Assist enable/disable
 
-### 3. `JewelryPawnApp.tsx` — Pass resolved settings down
+### Payout Defaults
+- Default payout method preselection
+- Split payout enable/disable
+- Require payout info before completion
 
-- Use `useStoreSettings('store1')` at the app level.
-- Pass the resolved `hideProfit`, `hidePayout` (payout percentage), and `hideMarketValue` flags into the `TakeInPage` store prop.
-- When settings change in `StoreSettingsModule` and are saved, the hook re-fetches, and the Take-In page reflects changes.
+### Rate Defaults
+- Default payout percentages prefill new items
+- Rate edit permissions enforced
 
-### 4. `TakeInPage.tsx` — Consume visibility flags
+### Compliance
+- Hold period, threshold warnings, manager approval
+- Required fields enforcement (ID, phone, email, address, DOB, gender)
+- Signature requirement
+- Employee name attached to transaction
 
-- Already accepts `store.hideProfit` and `store.hidePayout`. Add `store.hideMarketValue`.
-- Pass these flags down to `TakeInBalanced` and `SummaryFooter`.
+### Print Settings
+- Auto-print behaviors
+- Label content toggles
+- Hide payout % on printed docs
 
-### 5. `TakeInBalanced.tsx` — Conditionally hide fields
+### Notifications (if implemented in UI)
+- Wire notification triggers
 
-- Read `store.hideProfit`, `store.hidePayout`, `store.hideMarketValue` from props.
-- Conditionally render: market value column, payout percentage inputs, profit display, based on these flags.
-- If `hideMarketValue` is true, hide the "Market" column in each metal row.
-- If `hidePayout` is true, hide the "%" input on each metal row.
-- If `hideProfit` is true, hide profit in the summary sidebar.
+### Appearance
+- Theme, compact mode, accent color
 
-### 6. `SummaryFooter.tsx` — Already wired
+### Advanced
+- Archive, draft save, duplicate detection, keyboard shortcuts, lock transactions
 
-Already accepts `hideProfit` and `hidePayout` props. Will add `hideMarketValue` to also hide that line in the totals section.
+### Deliverable: Every setting in Store Settings actually affects app behavior.
 
-## Data Flow
+---
 
-```text
-Supabase (store_settings table)
-        ↓
-useStoreSettings hook (fetches + caches)
-        ↓
-JewelryPawnApp (resolves visibility for current employee)
-        ↓
-TakeInPage (receives store config with visibility flags)
-        ↓
-TakeInBalanced / SummaryFooter (conditionally renders fields)
-```
+## Phase 5: RLS Hardening + Cleanup
+**Goal:** Secure the database and remove all mock/placeholder code.
 
-## Files Changed
+- Replace open RLS policies with proper scoped policies
+- Store admins can only manage their own store
+- Employees can only read their own store's data
+- Remove all hardcoded store1/emp1 references
+- Remove localStorage auth remnants
+- Remove window.location.reload() hacks
+- Final security audit
 
-| File | Change |
-|---|---|
-| `supabase/migrations/` | New migration for `store_settings` and `employee_visibility_overrides` tables |
-| `hooks/useStoreSettings.ts` | New shared hook for loading/caching settings |
-| `StoreSettingsModule.tsx` | Wire save/load to Supabase via the hook |
-| `JewelryPawnApp.tsx` | Use hook, pass resolved visibility to TakeInPage |
-| `TakeInPage.tsx` | Add `hideMarketValue` to store prop interface |
-| `TakeInBalanced.tsx` | Conditionally hide market value, payout %, profit columns |
-| `SummaryFooter.tsx` | Add `hideMarketValue` prop support |
+### Deliverable: Production-ready security and no placeholder code.
 
+---
+
+## Estimated Scope
+Each phase is a significant implementation. I recommend we go phase by phase, testing each before moving to the next.
+
+**Shall I start with Phase 1?**
