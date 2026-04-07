@@ -75,51 +75,63 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_OUT' || !session) {
-        setUser(null);
-        setIsAuthenticated(false);
-        setIsLoading(false);
-        return;
-      }
+    let mounted = true;
 
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        if (user && isAuthenticated) {
+    const resolveProfile = async (session: any) => {
+      try {
+        const { data: profileData, error } = await supabase.functions.invoke('employee-management', {
+          body: { action: 'resolve-profile' }
+        });
+
+        if (!mounted) return;
+
+        if (error || profileData?.error) {
+          console.error('Profile resolution failed:', profileData?.error || error);
           setIsLoading(false);
           return;
         }
 
-        try {
-          const { data: profileData, error } = await supabase.functions.invoke('employee-management', {
-            body: { action: 'resolve-profile' }
-          });
-
-          if (error || profileData?.error) {
-            console.error('Profile resolution failed:', profileData?.error || error);
-            setIsLoading(false);
-            return;
-          }
-
-          if (profileData.type === 'platform_admin') {
-            setUser(buildPlatformAdminData(profileData.platformAdmin, session.user.id));
-          } else {
-            setUser(buildStoreUserData(profileData, session.user.id));
-          }
-          setIsAuthenticated(true);
-        } catch (err) {
-          console.error('Error resolving profile:', err);
+        if (profileData.type === 'platform_admin') {
+          setUser(buildPlatformAdminData(profileData.platformAdmin, session.user.id));
+        } else {
+          setUser(buildStoreUserData(profileData, session.user.id));
         }
-        setIsLoading(false);
+        setIsAuthenticated(true);
+      } catch (err) {
+        console.error('Error resolving profile:', err);
       }
-    });
+      if (mounted) setIsLoading(false);
+    };
 
+    // Initial session check
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
+      if (!mounted) return;
+      if (session) {
+        resolveProfile(session);
+      } else {
         setIsLoading(false);
       }
     });
 
-    return () => subscription.unsubscribe();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        if (mounted) {
+          setUser(null);
+          setIsAuthenticated(false);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      if (event === 'SIGNED_IN') {
+        resolveProfile(session);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleLogin = (userData: any, _remember: boolean) => {
