@@ -22,7 +22,7 @@ import {
   Check, X, AlertCircle, Store, DollarSign, CreditCard, Users,
   Shield, Package, Bell, QrCode, Upload, Search, Eye, EyeOff,
   Palette, Wrench, UserPlus, KeyRound, Settings2, Printer,
-  FileText, Clock, Lock, Unlock, ChevronRight
+  FileText, Clock, Lock, Unlock, ChevronRight, Mail
 } from 'lucide-react';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
