@@ -372,7 +372,7 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate, onSettingsSav
   const renderContent = () => {
     switch (activeTab) {
       case 'general': return <GeneralTab general={general} setGeneral={setGeneral} markDirty={markDirty} />;
-      case 'employees': return <EmployeesTab employees={employees} setEmployees={setEmployees} showAdd={showAddEmployee} setShowAdd={setShowAddEmployee} markDirty={markDirty} />;
+      case 'employees': return <EmployeesTab employees={employees} setEmployees={setEmployees} showAdd={showAddEmployee} setShowAdd={setShowAddEmployee} markDirty={markDirty} storeId={currentStore?.id} />;
       case 'visibility': return <VisibilityTab global={globalVisibility} setGlobal={setGlobalVisibility} employees={employees} setEmployees={setEmployees} markDirty={markDirty} />;
       case 'intake': return <IntakePayoutTab intake={intakeDefaults} setIntake={setIntakeDefaults} payout={payoutDefaults} setPayout={setPayoutDefaults} rates={rateDefaults} setRates={setRateDefaults} markDirty={markDirty} />;
       case 'customer': return <CustomerComplianceTab customer={customerSettings} setCustomer={setCustomerSettings} compliance={complianceSettings} setCompliance={setComplianceSettings} markDirty={markDirty} />;
