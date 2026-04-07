@@ -47,7 +47,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
   const { resolved, refetch: refetchSettings, settings: storeSettings } = useStoreSettings(storeId, employeeId);
 
   const modules = [
-    { id: 'dashboard', name: 'Dashboard', icon: BarChart3, component: () => <StatisticsModule currentStore={{ id: storeId, name: storeName, address: '', phone: '', email: '', type: 'jewelry', timezone: 'America/New_York', settings: {} as any, createdAt: '' }} /> },
+    { id: 'dashboard', name: 'Dashboard', icon: BarChart3, component: () => <StatisticsModule currentStore={{ id: storeId, name: storeName }} /> },
     { id: 'take-in', name: 'Take-In', icon: Plus, component: () => (
       <TakeInPage 
         store={{ 
@@ -75,7 +75,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
         onClose={() => setActiveModule('dashboard')} 
       />
     )},
-    { id: 'inventory', name: 'Inventory', icon: Package, component: InventoryModule },
+    { id: 'inventory', name: 'Inventory', icon: Package, component: () => <InventoryModule currentStore={{ id: storeId, name: storeName }} /> },
     { id: 'customers', name: 'Customers', icon: Users, component: () => <CustomerModule user={user} /> },
     { id: 'payouts', name: 'Payouts', icon: DollarSign, component: PayoutsModule },
     { id: 'settings', name: 'Settings', icon: Settings, component: () => (
