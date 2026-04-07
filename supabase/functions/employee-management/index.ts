@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
     const { action } = body
 
     // For register-store and accept-invite, authentication is not required
-    if (action === 'register-store' || action === 'accept-invite') {
+    if (action === 'register-store' || action === 'accept-invite' || action === 'bootstrap-root-admin') {
       // Handle unauthenticated actions below
     } else {
       // Verify caller is authenticated
