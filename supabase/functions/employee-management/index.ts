@@ -1,5 +1,9 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.52.1'
-import { corsHeaders } from 'https://esm.sh/@supabase/supabase-js@2.95.0/cors'
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -11,24 +15,37 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const adminClient = createClient(supabaseUrl, serviceRoleKey)
 
-    // Verify caller is authenticated
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Missing authorization' }), {
-        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    const body = await req.json()
+    const { action } = body
+
+    // For register-store and accept-invite, authentication is not required
+    if (action === 'register-store' || action === 'accept-invite') {
+      // Handle unauthenticated actions below
+    } else {
+      // Verify caller is authenticated
+      const authHeader = req.headers.get('Authorization')
+      if (!authHeader) {
+        return new Response(JSON.stringify({ error: 'Missing authorization' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      }
+
+      const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
+      const callerClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader } }
       })
+      const { data: { user: callerUser }, error: authError } = await callerClient.auth.getUser()
+      if (authError || !callerUser) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      }
+      // Store caller for use in authenticated actions
+      ;(body as any)._caller = callerUser
     }
 
-    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
-    const callerClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } }
-    })
-    const { data: { user: caller }, error: authError } = await callerClient.auth.getUser()
-    if (authError || !caller) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
+    // Get caller (may be null for unauthenticated actions)
+    const caller = (body as any)._caller || null
 
     const body = await req.json()
     const { action } = body
