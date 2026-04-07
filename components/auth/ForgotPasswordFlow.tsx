@@ -7,6 +7,7 @@ import { Progress } from '../ui/progress';
 import { ArrowLeft, Mail, Lock, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { AuthFlow } from '../AuthenticationFlow';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ForgotPasswordFlowProps {
   mode: 'forgot-password' | 'reset-password';
@@ -80,13 +81,15 @@ export function ForgotPasswordFlow({ mode, resetToken, onNavigate }: ForgotPassw
     setErrors({});
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
       
       setEmailSent(true);
       toast.success('Password reset email sent! Check your inbox.');
-    } catch (error) {
-      toast.error('Failed to send reset email. Please try again.');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send reset email. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -113,13 +116,15 @@ export function ForgotPasswordFlow({ mode, resetToken, onNavigate }: ForgotPassw
     setErrors({});
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const { error } = await supabase.auth.updateUser({
+        password: passwords.password,
+      });
+      if (error) throw error;
       
       setResetComplete(true);
-      toast.success('Password reset successful!');
-    } catch (error) {
-      toast.error('Failed to reset password. Please try again.');
+      toast.success('Password reset successful! You can now sign in.');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to reset password. Please try again.');
     } finally {
       setIsLoading(false);
     }

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -21,7 +22,7 @@ import {
   Check, X, AlertCircle, Store, DollarSign, CreditCard, Users,
   Shield, Package, Bell, QrCode, Upload, Search, Eye, EyeOff,
   Palette, Wrench, UserPlus, KeyRound, Settings2, Printer,
-  FileText, Clock, Lock, Unlock, ChevronRight
+  FileText, Clock, Lock, Unlock, ChevronRight, Mail
 } from 'lucide-react';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -371,7 +372,7 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate, onSettingsSav
   const renderContent = () => {
     switch (activeTab) {
       case 'general': return <GeneralTab general={general} setGeneral={setGeneral} markDirty={markDirty} />;
-      case 'employees': return <EmployeesTab employees={employees} setEmployees={setEmployees} showAdd={showAddEmployee} setShowAdd={setShowAddEmployee} markDirty={markDirty} />;
+      case 'employees': return <EmployeesTab employees={employees} setEmployees={setEmployees} showAdd={showAddEmployee} setShowAdd={setShowAddEmployee} markDirty={markDirty} storeId={currentStore?.id} />;
       case 'visibility': return <VisibilityTab global={globalVisibility} setGlobal={setGlobalVisibility} employees={employees} setEmployees={setEmployees} markDirty={markDirty} />;
       case 'intake': return <IntakePayoutTab intake={intakeDefaults} setIntake={setIntakeDefaults} payout={payoutDefaults} setPayout={setPayoutDefaults} rates={rateDefaults} setRates={setRateDefaults} markDirty={markDirty} />;
       case 'customer': return <CustomerComplianceTab customer={customerSettings} setCustomer={setCustomerSettings} compliance={complianceSettings} setCompliance={setComplianceSettings} markDirty={markDirty} />;
@@ -549,40 +550,194 @@ function GeneralTab({ general, setGeneral, markDirty }: any) {
 
 // ── 2. Employees / Users ────────────────────────────────────────────────────
 
-function EmployeesTab({ employees, setEmployees, showAdd, setShowAdd, markDirty }: any) {
+function EmployeesTab({ employees, setEmployees, showAdd, setShowAdd, markDirty, storeId }: any) {
   const [newEmp, setNewEmp] = useState({ firstName: '', lastName: '', email: '', phone: '', role: 'buyer', password: '' });
+  const [isCreating, setIsCreating] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('buyer');
+  const [showInvite, setShowInvite] = useState(false);
+  const [isInviting, setIsInviting] = useState(false);
 
-  const handleAdd = () => {
-    const emp: Employee = {
-      id: crypto.randomUUID(),
-      name: `${newEmp.firstName} ${newEmp.lastName}`,
-      firstName: newEmp.firstName, lastName: newEmp.lastName,
-      email: newEmp.email, phone: newEmp.phone, role: newEmp.role,
-      isActive: true, quickSwitchOrder: employees.length + 1,
-      storeId: '', permissions: { ...defaultPermissions }, visibility: { ...defaultVisibility },
-    };
-    setEmployees((prev: Employee[]) => [...prev, emp]);
-    setNewEmp({ firstName: '', lastName: '', email: '', phone: '', role: 'buyer', password: '' });
-    setShowAdd(false);
-    markDirty();
-    toast.success('Employee added');
+  const handleAdd = async () => {
+    if (!newEmp.firstName || !newEmp.lastName || !newEmp.email) {
+      toast.error('First name, last name, and email are required');
+      return;
+    }
+    setIsCreating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('employee-management', {
+        body: {
+          action: 'create-employee',
+          storeId,
+          firstName: newEmp.firstName,
+          lastName: newEmp.lastName,
+          email: newEmp.email,
+          phone: newEmp.phone,
+          role: newEmp.role,
+          password: newEmp.password || undefined,
+          isActive: true,
+        },
+      });
+      if (error || data?.error) throw new Error(data?.error || error?.message);
+      
+      // Refresh employee list
+      await refreshEmployees();
+      setNewEmp({ firstName: '', lastName: '', email: '', phone: '', role: 'buyer', password: '' });
+      setShowAdd(false);
+      toast.success('Employee created with real login credentials');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to create employee');
+    } finally {
+      setIsCreating(false);
+    }
   };
 
-  const toggleActive = (id: string) => {
-    setEmployees((prev: Employee[]) => prev.map(e => e.id === id ? { ...e, isActive: !e.isActive } : e));
-    markDirty();
+  const handleInvite = async () => {
+    if (!inviteEmail) { toast.error('Email is required'); return; }
+    setIsInviting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('employee-management', {
+        body: { action: 'invite-employee', storeId, email: inviteEmail, role: inviteRole },
+      });
+      if (error || data?.error) throw new Error(data?.error || error?.message);
+      await refreshEmployees();
+      setInviteEmail('');
+      setShowInvite(false);
+      toast.success('Invite sent! Employee will complete setup via link.');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to send invite');
+    } finally {
+      setIsInviting(false);
+    }
   };
 
-  const removeEmployee = (id: string) => {
-    setEmployees((prev: Employee[]) => prev.filter(e => e.id !== id));
-    markDirty();
-    toast.success('Employee removed');
+  const refreshEmployees = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('employee-management', {
+        body: { action: 'list-employees', storeId },
+      });
+      if (!error && data?.employees) {
+        // Convert DB format to local format
+        const mapped = data.employees.map((e: any) => ({
+          id: e.id,
+          authUserId: e.auth_user_id,
+          name: `${e.first_name} ${e.last_name}`.trim(),
+          firstName: e.first_name,
+          lastName: e.last_name,
+          email: e.email,
+          phone: e.phone,
+          role: e.role,
+          isActive: e.is_active,
+          quickSwitchOrder: 0,
+          storeId: e.store_id,
+          lastLogin: e.last_login_at ? new Date(e.last_login_at).toLocaleDateString() : null,
+          inviteStatus: e.invite_status,
+          permissions: e.employee_permissions?.[0] ? {
+            accessTakeIn: e.employee_permissions[0].can_access_take_in,
+            accessInventory: e.employee_permissions[0].can_access_inventory,
+            accessCustomers: e.employee_permissions[0].can_access_customers,
+            accessPayouts: e.employee_permissions[0].can_access_payouts,
+            accessStatistics: e.employee_permissions[0].can_access_statistics,
+            accessSettings: e.employee_permissions[0].can_access_settings,
+            accessSavedForLater: e.employee_permissions[0].can_access_saved_for_later,
+            canEditRates: e.employee_permissions[0].can_edit_rates,
+            canEditFinalPayout: e.employee_permissions[0].can_edit_final_payout_amount,
+            canPrintLabels: e.employee_permissions[0].can_print_labels,
+            canDeleteItems: e.employee_permissions[0].can_delete_items,
+            canCompletePurchase: e.employee_permissions[0].can_complete_purchase,
+          } : { ...defaultPermissions },
+          visibility: e.employee_visibility_overrides?.[0] ? {
+            hideProfit: e.employee_visibility_overrides[0].hide_profit,
+            hidePercentagePaid: e.employee_visibility_overrides[0].hide_percentage_paid,
+            hideMarketValue: e.employee_visibility_overrides[0].hide_market_value,
+            hideTotalPayoutBreakdown: e.employee_visibility_overrides[0].hide_total_payout_breakdown,
+          } : { ...defaultVisibility },
+        }));
+        setEmployees(mapped);
+      }
+    } catch (err) {
+      console.error('Failed to refresh employees:', err);
+    }
+  };
+
+  // Load employees from DB on mount
+  useState(() => { if (storeId) refreshEmployees(); });
+
+  const toggleActive = async (id: string, currentlyActive: boolean) => {
+    try {
+      const { error } = await supabase.functions.invoke('employee-management', {
+        body: { action: 'toggle-employee-status', storeId, employeeProfileId: id, isActive: !currentlyActive },
+      });
+      if (error) throw error;
+      setEmployees((prev: Employee[]) => prev.map(e => e.id === id ? { ...e, isActive: !e.isActive } : e));
+      toast.success(`Employee ${!currentlyActive ? 'activated' : 'deactivated'}`);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update status');
+    }
+  };
+
+  const removeEmployee = async (id: string) => {
+    try {
+      const { error } = await supabase.functions.invoke('employee-management', {
+        body: { action: 'delete-employee', storeId, employeeProfileId: id },
+      });
+      if (error) throw error;
+      setEmployees((prev: Employee[]) => prev.filter(e => e.id !== id));
+      toast.success('Employee removed');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to remove employee');
+    }
+  };
+
+  const handleResetPassword = async (id: string) => {
+    try {
+      const { error } = await supabase.functions.invoke('employee-management', {
+        body: { action: 'reset-employee-password', storeId, employeeProfileId: id },
+      });
+      if (error) throw error;
+      toast.success('Password reset email sent');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to send reset');
+    }
   };
 
   return (
     <>
-      <SettingsCard title="Employees" description="Manage employee accounts and access">
-        <div className="flex justify-end mb-3">
+      <SettingsCard title="Employees" description="Manage employee accounts and access. Employees created here get real login credentials.">
+        <div className="flex justify-end gap-2 mb-3">
+          {/* Invite by Email */}
+          <Dialog open={showInvite} onOpenChange={setShowInvite}>
+            <DialogTrigger asChild>
+              <Button size="sm" variant="outline"><Mail className="w-4 h-4 mr-1.5" />Invite by Email</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Invite Employee</DialogTitle>
+                <DialogDescription>Send an invite link. The employee will set up their own password and profile.</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-3 pt-2">
+                <div><Label className="text-xs">Email *</Label><Input type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} className="mt-1" placeholder="employee@example.com" /></div>
+                <div>
+                  <Label className="text-xs">Role</Label>
+                  <Select value={inviteRole} onValueChange={setInviteRole}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="buyer">Buyer</SelectItem>
+                      <SelectItem value="front_desk">Front Desk</SelectItem>
+                      <SelectItem value="read_only">Read Only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button variant="outline" size="sm" onClick={() => setShowInvite(false)}>Cancel</Button>
+                  <Button size="sm" onClick={handleInvite} disabled={!inviteEmail || isInviting}>{isInviting ? 'Sending…' : 'Send Invite'}</Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Add Manually */}
           <Dialog open={showAdd} onOpenChange={setShowAdd}>
             <DialogTrigger asChild>
               <Button size="sm"><UserPlus className="w-4 h-4 mr-1.5" />Add Employee</Button>
@@ -590,14 +745,14 @@ function EmployeesTab({ employees, setEmployees, showAdd, setShowAdd, markDirty 
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Add New Employee</DialogTitle>
-                <DialogDescription>Create an employee account for this store.</DialogDescription>
+                <DialogDescription>Create an employee account with login credentials.</DialogDescription>
               </DialogHeader>
               <div className="space-y-3 pt-2">
                 <div className="grid grid-cols-2 gap-3">
                   <div><Label className="text-xs">First Name *</Label><Input value={newEmp.firstName} onChange={e => setNewEmp(p => ({ ...p, firstName: e.target.value }))} className="mt-1" /></div>
                   <div><Label className="text-xs">Last Name *</Label><Input value={newEmp.lastName} onChange={e => setNewEmp(p => ({ ...p, lastName: e.target.value }))} className="mt-1" /></div>
                 </div>
-                <div><Label className="text-xs">Email</Label><Input type="email" value={newEmp.email} onChange={e => setNewEmp(p => ({ ...p, email: e.target.value }))} className="mt-1" /></div>
+                <div><Label className="text-xs">Email *</Label><Input type="email" value={newEmp.email} onChange={e => setNewEmp(p => ({ ...p, email: e.target.value }))} className="mt-1" /></div>
                 <div><Label className="text-xs">Phone</Label><Input type="tel" value={newEmp.phone} onChange={e => setNewEmp(p => ({ ...p, phone: e.target.value }))} className="mt-1" /></div>
                 <div>
                   <Label className="text-xs">Role</Label>
@@ -612,10 +767,10 @@ function EmployeesTab({ employees, setEmployees, showAdd, setShowAdd, markDirty 
                     </SelectContent>
                   </Select>
                 </div>
-                <div><Label className="text-xs">Temporary Password</Label><Input type="password" value={newEmp.password} onChange={e => setNewEmp(p => ({ ...p, password: e.target.value }))} className="mt-1" placeholder="Employee will reset on first login" /></div>
+                <div><Label className="text-xs">Temporary Password</Label><Input type="password" value={newEmp.password} onChange={e => setNewEmp(p => ({ ...p, password: e.target.value }))} className="mt-1" placeholder="Min 6 chars. Employee can reset later." /></div>
                 <div className="flex justify-end gap-2 pt-2">
                   <Button variant="outline" size="sm" onClick={() => setShowAdd(false)}>Cancel</Button>
-                  <Button size="sm" onClick={handleAdd} disabled={!newEmp.firstName || !newEmp.lastName}>Add Employee</Button>
+                  <Button size="sm" onClick={handleAdd} disabled={!newEmp.firstName || !newEmp.lastName || !newEmp.email || isCreating}>{isCreating ? 'Creating…' : 'Add Employee'}</Button>
                 </div>
               </div>
             </DialogContent>
@@ -635,12 +790,13 @@ function EmployeesTab({ employees, setEmployees, showAdd, setShowAdd, markDirty 
                   <TableHead>Employee</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Invite</TableHead>
                   <TableHead>Last Login</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {employees.map((emp: Employee) => (
+                {employees.map((emp: any) => (
                   <TableRow key={emp.id}>
                     <TableCell>
                       <div className="flex items-center gap-2.5">
@@ -648,20 +804,28 @@ function EmployeesTab({ employees, setEmployees, showAdd, setShowAdd, markDirty 
                           <AvatarFallback className="text-[10px]">{emp.firstName?.[0]}{emp.lastName?.[0]}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="text-sm font-medium">{emp.name}</p>
+                          <p className="text-sm font-medium">{emp.name || `${emp.firstName} ${emp.lastName}`.trim()}</p>
                           <p className="text-xs text-muted-foreground">{emp.email}</p>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell><Badge variant="outline" className="text-xs capitalize">{emp.role.replace('_', ' ')}</Badge></TableCell>
+                    <TableCell><Badge variant="outline" className="text-xs capitalize">{(emp.role || '').replace('_', ' ')}</Badge></TableCell>
                     <TableCell><Badge variant={emp.isActive ? 'default' : 'secondary'} className="text-xs">{emp.isActive ? 'Active' : 'Inactive'}</Badge></TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="text-xs capitalize">
+                        {emp.inviteStatus || 'active'}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-xs text-muted-foreground">{emp.lastLogin || '—'}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toggleActive(emp.id)}>
-                          {emp.isActive ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        <Button variant="ghost" size="icon" className="h-7 w-7" title="Reset password" onClick={() => handleResetPassword(emp.id)}>
+                          <KeyRound className="w-3.5 h-3.5" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeEmployee(emp.id)}>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" title={emp.isActive ? 'Deactivate' : 'Activate'} onClick={() => toggleActive(emp.id, emp.isActive)}>
+                          {emp.isActive ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" title="Delete" onClick={() => removeEmployee(emp.id)}>
                           <Trash2 className="w-3.5 h-3.5 text-destructive" />
                         </Button>
                       </div>

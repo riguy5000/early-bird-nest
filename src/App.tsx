@@ -4,8 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthenticationFlow } from '../components/AuthenticationFlow';
-import { RootAdminConsole } from '../components/RootAdminConsole';
 import { JewelryPawnApp } from '../components/JewelryPawnApp';
+import { supabase } from '@/integrations/supabase/client';
 
 const queryClient = new QueryClient();
 
@@ -14,68 +14,110 @@ const App = () => {
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check if user is already authenticated (from localStorage or session)
   useEffect(() => {
-    const checkAuthState = () => {
-      try {
-        const savedUser = localStorage.getItem('user');
-        const rememberMe = localStorage.getItem('rememberMe');
-        const sessionUser = sessionStorage.getItem('user');
-        
-        if (savedUser && rememberMe === 'true') {
-          const userData = JSON.parse(savedUser);
-          setUser(userData);
-          setIsAuthenticated(true);
-        } else if (sessionUser) {
-          const userData = JSON.parse(sessionUser);
-          setUser(userData);
-          setIsAuthenticated(true);
-        }
-      } catch (error) {
-        console.error('Error checking auth state:', error);
-        // Clear invalid data
-        localStorage.removeItem('user');
-        localStorage.removeItem('rememberMe');
-        sessionStorage.removeItem('user');
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        setUser(null);
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        return;
       }
-      
-      setIsLoading(false);
-    };
 
-    checkAuthState();
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        // If we already have user data (from login flow), don't re-resolve
+        if (user && isAuthenticated) {
+          setIsLoading(false);
+          return;
+        }
+
+        // Try to resolve profile for existing session
+        try {
+          const { data: profileData, error } = await supabase.functions.invoke('employee-management', {
+            body: { action: 'resolve-profile' }
+          });
+
+          if (error || profileData?.error) {
+            console.error('Profile resolution failed:', profileData?.error || error);
+            setIsLoading(false);
+            return;
+          }
+
+          const { profile, store, permissions, visibility } = profileData;
+          const userData = {
+            id: profile.id,
+            authUserId: session.user.id,
+            email: profile.email,
+            name: `${profile.first_name} ${profile.last_name}`.trim(),
+            firstName: profile.first_name,
+            lastName: profile.last_name,
+            role: profile.role,
+            storeId: profile.store_id,
+            store: store ? {
+              id: store.id,
+              name: store.name,
+              type: store.type,
+              address: store.address,
+              phone: store.phone,
+              email: store.email,
+              timezone: store.timezone,
+            } : null,
+            permissions: permissions ? {
+              accessTakeIn: permissions.can_access_take_in,
+              accessInventory: permissions.can_access_inventory,
+              accessCustomers: permissions.can_access_customers,
+              accessPayouts: permissions.can_access_payouts,
+              accessStatistics: permissions.can_access_statistics,
+              accessSettings: permissions.can_access_settings,
+              accessSavedForLater: permissions.can_access_saved_for_later,
+              canEditRates: permissions.can_edit_rates,
+              canEditFinalPayout: permissions.can_edit_final_payout_amount,
+              canPrintLabels: permissions.can_print_labels,
+              canPrintReceipts: permissions.can_print_receipts,
+              canDeleteItems: permissions.can_delete_items,
+              canCompletePurchase: permissions.can_complete_purchase,
+              canReopenTransactions: permissions.can_reopen_transactions,
+            } : null,
+            visibility: visibility ? {
+              hideProfit: visibility.hide_profit,
+              hidePercentagePaid: visibility.hide_percentage_paid,
+              hideMarketValue: visibility.hide_market_value,
+              hideTotalPayoutBreakdown: visibility.hide_total_payout_breakdown,
+              hideAverageRate: visibility.hide_average_rate,
+            } : null,
+            isActive: profile.is_active,
+          };
+          setUser(userData);
+          setIsAuthenticated(true);
+        } catch (err) {
+          console.error('Error resolving profile:', err);
+        }
+        setIsLoading(false);
+      }
+    });
+
+    // THEN check existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        setIsLoading(false);
+      }
+      // If session exists, onAuthStateChange will handle it
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const handleLogin = (userData: any, remember: boolean) => {
+  const handleLogin = (userData: any, _remember: boolean) => {
     setUser(userData);
     setIsAuthenticated(true);
-    
-    try {
-      if (remember) {
-        localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('rememberMe', 'true');
-      } else {
-        sessionStorage.setItem('user', JSON.stringify(userData));
-        localStorage.removeItem('rememberMe');
-      }
-    } catch (error) {
-      console.error('Error saving auth state:', error);
-    }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
     setIsAuthenticated(false);
-    
-    try {
-      localStorage.removeItem('user');
-      localStorage.removeItem('rememberMe');
-      sessionStorage.removeItem('user');
-    } catch (error) {
-      console.error('Error clearing auth state:', error);
-    }
   };
 
-  // Show loading screen while checking auth state
   if (isLoading) {
     return (
       <QueryClientProvider client={queryClient}>
@@ -93,7 +135,6 @@ const App = () => {
     );
   }
 
-  // Show authentication flow if not authenticated
   if (!isAuthenticated) {
     return (
       <QueryClientProvider client={queryClient}>
@@ -108,25 +149,6 @@ const App = () => {
     );
   }
 
-  // Check if user is root admin
-  const isRootAdmin = user?.email === 'admin@bravojewellers.com' && user?.role === 'root_admin';
-
-  // Show Root Admin Console for root admin users
-  if (isRootAdmin) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <div className="min-h-screen bg-background">
-            <RootAdminConsole user={user} onLogout={handleLogout} />
-            <Toaster />
-            <Sonner />
-          </div>
-        </TooltipProvider>
-      </QueryClientProvider>
-    );
-  }
-
-  // Show main application for regular users
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

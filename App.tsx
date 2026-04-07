@@ -1,76 +1,77 @@
 import { useState, useEffect } from 'react';
 import { AuthenticationFlow } from './components/AuthenticationFlow';
-import { RootAdminConsole } from './components/RootAdminConsole';
 import { JewelryPawnApp } from './components/JewelryPawnApp';
 import { Toaster } from './components/ui/sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check if user is already authenticated (from localStorage or session)
   useEffect(() => {
-    const checkAuthState = () => {
-      try {
-        const savedUser = localStorage.getItem('user');
-        const rememberMe = localStorage.getItem('rememberMe');
-        const sessionUser = sessionStorage.getItem('user');
-        
-        if (savedUser && rememberMe === 'true') {
-          const userData = JSON.parse(savedUser);
-          setUser(userData);
-          setIsAuthenticated(true);
-        } else if (sessionUser) {
-          const userData = JSON.parse(sessionUser);
-          setUser(userData);
-          setIsAuthenticated(true);
-        }
-      } catch (error) {
-        console.error('Error checking auth state:', error);
-        // Clear invalid data
-        localStorage.removeItem('user');
-        localStorage.removeItem('rememberMe');
-        sessionStorage.removeItem('user');
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        setUser(null);
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        return;
       }
-      
-      setIsLoading(false);
-    };
 
-    checkAuthState();
+      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && !user) {
+        try {
+          const { data: profileData, error } = await supabase.functions.invoke('employee-management', {
+            body: { action: 'resolve-profile' }
+          });
+
+          if (!error && !profileData?.error) {
+            const { profile, store, permissions, visibility } = profileData;
+            setUser({
+              id: profile.id,
+              authUserId: session.user.id,
+              email: profile.email,
+              name: `${profile.first_name} ${profile.last_name}`.trim(),
+              role: profile.role,
+              storeId: profile.store_id,
+              store,
+              permissions: permissions ? {
+                accessTakeIn: permissions.can_access_take_in,
+                accessInventory: permissions.can_access_inventory,
+                accessCustomers: permissions.can_access_customers,
+                accessPayouts: permissions.can_access_payouts,
+                accessStatistics: permissions.can_access_statistics,
+                accessSettings: permissions.can_access_settings,
+              } : null,
+              visibility,
+              isActive: profile.is_active,
+            });
+            setIsAuthenticated(true);
+          }
+        } catch (err) {
+          console.error('Profile resolution error:', err);
+        }
+        setIsLoading(false);
+      }
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const handleLogin = (userData: any, remember: boolean) => {
+  const handleLogin = (userData: any, _remember: boolean) => {
     setUser(userData);
     setIsAuthenticated(true);
-    
-    try {
-      if (remember) {
-        localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('rememberMe', 'true');
-      } else {
-        sessionStorage.setItem('user', JSON.stringify(userData));
-        localStorage.removeItem('rememberMe');
-      }
-    } catch (error) {
-      console.error('Error saving auth state:', error);
-    }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
     setIsAuthenticated(false);
-    
-    try {
-      localStorage.removeItem('user');
-      localStorage.removeItem('rememberMe');
-      sessionStorage.removeItem('user');
-    } catch (error) {
-      console.error('Error clearing auth state:', error);
-    }
   };
 
-  // Show loading screen while checking auth state
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -82,7 +83,6 @@ export default function App() {
     );
   }
 
-  // Show authentication flow if not authenticated
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background">
@@ -92,20 +92,6 @@ export default function App() {
     );
   }
 
-  // Check if user is root admin
-  const isRootAdmin = user?.email === 'admin@bravojewellers.com' && user?.role === 'root_admin';
-
-  // Show Root Admin Console for root admin users
-  if (isRootAdmin) {
-    return (
-      <div className="min-h-screen bg-background">
-        <RootAdminConsole user={user} onLogout={handleLogout} />
-        <Toaster position="top-right" />
-      </div>
-    );
-  }
-
-  // Show main application for regular users
   return (
     <div className="min-h-screen bg-background">
       <JewelryPawnApp user={user} onLogout={handleLogout} />
