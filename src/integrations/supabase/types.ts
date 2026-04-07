@@ -14,6 +14,189 @@ export type Database = {
   }
   public: {
     Tables: {
+      employee_permissions: {
+        Row: {
+          can_access_customers: boolean
+          can_access_inventory: boolean
+          can_access_payouts: boolean
+          can_access_saved_for_later: boolean
+          can_access_settings: boolean
+          can_access_statistics: boolean
+          can_access_take_in: boolean
+          can_complete_purchase: boolean
+          can_delete_items: boolean
+          can_edit_final_payout_amount: boolean
+          can_edit_rates: boolean
+          can_print_labels: boolean
+          can_print_receipts: boolean
+          can_reopen_transactions: boolean
+          created_at: string
+          employee_profile_id: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          can_access_customers?: boolean
+          can_access_inventory?: boolean
+          can_access_payouts?: boolean
+          can_access_saved_for_later?: boolean
+          can_access_settings?: boolean
+          can_access_statistics?: boolean
+          can_access_take_in?: boolean
+          can_complete_purchase?: boolean
+          can_delete_items?: boolean
+          can_edit_final_payout_amount?: boolean
+          can_edit_rates?: boolean
+          can_print_labels?: boolean
+          can_print_receipts?: boolean
+          can_reopen_transactions?: boolean
+          created_at?: string
+          employee_profile_id: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          can_access_customers?: boolean
+          can_access_inventory?: boolean
+          can_access_payouts?: boolean
+          can_access_saved_for_later?: boolean
+          can_access_settings?: boolean
+          can_access_statistics?: boolean
+          can_access_take_in?: boolean
+          can_complete_purchase?: boolean
+          can_delete_items?: boolean
+          can_edit_final_payout_amount?: boolean
+          can_edit_rates?: boolean
+          can_print_labels?: boolean
+          can_print_receipts?: boolean
+          can_reopen_transactions?: boolean
+          created_at?: string
+          employee_profile_id?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_permissions_employee_profile_id_fkey"
+            columns: ["employee_profile_id"]
+            isOneToOne: true
+            referencedRelation: "employee_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_profiles: {
+        Row: {
+          auth_user_id: string | null
+          avatar_url: string | null
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          invite_expires_at: string | null
+          invite_status: string
+          invite_token: string | null
+          invited_by: string | null
+          is_active: boolean
+          last_login_at: string | null
+          last_name: string
+          phone: string | null
+          role: string
+          store_id: string
+          updated_at: string
+        }
+        Insert: {
+          auth_user_id?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          first_name?: string
+          id?: string
+          invite_expires_at?: string | null
+          invite_status?: string
+          invite_token?: string | null
+          invited_by?: string | null
+          is_active?: boolean
+          last_login_at?: string | null
+          last_name?: string
+          phone?: string | null
+          role?: string
+          store_id: string
+          updated_at?: string
+        }
+        Update: {
+          auth_user_id?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          invite_expires_at?: string | null
+          invite_status?: string
+          invite_token?: string | null
+          invited_by?: string | null
+          is_active?: boolean
+          last_login_at?: string | null
+          last_name?: string
+          phone?: string | null
+          role?: string
+          store_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_profiles_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_visibility_overrides: {
+        Row: {
+          created_at: string
+          employee_profile_id: string
+          hide_average_rate: boolean
+          hide_market_value: boolean
+          hide_percentage_paid: boolean
+          hide_profit: boolean
+          hide_total_payout_breakdown: boolean
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          employee_profile_id: string
+          hide_average_rate?: boolean
+          hide_market_value?: boolean
+          hide_percentage_paid?: boolean
+          hide_profit?: boolean
+          hide_total_payout_breakdown?: boolean
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          employee_profile_id?: string
+          hide_average_rate?: boolean
+          hide_market_value?: boolean
+          hide_percentage_paid?: boolean
+          hide_profit?: boolean
+          hide_total_payout_breakdown?: boolean
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_visibility_overrides_employee_profile_id_fkey"
+            columns: ["employee_profile_id"]
+            isOneToOne: true
+            referencedRelation: "employee_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kv_store_62d2b480: {
         Row: {
           key: string
@@ -158,12 +341,62 @@ export type Database = {
         }
         Relationships: []
       }
+      stores: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          owner_auth_user_id: string
+          phone: string | null
+          timezone: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          owner_auth_user_id: string
+          phone?: string | null
+          timezone?: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          owner_auth_user_id?: string
+          phone?: string | null
+          timezone?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_employee_store_id: { Args: { _user_id: string }; Returns: string }
+      is_store_member: {
+        Args: { _store_id: string; _user_id: string }
+        Returns: boolean
+      }
+      owns_store: {
+        Args: { _store_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
