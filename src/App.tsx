@@ -5,9 +5,69 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthenticationFlow } from '../components/AuthenticationFlow';
 import { JewelryPawnApp } from '../components/JewelryPawnApp';
+import { RootAdminConsole } from '../components/RootAdminConsole';
 import { supabase } from '@/integrations/supabase/client';
 
 const queryClient = new QueryClient();
+
+function buildStoreUserData(profileData: any, authUserId: string) {
+  const { profile, store, permissions, visibility } = profileData;
+  return {
+    id: profile.id,
+    authUserId,
+    email: profile.email,
+    name: `${profile.first_name} ${profile.last_name}`.trim(),
+    firstName: profile.first_name,
+    lastName: profile.last_name,
+    role: profile.role,
+    storeId: profile.store_id,
+    store: store ? {
+      id: store.id,
+      name: store.name,
+      type: store.type,
+      address: store.address,
+      phone: store.phone,
+      email: store.email,
+      timezone: store.timezone,
+    } : null,
+    permissions: permissions ? {
+      accessTakeIn: permissions.can_access_take_in,
+      accessInventory: permissions.can_access_inventory,
+      accessCustomers: permissions.can_access_customers,
+      accessPayouts: permissions.can_access_payouts,
+      accessStatistics: permissions.can_access_statistics,
+      accessSettings: permissions.can_access_settings,
+      accessSavedForLater: permissions.can_access_saved_for_later,
+      canEditRates: permissions.can_edit_rates,
+      canEditFinalPayout: permissions.can_edit_final_payout_amount,
+      canPrintLabels: permissions.can_print_labels,
+      canPrintReceipts: permissions.can_print_receipts,
+      canDeleteItems: permissions.can_delete_items,
+      canCompletePurchase: permissions.can_complete_purchase,
+      canReopenTransactions: permissions.can_reopen_transactions,
+    } : null,
+    visibility: visibility ? {
+      hideProfit: visibility.hide_profit,
+      hidePercentagePaid: visibility.hide_percentage_paid,
+      hideMarketValue: visibility.hide_market_value,
+      hideTotalPayoutBreakdown: visibility.hide_total_payout_breakdown,
+      hideAverageRate: visibility.hide_average_rate,
+    } : null,
+    isActive: profile.is_active,
+  };
+}
+
+function buildPlatformAdminData(platformAdmin: any, authUserId: string) {
+  return {
+    id: platformAdmin.id,
+    authUserId,
+    email: platformAdmin.email,
+    name: platformAdmin.full_name,
+    role: platformAdmin.role,
+    isPlatformAdmin: true,
+    isActive: platformAdmin.is_active,
+  };
+}
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -15,7 +75,6 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
         setUser(null);
@@ -25,13 +84,11 @@ const App = () => {
       }
 
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        // If we already have user data (from login flow), don't re-resolve
         if (user && isAuthenticated) {
           setIsLoading(false);
           return;
         }
 
-        // Try to resolve profile for existing session
         try {
           const { data: profileData, error } = await supabase.functions.invoke('employee-management', {
             body: { action: 'resolve-profile' }
@@ -43,51 +100,11 @@ const App = () => {
             return;
           }
 
-          const { profile, store, permissions, visibility } = profileData;
-          const userData = {
-            id: profile.id,
-            authUserId: session.user.id,
-            email: profile.email,
-            name: `${profile.first_name} ${profile.last_name}`.trim(),
-            firstName: profile.first_name,
-            lastName: profile.last_name,
-            role: profile.role,
-            storeId: profile.store_id,
-            store: store ? {
-              id: store.id,
-              name: store.name,
-              type: store.type,
-              address: store.address,
-              phone: store.phone,
-              email: store.email,
-              timezone: store.timezone,
-            } : null,
-            permissions: permissions ? {
-              accessTakeIn: permissions.can_access_take_in,
-              accessInventory: permissions.can_access_inventory,
-              accessCustomers: permissions.can_access_customers,
-              accessPayouts: permissions.can_access_payouts,
-              accessStatistics: permissions.can_access_statistics,
-              accessSettings: permissions.can_access_settings,
-              accessSavedForLater: permissions.can_access_saved_for_later,
-              canEditRates: permissions.can_edit_rates,
-              canEditFinalPayout: permissions.can_edit_final_payout_amount,
-              canPrintLabels: permissions.can_print_labels,
-              canPrintReceipts: permissions.can_print_receipts,
-              canDeleteItems: permissions.can_delete_items,
-              canCompletePurchase: permissions.can_complete_purchase,
-              canReopenTransactions: permissions.can_reopen_transactions,
-            } : null,
-            visibility: visibility ? {
-              hideProfit: visibility.hide_profit,
-              hidePercentagePaid: visibility.hide_percentage_paid,
-              hideMarketValue: visibility.hide_market_value,
-              hideTotalPayoutBreakdown: visibility.hide_total_payout_breakdown,
-              hideAverageRate: visibility.hide_average_rate,
-            } : null,
-            isActive: profile.is_active,
-          };
-          setUser(userData);
+          if (profileData.type === 'platform_admin') {
+            setUser(buildPlatformAdminData(profileData.platformAdmin, session.user.id));
+          } else {
+            setUser(buildStoreUserData(profileData, session.user.id));
+          }
           setIsAuthenticated(true);
         } catch (err) {
           console.error('Error resolving profile:', err);
@@ -96,12 +113,10 @@ const App = () => {
       }
     });
 
-    // THEN check existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         setIsLoading(false);
       }
-      // If session exists, onAuthStateChange will handle it
     });
 
     return () => subscription.unsubscribe();
@@ -149,11 +164,19 @@ const App = () => {
     );
   }
 
+  // Route: Platform Admin → Root Admin Console
+  // Route: Store User → Jewelry Pawn App
+  const isPlatformAdmin = user?.isPlatformAdmin === true;
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <div className="min-h-screen bg-background">
-          <JewelryPawnApp user={user} onLogout={handleLogout} />
+          {isPlatformAdmin ? (
+            <RootAdminConsole user={user} onLogout={handleLogout} />
+          ) : (
+            <JewelryPawnApp user={user} onLogout={handleLogout} />
+          )}
           <Toaster />
           <Sonner />
         </div>
