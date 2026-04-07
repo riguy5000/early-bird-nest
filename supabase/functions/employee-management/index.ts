@@ -308,6 +308,32 @@ Deno.serve(async (req) => {
 
       // ── Resolve Profile (after login) ──
       case 'resolve-profile': {
+        // 1. Check platform_admins FIRST
+        const { data: platformAdmin } = await adminClient
+          .from('platform_admins')
+          .select('*')
+          .eq('auth_user_id', caller!.id)
+          .single()
+
+        if (platformAdmin) {
+          if (!platformAdmin.is_active) {
+            return new Response(JSON.stringify({ error: 'Platform admin account is inactive.' }), {
+              status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            })
+          }
+
+          // Update last login (no last_login_at column on platform_admins, use updated_at)
+          await adminClient.from('platform_admins')
+            .update({ updated_at: new Date().toISOString() })
+            .eq('id', platformAdmin.id)
+
+          return new Response(JSON.stringify({
+            type: 'platform_admin',
+            platformAdmin,
+          }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+        }
+
+        // 2. Check employee_profiles
         const { data: profile, error: profileError } = await adminClient
           .from('employee_profiles')
           .select(`
@@ -319,7 +345,7 @@ Deno.serve(async (req) => {
           .single()
 
         if (profileError || !profile) {
-          return new Response(JSON.stringify({ error: 'No employee profile found' }), {
+          return new Response(JSON.stringify({ error: 'No employee profile found. Access denied.' }), {
             status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           })
         }
@@ -343,10 +369,51 @@ Deno.serve(async (req) => {
           .eq('id', profile.id)
 
         return new Response(JSON.stringify({
+          type: 'store_user',
           profile,
           store,
           permissions: profile.employee_permissions?.[0] || null,
           visibility: profile.employee_visibility_overrides?.[0] || null,
+        }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+
+      // ── Bootstrap Root Admin (one-time setup) ──
+      case 'bootstrap-root-admin': {
+        const { email, password, fullName } = body
+
+        // Check if any platform admin already exists
+        const { data: existing } = await adminClient
+          .from('platform_admins')
+          .select('id')
+          .limit(1)
+
+        if (existing && existing.length > 0) {
+          return new Response(JSON.stringify({ error: 'Root admin already exists. Bootstrap denied.' }), {
+            status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        }
+
+        // Create auth user
+        const { data: authData, error: signUpError } = await adminClient.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+          user_metadata: { full_name: fullName, is_platform_admin: true }
+        })
+        if (signUpError) throw signUpError
+
+        // Create platform_admins record
+        await adminClient.from('platform_admins').insert({
+          auth_user_id: authData.user.id,
+          email,
+          full_name: fullName,
+          role: 'root_admin',
+          is_active: true,
+        })
+
+        return new Response(JSON.stringify({
+          success: true,
+          message: 'Root admin bootstrapped successfully',
         }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
       }
 
