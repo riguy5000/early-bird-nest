@@ -703,8 +703,41 @@ function EmployeesTab({ employees, setEmployees, showAdd, setShowAdd, markDirty,
 
   return (
     <>
-      <SettingsCard title="Employees" description="Manage employee accounts and access">
-        <div className="flex justify-end mb-3">
+      <SettingsCard title="Employees" description="Manage employee accounts and access. Employees created here get real login credentials.">
+        <div className="flex justify-end gap-2 mb-3">
+          {/* Invite by Email */}
+          <Dialog open={showInvite} onOpenChange={setShowInvite}>
+            <DialogTrigger asChild>
+              <Button size="sm" variant="outline"><Mail className="w-4 h-4 mr-1.5" />Invite by Email</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Invite Employee</DialogTitle>
+                <DialogDescription>Send an invite link. The employee will set up their own password and profile.</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-3 pt-2">
+                <div><Label className="text-xs">Email *</Label><Input type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} className="mt-1" placeholder="employee@example.com" /></div>
+                <div>
+                  <Label className="text-xs">Role</Label>
+                  <Select value={inviteRole} onValueChange={setInviteRole}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="buyer">Buyer</SelectItem>
+                      <SelectItem value="front_desk">Front Desk</SelectItem>
+                      <SelectItem value="read_only">Read Only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button variant="outline" size="sm" onClick={() => setShowInvite(false)}>Cancel</Button>
+                  <Button size="sm" onClick={handleInvite} disabled={!inviteEmail || isInviting}>{isInviting ? 'Sending…' : 'Send Invite'}</Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Add Manually */}
           <Dialog open={showAdd} onOpenChange={setShowAdd}>
             <DialogTrigger asChild>
               <Button size="sm"><UserPlus className="w-4 h-4 mr-1.5" />Add Employee</Button>
@@ -712,14 +745,14 @@ function EmployeesTab({ employees, setEmployees, showAdd, setShowAdd, markDirty,
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Add New Employee</DialogTitle>
-                <DialogDescription>Create an employee account for this store.</DialogDescription>
+                <DialogDescription>Create an employee account with login credentials.</DialogDescription>
               </DialogHeader>
               <div className="space-y-3 pt-2">
                 <div className="grid grid-cols-2 gap-3">
                   <div><Label className="text-xs">First Name *</Label><Input value={newEmp.firstName} onChange={e => setNewEmp(p => ({ ...p, firstName: e.target.value }))} className="mt-1" /></div>
                   <div><Label className="text-xs">Last Name *</Label><Input value={newEmp.lastName} onChange={e => setNewEmp(p => ({ ...p, lastName: e.target.value }))} className="mt-1" /></div>
                 </div>
-                <div><Label className="text-xs">Email</Label><Input type="email" value={newEmp.email} onChange={e => setNewEmp(p => ({ ...p, email: e.target.value }))} className="mt-1" /></div>
+                <div><Label className="text-xs">Email *</Label><Input type="email" value={newEmp.email} onChange={e => setNewEmp(p => ({ ...p, email: e.target.value }))} className="mt-1" /></div>
                 <div><Label className="text-xs">Phone</Label><Input type="tel" value={newEmp.phone} onChange={e => setNewEmp(p => ({ ...p, phone: e.target.value }))} className="mt-1" /></div>
                 <div>
                   <Label className="text-xs">Role</Label>
@@ -734,10 +767,10 @@ function EmployeesTab({ employees, setEmployees, showAdd, setShowAdd, markDirty,
                     </SelectContent>
                   </Select>
                 </div>
-                <div><Label className="text-xs">Temporary Password</Label><Input type="password" value={newEmp.password} onChange={e => setNewEmp(p => ({ ...p, password: e.target.value }))} className="mt-1" placeholder="Employee will reset on first login" /></div>
+                <div><Label className="text-xs">Temporary Password</Label><Input type="password" value={newEmp.password} onChange={e => setNewEmp(p => ({ ...p, password: e.target.value }))} className="mt-1" placeholder="Min 6 chars. Employee can reset later." /></div>
                 <div className="flex justify-end gap-2 pt-2">
                   <Button variant="outline" size="sm" onClick={() => setShowAdd(false)}>Cancel</Button>
-                  <Button size="sm" onClick={handleAdd} disabled={!newEmp.firstName || !newEmp.lastName}>Add Employee</Button>
+                  <Button size="sm" onClick={handleAdd} disabled={!newEmp.firstName || !newEmp.lastName || !newEmp.email || isCreating}>{isCreating ? 'Creating…' : 'Add Employee'}</Button>
                 </div>
               </div>
             </DialogContent>
@@ -757,12 +790,13 @@ function EmployeesTab({ employees, setEmployees, showAdd, setShowAdd, markDirty,
                   <TableHead>Employee</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Invite</TableHead>
                   <TableHead>Last Login</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {employees.map((emp: Employee) => (
+                {employees.map((emp: any) => (
                   <TableRow key={emp.id}>
                     <TableCell>
                       <div className="flex items-center gap-2.5">
@@ -770,20 +804,28 @@ function EmployeesTab({ employees, setEmployees, showAdd, setShowAdd, markDirty,
                           <AvatarFallback className="text-[10px]">{emp.firstName?.[0]}{emp.lastName?.[0]}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="text-sm font-medium">{emp.name}</p>
+                          <p className="text-sm font-medium">{emp.name || `${emp.firstName} ${emp.lastName}`.trim()}</p>
                           <p className="text-xs text-muted-foreground">{emp.email}</p>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell><Badge variant="outline" className="text-xs capitalize">{emp.role.replace('_', ' ')}</Badge></TableCell>
+                    <TableCell><Badge variant="outline" className="text-xs capitalize">{(emp.role || '').replace('_', ' ')}</Badge></TableCell>
                     <TableCell><Badge variant={emp.isActive ? 'default' : 'secondary'} className="text-xs">{emp.isActive ? 'Active' : 'Inactive'}</Badge></TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="text-xs capitalize">
+                        {emp.inviteStatus || 'active'}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-xs text-muted-foreground">{emp.lastLogin || '—'}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toggleActive(emp.id)}>
-                          {emp.isActive ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        <Button variant="ghost" size="icon" className="h-7 w-7" title="Reset password" onClick={() => handleResetPassword(emp.id)}>
+                          <KeyRound className="w-3.5 h-3.5" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeEmployee(emp.id)}>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" title={emp.isActive ? 'Deactivate' : 'Activate'} onClick={() => toggleActive(emp.id, emp.isActive)}>
+                          {emp.isActive ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" title="Delete" onClick={() => removeEmployee(emp.id)}>
                           <Trash2 className="w-3.5 h-3.5 text-destructive" />
                         </Button>
                       </div>
