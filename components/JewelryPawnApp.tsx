@@ -39,52 +39,74 @@ interface JewelryPawnAppProps {
 export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
   const [activeModule, setActiveModule] = useState('dashboard');
   
-  // Derive store/employee IDs from user object
-  const storeId = user?.storeId || user?.store?.id || 'default_store';
-  const employeeId = user?.id || 'default_employee';
-  const storeName = user?.store?.name || 'Main Store';
+  // Derive store/employee IDs from authenticated user
+  const storeId = user?.storeId || user?.store?.id || '';
+  const employeeId = user?.id || '';
+  const storeName = user?.store?.name || user?.name || 'Store';
+  const userPermissions = user?.permissions || {};
+  const isStoreAdmin = user?.role === 'store_admin';
 
   const { resolved, refetch: refetchSettings, settings: storeSettings } = useStoreSettings(storeId, employeeId);
 
-  const modules = [
-    { id: 'dashboard', name: 'Dashboard', icon: BarChart3, component: () => <StatisticsModule currentStore={{ id: storeId, name: storeName }} /> },
-    { id: 'take-in', name: 'Take-In', icon: Plus, component: () => (
+  // Merge user-level visibility with store settings
+  const effectiveVisibility = {
+    hideProfit: user?.visibility?.hideProfit ?? resolved.visibility.hideProfit,
+    hidePayout: user?.visibility?.hidePercentagePaid ?? resolved.visibility.hidePayout,
+    hideMarketValue: user?.visibility?.hideMarketValue ?? resolved.visibility.hideMarketValue,
+  };
+
+  // Build modules list based on permissions
+  const allModules = [
+    { id: 'dashboard', name: 'Dashboard', icon: BarChart3, requiresPermission: 'accessStatistics', component: () => <StatisticsModule currentStore={{ id: storeId, name: storeName }} /> },
+    { id: 'take-in', name: 'Take-In', icon: Plus, requiresPermission: 'accessTakeIn', component: () => (
       <TakeInPage 
         store={{ 
           id: storeId, 
           name: storeName, 
           defaultPayoutPercentage: 75, 
-          hideProfit: resolved.visibility.hideProfit, 
-          hidePayout: resolved.visibility.hidePayout, 
-          hideMarketValue: resolved.visibility.hideMarketValue, 
+          hideProfit: effectiveVisibility.hideProfit, 
+          hidePayout: effectiveVisibility.hidePayout, 
+          hideMarketValue: effectiveVisibility.hideMarketValue, 
           enableFastEntry: resolved.enableFastEntry, 
           autoPrintLabels: resolved.enablePrintLabels,
           requireCustomerInfoBeforeCompletion: resolved.requireCustomerInfoBeforeCompletion,
           defaultPayoutMethod: resolved.defaultPayoutMethod,
-          enablePrintReceipt: resolved.enablePrintReceipt,
-          enablePrintLabels: resolved.enablePrintLabels,
+          enablePrintReceipt: resolved.enablePrintReceipt && (isStoreAdmin || userPermissions.canPrintReceipts !== false),
+          enablePrintLabels: resolved.enablePrintLabels && (isStoreAdmin || userPermissions.canPrintLabels !== false),
           enableAiAssist: resolved.enableAiAssist,
           confirmCompletePurchase: resolved.confirmCompletePurchase,
           confirmDeleteItem: resolved.confirmDeleteItem,
           requireIdScan: resolved.requireIdScan,
           allowManualEntry: resolved.allowManualEntry,
           rateDefaults: resolved.rateDefaults,
+          canEditRates: isStoreAdmin || userPermissions.canEditRates === true,
+          canDeleteItems: isStoreAdmin || userPermissions.canDeleteItems === true,
+          canCompletePurchase: isStoreAdmin || userPermissions.canCompletePurchase !== false,
+          enableSaveForLater: storeSettings?.intakeDefaults?.enableSaveForLater !== false && (isStoreAdmin || userPermissions.accessSavedForLater !== false),
+          enableBatchPhotos: storeSettings?.intakeDefaults?.enableBatchPhotos !== false,
         }} 
         employee={{ id: employeeId, name: user?.name || 'Employee' }} 
         onComplete={(data) => toast.success('Transaction saved')} 
         onClose={() => setActiveModule('dashboard')} 
       />
     )},
-    { id: 'inventory', name: 'Inventory', icon: Package, component: () => <InventoryModule currentStore={{ id: storeId, name: storeName }} /> },
-    { id: 'customers', name: 'Customers', icon: Users, component: () => <CustomerModule user={user} /> },
-    { id: 'payouts', name: 'Payouts', icon: DollarSign, component: () => <PayoutsModule currentStore={{ id: storeId, name: storeName }} /> },
-    { id: 'settings', name: 'Settings', icon: Settings, component: () => (
+    { id: 'inventory', name: 'Inventory', icon: Package, requiresPermission: 'accessInventory', component: () => <InventoryModule currentStore={{ id: storeId, name: storeName }} /> },
+    { id: 'customers', name: 'Customers', icon: Users, requiresPermission: 'accessCustomers', component: () => <CustomerModule user={user} /> },
+    { id: 'payouts', name: 'Payouts', icon: DollarSign, requiresPermission: 'accessPayouts', component: () => <PayoutsModule currentStore={{ id: storeId, name: storeName }} /> },
+    { id: 'settings', name: 'Settings', icon: Settings, requiresPermission: 'accessSettings', component: () => (
       <StoreSettingsModule 
-        currentStore={{ id: storeId, name: storeName, type: 'jewelry' }} 
+        currentStore={{ id: storeId, name: storeName, type: user?.store?.type || 'jewelry' }} 
         onSettingsSaved={refetchSettings}
       />
     )}
   ];
+
+  // Filter modules based on permissions (store_admin sees everything)
+  const modules = allModules.filter(m => {
+    if (isStoreAdmin) return true;
+    const perm = m.requiresPermission as keyof typeof userPermissions;
+    return userPermissions[perm] !== false;
+  });
 
   const quickStats = [
     { label: 'Items in Stock', value: '1,247', change: '+12%', trend: 'up' },
