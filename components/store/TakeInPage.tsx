@@ -94,6 +94,11 @@ interface TakeInPageProps {
     requireIdScan: boolean;
     allowManualEntry: boolean;
     rateDefaults: Record<string, number>;
+    canEditRates?: boolean;
+    canDeleteItems?: boolean;
+    canCompletePurchase?: boolean;
+    enableSaveForLater?: boolean;
+    enableBatchPhotos?: boolean;
   };
   employee: {
     id: string;

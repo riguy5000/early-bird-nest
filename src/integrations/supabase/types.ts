@@ -284,6 +284,39 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_admins: {
+        Row: {
+          auth_user_id: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          is_active: boolean
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          auth_user_id: string
+          created_at?: string
+          email: string
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          role?: string
+          updated_at?: string
+        }
+        Update: {
+          auth_user_id?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       store_settings: {
         Row: {
           advanced: Json
@@ -389,6 +422,7 @@ export type Database = {
     }
     Functions: {
       get_employee_store_id: { Args: { _user_id: string }; Returns: string }
+      is_platform_admin: { Args: { _user_id: string }; Returns: boolean }
       is_store_member: {
         Args: { _store_id: string; _user_id: string }
         Returns: boolean

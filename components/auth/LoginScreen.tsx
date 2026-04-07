@@ -66,7 +66,7 @@ export function LoginScreen({ onLogin, onNavigate }: LoginScreenProps) {
         return;
       }
 
-      // Resolve employee profile via edge function
+      // Resolve profile via edge function (checks platform_admins first, then employee_profiles)
       const { data: profileData, error: profileError } = await supabase.functions.invoke('employee-management', {
         body: { action: 'resolve-profile' }
       });
@@ -74,9 +74,9 @@ export function LoginScreen({ onLogin, onNavigate }: LoginScreenProps) {
       if (profileError || profileData?.error) {
         const errorMsg = profileData?.error || 'Failed to load your profile';
         if (errorMsg.includes('inactive')) {
-          toast.error('Your account is inactive. Contact your store administrator.');
+          toast.error('Your account is inactive. Contact your administrator.');
         } else if (errorMsg.includes('No employee profile')) {
-          toast.error('No store profile found. Please contact your administrator.');
+          toast.error('No profile found. Please contact your administrator.');
         } else {
           toast.error(errorMsg);
         }
@@ -85,54 +85,69 @@ export function LoginScreen({ onLogin, onNavigate }: LoginScreenProps) {
         return;
       }
 
-      const { profile, store, permissions, visibility } = profileData;
-
-      const userData = {
-        id: profile.id,
-        authUserId: authData.user.id,
-        email: profile.email,
-        name: `${profile.first_name} ${profile.last_name}`.trim(),
-        firstName: profile.first_name,
-        lastName: profile.last_name,
-        role: profile.role,
-        storeId: profile.store_id,
-        store: store ? {
-          id: store.id,
-          name: store.name,
-          type: store.type,
-          address: store.address,
-          phone: store.phone,
-          email: store.email,
-          timezone: store.timezone,
-        } : null,
-        permissions: permissions ? {
-          accessTakeIn: permissions.can_access_take_in,
-          accessInventory: permissions.can_access_inventory,
-          accessCustomers: permissions.can_access_customers,
-          accessPayouts: permissions.can_access_payouts,
-          accessStatistics: permissions.can_access_statistics,
-          accessSettings: permissions.can_access_settings,
-          accessSavedForLater: permissions.can_access_saved_for_later,
-          canEditRates: permissions.can_edit_rates,
-          canEditFinalPayout: permissions.can_edit_final_payout_amount,
-          canPrintLabels: permissions.can_print_labels,
-          canPrintReceipts: permissions.can_print_receipts,
-          canDeleteItems: permissions.can_delete_items,
-          canCompletePurchase: permissions.can_complete_purchase,
-          canReopenTransactions: permissions.can_reopen_transactions,
-        } : null,
-        visibility: visibility ? {
-          hideProfit: visibility.hide_profit,
-          hidePercentagePaid: visibility.hide_percentage_paid,
-          hideMarketValue: visibility.hide_market_value,
-          hideTotalPayoutBreakdown: visibility.hide_total_payout_breakdown,
-          hideAverageRate: visibility.hide_average_rate,
-        } : null,
-        isActive: profile.is_active,
-      };
-
-      toast.success(`Welcome back, ${userData.name || 'User'}!`);
-      onLogin(userData, formData.rememberMe);
+      // Route based on user type
+      if (profileData.type === 'platform_admin') {
+        const pa = profileData.platformAdmin;
+        const userData = {
+          id: pa.id,
+          authUserId: authData.user.id,
+          email: pa.email,
+          name: pa.full_name,
+          role: pa.role,
+          isPlatformAdmin: true,
+          isActive: pa.is_active,
+        };
+        toast.success(`Welcome back, ${userData.name || 'Admin'}!`);
+        onLogin(userData, formData.rememberMe);
+      } else {
+        // Store user (store_user type)
+        const { profile, store, permissions, visibility } = profileData;
+        const userData = {
+          id: profile.id,
+          authUserId: authData.user.id,
+          email: profile.email,
+          name: `${profile.first_name} ${profile.last_name}`.trim(),
+          firstName: profile.first_name,
+          lastName: profile.last_name,
+          role: profile.role,
+          storeId: profile.store_id,
+          store: store ? {
+            id: store.id,
+            name: store.name,
+            type: store.type,
+            address: store.address,
+            phone: store.phone,
+            email: store.email,
+            timezone: store.timezone,
+          } : null,
+          permissions: permissions ? {
+            accessTakeIn: permissions.can_access_take_in,
+            accessInventory: permissions.can_access_inventory,
+            accessCustomers: permissions.can_access_customers,
+            accessPayouts: permissions.can_access_payouts,
+            accessStatistics: permissions.can_access_statistics,
+            accessSettings: permissions.can_access_settings,
+            accessSavedForLater: permissions.can_access_saved_for_later,
+            canEditRates: permissions.can_edit_rates,
+            canEditFinalPayout: permissions.can_edit_final_payout_amount,
+            canPrintLabels: permissions.can_print_labels,
+            canPrintReceipts: permissions.can_print_receipts,
+            canDeleteItems: permissions.can_delete_items,
+            canCompletePurchase: permissions.can_complete_purchase,
+            canReopenTransactions: permissions.can_reopen_transactions,
+          } : null,
+          visibility: visibility ? {
+            hideProfit: visibility.hide_profit,
+            hidePercentagePaid: visibility.hide_percentage_paid,
+            hideMarketValue: visibility.hide_market_value,
+            hideTotalPayoutBreakdown: visibility.hide_total_payout_breakdown,
+            hideAverageRate: visibility.hide_average_rate,
+          } : null,
+          isActive: profile.is_active,
+        };
+        toast.success(`Welcome back, ${userData.name || 'User'}!`);
+        onLogin(userData, formData.rememberMe);
+      }
     } catch (error: any) {
       console.error('Login error:', error);
       toast.error('An error occurred. Please try again.');
