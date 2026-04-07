@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -183,31 +184,75 @@ export function RegistrationWizard({ onComplete, onNavigate }: RegistrationWizar
     setIsLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const userData = {
-        id: 'store_' + Date.now(),
+      // Call the edge function to register store + auth user
+      const { data, error } = await supabase.functions.invoke('employee-management', {
+        body: {
+          action: 'register-store',
+          email: ownerAccount.ownerEmail,
+          password: ownerAccount.password,
+          fullName: ownerAccount.fullName,
+          store: {
+            name: storeDetails.storeName,
+            type: storeDetails.storeType,
+            address: storeDetails.address,
+            phone: storeDetails.phone,
+            email: storeDetails.email,
+          },
+        },
+      });
+
+      if (error || data?.error) {
+        throw new Error(data?.error || error?.message || 'Registration failed');
+      }
+
+      // Now sign in the user
+      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
         email: ownerAccount.ownerEmail,
-        name: ownerAccount.fullName,
-        role: 'store_admin',
-        storeId: 'store_' + Date.now(),
-        store: {
-          name: storeDetails.storeName,
-          type: storeDetails.storeType,
-          address: storeDetails.address,
-          placeId: storeDetails.placeId,
-          addressDetails: storeDetails.addressDetails,
-          phone: storeDetails.phone,
-          email: storeDetails.email,
-          employeeCount: storeDetails.employeeCount
-        }
+        password: ownerAccount.password,
+      });
+
+      if (signInError) throw signInError;
+
+      // Resolve profile
+      const { data: profileData, error: profileError } = await supabase.functions.invoke('employee-management', {
+        body: { action: 'resolve-profile' },
+      });
+
+      if (profileError || profileData?.error) {
+        throw new Error(profileData?.error || 'Failed to load profile');
+      }
+
+      const { profile, store, permissions, visibility } = profileData;
+      const userData = {
+        id: profile.id,
+        authUserId: authData.user?.id,
+        email: profile.email,
+        name: `${profile.first_name} ${profile.last_name}`.trim(),
+        role: profile.role,
+        storeId: profile.store_id,
+        store: store ? { id: store.id, name: store.name, type: store.type, address: store.address, phone: store.phone, email: store.email, timezone: store.timezone } : null,
+        permissions: permissions ? {
+          accessTakeIn: permissions.can_access_take_in, accessInventory: permissions.can_access_inventory,
+          accessCustomers: permissions.can_access_customers, accessPayouts: permissions.can_access_payouts,
+          accessStatistics: permissions.can_access_statistics, accessSettings: permissions.can_access_settings,
+          accessSavedForLater: permissions.can_access_saved_for_later, canEditRates: permissions.can_edit_rates,
+          canEditFinalPayout: permissions.can_edit_final_payout_amount, canPrintLabels: permissions.can_print_labels,
+          canPrintReceipts: permissions.can_print_receipts, canDeleteItems: permissions.can_delete_items,
+          canCompletePurchase: permissions.can_complete_purchase, canReopenTransactions: permissions.can_reopen_transactions,
+        } : null,
+        visibility: visibility ? {
+          hideProfit: visibility.hide_profit, hidePercentagePaid: visibility.hide_percentage_paid,
+          hideMarketValue: visibility.hide_market_value, hideTotalPayoutBreakdown: visibility.hide_total_payout_breakdown,
+          hideAverageRate: visibility.hide_average_rate,
+        } : null,
+        isActive: profile.is_active,
       };
       
       toast.success('Store created successfully! Welcome aboard!');
       onComplete(userData, false);
-    } catch (error) {
-      toast.error('Failed to create store. Please try again.');
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      toast.error(error.message || 'Failed to create store. Please try again.');
     } finally {
       setIsLoading(false);
     }
