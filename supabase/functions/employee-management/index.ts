@@ -575,6 +575,20 @@ Deno.serve(async (req) => {
         }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
       }
 
+      case 'admin-reset-password': {
+        const { email: resetEmail, newPassword } = body
+        // Look up user by email
+        const { data: { users: foundUsers }, error: listErr } = await adminClient.auth.admin.listUsers()
+        if (listErr) throw listErr
+        const targetUser = foundUsers?.find((u: any) => u.email === resetEmail)
+        if (!targetUser) throw new Error('User not found')
+        const { error: resetErr } = await adminClient.auth.admin.updateUserById(targetUser.id, { password: newPassword })
+        if (resetErr) throw resetErr
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      }
+
       default:
         return new Response(JSON.stringify({ error: 'Unknown action' }), {
           status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
