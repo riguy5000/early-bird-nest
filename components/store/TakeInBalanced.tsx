@@ -46,6 +46,10 @@ interface TakeInBalancedProps {
   onCompletePurchase: () => void;
   onSaveQuote: () => void;
   completing?: boolean;
+  paymentMethod: string;
+  onPaymentMethodChange: (method: string) => void;
+  checkNumber: string;
+  onCheckNumberChange: (num: string) => void;
 }
 
 export function TakeInBalanced({
@@ -61,13 +65,15 @@ export function TakeInBalanced({
   onOpenCustomerDrawer,
   onCompletePurchase,
   onSaveQuote,
-  completing
+  completing,
+  paymentMethod,
+  onPaymentMethodChange,
+  checkNumber,
+  onCheckNumberChange
 }: TakeInBalancedProps) {
   const { toast } = useToast();
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set());
   const [batchPhotoOpen, setBatchPhotoOpen] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('Check');
-  const [checkNumber, setCheckNumber] = useState('');
   const [storeCreditNumber, setStoreCreditNumber] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const weightInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
@@ -613,7 +619,7 @@ export function TakeInBalanced({
           {/* Payout Information */}
           <div className="p-4 border-b border-slate-200">
             <h3 className="text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-3">Payment Method</h3>
-            <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+            <Select value={paymentMethod} onValueChange={onPaymentMethodChange}>
               <SelectTrigger className="w-full rounded-lg bg-white border border-slate-200">
                 <SelectValue />
               </SelectTrigger>
@@ -626,7 +632,7 @@ export function TakeInBalanced({
             {paymentMethod === 'Check' && (
               <Input
                 value={checkNumber}
-                onChange={(e) => setCheckNumber(e.target.value)}
+                onChange={(e) => onCheckNumberChange(e.target.value)}
                 placeholder="Check #"
                 className="mt-2 h-9 text-sm rounded-lg bg-white border border-slate-200"
               />
