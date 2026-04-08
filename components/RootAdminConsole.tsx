@@ -9,9 +9,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet';
-import { MetalApiKeysSettings } from './admin/MetalApiKeysSettings';
-import { OpenAIKeySettings } from './admin/OpenAIKeySettings';
 import { JewelryPawnApp } from './JewelryPawnApp';
+import { RootAdminUsers } from './admin/RootAdminUsers';
+import { RootAdminSystem } from './admin/RootAdminSystem';
+import { RootAdminAnalytics } from './admin/RootAdminAnalytics';
+import { RootAdminPlatformSettings } from './admin/RootAdminPlatformSettings';
+import { RootAdminAddStore } from './admin/RootAdminAddStore';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { 
