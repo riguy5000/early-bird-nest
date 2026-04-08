@@ -9,16 +9,19 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet';
-import { MetalApiKeysSettings } from './admin/MetalApiKeysSettings';
-import { OpenAIKeySettings } from './admin/OpenAIKeySettings';
 import { JewelryPawnApp } from './JewelryPawnApp';
+import { RootAdminUsers } from './admin/RootAdminUsers';
+import { RootAdminSystem } from './admin/RootAdminSystem';
+import { RootAdminAnalytics } from './admin/RootAdminAnalytics';
+import { RootAdminPlatformSettings } from './admin/RootAdminPlatformSettings';
+import { RootAdminAddStore } from './admin/RootAdminAddStore';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { 
   Crown, LogOut, Settings, Shield, Users, Building, BarChart3, Activity, Server,
   AlertTriangle, TrendingUp, Calendar, Search, MoreHorizontal, Bell, Store,
   ChevronLeft, ChevronRight, Eye, Ban, PlayCircle, PauseCircle, Download,
-  UserCheck, X, ArrowUpDown
+  UserCheck, X, ArrowUpDown, Plus
 } from 'lucide-react';
 
 interface RootAdminConsoleProps {
@@ -98,8 +101,8 @@ export function RootAdminConsole({ user, onLogout }: RootAdminConsoleProps) {
   // Status change confirmation
   const [statusAction, setStatusAction] = useState<{ storeId: string; storeName: string; newStatus: string } | null>(null);
 
-  // Impersonation
   const [impersonating, setImpersonating] = useState<any>(null);
+  const [addStoreOpen, setAddStoreOpen] = useState(false);
 
   const sections = [
     { id: 'overview', name: 'Overview', icon: BarChart3 },
@@ -409,6 +412,9 @@ export function RootAdminConsole({ user, onLogout }: RootAdminConsoleProps) {
                 <h2 className="text-2xl font-bold">All Stores</h2>
                 <p className="text-muted-foreground">{storesTotal} registered store{storesTotal !== 1 ? 's' : ''}</p>
               </div>
+              <Button onClick={() => setAddStoreOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />Add Store
+              </Button>
             </div>
 
             {/* Filters */}
@@ -533,38 +539,21 @@ export function RootAdminConsole({ user, onLogout }: RootAdminConsoleProps) {
           </div>
         )}
 
-        {/* Settings */}
-        {activeSection === 'settings' && (
-          <div className="max-w-7xl mx-auto space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold">Platform Settings</h2>
-              <p className="text-muted-foreground">Configure platform-wide integrations</p>
-            </div>
-            <OpenAIKeySettings />
-            <Separator />
-            <MetalApiKeysSettings />
-          </div>
-        )}
+        {/* Users */}
+        {activeSection === 'users' && <RootAdminUsers />}
 
-        {/* Placeholder for other sections */}
-        {!['overview', 'stores', 'settings'].includes(activeSection) && (
-          <div className="max-w-7xl mx-auto">
-            <Card>
-              <CardContent className="flex items-center justify-center py-12">
-                <div className="text-center space-y-4">
-                  <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
-                    <Settings className="h-8 w-8 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-medium capitalize">{activeSection} Section</h3>
-                    <p className="text-muted-foreground">This section is under development.</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        {/* System */}
+        {activeSection === 'system' && <RootAdminSystem />}
+
+        {/* Analytics */}
+        {activeSection === 'analytics' && <RootAdminAnalytics />}
+
+        {/* Settings */}
+        {activeSection === 'settings' && <RootAdminPlatformSettings />}
       </main>
+
+      {/* Add Store Modal */}
+      <RootAdminAddStore open={addStoreOpen} onOpenChange={setAddStoreOpen} onCreated={loadStores} />
 
       {/* Store Details Sheet */}
       <Sheet open={detailsOpen} onOpenChange={setDetailsOpen}>
