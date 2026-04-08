@@ -101,8 +101,8 @@ export function RootAdminConsole({ user, onLogout }: RootAdminConsoleProps) {
   // Status change confirmation
   const [statusAction, setStatusAction] = useState<{ storeId: string; storeName: string; newStatus: string } | null>(null);
 
-  // Impersonation
   const [impersonating, setImpersonating] = useState<any>(null);
+  const [addStoreOpen, setAddStoreOpen] = useState(false);
 
   const sections = [
     { id: 'overview', name: 'Overview', icon: BarChart3 },
@@ -412,6 +412,9 @@ export function RootAdminConsole({ user, onLogout }: RootAdminConsoleProps) {
                 <h2 className="text-2xl font-bold">All Stores</h2>
                 <p className="text-muted-foreground">{storesTotal} registered store{storesTotal !== 1 ? 's' : ''}</p>
               </div>
+              <Button onClick={() => setAddStoreOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />Add Store
+              </Button>
             </div>
 
             {/* Filters */}
