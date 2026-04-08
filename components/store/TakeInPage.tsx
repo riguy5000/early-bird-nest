@@ -358,7 +358,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
         // Build photos array: crop first (item-specific), then batch photo as fallback
         const photos: string[] = [];
         if (detected.cropUrl) photos.push(detected.cropUrl);
-        if (batchPhotoUrl && !photos.includes(batchPhotoUrl)) photos.push(batchPhotoUrl);
+        if (batchPhotoUrlArg && !photos.includes(batchPhotoUrlArg)) photos.push(batchPhotoUrlArg);
         newItems.push({
           id: `item_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
           category: category as Item['category'],
