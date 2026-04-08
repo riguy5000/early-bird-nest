@@ -268,6 +268,298 @@ export type Database = {
           },
         ]
       }
+      inventory_batches: {
+        Row: {
+          batch_notes: string | null
+          batch_photos: string[] | null
+          created_at: string
+          customer_id: string | null
+          employee_id: string | null
+          id: string
+          source: string
+          status: string
+          store_id: string
+          take_in_ref: string | null
+          total_items: number
+          total_payout: number
+          updated_at: string
+        }
+        Insert: {
+          batch_notes?: string | null
+          batch_photos?: string[] | null
+          created_at?: string
+          customer_id?: string | null
+          employee_id?: string | null
+          id?: string
+          source?: string
+          status?: string
+          store_id: string
+          take_in_ref?: string | null
+          total_items?: number
+          total_payout?: number
+          updated_at?: string
+        }
+        Update: {
+          batch_notes?: string | null
+          batch_photos?: string[] | null
+          created_at?: string
+          customer_id?: string | null
+          employee_id?: string | null
+          id?: string
+          source?: string
+          status?: string
+          store_id?: string
+          take_in_ref?: string | null
+          total_items?: number
+          total_payout?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_batches_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_batches_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_batches_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_items: {
+        Row: {
+          archive_date: string | null
+          archive_reason: string | null
+          batch_id: string | null
+          category: string
+          created_at: string
+          customer_id: string | null
+          description: string | null
+          disposition: string
+          employee_id: string | null
+          estimated_resale_value: number | null
+          estimated_scrap_value: number | null
+          id: string
+          is_archived: boolean | null
+          is_part_out_eligible: boolean | null
+          is_resellable: boolean | null
+          is_scrap_eligible: boolean | null
+          location: string | null
+          location_notes: string | null
+          market_value_at_intake: number | null
+          metals: Json | null
+          notes: string | null
+          parent_item_id: string | null
+          payout_amount: number | null
+          payout_percentage: number | null
+          photos: string[] | null
+          processing_status: string
+          refinery_lot_id: string | null
+          sale_channel: string | null
+          selling_price: number | null
+          sent_to_refinery_date: string | null
+          showroom_location: string | null
+          showroom_ready: boolean | null
+          sold_amount: number | null
+          sold_date: string | null
+          source: string
+          stones: Json | null
+          store_id: string
+          subcategory: string | null
+          take_in_item_ref: string | null
+          test_method: string | null
+          updated_at: string
+          watch_info: Json | null
+          weight: number | null
+        }
+        Insert: {
+          archive_date?: string | null
+          archive_reason?: string | null
+          batch_id?: string | null
+          category?: string
+          created_at?: string
+          customer_id?: string | null
+          description?: string | null
+          disposition?: string
+          employee_id?: string | null
+          estimated_resale_value?: number | null
+          estimated_scrap_value?: number | null
+          id?: string
+          is_archived?: boolean | null
+          is_part_out_eligible?: boolean | null
+          is_resellable?: boolean | null
+          is_scrap_eligible?: boolean | null
+          location?: string | null
+          location_notes?: string | null
+          market_value_at_intake?: number | null
+          metals?: Json | null
+          notes?: string | null
+          parent_item_id?: string | null
+          payout_amount?: number | null
+          payout_percentage?: number | null
+          photos?: string[] | null
+          processing_status?: string
+          refinery_lot_id?: string | null
+          sale_channel?: string | null
+          selling_price?: number | null
+          sent_to_refinery_date?: string | null
+          showroom_location?: string | null
+          showroom_ready?: boolean | null
+          sold_amount?: number | null
+          sold_date?: string | null
+          source?: string
+          stones?: Json | null
+          store_id: string
+          subcategory?: string | null
+          take_in_item_ref?: string | null
+          test_method?: string | null
+          updated_at?: string
+          watch_info?: Json | null
+          weight?: number | null
+        }
+        Update: {
+          archive_date?: string | null
+          archive_reason?: string | null
+          batch_id?: string | null
+          category?: string
+          created_at?: string
+          customer_id?: string | null
+          description?: string | null
+          disposition?: string
+          employee_id?: string | null
+          estimated_resale_value?: number | null
+          estimated_scrap_value?: number | null
+          id?: string
+          is_archived?: boolean | null
+          is_part_out_eligible?: boolean | null
+          is_resellable?: boolean | null
+          is_scrap_eligible?: boolean | null
+          location?: string | null
+          location_notes?: string | null
+          market_value_at_intake?: number | null
+          metals?: Json | null
+          notes?: string | null
+          parent_item_id?: string | null
+          payout_amount?: number | null
+          payout_percentage?: number | null
+          photos?: string[] | null
+          processing_status?: string
+          refinery_lot_id?: string | null
+          sale_channel?: string | null
+          selling_price?: number | null
+          sent_to_refinery_date?: string | null
+          showroom_location?: string | null
+          showroom_ready?: boolean | null
+          sold_amount?: number | null
+          sold_date?: string | null
+          source?: string
+          stones?: Json | null
+          store_id?: string
+          subcategory?: string | null
+          take_in_item_ref?: string | null
+          test_method?: string | null
+          updated_at?: string
+          watch_info?: Json | null
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_items_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_items_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_items_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_items_parent_item_id_fkey"
+            columns: ["parent_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_items_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          field_changed: string
+          id: string
+          item_id: string
+          new_value: string | null
+          notes: string | null
+          old_value: string | null
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          field_changed: string
+          id?: string
+          item_id: string
+          new_value?: string | null
+          notes?: string | null
+          old_value?: string | null
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          field_changed?: string
+          id?: string
+          item_id?: string
+          new_value?: string | null
+          notes?: string | null
+          old_value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_status_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "employee_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_status_history_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kv_store_62d2b480: {
         Row: {
           key: string
@@ -387,6 +679,59 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      refinery_lots: {
+        Row: {
+          actual_settlement: number | null
+          created_at: string
+          difference: number | null
+          expected_melt_value: number | null
+          id: string
+          item_ids: string[] | null
+          lot_number: string
+          notes: string | null
+          sent_date: string | null
+          status: string
+          store_id: string
+          updated_at: string
+        }
+        Insert: {
+          actual_settlement?: number | null
+          created_at?: string
+          difference?: number | null
+          expected_melt_value?: number | null
+          id?: string
+          item_ids?: string[] | null
+          lot_number?: string
+          notes?: string | null
+          sent_date?: string | null
+          status?: string
+          store_id: string
+          updated_at?: string
+        }
+        Update: {
+          actual_settlement?: number | null
+          created_at?: string
+          difference?: number | null
+          expected_melt_value?: number | null
+          id?: string
+          item_ids?: string[] | null
+          lot_number?: string
+          notes?: string | null
+          sent_date?: string | null
+          status?: string
+          store_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refinery_lots_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       store_settings: {
         Row: {
