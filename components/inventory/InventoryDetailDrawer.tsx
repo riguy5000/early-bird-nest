@@ -3,8 +3,10 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Scissors, Archive, MapPin, Printer } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Scissors, Archive } from 'lucide-react';
 import type { InventoryItemRecord } from './types';
+import { DISPOSITIONS } from './types';
 
 interface Props {
   item: InventoryItemRecord | null;
@@ -12,6 +14,7 @@ interface Props {
   onClose: () => void;
   onPartOut: (item: InventoryItemRecord) => void;
   onArchive: (item: InventoryItemRecord) => void;
+  onDispositionChange?: (item: InventoryItemRecord, disposition: string) => void;
 }
 
 function fmt(n: number) {
@@ -28,7 +31,7 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-export function InventoryDetailDrawer({ item, open, onClose, onPartOut, onArchive }: Props) {
+export function InventoryDetailDrawer({ item, open, onClose, onPartOut, onArchive, onDispositionChange }: Props) {
   if (!item) return null;
 
   return (
@@ -38,14 +41,29 @@ export function InventoryDetailDrawer({ item, open, onClose, onPartOut, onArchiv
           <SheetTitle className="text-lg">
             {item.description || `${item.category} - ${item.subcategory}`}
           </SheetTitle>
-          <div className="flex gap-2 mt-1">
-            <Badge variant="outline">{item.disposition}</Badge>
+          <div className="flex gap-2 mt-1 items-center">
+            {onDispositionChange ? (
+              <Select
+                value={item.disposition}
+                onValueChange={(v) => onDispositionChange(item, v)}
+              >
+                <SelectTrigger className="h-7 w-[160px] text-xs font-medium">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {DISPOSITIONS.map(d => (
+                    <SelectItem key={d} value={d} className="text-xs">{d}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Badge variant="outline">{item.disposition}</Badge>
+            )}
             <Badge variant="outline">{item.processing_status}</Badge>
           </div>
         </SheetHeader>
 
         <div className="mt-6 space-y-4">
-          {/* Photos */}
           {item.photos?.length > 0 && (
             <div className="flex gap-2 overflow-x-auto pb-2">
               {item.photos.map((url, i) => (
@@ -54,7 +72,6 @@ export function InventoryDetailDrawer({ item, open, onClose, onPartOut, onArchiv
             </div>
           )}
 
-          {/* Core Info */}
           <div>
             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Item Info</h4>
             <Field label="Item ID" value={item.id.slice(0, 12)} />
@@ -69,7 +86,6 @@ export function InventoryDetailDrawer({ item, open, onClose, onPartOut, onArchiv
 
           <Separator />
 
-          {/* Values */}
           <div>
             <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Values</h4>
             <Field label="Market Value at Intake" value={fmt(item.market_value_at_intake)} />
@@ -83,7 +99,6 @@ export function InventoryDetailDrawer({ item, open, onClose, onPartOut, onArchiv
 
           <Separator />
 
-          {/* Metals */}
           {item.metals?.length > 0 && (
             <div>
               <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Metals</h4>
@@ -95,7 +110,6 @@ export function InventoryDetailDrawer({ item, open, onClose, onPartOut, onArchiv
             </div>
           )}
 
-          {/* Stones */}
           {item.stones?.length > 0 && (
             <div>
               <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Stones</h4>
@@ -107,7 +121,6 @@ export function InventoryDetailDrawer({ item, open, onClose, onPartOut, onArchiv
             </div>
           )}
 
-          {/* Notes */}
           {item.notes && (
             <div>
               <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Notes</h4>
@@ -115,7 +128,6 @@ export function InventoryDetailDrawer({ item, open, onClose, onPartOut, onArchiv
             </div>
           )}
 
-          {/* Parent/Child */}
           {item.parent_item_id && (
             <div>
               <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Derived From</h4>
@@ -125,7 +137,6 @@ export function InventoryDetailDrawer({ item, open, onClose, onPartOut, onArchiv
 
           <Separator />
 
-          {/* Actions */}
           <div className="flex gap-2 pt-2">
             {item.is_part_out_eligible && !item.is_archived && (
               <Button variant="outline" size="sm" onClick={() => onPartOut(item)}>

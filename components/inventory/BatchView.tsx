@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronRight, Package, Calendar, User, DollarSign } from 'lucide-react';
+import { ChevronDown, ChevronRight, Package, Calendar, DollarSign } from 'lucide-react';
 import { InventoryItemTable } from './InventoryItemTable';
 import type { InventoryBatchRecord, InventoryItemRecord } from './types';
 
@@ -13,13 +13,14 @@ interface Props {
   onEditItem: (item: InventoryItemRecord) => void;
   onPartOutItem: (item: InventoryItemRecord) => void;
   onArchiveItem: (item: InventoryItemRecord) => void;
+  onDispositionChange?: (item: InventoryItemRecord, disposition: string) => void;
 }
 
 function fmt(n: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 }
 
-export function BatchView({ batches, allItems, onViewItem, onEditItem, onPartOutItem, onArchiveItem }: Props) {
+export function BatchView({ batches, allItems, onViewItem, onEditItem, onPartOutItem, onArchiveItem, onDispositionChange }: Props) {
   const [expandedBatches, setExpandedBatches] = useState<Set<string>>(new Set());
 
   const toggleBatch = (id: string) => {
@@ -83,6 +84,7 @@ export function BatchView({ batches, allItems, onViewItem, onEditItem, onPartOut
                   onEdit={onEditItem}
                   onPartOut={onPartOutItem}
                   onArchive={onArchiveItem}
+                  onDispositionChange={onDispositionChange}
                   emptyMessage="No items in this batch"
                 />
               </CardContent>

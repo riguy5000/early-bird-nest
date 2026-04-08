@@ -2,10 +2,12 @@ import React, { useState, useRef, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { QRCodeSVG } from 'qrcode.react';
-import { Camera, Upload, Loader2, Sparkles, Check, X, ImageIcon, QrCode, Smartphone } from 'lucide-react';
+import { Camera, Upload, Loader2, Sparkles, Check, X, QrCode, Smartphone, Merge, Split, Trash2, Edit } from 'lucide-react';
 
 interface DetectedItem {
   type: string;
@@ -13,6 +15,15 @@ interface DetectedItem {
   notes?: string;
   color_notes?: string;
   subcategory?: string;
+}
+
+interface ReviewItem {
+  id: string;
+  type: string;
+  color_notes: string;
+  notes: string;
+  isPair: boolean;
+  category: string;
 }
 
 interface AICaptureResult {
@@ -27,11 +38,32 @@ interface AICaptureModalProps {
   batchId: string;
 }
 
+const EARRING_TYPES = ['earring', 'earrings', 'stud', 'studs', 'hoop', 'hoops', 'drop earring', 'drop earrings'];
+
+function isEarringType(type: string): boolean {
+  return EARRING_TYPES.some(t => type.toLowerCase().includes(t));
+}
+
+function categorize(type: string): string {
+  if (['Watch'].some(t => type.toLowerCase().includes(t.toLowerCase()))) return 'Watch';
+  if (['Coin', 'Bar', 'Round'].some(t => type.toLowerCase().includes(t.toLowerCase()))) return 'Bullion';
+  if (['Spoon', 'Fork', 'Knife'].some(t => type.toLowerCase().includes(t.toLowerCase()))) return 'Silverware';
+  return 'Jewelry';
+}
+
+const SUBCATEGORIES: Record<string, string[]> = {
+  Jewelry: ['Ring', 'Wedding Band', 'Earrings', 'Pendant', 'Chain', 'Necklace', 'Bracelet', 'Anklet', 'Brooch', 'Charm', 'Cufflinks', 'Pin', 'Other'],
+  Watch: ['Luxury Watch', 'Dress Watch', 'Sport Watch', 'Pocket Watch', 'Other'],
+  Bullion: ['Gold Coin', 'Silver Coin', 'Gold Bar', 'Silver Bar', 'Round', 'Other'],
+  Silverware: ['Spoon', 'Fork', 'Knife', 'Serving Piece', 'Other'],
+};
+
 export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICaptureModalProps) {
-  const [step, setStep] = useState<'method' | 'capture' | 'qr' | 'analyzing' | 'results'>('method');
+  const [step, setStep] = useState<'method' | 'capture' | 'qr' | 'analyzing' | 'review'>('method');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [result, setResult] = useState<AICaptureResult | null>(null);
+  const [reviewItems, setReviewItems] = useState<ReviewItem[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [qrSessionId, setQrSessionId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -41,7 +73,8 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
     setStep('method');
     setImagePreview(null);
     setImageFile(null);
-    setResult(null);
+    setReviewItems([]);
+    setSelectedIds(new Set());
     setQrSessionId(null);
     if (qrPollRef.current) {
       clearInterval(qrPollRef.current);
@@ -70,6 +103,53 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
     reader.readAsDataURL(file);
   }, []);
 
+  const buildReviewItems = useCallback((result: AICaptureResult): ReviewItem[] => {
+    const items: ReviewItem[] = [];
+    for (const detected of result.items) {
+      const isEarring = isEarringType(detected.type);
+      const isPair = isEarring && (
+        detected.count >= 2 ||
+        (detected.notes || '').toLowerCase().includes('pair')
+      );
+
+      if (isPair) {
+        // Create one pair item
+        items.push({
+          id: `ai_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          type: 'Earrings',
+          color_notes: detected.color_notes || '',
+          notes: `Pair${detected.notes ? ' — ' + detected.notes : ''}`,
+          isPair: true,
+          category: 'Jewelry',
+        });
+        // If count > 2 there might be extra singles
+        const remaining = detected.count - 2;
+        for (let i = 0; i < remaining; i++) {
+          items.push({
+            id: `ai_${Date.now()}_${Math.random().toString(36).slice(2, 7)}_s${i}`,
+            type: 'Earring (single)',
+            color_notes: detected.color_notes || '',
+            notes: detected.notes || '',
+            isPair: false,
+            category: 'Jewelry',
+          });
+        }
+      } else {
+        for (let i = 0; i < detected.count; i++) {
+          items.push({
+            id: `ai_${Date.now()}_${Math.random().toString(36).slice(2, 7)}_${i}`,
+            type: isEarring ? 'Earring (single)' : detected.type,
+            color_notes: detected.color_notes || '',
+            notes: detected.notes || '',
+            isPair: false,
+            category: categorize(detected.type),
+          });
+        }
+      }
+    }
+    return items;
+  }, []);
+
   const handleAnalyze = useCallback(async () => {
     if (!imagePreview) return;
     setStep('analyzing');
@@ -80,21 +160,21 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      setResult(data as AICaptureResult);
-      setStep('results');
+      const result = data as AICaptureResult;
+      setReviewItems(buildReviewItems(result));
+      setStep('review');
     } catch (err: any) {
       console.error('AI capture error:', err);
       toast.error(err.message || 'Failed to analyze image');
       setStep('capture');
     }
-  }, [imagePreview]);
+  }, [imagePreview, buildReviewItems]);
 
-  // QR remote capture for AI assist
+  // QR remote capture
   const startQrFlow = useCallback(() => {
     const sessionId = `ai_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     setQrSessionId(sessionId);
     setStep('qr');
-
     if (qrPollRef.current) clearInterval(qrPollRef.current);
     qrPollRef.current = setInterval(async () => {
       try {
@@ -103,7 +183,6 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
           .select('value')
           .eq('key', `qr_scan_${sessionId}`)
           .maybeSingle();
-        
         if (data?.value) {
           clearInterval(qrPollRef.current!);
           qrPollRef.current = null;
@@ -111,7 +190,6 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
           const imageBase64 = payload.front_image_base64 || payload.image_base64;
           if (imageBase64) {
             setImagePreview(`data:image/jpeg;base64,${imageBase64}`);
-            // Create a File object from base64
             const byteArray = Uint8Array.from(atob(imageBase64), c => c.charCodeAt(0));
             const blob = new Blob([byteArray], { type: 'image/jpeg' });
             setImageFile(new File([blob], 'qr-capture.jpg', { type: 'image/jpeg' }));
@@ -120,36 +198,80 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
             await supabase.from('kv_store_62d2b480').delete().eq('key', `qr_scan_${sessionId}`);
           }
         }
-      } catch (e) {
-        // Ignore
-      }
+      } catch (_) {}
     }, 2000);
   }, []);
 
-  const handleConfirm = useCallback(async () => {
-    if (!result || !imageFile) return;
-    try {
-      const ext = imageFile.name.split('.').pop() || 'jpg';
-      const filePath = `${batchId}/batch-photo.${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from('batch-photos')
-        .upload(filePath, imageFile, { upsert: true });
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-      }
-      const { data: urlData } = supabase.storage
-        .from('batch-photos')
-        .getPublicUrl(filePath);
+  // Review actions
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
-      onItemsDetected(result.items, urlData?.publicUrl || '');
+  const mergeSelected = () => {
+    if (selectedIds.size < 2) { toast.error('Select at least 2 items to merge'); return; }
+    const ids = Array.from(selectedIds);
+    const kept = reviewItems.find(i => i.id === ids[0])!;
+    setReviewItems(prev => [
+      ...prev.filter(i => !selectedIds.has(i.id)),
+      { ...kept, type: 'Earrings', isPair: true, notes: `Merged pair${kept.notes ? ' — ' + kept.notes : ''}` },
+    ]);
+    setSelectedIds(new Set());
+  };
+
+  const splitItem = (id: string) => {
+    const item = reviewItems.find(i => i.id === id);
+    if (!item) return;
+    setReviewItems(prev => [
+      ...prev.filter(i => i.id !== id),
+      { ...item, id: `${id}_a`, type: 'Earring (single)', isPair: false, notes: 'Split from pair' },
+      { ...item, id: `${id}_b`, type: 'Earring (single)', isPair: false, notes: 'Split from pair' },
+    ]);
+  };
+
+  const deleteItem = (id: string) => {
+    setReviewItems(prev => prev.filter(i => i.id !== id));
+    setSelectedIds(prev => { const n = new Set(prev); n.delete(id); return n; });
+  };
+
+  const updateReviewItem = (id: string, updates: Partial<ReviewItem>) => {
+    setReviewItems(prev => prev.map(i => i.id === id ? { ...i, ...updates } : i));
+  };
+
+  // Confirm and send to TakeIn
+  const handleConfirm = useCallback(async () => {
+    if (reviewItems.length === 0) return;
+    try {
+      let batchPhotoUrl = '';
+      if (imageFile) {
+        const ext = imageFile.name.split('.').pop() || 'jpg';
+        const filePath = `${batchId}/batch-photo.${ext}`;
+        await supabase.storage.from('batch-photos').upload(filePath, imageFile, { upsert: true });
+        const { data: urlData } = supabase.storage.from('batch-photos').getPublicUrl(filePath);
+        batchPhotoUrl = urlData?.publicUrl || '';
+      }
+
+      // Convert review items to detected items format
+      const detected: DetectedItem[] = reviewItems.map(ri => ({
+        type: ri.type,
+        count: 1,
+        notes: ri.notes,
+        color_notes: ri.color_notes,
+      }));
+
+      onItemsDetected(detected, batchPhotoUrl);
       handleClose();
-      toast.success(`Detected ${result.total_count} items — added to your batch`);
+      toast.success(`Added ${reviewItems.length} draft items to your batch`);
     } catch (err: any) {
       toast.error('Failed to save batch photo');
-      onItemsDetected(result.items, '');
+      const detected: DetectedItem[] = reviewItems.map(ri => ({ type: ri.type, count: 1, notes: ri.notes, color_notes: ri.color_notes }));
+      onItemsDetected(detected, '');
       handleClose();
     }
-  }, [result, imageFile, batchId, onItemsDetected, handleClose]);
+  }, [reviewItems, imageFile, batchId, onItemsDetected, handleClose]);
 
   const qrUrl = qrSessionId
     ? `${window.location.origin}/scan-upload?session=${qrSessionId}&mode=single`
@@ -157,7 +279,7 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
@@ -171,39 +293,27 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
         {/* Step: Choose input method */}
         {step === 'method' && (
           <div className="space-y-3">
-            <Button
-              className="w-full h-12 rounded-lg flex items-center gap-3"
-              onClick={() => cameraInputRef.current?.click()}
-            >
+            <Button className="w-full h-12 rounded-lg flex items-center gap-3" onClick={() => cameraInputRef.current?.click()}>
               <Camera className="h-5 w-5" />
               <div className="text-left">
                 <div className="text-sm font-medium">Use This Device Camera</div>
                 <div className="text-[11px] opacity-80">Take a photo directly</div>
               </div>
             </Button>
-            <Button
-              variant="outline"
-              className="w-full h-12 rounded-lg flex items-center gap-3"
-              onClick={() => fileInputRef.current?.click()}
-            >
+            <Button variant="outline" className="w-full h-12 rounded-lg flex items-center gap-3" onClick={() => fileInputRef.current?.click()}>
               <Upload className="h-5 w-5" />
               <div className="text-left">
                 <div className="text-sm font-medium">Upload Image</div>
                 <div className="text-[11px] text-muted-foreground">Select from your files</div>
               </div>
             </Button>
-            <Button
-              variant="outline"
-              className="w-full h-12 rounded-lg flex items-center gap-3"
-              onClick={startQrFlow}
-            >
+            <Button variant="outline" className="w-full h-12 rounded-lg flex items-center gap-3" onClick={startQrFlow}>
               <QrCode className="h-5 w-5" />
               <div className="text-left">
                 <div className="text-sm font-medium">QR Code Remote Capture</div>
                 <div className="text-[11px] text-muted-foreground">Scan QR with phone to take photo</div>
               </div>
             </Button>
-
             <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
             <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileSelect} />
           </div>
@@ -226,9 +336,7 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
               <Loader2 className="h-3 w-3 animate-spin" />
               Waiting for photo…
             </div>
-            <Button variant="ghost" size="sm" onClick={() => { reset(); }} className="text-xs text-muted-foreground">
-              Cancel
-            </Button>
+            <Button variant="ghost" size="sm" onClick={reset} className="text-xs text-muted-foreground">Cancel</Button>
           </div>
         )}
 
@@ -238,12 +346,7 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
             {imagePreview && (
               <div className="relative rounded-lg overflow-hidden border">
                 <img src={imagePreview} alt="Batch preview" className="w-full max-h-64 object-contain bg-muted" />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute top-2 right-2 bg-background/80 backdrop-blur"
-                  onClick={() => { setImagePreview(null); setImageFile(null); setStep('method'); }}
-                >
+                <Button variant="ghost" size="sm" className="absolute top-2 right-2 bg-background/80 backdrop-blur" onClick={() => { setImagePreview(null); setImageFile(null); setStep('method'); }}>
                   <X className="h-4 w-4" />
                 </Button>
               </div>
@@ -269,39 +372,90 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
           </div>
         )}
 
-        {/* Step: Results */}
-        {step === 'results' && result && (
+        {/* Step: Review */}
+        {step === 'review' && (
           <div className="space-y-4">
+            {/* Batch image thumbnail */}
             {imagePreview && (
-              <div className="rounded-lg overflow-hidden border max-h-32">
-                <img src={imagePreview} alt="Batch" className="w-full max-h-32 object-contain bg-muted" />
+              <div className="rounded-lg overflow-hidden border max-h-28">
+                <img src={imagePreview} alt="Batch" className="w-full max-h-28 object-contain bg-muted" />
               </div>
             )}
 
             <div className="flex items-center justify-between">
-              <h4 className="font-medium">Detected Items</h4>
-              <Badge>{result.total_count} total</Badge>
+              <h4 className="font-medium">Review Detected Items</h4>
+              <Badge>{reviewItems.length} items</Badge>
             </div>
 
-            <div className="space-y-2 max-h-48 overflow-auto">
-              {result.items.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
-                  <div>
-                    <span className="font-medium">{item.type}</span>
-                    {item.color_notes && (
-                      <span className="text-xs text-muted-foreground ml-2">({item.color_notes})</span>
-                    )}
-                    {item.notes && (
-                      <p className="text-xs text-muted-foreground">{item.notes}</p>
-                    )}
+            {/* Merge/Split toolbar */}
+            {selectedIds.size > 0 && (
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/20">
+                <span className="text-xs font-medium">{selectedIds.size} selected</span>
+                <Button variant="outline" size="sm" className="h-7 text-xs" onClick={mergeSelected}>
+                  <Merge className="h-3 w-3 mr-1" /> Merge as Pair
+                </Button>
+                <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setSelectedIds(new Set())}>
+                  Clear
+                </Button>
+              </div>
+            )}
+
+            <div className="space-y-2 max-h-60 overflow-auto">
+              {reviewItems.map((item) => (
+                <div key={item.id} className={`p-3 rounded-lg border transition-colors ${selectedIds.has(item.id) ? 'bg-primary/5 border-primary/30' : 'bg-muted/50'}`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(item.id)}
+                        onChange={() => toggleSelect(item.id)}
+                        className="rounded border-muted-foreground/30 mt-0.5"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={item.type}
+                            onChange={(e) => updateReviewItem(item.id, { type: e.target.value })}
+                            className="h-6 text-xs font-medium border-0 border-b border-transparent hover:border-border focus:border-primary bg-transparent px-0 w-auto max-w-[140px]"
+                          />
+                          <Select value={item.category} onValueChange={(v) => updateReviewItem(item.id, { category: v })}>
+                            <SelectTrigger className="h-6 w-20 text-[10px] border-0 bg-muted/50">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Jewelry">Jewelry</SelectItem>
+                              <SelectItem value="Watch">Watch</SelectItem>
+                              <SelectItem value="Bullion">Bullion</SelectItem>
+                              <SelectItem value="Silverware">Silverware</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          {item.isPair && <Badge variant="secondary" className="text-[9px] h-4 px-1">Pair</Badge>}
+                        </div>
+                        {item.color_notes && (
+                          <span className="text-[10px] text-muted-foreground italic">{item.color_notes}</span>
+                        )}
+                        {item.notes && (
+                          <p className="text-[10px] text-muted-foreground truncate">{item.notes}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-0.5 flex-shrink-0">
+                      {item.isPair && (
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => splitItem(item.id)} title="Split into singles">
+                          <Split className="h-3 w-3" />
+                        </Button>
+                      )}
+                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-destructive" onClick={() => deleteItem(item.id)} title="Remove">
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
-                  <Badge variant="outline">×{item.count}</Badge>
                 </div>
               ))}
             </div>
 
             <p className="text-xs text-muted-foreground italic">
-              These are draft items. Metal type, karat, and weight still need manual verification.
+              Draft items only — metal type, karat, and weight still need manual verification.
             </p>
 
             <div className="flex gap-2">
@@ -309,9 +463,9 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
                 <Camera className="h-4 w-4 mr-2" />
                 Retake
               </Button>
-              <Button className="flex-1" onClick={handleConfirm}>
+              <Button className="flex-1" onClick={handleConfirm} disabled={reviewItems.length === 0}>
                 <Check className="h-4 w-4 mr-2" />
-                Add to Batch
+                Add {reviewItems.length} Items
               </Button>
             </div>
           </div>
