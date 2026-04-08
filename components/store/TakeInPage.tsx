@@ -288,6 +288,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
         paymentMethod,
         checkNumber,
         followUpReminder,
+        batchPhotos: batchPhotoUrl ? [batchPhotoUrl] : [],
         ...totals,
         status: 'Purchase',
         createdAt: new Date().toISOString()
