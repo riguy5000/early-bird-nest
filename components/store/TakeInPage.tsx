@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { CustomerData } from './CustomerDrawer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
@@ -63,17 +64,7 @@ interface WatchInfo {
   condition: string;
 }
 
-interface Customer {
-  id?: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  dateOfBirth: string;
-  gender: string;
-  licenseNumber?: string;
-}
-
+// Use CustomerData from CustomerDrawer instead of local Customer type
 interface TakeInPageProps {
   store: {
     id: string;
