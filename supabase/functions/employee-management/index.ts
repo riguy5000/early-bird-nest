@@ -575,6 +575,18 @@ Deno.serve(async (req) => {
         }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
       }
 
+      case 'admin-reset-password': {
+        // Platform admin only
+        const { data: isAdmin } = await adminClient.rpc('is_platform_admin', { _user_id: caller.id })
+        if (!isAdmin) throw new Error('Not a platform admin')
+        const { userId, newPassword } = body
+        const { error: resetErr } = await adminClient.auth.admin.updateUserById(userId, { password: newPassword })
+        if (resetErr) throw resetErr
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      }
+
       default:
         return new Response(JSON.stringify({ error: 'Unknown action' }), {
           status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
