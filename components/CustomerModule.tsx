@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
@@ -80,72 +81,60 @@ export function CustomerModule({ user }: CustomerModuleProps) {
   const loadCustomers = async () => {
     setLoading(true);
     try {
-      // Mock customer data for development
-      const mockCustomers: Customer[] = [
-        {
-          id: '1',
-          firstName: 'John',
-          lastName: 'Smith',
-          email: 'john.smith@email.com',
-          phone: '(555) 123-4567',
-          altPhone: '',
-          dateOfBirth: '1985-06-15',
-          address: '123 Main Street, New York, NY 10001',
-          placeId: 'ChIJOwg_06VPwokRYv534QaPC8g',
-          addressDetails: null,
-          city: 'New York',
-          state: 'NY',
-          zipCode: '10001',
-          idType: 'Driver License',
-          idNumber: 'D123456789',
-          notes: 'Regular customer, prefers gold jewelry',
-          createdAt: '2024-01-15T10:30:00Z',
-          storeId: user?.storeId || 'store_1'
-        },
-        {
-          id: '2',
-          firstName: 'Sarah',
-          lastName: 'Johnson',
-          email: 'sarah.j@email.com',
-          phone: '(555) 987-6543',
-          altPhone: '(555) 111-2222',
-          dateOfBirth: '1990-03-22',
-          address: '456 Oak Avenue, Los Angeles, CA 90210',
-          placeId: 'ChIJE9on3F3HwoAR9AhGJW_fL-I',
-          addressDetails: null,
-          city: 'Los Angeles',
-          state: 'CA',
-          zipCode: '90210',
-          idType: 'State ID',
-          idNumber: 'CA987654321',
-          notes: 'Interested in vintage pieces',
-          createdAt: '2024-01-20T14:15:00Z',
-          storeId: user?.storeId || 'store_1'
-        },
-        {
-          id: '3',
-          firstName: 'Michael',
-          lastName: 'Brown',
-          email: 'mbrown@email.com',
-          phone: '(555) 456-7890',
-          altPhone: '',
-          dateOfBirth: '1978-11-08',
-          address: '789 Elm Street, Chicago, IL 60601',
-          placeId: 'ChIJ7cv00DwsDogRAMDACa2m4K8',
-          addressDetails: null,
-          city: 'Chicago',
-          state: 'IL',
-          zipCode: '60601',
-          idType: 'Driver License',
-          idNumber: 'IL456789123',
-          notes: 'Frequent pawn customer',
-          createdAt: '2024-01-25T09:45:00Z',
-          storeId: user?.storeId || 'store_1'
-        }
-      ];
-      
-      setCustomers(mockCustomers);
-      toast.success('Customers loaded successfully');
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session) return;
+
+      // Get store ID
+      const { data: ep } = await supabase
+        .from('employee_profiles')
+        .select('store_id')
+        .eq('auth_user_id', session.session.user.id)
+        .eq('is_active', true)
+        .limit(1)
+        .maybeSingle();
+
+      let storeId = ep?.store_id;
+      if (!storeId) {
+        const { data: store } = await supabase
+          .from('stores')
+          .select('id')
+          .eq('owner_auth_user_id', session.session.user.id)
+          .limit(1)
+          .maybeSingle();
+        storeId = store?.id;
+      }
+      if (!storeId) return;
+
+      const { data, error } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('store_id', storeId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const mapped: Customer[] = (data || []).map((c: any) => ({
+        id: c.id,
+        firstName: c.first_name || '',
+        lastName: c.last_name || '',
+        email: c.email || '',
+        phone: c.phone || '',
+        altPhone: '',
+        dateOfBirth: c.date_of_birth || '',
+        address: c.address || '',
+        placeId: '',
+        addressDetails: null,
+        city: '',
+        state: '',
+        zipCode: '',
+        idType: c.license_number ? 'Government ID' : '',
+        idNumber: c.license_number || '',
+        notes: c.notes || '',
+        createdAt: c.created_at,
+        storeId: c.store_id,
+      }));
+
+      setCustomers(mapped);
     } catch (error) {
       console.error('Error loading customers:', error);
       toast.error('Failed to load customers');
