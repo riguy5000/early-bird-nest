@@ -109,19 +109,8 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
     return userPermissions[perm] !== false;
   });
 
-  const quickStats = [
-    { label: 'Items in Stock', value: '1,247', change: '+12%', trend: 'up' },
-    { label: 'Total Value', value: '$89,450', change: '+8.2%', trend: 'up' },
-    { label: 'Active Customers', value: '342', change: '+5%', trend: 'up' },
-    { label: 'Daily Revenue', value: '$2,890', change: '-2.1%', trend: 'down' }
-  ];
-
-  const recentActivities = [
-    { type: 'take-in', description: 'Gold ring intake - 14k, 3.2g', time: '2 minutes ago', value: '$85' },
-    { type: 'customer', description: 'New customer registered', time: '15 minutes ago', value: null },
-    { type: 'payout', description: 'Customer payout processed', time: '32 minutes ago', value: '$1,250' },
-    { type: 'inventory', description: 'Silver bracelet marked as sold', time: '1 hour ago', value: '$450' }
-  ];
+  const quickStats: any[] = [];
+  const recentActivities: any[] = [];
 
   const handleQuickAction = (action: string) => {
     switch (action) {
