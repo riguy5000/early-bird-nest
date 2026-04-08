@@ -6,6 +6,9 @@ const KARAT_PURITY: Record<string, number> = {
   '9k': 9 / 24, '10k': 10 / 24, '14k': 14 / 24, '18k': 18 / 24,
   '22k': 22 / 24, '24k': 1, '999': 1, '925': 0.925, '900': 0.9,
   '950': 0.95, '585': 14 / 24, '750': 18 / 24, '375': 9 / 24, '417': 10 / 24,
+  // Numeric string formats (from take-in metals JSON)
+  '9': 9 / 24, '10': 10 / 24, '14': 14 / 24, '18': 18 / 24,
+  '22': 22 / 24, '24': 1,
 };
 
 const METAL_SYMBOL_MAP: Record<string, string> = {
