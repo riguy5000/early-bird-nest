@@ -116,6 +116,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [isCustomerDrawerOpen, setIsCustomerDrawerOpen] = useState(false);
+  const [customerDrawerMode, setCustomerDrawerMode] = useState<'scan' | 'manual'>('manual');
   const [batchId, setBatchId] = useState('');
   const [showAIAssist, setShowAIAssist] = useState(false);
   const [showAICaptureModal, setShowAICaptureModal] = useState(false);
@@ -123,6 +124,11 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
   const [checkNumber, setCheckNumber] = useState('');
   const [followUpReminder, setFollowUpReminder] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+
+  const openCustomerDrawer = (mode: 'scan' | 'manual') => {
+    setCustomerDrawerMode(mode);
+    setIsCustomerDrawerOpen(true);
+  };
 
   // Generate batch ID on mount
   useEffect(() => {
