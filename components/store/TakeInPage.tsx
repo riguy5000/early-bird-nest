@@ -345,7 +345,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
     setShowAICaptureModal(true);
   }, []);
 
-  const handleItemsDetected = useCallback((detectedItems: Array<{ type: string; count: number; notes?: string; color_notes?: string }>, batchPhotoUrl: string) => {
+  const handleItemsDetected = useCallback((detectedItems: Array<{ type: string; count: number; notes?: string; color_notes?: string; cropUrl?: string }>, batchPhotoUrl: string) => {
     const newItems: Item[] = [];
     for (const detected of detectedItems) {
       for (let i = 0; i < detected.count; i++) {
@@ -353,6 +353,10 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
           : ['Coin', 'Bar', 'Round'].includes(detected.type) ? 'Bullion'
           : ['Spoon', 'Fork', 'Knife'].includes(detected.type) ? 'Silverware'
           : 'Jewelry';
+        // Build photos array: crop first (item-specific), then batch photo as fallback
+        const photos: string[] = [];
+        if (detected.cropUrl) photos.push(detected.cropUrl);
+        if (batchPhotoUrl && !photos.includes(batchPhotoUrl)) photos.push(batchPhotoUrl);
         newItems.push({
           id: `item_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
           category: category as Item['category'],
@@ -363,7 +367,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
           marketValue: 0,
           payoutPercentage: store.defaultPayoutPercentage,
           payoutAmount: 0,
-          photos: batchPhotoUrl ? [batchPhotoUrl] : [],
+          photos,
           notes: detected.notes || '',
           colorNotes: detected.color_notes || '',
           status: 'In Stock',
