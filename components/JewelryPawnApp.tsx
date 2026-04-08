@@ -5,13 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { CustomerModule } from './CustomerModule';
 import { TakeInPage } from './store/TakeInPage';
 import { InventoryModule } from './InventoryModule';
 import { PayoutsModule } from './PayoutsModule';
 import { StoreSettingsModule } from './StoreSettingsModule';
-import { StatisticsModule } from './StatisticsModule';
+import { OwnerDashboard } from './dashboard/OwnerDashboard';
+import { AnalyticsModule } from './dashboard/AnalyticsModule';
 import { 
   Store, 
   Package, 
