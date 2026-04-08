@@ -240,8 +240,10 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
     if (store.requireCustomerInfoBeforeCompletion && !customer) {
       errors.push('Customer information is required before completing');
     }
-    if (store.requireIdScan && (!customer || customer.source !== 'scan')) {
+    if (store.requireIdScan && !customer) {
       errors.push('A scanned government ID is required before completing');
+    } else if (store.requireIdScan && customer && customer.source !== 'scan' && !store.allowManualEntry) {
+      errors.push('A scanned government ID is required — manual entry is not allowed');
     }
     if (store.canCompletePurchase === false) {
       errors.push('You do not have permission to complete purchases');
