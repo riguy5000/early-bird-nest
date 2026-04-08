@@ -316,7 +316,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
     } finally {
       setCompleting(false);
     }
-  }, [validateForPurchase, store, batchId, employee.id, items, customer, paymentMethod, checkNumber, followUpReminder, calculateTotals, onComplete, showConfirmPurchase]);
+  }, [validateForPurchase, store, batchId, employee.id, items, customer, paymentMethod, checkNumber, followUpReminder, batchPhotoUrl, calculateTotals, onComplete, showConfirmPurchase]);
 
   // ---- SAVE QUOTE ----
   const handleSaveQuote = useCallback(() => {
