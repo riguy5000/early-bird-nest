@@ -519,13 +519,30 @@ export function TakeInBalanced({
                                          className="h-16 text-xs resize-none bg-background border-border/40 rounded-lg"
                                        />
                                      </div>
-                                     <div>
-                                       <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Photos</label>
-                                       <div className="border border-dashed border-slate-300 rounded-lg p-3 text-center bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer h-16 flex flex-col items-center justify-center">
-                                         <Camera className="h-4 w-4 text-muted-foreground mb-1" />
-                                         <span className="text-[11px] text-muted-foreground">Upload Photos</span>
-                                       </div>
-                                     </div>
+                                      <div>
+                                        <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Photos</label>
+                                        {item.photos?.length > 0 ? (
+                                          <div className="flex gap-2 flex-wrap">
+                                            {item.photos.map((url: string, pi: number) => (
+                                              <div key={pi} className="relative group">
+                                                <img src={url} alt={`Item photo ${pi + 1}`} className="w-16 h-16 rounded-lg object-cover border border-border/60" />
+                                                <button
+                                                  className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
+                                                  onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { photos: item.photos.filter((_: string, j: number) => j !== pi) }); }}
+                                                >×</button>
+                                                {pi === 0 && item.source === 'AI Assist' && (
+                                                  <span className="absolute bottom-0 left-0 right-0 bg-primary/80 text-[8px] text-primary-foreground text-center rounded-b-lg">Crop</span>
+                                                )}
+                                              </div>
+                                            ))}
+                                          </div>
+                                        ) : (
+                                          <div className="border border-dashed border-slate-300 rounded-lg p-3 text-center bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer h-16 flex flex-col items-center justify-center">
+                                            <Camera className="h-4 w-4 text-muted-foreground mb-1" />
+                                            <span className="text-[11px] text-muted-foreground">Upload Photos</span>
+                                          </div>
+                                        )}
+                                      </div>
                                     </div>
 
                                     <div className="flex justify-end gap-2 pt-3 border-t border-border/40 mt-3">
