@@ -46,6 +46,10 @@ interface TakeInBalancedProps {
   onCompletePurchase: () => void;
   onSaveQuote: () => void;
   completing?: boolean;
+  paymentMethod: string;
+  onPaymentMethodChange: (method: string) => void;
+  checkNumber: string;
+  onCheckNumberChange: (num: string) => void;
 }
 
 export function TakeInBalanced({
