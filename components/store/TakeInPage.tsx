@@ -241,6 +241,10 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
       toast.error('Customer information is required before completing');
       return;
     }
+    if (store.requireIdScan && (!customer || customer.source !== 'scan')) {
+      toast.error('A scanned customer ID is required before completing');
+      return;
+    }
     const totals = calculateTotals();
     const transactionData = {
       batchId,
