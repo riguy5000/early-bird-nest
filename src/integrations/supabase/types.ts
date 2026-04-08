@@ -384,6 +384,7 @@ export type Database = {
           name: string
           owner_auth_user_id: string
           phone: string | null
+          status: string
           timezone: string
           type: string
           updated_at: string
@@ -397,6 +398,7 @@ export type Database = {
           name?: string
           owner_auth_user_id: string
           phone?: string | null
+          status?: string
           timezone?: string
           type?: string
           updated_at?: string
@@ -410,6 +412,7 @@ export type Database = {
           name?: string
           owner_auth_user_id?: string
           phone?: string | null
+          status?: string
           timezone?: string
           type?: string
           updated_at?: string
