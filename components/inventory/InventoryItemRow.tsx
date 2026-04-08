@@ -2,9 +2,11 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Eye, Edit, Scissors, Archive, Printer, MapPin } from 'lucide-react';
+import { MoreHorizontal, Eye, Edit, Scissors, Archive } from 'lucide-react';
 import type { InventoryItemRecord } from './types';
+import { DISPOSITIONS } from './types';
 
 interface Props {
   item: InventoryItemRecord;
@@ -12,15 +14,9 @@ interface Props {
   onEdit: (item: InventoryItemRecord) => void;
   onPartOut: (item: InventoryItemRecord) => void;
   onArchive: (item: InventoryItemRecord) => void;
+  onDispositionChange?: (item: InventoryItemRecord, disposition: string) => void;
   hideProfit?: boolean;
 }
-
-const dispositionColor: Record<string, string> = {
-  'Undecided': 'bg-muted text-muted-foreground',
-  'Scrap Candidate': 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
-  'Showroom Candidate': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-  'Part-Out Candidate': 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
-};
 
 const statusColor: Record<string, string> = {
   'In Stock': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
@@ -28,6 +24,13 @@ const statusColor: Record<string, string> = {
   'Sent to Refinery': 'bg-orange-100 text-orange-700',
   'Parted Out': 'bg-purple-100 text-purple-700',
   'Archived': 'bg-muted text-muted-foreground',
+};
+
+const dispositionStyles: Record<string, string> = {
+  'Undecided': 'border-muted-foreground/30 text-muted-foreground',
+  'Scrap Candidate': 'border-orange-300 bg-orange-50 text-orange-700',
+  'Showroom Candidate': 'border-blue-300 bg-blue-50 text-blue-700',
+  'Part-Out Candidate': 'border-purple-300 bg-purple-50 text-purple-700',
 };
 
 function fmt(n: number) {
@@ -39,7 +42,7 @@ function metalSummary(metals: any[]) {
   return metals.map((m: any) => `${m.karat || m.type || ''}${m.weight ? ` ${m.weight}g` : ''}`).join(', ');
 }
 
-export function InventoryItemRow({ item, onView, onEdit, onPartOut, onArchive, hideProfit }: Props) {
+export function InventoryItemRow({ item, onView, onEdit, onPartOut, onArchive, onDispositionChange, hideProfit }: Props) {
   return (
     <TableRow className="cursor-pointer hover:bg-muted/50" onClick={() => onView(item)}>
       <TableCell className="w-10">
@@ -57,10 +60,26 @@ export function InventoryItemRow({ item, onView, onEdit, onPartOut, onArchive, h
         <div className="text-xs text-muted-foreground">{item.category} · {item.subcategory}</div>
       </TableCell>
       <TableCell className="text-xs">{metalSummary(item.metals)}</TableCell>
-      <TableCell>
-        <Badge variant="outline" className={`text-[10px] ${dispositionColor[item.disposition] || ''}`}>
-          {item.disposition}
-        </Badge>
+      <TableCell onClick={(e) => e.stopPropagation()}>
+        {onDispositionChange ? (
+          <Select
+            value={item.disposition}
+            onValueChange={(v) => onDispositionChange(item, v)}
+          >
+            <SelectTrigger className={`h-7 w-[145px] text-[10px] font-medium border rounded-md ${dispositionStyles[item.disposition] || ''}`}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {DISPOSITIONS.map(d => (
+                <SelectItem key={d} value={d} className="text-xs">{d}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <Badge variant="outline" className={`text-[10px] ${dispositionStyles[item.disposition] || ''}`}>
+            {item.disposition}
+          </Badge>
+        )}
       </TableCell>
       <TableCell>
         <Badge variant="outline" className={`text-[10px] ${statusColor[item.processing_status] || ''}`}>

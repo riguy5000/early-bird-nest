@@ -10,11 +10,12 @@ interface Props {
   onEdit: (item: InventoryItemRecord) => void;
   onPartOut: (item: InventoryItemRecord) => void;
   onArchive: (item: InventoryItemRecord) => void;
+  onDispositionChange?: (item: InventoryItemRecord, disposition: string) => void;
   hideProfit?: boolean;
   emptyMessage?: string;
 }
 
-export function InventoryItemTable({ items, onView, onEdit, onPartOut, onArchive, hideProfit, emptyMessage }: Props) {
+export function InventoryItemTable({ items, onView, onEdit, onPartOut, onArchive, onDispositionChange, hideProfit, emptyMessage }: Props) {
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
@@ -51,6 +52,7 @@ export function InventoryItemTable({ items, onView, onEdit, onPartOut, onArchive
               onEdit={onEdit}
               onPartOut={onPartOut}
               onArchive={onArchive}
+              onDispositionChange={onDispositionChange}
               hideProfit={hideProfit}
             />
           ))}
