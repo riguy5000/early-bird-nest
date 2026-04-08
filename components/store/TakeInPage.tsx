@@ -123,6 +123,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
   const [showConfirmPurchase, setShowConfirmPurchase] = useState(false);
   const [completing, setCompleting] = useState(false);
   const [completionSuccess, setCompletionSuccess] = useState(false);
+  const [batchPhotoUrl, setBatchPhotoUrl] = useState<string>('');
 
   const openCustomerDrawer = (mode: 'scan' | 'manual') => {
     setCustomerDrawerMode(mode);
