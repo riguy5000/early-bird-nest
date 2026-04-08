@@ -57,7 +57,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
 
   // Build modules list based on permissions
   const allModules = [
-    { id: 'dashboard', name: 'Dashboard', icon: BarChart3, requiresPermission: 'accessStatistics', component: () => <StatisticsModule currentStore={{ id: storeId, name: storeName }} /> },
+    { id: 'dashboard', name: 'Dashboard', icon: BarChart3, requiresPermission: 'accessStatistics', component: () => <OwnerDashboard storeId={storeId} storeName={storeName} onNavigate={setActiveModule} /> },
     { id: 'take-in', name: 'Take-In', icon: Plus, requiresPermission: 'accessTakeIn', component: () => (
       <TakeInPage 
         store={{ 
@@ -93,6 +93,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
     { id: 'inventory', name: 'Inventory', icon: Package, requiresPermission: 'accessInventory', component: () => <InventoryModule currentStore={{ id: storeId, name: storeName }} employeeId={employeeId} hideProfit={effectiveVisibility.hideProfit} permissions={userPermissions} /> },
     { id: 'customers', name: 'Customers', icon: Users, requiresPermission: 'accessCustomers', component: () => <CustomerModule user={user} /> },
     { id: 'payouts', name: 'Payouts', icon: DollarSign, requiresPermission: 'accessPayouts', component: () => <PayoutsModule currentStore={{ id: storeId, name: storeName }} /> },
+    { id: 'analytics', name: 'Analytics', icon: TrendingUp, requiresPermission: 'accessStatistics', component: () => <AnalyticsModule storeId={storeId} storeName={storeName} /> },
     { id: 'settings', name: 'Settings', icon: Settings, requiresPermission: 'accessSettings', component: () => (
       <StoreSettingsModule 
         currentStore={{ id: storeId, name: storeName, type: user?.store?.type || 'jewelry' }} 
