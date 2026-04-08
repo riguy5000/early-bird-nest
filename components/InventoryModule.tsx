@@ -347,6 +347,7 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
         onClose={() => setShowDetail(false)}
         onPartOut={handlePartOut}
         onArchive={handleArchive}
+        onDispositionChange={handleDispositionChange}
       />
 
       {/* Add Modal */}
