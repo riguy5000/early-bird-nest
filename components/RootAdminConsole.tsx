@@ -539,37 +539,17 @@ export function RootAdminConsole({ user, onLogout }: RootAdminConsoleProps) {
           </div>
         )}
 
-        {/* Settings */}
-        {activeSection === 'settings' && (
-          <div className="max-w-7xl mx-auto space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold">Platform Settings</h2>
-              <p className="text-muted-foreground">Configure platform-wide integrations</p>
-            </div>
-            <OpenAIKeySettings />
-            <Separator />
-            <MetalApiKeysSettings />
-          </div>
-        )}
+        {/* Users */}
+        {activeSection === 'users' && <RootAdminUsers />}
 
-        {/* Placeholder for other sections */}
-        {!['overview', 'stores', 'settings'].includes(activeSection) && (
-          <div className="max-w-7xl mx-auto">
-            <Card>
-              <CardContent className="flex items-center justify-center py-12">
-                <div className="text-center space-y-4">
-                  <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
-                    <Settings className="h-8 w-8 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-medium capitalize">{activeSection} Section</h3>
-                    <p className="text-muted-foreground">This section is under development.</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        {/* System */}
+        {activeSection === 'system' && <RootAdminSystem />}
+
+        {/* Analytics */}
+        {activeSection === 'analytics' && <RootAdminAnalytics />}
+
+        {/* Settings */}
+        {activeSection === 'settings' && <RootAdminPlatformSettings />}
       </main>
 
       {/* Store Details Sheet */}
