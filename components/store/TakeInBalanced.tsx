@@ -29,7 +29,7 @@ import {
   Printer,
   Edit
 } from 'lucide-react';
-import { CustomerDrawer } from './CustomerDrawer';
+import { CustomerSummaryCard } from './CustomerSummaryCard';
 
 interface TakeInBalancedProps {
   items: any[];
