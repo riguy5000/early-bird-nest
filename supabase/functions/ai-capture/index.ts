@@ -76,7 +76,7 @@ Other important rules:
               },
               {
                 type: 'text',
-                text: 'Identify all jewelry/precious metal items in this image. For EACH item, provide its bounding box as normalized coordinates (0.0-1.0). If there are 3 rings in different positions, list 3 separate entries each with their own bounding box. Do not guess metal type or karat.',
+                text: 'Identify all jewelry/precious metal items in this image. For EACH item, provide a TIGHT bounding box as normalized coordinates (0.0-1.0) that wraps snugly around the full visible item. Do not cut off any part of any item. Do not include excessive background. If there are 3 rings in different positions, list 3 separate entries each with their own bounding box. Do not guess metal type or karat.',
               },
             ],
           },
