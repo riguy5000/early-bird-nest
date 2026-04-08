@@ -14,6 +14,77 @@ export type Database = {
   }
   public: {
     Tables: {
+      customers: {
+        Row: {
+          address: string | null
+          created_at: string
+          date_of_birth: string | null
+          email: string | null
+          first_name: string
+          full_name: string
+          gender: string | null
+          id: string
+          id_scan_back_url: string | null
+          id_scan_url: string | null
+          last_name: string
+          license_number: string | null
+          notes: string | null
+          ocr_payload: Json | null
+          phone: string | null
+          source: string
+          store_id: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          email?: string | null
+          first_name?: string
+          full_name?: string
+          gender?: string | null
+          id?: string
+          id_scan_back_url?: string | null
+          id_scan_url?: string | null
+          last_name?: string
+          license_number?: string | null
+          notes?: string | null
+          ocr_payload?: Json | null
+          phone?: string | null
+          source?: string
+          store_id: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          email?: string | null
+          first_name?: string
+          full_name?: string
+          gender?: string | null
+          id?: string
+          id_scan_back_url?: string | null
+          id_scan_url?: string | null
+          last_name?: string
+          license_number?: string | null
+          notes?: string | null
+          ocr_payload?: Json | null
+          phone?: string | null
+          source?: string
+          store_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_permissions: {
         Row: {
           can_access_customers: boolean
