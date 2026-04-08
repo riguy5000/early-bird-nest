@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import type { CustomerData } from './CustomerDrawer';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -23,13 +24,12 @@ import {
   Coins,
   Sparkles,
   Utensils,
-  Heart,
   DollarSign,
   Save as SaveIcon,
   Printer,
   Edit
 } from 'lucide-react';
-import { CustomerDrawer } from './CustomerDrawer';
+import { CustomerSummaryCard } from './CustomerSummaryCard';
 
 interface TakeInBalancedProps {
   items: any[];
@@ -39,6 +39,9 @@ interface TakeInBalancedProps {
   onItemRemove: (itemId: string) => void;
   onItemSelect: (itemId: string) => void;
   store: any;
+  customer: CustomerData | null;
+  onCustomerUpdate: (customer: CustomerData) => void;
+  onOpenCustomerDrawer: (mode: 'scan' | 'manual') => void;
 }
 
 export function TakeInBalanced({
@@ -48,12 +51,13 @@ export function TakeInBalanced({
   onItemUpdate,
   onItemRemove,
   onItemSelect,
-  store
+  store,
+  customer,
+  onCustomerUpdate,
+  onOpenCustomerDrawer
 }: TakeInBalancedProps) {
   const { toast } = useToast();
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set());
-  const [customerDrawerOpen, setCustomerDrawerOpen] = useState(false);
-  const [customer, setCustomer] = useState(null);
   const [batchPhotoOpen, setBatchPhotoOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('Check');
   const [checkNumber, setCheckNumber] = useState('');
@@ -571,26 +575,33 @@ export function TakeInBalanced({
           </div>
 
            {/* Customer Information */}
-          <div className="p-4 border-b border-slate-200">
-            <h3 className="text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-3">Customer</h3>
-            <Button 
-              variant="outline" 
-              onClick={() => setCustomerDrawerOpen(true)}
-              className="w-full flex items-center gap-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50"
-            >
-              <ScanLine className="h-4 w-4" />
-              Scan Customer ID
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setCustomerDrawerOpen(true)}
-              className="w-full mt-1.5 text-xs text-slate-600 rounded-lg border border-slate-200 bg-white hover:bg-slate-50"
-            >
-              <Edit className="h-3.5 w-3.5 mr-1.5" />
-              Enter Manually
-            </Button>
-          </div>
+          {customer ? (
+            <CustomerSummaryCard 
+              customer={customer} 
+              onEdit={() => onOpenCustomerDrawer('manual')} 
+            />
+          ) : (
+            <div className="p-4 border-b border-slate-200">
+              <h3 className="text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-3">Customer</h3>
+              <Button 
+                variant="outline" 
+                onClick={() => onOpenCustomerDrawer('scan')}
+                className="w-full flex items-center gap-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50"
+              >
+                <ScanLine className="h-4 w-4" />
+                Scan Customer ID
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => onOpenCustomerDrawer('manual')}
+                className="w-full mt-1.5 text-xs text-slate-600 rounded-lg border border-slate-200 bg-white hover:bg-slate-50"
+              >
+                <Edit className="h-3.5 w-3.5 mr-1.5" />
+                Enter Manually
+              </Button>
+            </div>
+          )}
 
           {/* Payout Information */}
           <div className="p-4 border-b border-slate-200">
@@ -680,13 +691,6 @@ export function TakeInBalanced({
         </div>
       </div>
 
-      {/* Customer Drawer */}
-      <CustomerDrawer 
-        isOpen={customerDrawerOpen}
-        onClose={() => setCustomerDrawerOpen(false)}
-        customer={customer}
-        onCustomerUpdate={setCustomer}
-      />
     </div>
   );
 }

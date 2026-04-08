@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { CustomerData } from './CustomerDrawer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
@@ -63,17 +64,7 @@ interface WatchInfo {
   condition: string;
 }
 
-interface Customer {
-  id?: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  dateOfBirth: string;
-  gender: string;
-  licenseNumber?: string;
-}
-
+// Use CustomerData from CustomerDrawer instead of local Customer type
 interface TakeInPageProps {
   store: {
     id: string;
@@ -114,8 +105,9 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
   );
   const [items, setItems] = useState<Item[]>([]);
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
-  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [customer, setCustomer] = useState<CustomerData | null>(null);
   const [isCustomerDrawerOpen, setIsCustomerDrawerOpen] = useState(false);
+  const [customerDrawerMode, setCustomerDrawerMode] = useState<'scan' | 'manual'>('manual');
   const [batchId, setBatchId] = useState('');
   const [showAIAssist, setShowAIAssist] = useState(false);
   const [showAICaptureModal, setShowAICaptureModal] = useState(false);
@@ -123,6 +115,11 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
   const [checkNumber, setCheckNumber] = useState('');
   const [followUpReminder, setFollowUpReminder] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+
+  const openCustomerDrawer = (mode: 'scan' | 'manual') => {
+    setCustomerDrawerMode(mode);
+    setIsCustomerDrawerOpen(true);
+  };
 
   // Generate batch ID on mount
   useEffect(() => {
@@ -233,6 +230,10 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
     }
     if (store.requireCustomerInfoBeforeCompletion && !customer) {
       toast.error('Customer information is required before completing');
+      return;
+    }
+    if (store.requireIdScan && (!customer || customer.source !== 'scan')) {
+      toast.error('A scanned customer ID is required before completing');
       return;
     }
     const totals = calculateTotals();
@@ -407,6 +408,9 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
             onItemRemove={removeItem}
             onItemSelect={setActiveItemId}
             store={store}
+            customer={customer}
+            onCustomerUpdate={setCustomer}
+            onOpenCustomerDrawer={openCustomerDrawer}
           />
         ) : (
           <TakeInSlim
@@ -420,13 +424,14 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
         )}
       </div>
 
-
       {/* Customer Drawer */}
       <CustomerDrawer
         isOpen={isCustomerDrawerOpen}
         onClose={() => setIsCustomerDrawerOpen(false)}
         customer={customer}
         onCustomerUpdate={setCustomer}
+        mode={customerDrawerMode}
+        storeId={store.id}
       />
 
       {/* AI Capture Modal */}

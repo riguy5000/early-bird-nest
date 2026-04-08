@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthenticationFlow } from '../components/AuthenticationFlow';
 import { JewelryPawnApp } from '../components/JewelryPawnApp';
 import { RootAdminConsole } from '../components/RootAdminConsole';
+import { ScanUploadPage } from '../components/store/ScanUploadPage';
 import { supabase } from '@/integrations/supabase/client';
 
 const queryClient = new QueryClient();
@@ -144,6 +145,19 @@ const App = () => {
     setUser(null);
     setIsAuthenticated(false);
   };
+
+  // Handle QR scan-upload route (no auth required)
+  if (window.location.pathname === '/scan-upload') {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <ScanUploadPage />
+          <Toaster />
+          <Sonner />
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
 
   if (isLoading) {
     return (
