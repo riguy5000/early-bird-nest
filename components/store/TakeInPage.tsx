@@ -511,6 +511,10 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
             onCompletePurchase={handleCompletePurchase}
             onSaveQuote={handleSaveQuote}
             completing={completing}
+            paymentMethod={paymentMethod}
+            onPaymentMethodChange={(m) => setPaymentMethod(m as any)}
+            checkNumber={checkNumber}
+            onCheckNumberChange={setCheckNumber}
           />
         ) : (
           <TakeInSlim
