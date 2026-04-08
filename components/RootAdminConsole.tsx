@@ -21,7 +21,7 @@ import {
   Crown, LogOut, Settings, Shield, Users, Building, BarChart3, Activity, Server,
   AlertTriangle, TrendingUp, Calendar, Search, MoreHorizontal, Bell, Store,
   ChevronLeft, ChevronRight, Eye, Ban, PlayCircle, PauseCircle, Download,
-  UserCheck, X, ArrowUpDown
+  UserCheck, X, ArrowUpDown, Plus
 } from 'lucide-react';
 
 interface RootAdminConsoleProps {
