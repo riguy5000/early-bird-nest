@@ -346,7 +346,8 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
     setShowAICaptureModal(true);
   }, []);
 
-  const handleItemsDetected = useCallback((detectedItems: Array<{ type: string; count: number; notes?: string; color_notes?: string; cropUrl?: string }>, batchPhotoUrl: string) => {
+  const handleItemsDetected = useCallback((detectedItems: Array<{ type: string; count: number; notes?: string; color_notes?: string; cropUrl?: string }>, batchPhotoUrlArg: string) => {
+    if (batchPhotoUrlArg) setBatchPhotoUrl(batchPhotoUrlArg);
     const newItems: Item[] = [];
     for (const detected of detectedItems) {
       for (let i = 0; i < detected.count; i++) {
