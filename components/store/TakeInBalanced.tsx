@@ -65,13 +65,15 @@ export function TakeInBalanced({
   onOpenCustomerDrawer,
   onCompletePurchase,
   onSaveQuote,
-  completing
+  completing,
+  paymentMethod,
+  onPaymentMethodChange,
+  checkNumber,
+  onCheckNumberChange
 }: TakeInBalancedProps) {
   const { toast } = useToast();
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set());
   const [batchPhotoOpen, setBatchPhotoOpen] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('Check');
-  const [checkNumber, setCheckNumber] = useState('');
   const [storeCreditNumber, setStoreCreditNumber] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const weightInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
