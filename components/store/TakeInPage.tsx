@@ -224,7 +224,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
     return { totalMarketValue, totalPayout, avgPayoutPercentage, profit };
   }, [items]);
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     if (items.length === 0) {
       toast.error('Please add at least one item');
       return;
