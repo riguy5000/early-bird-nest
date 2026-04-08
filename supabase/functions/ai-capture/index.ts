@@ -32,30 +32,34 @@ serve(async (req) => {
 
 For each item, determine:
 1. The type/subcategory: Ring, Wedding Band, Earring (pair counts as 1 if matched, standalone earring is separate), Pendant, Chain, Necklace, Bracelet, Anklet, Brooch, Charm, Cufflinks, Pin, Watch, Bar, Coin, Round, Spoon, Fork, Knife, or other descriptive type
-2. A count if there are multiples of the same type
-3. Visible color notes: describe the apparent color (yellow, white/silver, rose/pink, two-tone, mixed). Do NOT claim metal type or karat — only describe what color you see.
+2. A count — always 1 per bounding box. If multiple items of the same type exist, list them separately with individual bounding boxes.
+3. Visible color notes: describe the apparent color (yellow, white/silver, rose/pink, two-tone, mixed). Do NOT claim metal type or karat.
 4. Brief distinguishing notes
-5. The PRECISE bounding box of each item in the image, expressed as normalized coordinates (0.0 to 1.0) relative to the image dimensions: x_min, y_min, x_max, y_max where (0,0) is top-left and (1,1) is bottom-right.
+5. The PRECISE bounding box expressed as normalized coordinates (0.0 to 1.0): x_min, y_min, x_max, y_max where (0,0) is top-left and (1,1) is bottom-right.
+6. A detection_confidence between 0.0 and 1.0:
+   - 0.9+ = clearly visible isolated item, very confident in type and location
+   - 0.7-0.89 = visible but some ambiguity (partially occluded, close to another item)
+   - 0.5-0.69 = low confidence (heavily overlapping, tangled, uncertain type)
+   - below 0.5 = very uncertain, may be wrong
+7. Whether the bounding box overlaps significantly with another item's box (overlap_flag true/false). If two items' boxes overlap by more than 30% of the smaller box area, set overlap_flag=true for BOTH items.
 
 CRITICAL bounding box rules:
-- The bounding box MUST tightly wrap around the ENTIRE visible item with a small margin.
-- Do NOT cut off any part of the item. The full ring, full bracelet, full chain mass, full earring including hooks — everything visible must be INSIDE the box.
-- Do NOT make the box too large. Minimize empty background space. The item should fill most of the bounding box area.
-- For chains: wrap the entire visible chain mass, not just a small section.
-- For rings: include the full circular body and any stone/setting on top.
-- For earrings (pair): use one box that covers both earrings snugly.
-- For bracelets: include the full arc/body visible.
+- ONE item per bounding box. Do NOT group multiple separate items into one box.
+- The bounding box MUST tightly wrap the ENTIRE visible item with minimal margin.
+- Do NOT cut off any part of the item. The full ring, bracelet arc, chain mass, earring with hooks — must be INSIDE the box.
+- Do NOT make the box too large. The item should fill most of the bounding box area.
+- For chains: wrap the entire visible chain mass.
+- For rings: include the full circular body and any stone/setting.
+- For earrings (pair): if they are physically close together, use ONE box covering both snugly. If far apart, use separate boxes.
+- For watches: include only the watch body/dial/strap. Do NOT include nearby jewelry in the watch box.
 - Estimate boundaries carefully by looking at where the actual item pixels start and end.
 
 Other important rules:
-- Count each individual piece carefully
-- A pair of earrings = 1 item with count 1 (note "pair" in notes). Use one bounding box that covers both earrings.
+- A pair of earrings = 1 item with count 1 (note "pair" in notes).
 - A standalone single earring = 1 item with count 1 (note "single" in notes)
-- Watches are a separate category
-- Do NOT identify metal type, karat, or authenticity — only visible appearance
-- Be conservative: if unsure, describe what you see
-- Each item MUST have a bounding box. Estimate as best you can.
-- If multiple items of the same type are in different locations, list them separately with individual bounding boxes.`;
+- Do NOT identify metal type, karat, or authenticity
+- Be conservative: if unsure, describe what you see and lower the confidence
+- Each item MUST have a bounding box.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -76,7 +80,7 @@ Other important rules:
               },
               {
                 type: 'text',
-                text: 'Identify all jewelry/precious metal items in this image. For EACH item, provide a TIGHT bounding box as normalized coordinates (0.0-1.0) that wraps snugly around the full visible item. Do not cut off any part of any item. Do not include excessive background. If there are 3 rings in different positions, list 3 separate entries each with their own bounding box. Do not guess metal type or karat.',
+                text: 'Identify all jewelry/precious metal items in this image. For EACH item provide a TIGHT bounding box as normalized coordinates (0.0-1.0). Provide detection_confidence and overlap_flag for each. ONE item per bounding box — do not group separate items together. Do not guess metal type or karat.',
               },
             ],
           },
@@ -86,7 +90,7 @@ Other important rules:
             type: 'function',
             function: {
               name: 'detect_items',
-              description: 'Report detected jewelry items from the image with visible color descriptions and bounding boxes',
+              description: 'Report detected jewelry items with bounding boxes, confidence scores, and overlap flags',
               parameters: {
                 type: 'object',
                 properties: {
@@ -97,34 +101,42 @@ Other important rules:
                       properties: {
                         type: {
                           type: 'string',
-                          description: 'Item subcategory (e.g. Ring, Wedding Band, Earring, Chain, Watch, Pendant, Bracelet, Necklace, Brooch, Anklet, Charm, Cufflinks, Pin, Bar, Coin, Round, Spoon, Fork, Knife)',
+                          description: 'Item subcategory (Ring, Wedding Band, Earring, Chain, Watch, Pendant, Bracelet, Necklace, Brooch, Anklet, Charm, Cufflinks, Pin, Bar, Coin, Round, Spoon, Fork, Knife)',
                         },
                         count: {
                           type: 'number',
-                          description: 'Number of this item type at this location. Usually 1 unless items overlap.',
+                          description: 'Always 1 per bounding box.',
                         },
                         color_notes: {
                           type: 'string',
-                          description: 'Visible color description (e.g. yellow color, white/silver color, rose/pink color, two-tone). Do NOT claim metal type.',
+                          description: 'Visible color description. Do NOT claim metal type.',
                         },
                         notes: {
                           type: 'string',
-                          description: 'Brief distinguishing features (e.g. pair, single, large, small, with stones)',
+                          description: 'Brief distinguishing features',
+                        },
+                        detection_confidence: {
+                          type: 'number',
+                          description: 'Confidence 0.0-1.0 for the detection accuracy and type correctness',
+                        },
+                        overlap_flag: {
+                          type: 'boolean',
+                          description: 'True if this box overlaps significantly (>30%) with another item box',
                         },
                         bbox: {
                           type: 'object',
-                          description: 'Bounding box as normalized coordinates (0.0-1.0). (0,0) = top-left, (1,1) = bottom-right.',
+                          description: 'Bounding box as normalized coordinates (0.0-1.0).',
                           properties: {
-                            x_min: { type: 'number', description: 'Left edge (0.0-1.0)' },
-                            y_min: { type: 'number', description: 'Top edge (0.0-1.0)' },
-                            x_max: { type: 'number', description: 'Right edge (0.0-1.0)' },
-                            y_max: { type: 'number', description: 'Bottom edge (0.0-1.0)' },
+                            x_min: { type: 'number' },
+                            y_min: { type: 'number' },
+                            x_max: { type: 'number' },
+                            y_max: { type: 'number' },
                           },
                           required: ['x_min', 'y_min', 'x_max', 'y_max'],
                           additionalProperties: false,
                         },
                       },
-                      required: ['type', 'count', 'bbox'],
+                      required: ['type', 'count', 'bbox', 'detection_confidence', 'overlap_flag'],
                       additionalProperties: false,
                     },
                   },
@@ -149,20 +161,17 @@ Other important rules:
 
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }), {
-          status: 429,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
       if (response.status === 402) {
         return new Response(JSON.stringify({ error: 'AI credits exhausted. Please add funds.' }), {
-          status: 402,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
       return new Response(JSON.stringify({ error: 'AI analysis failed' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -171,12 +180,31 @@ Other important rules:
 
     if (!toolCall) {
       return new Response(JSON.stringify({ error: 'AI did not return structured results' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     const result = JSON.parse(toolCall.function.arguments);
+
+    // Post-process: compute overlap between all pairs server-side for accuracy
+    const items = result.items || [];
+    for (let i = 0; i < items.length; i++) {
+      for (let j = i + 1; j < items.length; j++) {
+        const a = items[i].bbox;
+        const b = items[j].bbox;
+        if (!a || !b) continue;
+        const overlapX = Math.max(0, Math.min(a.x_max, b.x_max) - Math.max(a.x_min, b.x_min));
+        const overlapY = Math.max(0, Math.min(a.y_max, b.y_max) - Math.max(a.y_min, b.y_min));
+        const overlapArea = overlapX * overlapY;
+        const areaA = (a.x_max - a.x_min) * (a.y_max - a.y_min);
+        const areaB = (b.x_max - b.x_min) * (b.y_max - b.y_min);
+        const minArea = Math.min(areaA, areaB);
+        if (minArea > 0 && overlapArea / minArea > 0.3) {
+          items[i].overlap_flag = true;
+          items[j].overlap_flag = true;
+        }
+      }
+    }
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
