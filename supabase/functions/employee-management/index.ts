@@ -363,6 +363,18 @@ Deno.serve(async (req) => {
           .eq('id', profile.store_id)
           .single()
 
+        // Check store status
+        if (store && store.status === 'suspended') {
+          return new Response(JSON.stringify({ error: 'Your store has been suspended. Contact platform support.' }), {
+            status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        }
+        if (store && store.status === 'banned') {
+          return new Response(JSON.stringify({ error: 'Your store has been banned from the platform.' }), {
+            status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        }
+
         // Update last login
         await adminClient.from('employee_profiles')
           .update({ last_login_at: new Date().toISOString() })
