@@ -104,9 +104,10 @@ export function useDashboardData(storeId: string) {
 
         metals.forEach((m: any) => {
           const metalType = (m.metal || m.type || 'gold').toLowerCase();
-          const karat = (m.karat || m.purity || '14k').toLowerCase();
+          const rawKarat = String(m.karat || m.purity || '14k').toLowerCase();
+          const karat = /^\d+$/.test(rawKarat) ? rawKarat + 'k' : rawKarat;
           const weight = Number(m.weight) || 0;
-          const purity = KARAT_PURITY[karat] || 0.585;
+          const purity = KARAT_PURITY[rawKarat] || KARAT_PURITY[karat] || 0.585;
           const symbol = METAL_SYMBOL_MAP[metalType] || 'XAU';
           const pricePerOz = metalPrices[symbol] || 0;
           const pureWeightOz = (weight * purity) / GRAMS_PER_TROY_OZ;
@@ -142,9 +143,10 @@ export function useDashboardData(storeId: string) {
         if (metals.length > 0) {
           const itemCost = Number(item.payout_amount) || 0;
           metals.forEach((m: any) => {
-            const metalType = (m.metal || m.type || 'gold').toLowerCase();
-            const karat = (m.karat || m.purity || '14k').toLowerCase();
-            const key = `${metalType}-${karat}`;
+          const metalType = (m.metal || m.type || 'gold').toLowerCase();
+          const rawKarat = String(m.karat || m.purity || '14k').toLowerCase();
+          const karat = /^\d+$/.test(rawKarat) ? rawKarat + 'k' : rawKarat;
+          const key = `${metalType}-${karat}`;
             const row = exposureMap.get(key);
             if (row) row.costBasis += itemCost / metals.length;
           });

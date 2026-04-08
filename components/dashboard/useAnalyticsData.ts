@@ -114,9 +114,10 @@ function calcItemLiveValue(item: any, metalPrices: Record<string, number>): numb
   let total = 0;
   metals.forEach((m: any) => {
     const metalType = (m.metal || m.type || 'gold').toLowerCase();
-    const karat = (m.karat || m.purity || '14k').toLowerCase();
+    const rawKarat = String(m.karat || m.purity || '14k').toLowerCase();
+    const karat = /^\d+$/.test(rawKarat) ? rawKarat + 'k' : rawKarat;
     const weight = Number(m.weight) || 0;
-    const purity = KARAT_PURITY[karat] || 0.585;
+    const purity = KARAT_PURITY[rawKarat] || KARAT_PURITY[karat] || 0.585;
     const symbol = METAL_SYMBOL_MAP[metalType] || 'XAU';
     const pricePerOz = metalPrices[symbol] || 0;
     total += (weight * purity / GRAMS_PER_TROY_OZ) * pricePerOz;
@@ -184,7 +185,8 @@ export function useAnalyticsData(storeId: string, dateRange: string) {
         const metals = Array.isArray(item.metals) ? item.metals : [];
         metals.forEach((m: any) => {
           const metalType = (m.metal || m.type || 'gold').toLowerCase();
-          const karat = (m.karat || m.purity || '14k').toLowerCase();
+          const rawKarat = String(m.karat || m.purity || '14k').toLowerCase();
+          const karat = /^\d+$/.test(rawKarat) ? rawKarat + 'k' : rawKarat;
           const weight = Number(m.weight) || 0;
           const purity = KARAT_PURITY[karat] || 0.585;
           const symbol = METAL_SYMBOL_MAP[metalType] || 'XAU';
