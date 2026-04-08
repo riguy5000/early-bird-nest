@@ -90,7 +90,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
         onClose={() => setActiveModule('dashboard')} 
       />
     )},
-    { id: 'inventory', name: 'Inventory', icon: Package, requiresPermission: 'accessInventory', component: () => <InventoryModule currentStore={{ id: storeId, name: storeName }} /> },
+    { id: 'inventory', name: 'Inventory', icon: Package, requiresPermission: 'accessInventory', component: () => <InventoryModule currentStore={{ id: storeId, name: storeName }} employeeId={employeeId} hideProfit={effectiveVisibility.hideProfit} permissions={userPermissions} /> },
     { id: 'customers', name: 'Customers', icon: Users, requiresPermission: 'accessCustomers', component: () => <CustomerModule user={user} /> },
     { id: 'payouts', name: 'Payouts', icon: DollarSign, requiresPermission: 'accessPayouts', component: () => <PayoutsModule currentStore={{ id: storeId, name: storeName }} /> },
     { id: 'settings', name: 'Settings', icon: Settings, requiresPermission: 'accessSettings', component: () => (
