@@ -5,13 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { CustomerModule } from './CustomerModule';
 import { TakeInPage } from './store/TakeInPage';
 import { InventoryModule } from './InventoryModule';
 import { PayoutsModule } from './PayoutsModule';
 import { StoreSettingsModule } from './StoreSettingsModule';
-import { StatisticsModule } from './StatisticsModule';
+import { OwnerDashboard } from './dashboard/OwnerDashboard';
+import { AnalyticsModule } from './dashboard/AnalyticsModule';
 import { 
   Store, 
   Package, 
@@ -57,7 +57,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
 
   // Build modules list based on permissions
   const allModules = [
-    { id: 'dashboard', name: 'Dashboard', icon: BarChart3, requiresPermission: 'accessStatistics', component: () => <StatisticsModule currentStore={{ id: storeId, name: storeName }} /> },
+    { id: 'dashboard', name: 'Dashboard', icon: BarChart3, requiresPermission: 'accessStatistics', component: () => <OwnerDashboard storeId={storeId} storeName={storeName} onNavigate={setActiveModule} /> },
     { id: 'take-in', name: 'Take-In', icon: Plus, requiresPermission: 'accessTakeIn', component: () => (
       <TakeInPage 
         store={{ 
@@ -93,6 +93,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
     { id: 'inventory', name: 'Inventory', icon: Package, requiresPermission: 'accessInventory', component: () => <InventoryModule currentStore={{ id: storeId, name: storeName }} employeeId={employeeId} hideProfit={effectiveVisibility.hideProfit} permissions={userPermissions} /> },
     { id: 'customers', name: 'Customers', icon: Users, requiresPermission: 'accessCustomers', component: () => <CustomerModule user={user} /> },
     { id: 'payouts', name: 'Payouts', icon: DollarSign, requiresPermission: 'accessPayouts', component: () => <PayoutsModule currentStore={{ id: storeId, name: storeName }} /> },
+    { id: 'analytics', name: 'Analytics', icon: TrendingUp, requiresPermission: 'accessStatistics', component: () => <AnalyticsModule storeId={storeId} storeName={storeName} /> },
     { id: 'settings', name: 'Settings', icon: Settings, requiresPermission: 'accessSettings', component: () => (
       <StoreSettingsModule 
         currentStore={{ id: storeId, name: storeName, type: user?.store?.type || 'jewelry' }} 
@@ -108,19 +109,8 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
     return userPermissions[perm] !== false;
   });
 
-  const quickStats = [
-    { label: 'Items in Stock', value: '1,247', change: '+12%', trend: 'up' },
-    { label: 'Total Value', value: '$89,450', change: '+8.2%', trend: 'up' },
-    { label: 'Active Customers', value: '342', change: '+5%', trend: 'up' },
-    { label: 'Daily Revenue', value: '$2,890', change: '-2.1%', trend: 'down' }
-  ];
-
-  const recentActivities = [
-    { type: 'take-in', description: 'Gold ring intake - 14k, 3.2g', time: '2 minutes ago', value: '$85' },
-    { type: 'customer', description: 'New customer registered', time: '15 minutes ago', value: null },
-    { type: 'payout', description: 'Customer payout processed', time: '32 minutes ago', value: '$1,250' },
-    { type: 'inventory', description: 'Silver bracelet marked as sold', time: '1 hour ago', value: '$450' }
-  ];
+  const quickStats: any[] = [];
+  const recentActivities: any[] = [];
 
   const handleQuickAction = (action: string) => {
     switch (action) {
@@ -262,96 +252,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
 
       {/* Main Content */}
       <main className={isTakeIn ? 'flex-1 min-h-0 overflow-hidden' : 'p-6'}>
-        {activeModule === 'dashboard' ? (
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {quickStats.map((stat, index) => (
-                <Card key={index}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">{stat.label}</p>
-                        <p className="text-2xl font-bold">{stat.value}</p>
-                      </div>
-                      <Badge 
-                        variant={stat.trend === 'up' ? 'default' : 'destructive'}
-                        className="text-xs"
-                      >
-                        <TrendingUp className={`h-3 w-3 mr-1 ${stat.trend === 'down' ? 'rotate-180' : ''}`} />
-                        {stat.change}
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-                <CardDescription>Common tasks at your fingertips</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Button onClick={() => handleQuickAction('take-in')} className="flex flex-col items-center gap-2 h-auto py-4">
-                    <Plus className="h-5 w-5" />
-                    <span>New Take-In</span>
-                  </Button>
-                  <Button variant="outline" onClick={() => handleQuickAction('find-customer')} className="flex flex-col items-center gap-2 h-auto py-4">
-                    <Users className="h-5 w-5" />
-                    <span>Find Customer</span>
-                  </Button>
-                  <Button variant="outline" onClick={() => handleQuickAction('inventory')} className="flex flex-col items-center gap-2 h-auto py-4">
-                    <Package className="h-5 w-5" />
-                    <span>View Inventory</span>
-                  </Button>
-                  <Button variant="outline" onClick={() => handleQuickAction('payout')} className="flex flex-col items-center gap-2 h-auto py-4">
-                    <DollarSign className="h-5 w-5" />
-                    <span>Process Payout</span>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recent Activity */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Latest transactions and events</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {recentActivities.map((activity, index) => (
-                    <div key={index} className="flex items-center justify-between py-2 border-b last:border-0">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                          {activity.type === 'take-in' && <Plus className="h-4 w-4 text-primary" />}
-                          {activity.type === 'customer' && <User className="h-4 w-4 text-primary" />}
-                          {activity.type === 'payout' && <DollarSign className="h-4 w-4 text-primary" />}
-                          {activity.type === 'inventory' && <Package className="h-4 w-4 text-primary" />}
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">{activity.description}</p>
-                          <p className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {activity.time}
-                          </p>
-                        </div>
-                      </div>
-                      {activity.value && (
-                        <span className="text-sm font-semibold">{activity.value}</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        ) : (
-          ActiveComponent && <ActiveComponent />
-        )}
+        {ActiveComponent && <ActiveComponent />}
       </main>
     </div>
   );
