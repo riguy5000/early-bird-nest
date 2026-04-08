@@ -50,8 +50,8 @@ export function ScanUploadPage() {
 
       // Write to KV store so the main session picks it up
       const { error } = await supabase
-        .from('kv_store_62d2b480' as any)
-        .upsert({ key: `qr_scan_${sessionId}`, value: payload } as any);
+        .from('kv_store_62d2b480')
+        .upsert({ key: `qr_scan_${sessionId}`, value: payload as any });
 
       if (error) throw error;
       setStep('done');
