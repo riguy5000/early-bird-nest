@@ -67,6 +67,29 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
     setShowPartOut(true);
   }, []);
 
+  const handleDispositionChange = useCallback(async (item: InventoryItemRecord, disposition: string) => {
+    try {
+      const { error } = await supabase.from('inventory_items')
+        .update({ disposition } as any)
+        .eq('id', item.id);
+      if (error) throw error;
+
+      await supabase.from('inventory_status_history').insert({
+        item_id: item.id,
+        field_changed: 'disposition',
+        old_value: item.disposition,
+        new_value: disposition,
+        changed_by: employeeId || null,
+        notes: `Changed disposition to ${disposition}`,
+      } as any);
+
+      toast.success(`Disposition set to ${disposition}`);
+      refetch();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update disposition');
+    }
+  }, [employeeId, refetch]);
+
   const handleArchive = useCallback(async (item: InventoryItemRecord) => {
     try {
       const { error } = await supabase.from('inventory_items')
@@ -284,6 +307,7 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
             onEditItem={handleEdit}
             onPartOutItem={handlePartOut}
             onArchiveItem={handleArchive}
+            onDispositionChange={handleDispositionChange}
           />
         </TabsContent>
 
@@ -301,6 +325,7 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
                 onEdit={handleEdit}
                 onPartOut={handlePartOut}
                 onArchive={handleArchive}
+                onDispositionChange={handleDispositionChange}
                 hideProfit={hideProfit}
                 emptyMessage={
                   tab === 'archive' ? 'No archived items' :
