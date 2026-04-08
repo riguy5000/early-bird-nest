@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TakeInBalanced } from './TakeInBalanced';
 import { TakeInSlim } from './TakeInSlim';
 import { CustomerDrawer } from './CustomerDrawer';
@@ -14,6 +13,7 @@ import { AIAssistBanner } from './AIAssistBanner';
 import { AICaptureModal } from './AICaptureModal';
 import { toast } from 'sonner';
 import { syncTakeInToInventory } from '../inventory/syncTakeInToInventory';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
   Settings, 
   Zap, 
@@ -24,13 +24,16 @@ import {
   User,
   Package,
   Plus,
-  Minus
+  Minus,
+  AlertTriangle,
+  CheckCircle2
 } from 'lucide-react';
 
 interface Item {
   id: string;
   category: 'Jewelry' | 'Watch' | 'Bullion' | 'Stones' | 'Silverware';
   subType?: string;
+  itemType?: string;
   metals: Metal[];
   stones: Stone[];
   watchInfo?: WatchInfo;
@@ -41,6 +44,8 @@ interface Item {
   notes: string;
   testMethod?: 'Loop' | 'Acid' | 'XRF' | 'Melt';
   status: 'In Stock' | 'Melted' | 'Resold' | 'Used Toward Sale';
+  source?: string;
+  colorNotes?: string;
 }
 
 interface Metal {
@@ -65,7 +70,6 @@ interface WatchInfo {
   condition: string;
 }
 
-// Use CustomerData from CustomerDrawer instead of local Customer type
 interface TakeInPageProps {
   store: {
     id: string;
@@ -116,6 +120,9 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
   const [checkNumber, setCheckNumber] = useState('');
   const [followUpReminder, setFollowUpReminder] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [showConfirmPurchase, setShowConfirmPurchase] = useState(false);
+  const [completing, setCompleting] = useState(false);
+  const [completionSuccess, setCompletionSuccess] = useState(false);
 
   const openCustomerDrawer = (mode: 'scan' | 'manual') => {
     setCustomerDrawerMode(mode);
@@ -160,7 +167,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === 's') {
         e.preventDefault();
-        handleSave();
+        handleSaveQuote();
       }
       if (e.shiftKey && e.key === 'D') {
         e.preventDefault();
@@ -224,21 +231,97 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
     return { totalMarketValue, totalPayout, avgPayoutPercentage, profit };
   }, [items]);
 
-  const handleSave = useCallback(async () => {
+  // ---- VALIDATION ----
+  const validateForPurchase = useCallback((): string[] => {
+    const errors: string[] = [];
     if (items.length === 0) {
-      toast.error('Please add at least one item');
-      return;
+      errors.push('Add at least one item before completing');
     }
     if (store.requireCustomerInfoBeforeCompletion && !customer) {
-      toast.error('Customer information is required before completing');
-      return;
+      errors.push('Customer information is required before completing');
     }
     if (store.requireIdScan && (!customer || customer.source !== 'scan')) {
-      toast.error('A scanned customer ID is required before completing');
+      errors.push('A scanned government ID is required before completing');
+    }
+    if (store.canCompletePurchase === false) {
+      errors.push('You do not have permission to complete purchases');
+    }
+    if (paymentMethod === 'Check' && !checkNumber.trim()) {
+      errors.push('Check number is required for check payments');
+    }
+    // Check items have weight
+    const zeroWeightItems = items.filter(item => {
+      const totalWeight = (item.metals || []).reduce((s: number, m: any) => s + (parseFloat(m.weight) || 0), 0);
+      return totalWeight === 0 && item.category !== 'Watch';
+    });
+    if (zeroWeightItems.length > 0) {
+      errors.push(`${zeroWeightItems.length} item(s) have zero weight — add weight before completing`);
+    }
+    return errors;
+  }, [items, customer, store, paymentMethod, checkNumber]);
+
+  // ---- COMPLETE PURCHASE ----
+  const handleCompletePurchase = useCallback(async () => {
+    const errors = validateForPurchase();
+    if (errors.length > 0) {
+      errors.forEach(err => toast.error(err));
+      return;
+    }
+    // Confirmation dialog if enabled
+    if (store.confirmCompletePurchase && !showConfirmPurchase) {
+      setShowConfirmPurchase(true);
+      return;
+    }
+    setShowConfirmPurchase(false);
+    setCompleting(true);
+    try {
+      const totals = calculateTotals();
+      const transactionData = {
+        batchId,
+        storeId: store.id,
+        employeeId: employee.id,
+        items,
+        customer,
+        paymentMethod,
+        checkNumber,
+        followUpReminder,
+        ...totals,
+        status: 'Purchase',
+        createdAt: new Date().toISOString()
+      };
+      await syncTakeInToInventory(transactionData);
+      setCompletionSuccess(true);
+      toast.success('Purchase completed — inventory updated');
+      localStorage.removeItem(`takeInDraft_${batchId}`);
+      onComplete(transactionData);
+      // Reset after short delay so user sees success
+      setTimeout(() => {
+        setItems([]);
+        setCustomer(null);
+        setCheckNumber('');
+        setCompletionSuccess(false);
+        // Generate new batch ID
+        const now = new Date();
+        const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+        const counter = Math.floor(Math.random() * 999) + 1;
+        setBatchId(`${store.id}-${dateStr}-${counter.toString().padStart(3, '0')}`);
+      }, 2000);
+    } catch (err: any) {
+      console.error('Purchase completion error:', err);
+      toast.error(`Failed to complete purchase: ${err.message || 'Unknown error'}`);
+    } finally {
+      setCompleting(false);
+    }
+  }, [validateForPurchase, store, batchId, employee.id, items, customer, paymentMethod, checkNumber, followUpReminder, calculateTotals, onComplete, showConfirmPurchase]);
+
+  // ---- SAVE QUOTE ----
+  const handleSaveQuote = useCallback(() => {
+    if (items.length === 0) {
+      toast.error('Add at least one item before saving');
       return;
     }
     const totals = calculateTotals();
-    const transactionData = {
+    const quoteData = {
       batchId,
       storeId: store.id,
       employeeId: employee.id,
@@ -251,24 +334,16 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
       status: 'Quote',
       createdAt: new Date().toISOString()
     };
-    // If completing as purchase, sync to inventory
-    try {
-      const purchaseData = { ...transactionData, status: 'Purchase' };
-      await syncTakeInToInventory(purchaseData);
-      toast.success('Purchase completed — inventory updated');
-    } catch (err) {
-      console.error('Inventory sync error:', err);
-      toast.success('Transaction saved (inventory sync pending)');
-    }
-    onComplete(transactionData);
-    localStorage.removeItem(`takeInDraft_${batchId}`);
-  }, [batchId, store.id, employee.id, items, customer, paymentMethod, checkNumber, followUpReminder, calculateTotals, onComplete]);
+    localStorage.setItem(`takeInDraft_${batchId}`, JSON.stringify(quoteData));
+    setLastSaved(new Date());
+    toast.success('Quote saved');
+  }, [batchId, store.id, employee.id, items, customer, paymentMethod, checkNumber, followUpReminder, calculateTotals]);
 
   const handleAIAssist = useCallback(() => {
     setShowAICaptureModal(true);
   }, []);
 
-  const handleItemsDetected = useCallback((detectedItems: Array<{ type: string; count: number; notes?: string }>, batchPhotoUrl: string) => {
+  const handleItemsDetected = useCallback((detectedItems: Array<{ type: string; count: number; notes?: string; color_notes?: string }>, batchPhotoUrl: string) => {
     const newItems: Item[] = [];
     for (const detected of detectedItems) {
       for (let i = 0; i < detected.count; i++) {
@@ -280,14 +355,17 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
           id: `item_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
           category: category as Item['category'],
           subType: detected.type,
-          metals: [{ id: `metal_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`, type: 'Gold', karat: 14, weight: 0 }],
+          itemType: detected.type,
+          metals: category === 'Watch' ? [] : [{ id: `metal_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`, type: 'Gold', karat: 14, weight: 0 }],
           stones: [],
           marketValue: 0,
           payoutPercentage: store.defaultPayoutPercentage,
           payoutAmount: 0,
           photos: batchPhotoUrl ? [batchPhotoUrl] : [],
           notes: detected.notes || '',
+          colorNotes: detected.color_notes || '',
           status: 'In Stock',
+          source: 'AI Assist',
         });
       }
     }
@@ -303,7 +381,18 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
 
   return (
     <div className="flex flex-col h-full bg-background">
-      {/* Global Header — frosted glass, no shadow */}
+      {/* Completion success overlay */}
+      {completionSuccess && (
+        <div className="absolute inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="text-center space-y-3">
+            <CheckCircle2 className="h-16 w-16 mx-auto text-green-500" />
+            <h2 className="text-xl font-semibold">Purchase Completed!</h2>
+            <p className="text-sm text-muted-foreground">Items have been added to inventory</p>
+          </div>
+        </div>
+      )}
+
+      {/* Global Header */}
       <div className="h-14 flex items-center justify-between px-6 border-b border-border/60 bg-background/80 backdrop-blur-xl sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <Package className="h-5 w-5 text-muted-foreground" />
@@ -326,7 +415,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
         </div>
       </div>
 
-      {/* Metal Ticker — minimal strip */}
+      {/* Metal Ticker */}
       <div className="border-b border-border/40 px-6 py-1.5">
         <MetalPriceTicker />
       </div>
@@ -334,7 +423,6 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
       {/* Quick Controls Row */}
       <div className="px-6 py-3 flex items-center justify-between gap-6 border-b border-border/40">
         <div className="flex items-center gap-5">
-          {/* Category Chips */}
           <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
             {['Jewelry', 'Watch', 'Bullion', 'Stones', 'Silverware'].map((category) => {
               const isActive = items.some(item => item.category === category);
@@ -354,7 +442,6 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
             })}
           </div>
 
-          {/* Item Count */}
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">Items</span>
             <div className="flex items-center bg-slate-100 border border-slate-200 rounded-lg overflow-hidden">
@@ -377,7 +464,6 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
             </div>
           </div>
 
-          {/* Fast Entry Toggle */}
           <div className="flex items-center gap-2 bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5">
             <Label htmlFor="fast-entry" className="text-xs font-medium text-slate-700 cursor-pointer">Fast Entry</Label>
             <Switch
@@ -389,24 +475,24 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
           </div>
         </div>
 
-        {/* AI Assist Button */}
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={handleAIAssist}
-          className="flex items-center gap-2 text-slate-600 hover:text-primary bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg px-4 transition-all duration-200"
-        >
-          <Zap className="h-3.5 w-3.5" />
-          <span className="text-xs font-medium">AI Assist</span>
-        </Button>
+        {store.enableAiAssist && (
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={handleAIAssist}
+            className="flex items-center gap-2 text-slate-600 hover:text-primary bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg px-4 transition-all duration-200"
+          >
+            <Zap className="h-3.5 w-3.5" />
+            <span className="text-xs font-medium">AI Assist</span>
+          </Button>
+        )}
       </div>
 
-      {/* AI Assist Banner — full-width strip */}
       {showAIAssist && (
         <AIAssistBanner onActivate={handleAIAssist} />
       )}
 
-      {/* Main Content — fills remaining viewport, no page-level scroll */}
+      {/* Main Content */}
       <div className="flex-1 overflow-hidden min-h-0">
         {viewMode === 'balanced' ? (
           <TakeInBalanced
@@ -420,6 +506,9 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
             customer={customer}
             onCustomerUpdate={setCustomer}
             onOpenCustomerDrawer={openCustomerDrawer}
+            onCompletePurchase={handleCompletePurchase}
+            onSaveQuote={handleSaveQuote}
+            completing={completing}
           />
         ) : (
           <TakeInSlim
@@ -450,6 +539,29 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
         onItemsDetected={handleItemsDetected}
         batchId={batchId}
       />
+
+      {/* Confirm Purchase Dialog */}
+      <Dialog open={showConfirmPurchase} onOpenChange={setShowConfirmPurchase}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Confirm Purchase
+            </DialogTitle>
+            <DialogDescription>
+              You are about to complete this purchase for <strong>${totals.totalPayout.toFixed(2)}</strong> with {items.length} item(s).
+              {customer && <> Customer: <strong>{customer.name}</strong>.</>}
+              {' '}This action will create inventory records and cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowConfirmPurchase(false)}>Cancel</Button>
+            <Button onClick={handleCompletePurchase} disabled={completing}>
+              {completing ? 'Completing…' : 'Confirm Purchase'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

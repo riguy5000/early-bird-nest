@@ -27,7 +27,9 @@ import {
   Upload,
   QrCode,
   Smartphone,
-  X
+  X,
+  Search,
+  Image as ImageIcon
 } from 'lucide-react';
 
 export interface CustomerData {
@@ -72,6 +74,24 @@ const EMPTY_FORM: CustomerData = {
   firstName: '', lastName: '', notes: '', source: 'manual'
 };
 
+interface CustomerSuggestion {
+  id: string;
+  full_name: string;
+  email: string | null;
+  phone: string | null;
+  license_number: string | null;
+  date_of_birth: string | null;
+  address: string | null;
+  gender: string | null;
+  first_name: string;
+  last_name: string;
+  id_scan_url: string | null;
+  id_scan_back_url: string | null;
+  source: string;
+  notes: string | null;
+  ocr_payload: any;
+}
+
 export function CustomerDrawer({ 
   isOpen, onClose, customer, onCustomerUpdate, mode, storeId, storeSettings 
 }: CustomerDrawerProps) {
@@ -85,6 +105,9 @@ export function CustomerDrawer({
   const [dirty, setDirty] = useState(false);
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
   const [qrSessionId, setQrSessionId] = useState<string | null>(null);
+  const [suggestions, setSuggestions] = useState<CustomerSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchTimeout, setSearchTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const frontInputRef = useRef<HTMLInputElement>(null);
   const backInputRef = useRef<HTMLInputElement>(null);
   const qrPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -100,13 +123,13 @@ export function CustomerDrawer({
       setBackImage(null);
       setImageQualityWarning(null);
       setDirty(false);
+      setSuggestions([]);
+      setShowSuggestions(false);
       
-      // Auto-start scan or manual mode if specified
       if (!isEditing && mode === 'scan') {
         setScanStep('choose');
       }
     } else {
-      // Cleanup QR polling
       if (qrPollRef.current) {
         clearInterval(qrPollRef.current);
         qrPollRef.current = null;
@@ -128,9 +151,64 @@ export function CustomerDrawer({
     onClose();
   };
 
+  // ---- CUSTOMER SEARCH ----
+  const searchCustomers = useCallback(async (query: string) => {
+    if (query.length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    try {
+      const { data, error } = await supabase
+        .from('customers')
+        .select('id, full_name, email, phone, license_number, date_of_birth, address, gender, first_name, last_name, id_scan_url, id_scan_back_url, source, notes, ocr_payload')
+        .eq('store_id', storeId)
+        .or(`full_name.ilike.%${query}%,email.ilike.%${query}%,phone.ilike.%${query}%,license_number.ilike.%${query}%`)
+        .limit(5);
+      if (error) throw error;
+      setSuggestions((data || []) as CustomerSuggestion[]);
+      setShowSuggestions((data || []).length > 0);
+    } catch (err) {
+      console.error('Customer search error:', err);
+    }
+  }, [storeId]);
+
+  const selectSuggestion = (s: CustomerSuggestion) => {
+    setFormData({
+      id: s.id,
+      name: s.full_name,
+      firstName: s.first_name,
+      lastName: s.last_name,
+      email: s.email || '',
+      phone: s.phone || '',
+      address: s.address || '',
+      dateOfBirth: s.date_of_birth || '',
+      gender: s.gender || '',
+      licenseNumber: s.license_number || '',
+      idScanUrl: s.id_scan_url || undefined,
+      idScanBackUrl: s.id_scan_back_url || undefined,
+      ocrPayload: s.ocr_payload,
+      source: (s.source as 'scan' | 'manual') || 'manual',
+      notes: s.notes || '',
+    });
+    setDirty(true);
+    setSuggestions([]);
+    setShowSuggestions(false);
+    toast.success(`Loaded existing customer: ${s.full_name}`);
+  };
+
   const updateField = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setDirty(true);
+    // Trigger customer search for name, email, phone, license
+    if (['name', 'email', 'phone', 'licenseNumber'].includes(field) && value.length >= 2) {
+      if (searchTimeout) clearTimeout(searchTimeout);
+      const t = setTimeout(() => searchCustomers(value), 300);
+      setSearchTimeout(t);
+    } else if (value.length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
   };
 
   const fileToBase64 = (file: File): Promise<string> => {
@@ -187,7 +265,6 @@ export function CustomerDrawer({
     setScanStep('analyzing');
     setImageQualityWarning(null);
     try {
-      // Upload images in parallel
       const [frontUrl, backUrl] = await Promise.all([
         uploadIdImage(front, 'front'),
         back ? uploadIdImage(back, 'back') : Promise.resolve(null)
@@ -203,7 +280,6 @@ export function CustomerDrawer({
         return;
       }
 
-      // Parse name into first/last
       const fullName = data.name || '';
       const nameParts = fullName.split(' ');
       const firstName = nameParts[0] || '';
@@ -230,12 +306,12 @@ export function CustomerDrawer({
       if (data.image_quality !== 'clear') {
         setImageQualityWarning(data.image_quality_note || 'The front image appears blurry. Please verify the extracted information.');
       }
-      toast.success('License data extracted successfully');
+      toast.success('ID data extracted successfully');
       setScanStep('idle');
       setEditMode(true);
     } catch (err: any) {
       console.error('License scan error:', err);
-      toast.error(err.message || 'Failed to scan license');
+      toast.error(err.message || 'Failed to scan ID');
       setScanStep('idle');
     }
   };
@@ -246,7 +322,6 @@ export function CustomerDrawer({
     setQrSessionId(sessionId);
     setScanStep('qr');
 
-    // Poll for uploaded images from remote device
     if (qrPollRef.current) clearInterval(qrPollRef.current);
     qrPollRef.current = setInterval(async () => {
       try {
@@ -263,7 +338,6 @@ export function CustomerDrawer({
           if (payload.front_image_base64) {
             setFrontImage(payload.front_image_base64);
             analyzeLicense(payload.front_image_base64, payload.back_image_base64 || null);
-            // Cleanup the KV entry
             await supabase.from('kv_store_62d2b480').delete().eq('key', `qr_scan_${sessionId}`);
           }
         }
@@ -274,13 +348,11 @@ export function CustomerDrawer({
   }, []);
 
   const handleSave = async () => {
-    // Validate required fields
     if (!formData.name?.trim()) {
       toast.error('Full name is required');
       return;
     }
 
-    // Enforce store settings requirements
     if (storeSettings?.requirePhone && !formData.phone?.trim()) {
       toast.error('Phone number is required by store settings');
       return;
@@ -294,7 +366,7 @@ export function CustomerDrawer({
       return;
     }
     if (storeSettings?.requireLicenseNumber && !formData.licenseNumber?.trim()) {
-      toast.error('License number is required by store settings');
+      toast.error('Government ID number is required by store settings');
       return;
     }
     if (storeSettings?.requireDob && !formData.dateOfBirth?.trim()) {
@@ -331,14 +403,12 @@ export function CustomerDrawer({
       };
 
       if (formData.id) {
-        // Update existing customer
         const { error } = await supabase
           .from('customers')
           .update(customerPayload)
           .eq('id', formData.id);
         if (error) throw error;
       } else {
-        // Insert new customer
         const { data, error } = await supabase
           .from('customers')
           .insert(customerPayload)
@@ -371,6 +441,16 @@ export function CustomerDrawer({
   const qrUrl = qrSessionId
     ? `${window.location.origin}/scan-upload?session=${qrSessionId}&store=${storeId}`
     : '';
+
+  const getIdImageUrl = (path: string | undefined) => {
+    if (!path) return null;
+    if (path.startsWith('http')) return path;
+    const { data } = supabase.storage.from('customer-id-scans').getPublicUrl(path);
+    return data?.publicUrl || null;
+  };
+
+  const frontUrl = getIdImageUrl(formData.idScanUrl);
+  const backUrl = getIdImageUrl(formData.idScanBackUrl);
 
   return (
     <>
@@ -417,16 +497,16 @@ export function CustomerDrawer({
                         className="w-full flex items-center gap-2 h-11 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-all"
                       >
                         <Scan className="h-4 w-4" />
-                        Scan Customer ID
+                        Scan Government ID
                       </Button>
                     </div>
                   )}
 
-                  {/* Choose capture method */}
                   {scanStep === 'choose' && (
                     <div className="border border-slate-200 rounded-lg p-5 space-y-3 bg-slate-50">
                       <div className="text-center mb-2">
                         <p className="font-medium text-sm">How do you want to capture the ID?</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Driver License, State ID, or Passport</p>
                       </div>
                       <Button 
                         onClick={startDeviceCapture}
@@ -453,7 +533,6 @@ export function CustomerDrawer({
                     </div>
                   )}
 
-                  {/* QR Code for remote capture */}
                   {scanStep === 'qr' && (
                     <div className="border border-slate-200 rounded-lg p-5 text-center space-y-3 bg-slate-50">
                       <div className="w-12 h-12 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
@@ -494,8 +573,8 @@ export function CustomerDrawer({
                         <Camera className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <p className="font-medium text-sm">Front of License</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">Take a photo or upload the front side</p>
+                        <p className="font-medium text-sm">Front of ID</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Take a photo or upload the front side of the government ID</p>
                       </div>
                       <Button onClick={() => frontInputRef.current?.click()} className="w-full rounded-lg">
                         <Upload className="h-4 w-4 mr-2" />
@@ -518,7 +597,7 @@ export function CustomerDrawer({
                         <Camera className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <p className="font-medium text-sm">Back of License</p>
+                        <p className="font-medium text-sm">Back of ID</p>
                         <p className="text-xs text-muted-foreground mt-0.5">Take a photo of the back side</p>
                       </div>
                       <Button onClick={() => backInputRef.current?.click()} className="w-full rounded-lg">
@@ -536,7 +615,7 @@ export function CustomerDrawer({
                     <div className="border border-slate-200 rounded-lg p-6 text-center space-y-3 bg-slate-50">
                       <Loader2 className="h-6 w-6 mx-auto animate-spin text-primary" />
                       <div>
-                        <p className="font-medium text-sm">Analyzing License…</p>
+                        <p className="font-medium text-sm">Analyzing ID…</p>
                         <p className="text-xs text-muted-foreground">AI is extracting information</p>
                       </div>
                     </div>
@@ -549,20 +628,57 @@ export function CustomerDrawer({
                     </div>
                   )}
 
-                  {/* Scanned image indicator */}
-                  {formData.idScanUrl && scanStep === 'idle' && (
-                    <div className="flex items-center gap-2 p-2.5 rounded-lg bg-green-50 border border-green-200/60 text-green-700">
-                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
-                      <span className="text-xs font-medium">ID scanned</span>
-                      <Button 
-                        variant="ghost" size="sm" 
-                        onClick={() => setScanStep('choose')}
-                        className="ml-auto h-6 text-[10px] text-green-700 hover:text-green-800"
-                      >
-                        Re-scan
-                      </Button>
+                  {/* Scanned ID image thumbnails */}
+                  {(frontUrl || backUrl) && scanStep === 'idle' && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 p-2.5 rounded-lg bg-green-50 border border-green-200/60 text-green-700">
+                        <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                        <span className="text-xs font-medium">ID scanned</span>
+                        <Button 
+                          variant="ghost" size="sm" 
+                          onClick={() => setScanStep('choose')}
+                          className="ml-auto h-6 text-[10px] text-green-700 hover:text-green-800"
+                        >
+                          Re-scan
+                        </Button>
+                      </div>
+                      <div className="flex gap-2">
+                        {frontUrl && (
+                          <div className="flex-1">
+                            <p className="text-[10px] text-muted-foreground mb-1">Front</p>
+                            <img src={frontUrl} alt="ID Front" className="w-full h-20 object-cover rounded-md border border-slate-200" />
+                          </div>
+                        )}
+                        {backUrl && (
+                          <div className="flex-1">
+                            <p className="text-[10px] text-muted-foreground mb-1">Back</p>
+                            <img src={backUrl} alt="ID Back" className="w-full h-20 object-cover rounded-md border border-slate-200" />
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* View-mode ID images */}
+              {!editMode && (frontUrl || backUrl) && (
+                <div className="space-y-2">
+                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Scanned ID</h4>
+                  <div className="flex gap-2">
+                    {frontUrl && (
+                      <div className="flex-1">
+                        <p className="text-[10px] text-muted-foreground mb-1">Front</p>
+                        <img src={frontUrl} alt="ID Front" className="w-full h-20 object-cover rounded-md border border-slate-200" />
+                      </div>
+                    )}
+                    {backUrl && (
+                      <div className="flex-1">
+                        <p className="text-[10px] text-muted-foreground mb-1">Back</p>
+                        <img src={backUrl} alt="ID Back" className="w-full h-20 object-cover rounded-md border border-slate-200" />
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -573,10 +689,46 @@ export function CustomerDrawer({
                 <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Personal Information</h4>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="col-span-2">
+                  <div className="col-span-2 relative">
                     <Label className="text-xs text-muted-foreground">Full Name *</Label>
                     {editMode ? (
-                      <Input value={formData.name} onChange={(e) => updateField('name', e.target.value)} placeholder="Full name" className="mt-1 rounded-lg bg-white border border-slate-200" />
+                      <>
+                        <div className="relative">
+                          <Input 
+                            value={formData.name} 
+                            onChange={(e) => updateField('name', e.target.value)} 
+                            placeholder="Full name" 
+                            className="mt-1 rounded-lg bg-white border border-slate-200 pr-8"
+                            onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                          />
+                          {formData.name.length >= 2 && (
+                            <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground mt-0.5" />
+                          )}
+                        </div>
+                        {/* Suggestions dropdown */}
+                        {showSuggestions && suggestions.length > 0 && (
+                          <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
+                            <div className="px-3 py-1.5 text-[10px] text-muted-foreground uppercase tracking-wider bg-slate-50 border-b border-slate-200">
+                              Existing Customers
+                            </div>
+                            {suggestions.map(s => (
+                              <button
+                                key={s.id}
+                                className="w-full px-3 py-2 text-left hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0"
+                                onMouseDown={() => selectSuggestion(s)}
+                              >
+                                <div className="text-sm font-medium">{s.full_name}</div>
+                                <div className="text-[11px] text-muted-foreground flex gap-2">
+                                  {s.license_number && <span>ID: {s.license_number}</span>}
+                                  {s.phone && <span>{s.phone}</span>}
+                                  {s.email && <span>{s.email}</span>}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <div className="mt-1 text-sm font-medium">{customer?.name || 'Not provided'}</div>
                     )}
@@ -613,10 +765,10 @@ export function CustomerDrawer({
 
                   <div className="col-span-2">
                     <Label className="text-xs text-muted-foreground">
-                      Driver License # {storeSettings?.requireLicenseNumber && '*'}
+                      ID / License / Passport # {storeSettings?.requireLicenseNumber && '*'}
                     </Label>
                     {editMode ? (
-                      <Input value={formData.licenseNumber} onChange={(e) => updateField('licenseNumber', e.target.value)} placeholder="License number" className="mt-1 rounded-lg bg-white border border-slate-200 font-mono" />
+                      <Input value={formData.licenseNumber} onChange={(e) => updateField('licenseNumber', e.target.value)} placeholder="Government ID number" className="mt-1 rounded-lg bg-white border border-slate-200 font-mono" />
                     ) : (
                       <div className="mt-1 text-sm font-mono">{customer?.licenseNumber || 'Not provided'}</div>
                     )}

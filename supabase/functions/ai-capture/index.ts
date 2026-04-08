@@ -5,12 +5,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const JEWELRY_CATEGORIES = [
-  'Ring', 'Earring', 'Bracelet', 'Necklace', 'Chain', 'Pendant',
-  'Watch', 'Brooch', 'Anklet', 'Charm', 'Cufflinks', 'Pin',
-  'Bar', 'Coin', 'Round', 'Spoon', 'Fork', 'Knife'
-];
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -34,13 +28,21 @@ serve(async (req) => {
       });
     }
 
-    const systemPrompt = `You are a jewelry identification expert. Analyze the image and identify each jewelry or precious metal item visible.
+    const systemPrompt = `You are a jewelry and precious metals identification expert. Analyze the image and identify each individual item visible.
 
 For each item, determine:
-1. The type from this list: ${JEWELRY_CATEGORIES.join(', ')}
+1. The type/subcategory: Ring, Wedding Band, Earring (pair counts as 1 if matched, standalone earring is separate), Pendant, Chain, Necklace, Bracelet, Anklet, Brooch, Charm, Cufflinks, Pin, Watch, Bar, Coin, Round, Spoon, Fork, Knife, or other descriptive type
 2. A count if there are multiples of the same type
+3. Visible color notes: describe the apparent color (yellow, white/silver, rose/pink, two-tone, mixed). Do NOT claim metal type or karat — only describe what color you see.
+4. Brief distinguishing notes
 
-Return your analysis using the detect_items tool. Be precise about counts - count each individual piece.`;
+Important rules:
+- Count each individual piece carefully
+- A pair of earrings = 1 item with count 1 (note "pair" in notes)
+- A standalone single earring = 1 item with count 1 (note "single" in notes)
+- Watches are a separate category
+- Do NOT identify metal type, karat, or authenticity — only visible appearance
+- Be conservative: if unsure, describe what you see`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -61,7 +63,7 @@ Return your analysis using the detect_items tool. Be precise about counts - coun
               },
               {
                 type: 'text',
-                text: 'Please identify and count all jewelry/precious metal items in this image.',
+                text: 'Please identify, count, and describe the visible color of all jewelry/precious metal items in this image. Do not guess metal type or karat.',
               },
             ],
           },
@@ -71,7 +73,7 @@ Return your analysis using the detect_items tool. Be precise about counts - coun
             type: 'function',
             function: {
               name: 'detect_items',
-              description: 'Report detected jewelry items from the image',
+              description: 'Report detected jewelry items from the image with visible color descriptions',
               parameters: {
                 type: 'object',
                 properties: {
@@ -82,15 +84,19 @@ Return your analysis using the detect_items tool. Be precise about counts - coun
                       properties: {
                         type: {
                           type: 'string',
-                          description: 'Item type (e.g. Ring, Earring, Bracelet, Necklace, Chain, Pendant, Watch, Brooch, Anklet, Charm, Cufflinks, Pin, Bar, Coin, Round, Spoon, Fork, Knife)',
+                          description: 'Item subcategory (e.g. Ring, Wedding Band, Earring, Chain, Watch, Pendant, Bracelet, Necklace, Brooch, Anklet, Charm, Cufflinks, Pin, Bar, Coin, Round, Spoon, Fork, Knife)',
                         },
                         count: {
                           type: 'number',
                           description: 'Number of this item type detected',
                         },
+                        color_notes: {
+                          type: 'string',
+                          description: 'Visible color description (e.g. yellow color, white/silver color, rose/pink color, two-tone). Do NOT claim metal type.',
+                        },
                         notes: {
                           type: 'string',
-                          description: 'Brief description or distinguishing features',
+                          description: 'Brief distinguishing features (e.g. pair, single, large, small, with stones)',
                         },
                       },
                       required: ['type', 'count'],

@@ -27,7 +27,8 @@ import {
   DollarSign,
   Save as SaveIcon,
   Printer,
-  Edit
+  Edit,
+  Loader2
 } from 'lucide-react';
 import { CustomerSummaryCard } from './CustomerSummaryCard';
 
@@ -42,6 +43,9 @@ interface TakeInBalancedProps {
   customer: CustomerData | null;
   onCustomerUpdate: (customer: CustomerData) => void;
   onOpenCustomerDrawer: (mode: 'scan' | 'manual') => void;
+  onCompletePurchase: () => void;
+  onSaveQuote: () => void;
+  completing?: boolean;
 }
 
 export function TakeInBalanced({
@@ -54,7 +58,10 @@ export function TakeInBalanced({
   store,
   customer,
   onCustomerUpdate,
-  onOpenCustomerDrawer
+  onOpenCustomerDrawer,
+  onCompletePurchase,
+  onSaveQuote,
+  completing
 }: TakeInBalancedProps) {
   const { toast } = useToast();
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set());
@@ -65,7 +72,6 @@ export function TakeInBalanced({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const weightInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handleKeydown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'j') {
@@ -102,14 +108,12 @@ export function TakeInBalanced({
     const updatedMetals = item.metals.map((m: any) => {
       if (m.id !== metalId) return m;
       const updated = { ...m, ...updates };
-      // Recalculate per-metal values
-      const metalMarket = (updated.weight || 0) * 50; // placeholder price per gram
+      const metalMarket = (updated.weight || 0) * 50;
       const pct = updated.payoutPercentage ?? 75;
       updated.marketValue = metalMarket;
       updated.payoutAmount = metalMarket * (pct / 100);
       return updated;
     });
-    // Recalculate item totals from all metals
     const totalMarketValue = updatedMetals.reduce((sum: number, m: any) => sum + (m.marketValue || 0), 0);
     const totalPayoutAmount = updatedMetals.reduce((sum: number, m: any) => sum + (m.payoutAmount || 0), 0);
     onItemUpdate(itemId, { metals: updatedMetals, marketValue: totalMarketValue, payoutAmount: totalPayoutAmount });
@@ -259,7 +263,6 @@ export function TakeInBalanced({
                       <div className="p-2 space-y-1.5">
                         {(categoryItems as any[]).map((item, index) => (
                            <div key={item.id} className="bg-white rounded-lg border border-slate-150 shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.06)] transition-shadow duration-150">
-                              {/* Single compact row: Number | Type chips | Metal | Karat | Grams | % | Price | +Metal | Specs | ✕ */}
                               <div 
                                 className="flex items-start gap-2 px-3 py-2 cursor-pointer"
                                 onClick={(e) => {
@@ -270,12 +273,10 @@ export function TakeInBalanced({
                                   }
                                 }}
                               >
-                                {/* Item number */}
                                 <div className="w-6 h-6 bg-slate-200 rounded-md flex items-center justify-center text-[11px] font-semibold text-slate-600 mt-0.5 flex-shrink-0">
                                   {items.findIndex(i => i.id === item.id) + 1}
                                 </div>
 
-                                {/* Item type - compact inline */}
                                 <div className="flex flex-col gap-1 min-w-[120px] flex-shrink-0">
                                   <Input
                                     value={item.itemType || ''}
@@ -298,9 +299,15 @@ export function TakeInBalanced({
                                       </button>
                                     ))}
                                   </div>
+                                  {/* AI source + color notes */}
+                                  {item.source === 'AI Assist' && (
+                                    <Badge variant="secondary" className="text-[9px] w-fit px-1.5 py-0 h-4">AI</Badge>
+                                  )}
+                                  {item.colorNotes && (
+                                    <span className="text-[10px] text-muted-foreground italic">{item.colorNotes}</span>
+                                  )}
                                 </div>
 
-                                {/* Metals column */}
                                 <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                                   {(item.metals || []).map((metal: any) => (
                                     <div key={metal.id} className="flex items-center gap-1.5">
@@ -321,6 +328,7 @@ export function TakeInBalanced({
                                           <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent className="rounded-lg">
+                                          <SelectItem value="9">9K</SelectItem>
                                           <SelectItem value="10">10K</SelectItem>
                                           <SelectItem value="14">14K</SelectItem>
                                           <SelectItem value="18">18K</SelectItem>
@@ -392,7 +400,6 @@ export function TakeInBalanced({
                                   ))}
                                 </div>
 
-                                {/* Right side: Add Metal + Total + Specs + Remove */}
                                 <div className="flex items-center gap-2 flex-shrink-0 mt-0.5">
                                   <Button
                                     variant="ghost"
@@ -416,21 +423,22 @@ export function TakeInBalanced({
                                     <span>Specs</span>
                                   </div>
 
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onItemRemove(item.id);
-                                    }}
-                                    className="h-5 w-5 p-0 hover:bg-destructive/10 hover:text-destructive rounded-lg"
-                                  >
-                                    <X className="h-3 w-3" />
-                                  </Button>
+                                  {store.canDeleteItems !== false && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        onItemRemove(item.id);
+                                      }}
+                                      className="h-5 w-5 p-0 hover:bg-destructive/10 hover:text-destructive rounded-lg"
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </Button>
+                                  )}
                                 </div>
                               </div>
 
-                             {/* Advanced Details */}
                              <Collapsible 
                                open={expandedAdvanced.has(item.id)} 
                                onOpenChange={() => toggleAdvanced(item.id)}
@@ -477,7 +485,6 @@ export function TakeInBalanced({
                                      </div>
                                    </div>
 
-                                    {/* Metals Summary (read-only, managed above) */}
                                     {(item.metals || []).length > 0 && (
                                       <div>
                                         <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Metals</label>
@@ -496,7 +503,6 @@ export function TakeInBalanced({
                                       </div>
                                     )}
 
-                                   {/* Notes and Photos */}
                                    <div className="grid grid-cols-2 gap-4">
                                      <div>
                                        <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Notes</label>
@@ -516,7 +522,6 @@ export function TakeInBalanced({
                                      </div>
                                     </div>
 
-                                    {/* Clear / Save buttons */}
                                     <div className="flex justify-end gap-2 pt-3 border-t border-border/40 mt-3">
                                       <Button
                                         variant="outline"
@@ -560,7 +565,7 @@ export function TakeInBalanced({
           </div>
         </div>
 
-        {/* Right Panel — fixed sidebar, never scrolls with items */}
+        {/* Right Panel */}
         <div className="w-72 border-l border-slate-200 bg-white flex flex-col flex-shrink-0 h-full overflow-auto">
           {/* Payout Total */}
           <div className="p-6 border-b border-slate-200">
@@ -591,15 +596,17 @@ export function TakeInBalanced({
                 <ScanLine className="h-4 w-4" />
                 Scan Customer ID
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => onOpenCustomerDrawer('manual')}
-                className="w-full mt-1.5 text-xs text-slate-600 rounded-lg border border-slate-200 bg-white hover:bg-slate-50"
-              >
-                <Edit className="h-3.5 w-3.5 mr-1.5" />
-                Enter Manually
-              </Button>
+              {store.allowManualEntry !== false && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => onOpenCustomerDrawer('manual')}
+                  className="w-full mt-1.5 text-xs text-slate-600 rounded-lg border border-slate-200 bg-white hover:bg-slate-50"
+                >
+                  <Edit className="h-3.5 w-3.5 mr-1.5" />
+                  Enter Manually
+                </Button>
+              )}
             </div>
           )}
 
@@ -664,14 +671,17 @@ export function TakeInBalanced({
 
           {/* Action Buttons */}
           <div className="p-4 space-y-2 border-t border-slate-200">
-            <Button 
-              variant="ghost" 
-              className="w-full flex items-center gap-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
-              disabled={items.length === 0}
-            >
-              <SaveIcon className="h-4 w-4" />
-              Save as Quote
-            </Button>
+            {store.enableSaveForLater !== false && (
+              <Button 
+                variant="ghost" 
+                className="w-full flex items-center gap-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
+                disabled={items.length === 0}
+                onClick={onSaveQuote}
+              >
+                <SaveIcon className="h-4 w-4" />
+                Save as Quote
+              </Button>
+            )}
             <Button 
               variant="ghost" 
               className="w-full flex items-center gap-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
@@ -680,13 +690,20 @@ export function TakeInBalanced({
               <Printer className="h-4 w-4" />
               Print Receipt
             </Button>
-            <Button 
-              className="w-full flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg"
-              disabled={items.length === 0}
-            >
-              <DollarSign className="h-4 w-4" />
-              Complete Purchase
-            </Button>
+            {store.canCompletePurchase !== false && (
+              <Button 
+                className="w-full flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg"
+                disabled={items.length === 0 || completing}
+                onClick={onCompletePurchase}
+              >
+                {completing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <DollarSign className="h-4 w-4" />
+                )}
+                {completing ? 'Completing…' : 'Complete Purchase'}
+              </Button>
+            )}
           </div>
         </div>
       </div>
