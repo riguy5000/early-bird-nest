@@ -35,14 +35,17 @@ For each item, determine:
 2. A count if there are multiples of the same type
 3. Visible color notes: describe the apparent color (yellow, white/silver, rose/pink, two-tone, mixed). Do NOT claim metal type or karat — only describe what color you see.
 4. Brief distinguishing notes
+5. The approximate bounding box of each item in the image, expressed as normalized coordinates (0.0 to 1.0) relative to the image dimensions: x_min, y_min, x_max, y_max where (0,0) is top-left and (1,1) is bottom-right.
 
 Important rules:
 - Count each individual piece carefully
-- A pair of earrings = 1 item with count 1 (note "pair" in notes)
+- A pair of earrings = 1 item with count 1 (note "pair" in notes). Use one bounding box that covers both earrings.
 - A standalone single earring = 1 item with count 1 (note "single" in notes)
 - Watches are a separate category
 - Do NOT identify metal type, karat, or authenticity — only visible appearance
-- Be conservative: if unsure, describe what you see`;
+- Be conservative: if unsure, describe what you see
+- Each item MUST have a bounding box. Estimate as best you can.
+- If multiple items of the same type are in different locations, list them separately with individual bounding boxes.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -63,7 +66,7 @@ Important rules:
               },
               {
                 type: 'text',
-                text: 'Please identify, count, and describe the visible color of all jewelry/precious metal items in this image. Do not guess metal type or karat.',
+                text: 'Identify all jewelry/precious metal items in this image. For EACH item, provide its bounding box as normalized coordinates (0.0-1.0). If there are 3 rings in different positions, list 3 separate entries each with their own bounding box. Do not guess metal type or karat.',
               },
             ],
           },
@@ -73,7 +76,7 @@ Important rules:
             type: 'function',
             function: {
               name: 'detect_items',
-              description: 'Report detected jewelry items from the image with visible color descriptions',
+              description: 'Report detected jewelry items from the image with visible color descriptions and bounding boxes',
               parameters: {
                 type: 'object',
                 properties: {
@@ -88,7 +91,7 @@ Important rules:
                         },
                         count: {
                           type: 'number',
-                          description: 'Number of this item type detected',
+                          description: 'Number of this item type at this location. Usually 1 unless items overlap.',
                         },
                         color_notes: {
                           type: 'string',
@@ -98,8 +101,20 @@ Important rules:
                           type: 'string',
                           description: 'Brief distinguishing features (e.g. pair, single, large, small, with stones)',
                         },
+                        bbox: {
+                          type: 'object',
+                          description: 'Bounding box as normalized coordinates (0.0-1.0). (0,0) = top-left, (1,1) = bottom-right.',
+                          properties: {
+                            x_min: { type: 'number', description: 'Left edge (0.0-1.0)' },
+                            y_min: { type: 'number', description: 'Top edge (0.0-1.0)' },
+                            x_max: { type: 'number', description: 'Right edge (0.0-1.0)' },
+                            y_max: { type: 'number', description: 'Bottom edge (0.0-1.0)' },
+                          },
+                          required: ['x_min', 'y_min', 'x_max', 'y_max'],
+                          additionalProperties: false,
+                        },
                       },
-                      required: ['type', 'count'],
+                      required: ['type', 'count', 'bbox'],
                       additionalProperties: false,
                     },
                   },

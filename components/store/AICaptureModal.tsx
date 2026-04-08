@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { QRCodeSVG } from 'qrcode.react';
-import { Camera, Upload, Loader2, Sparkles, Check, X, QrCode, Smartphone, Merge, Split, Trash2, Edit } from 'lucide-react';
+import { Camera, Upload, Loader2, Sparkles, Check, X, QrCode, Smartphone, Merge, Split, Trash2, ImageIcon } from 'lucide-react';
 
 interface DetectedItem {
   type: string;
@@ -15,6 +15,7 @@ interface DetectedItem {
   notes?: string;
   color_notes?: string;
   subcategory?: string;
+  bbox?: { x_min: number; y_min: number; x_max: number; y_max: number };
 }
 
 interface ReviewItem {
@@ -24,6 +25,9 @@ interface ReviewItem {
   notes: string;
   isPair: boolean;
   category: string;
+  cropDataUrl?: string; // base64 crop for preview
+  cropUrl?: string; // uploaded storage URL
+  bbox?: { x_min: number; y_min: number; x_max: number; y_max: number };
 }
 
 interface AICaptureResult {
@@ -31,10 +35,18 @@ interface AICaptureResult {
   total_count: number;
 }
 
+export interface AICaptureItemResult {
+  type: string;
+  count: number;
+  notes?: string;
+  color_notes?: string;
+  cropUrl?: string;
+}
+
 interface AICaptureModalProps {
   open: boolean;
   onClose: () => void;
-  onItemsDetected: (items: DetectedItem[], batchPhotoUrl: string) => void;
+  onItemsDetected: (items: AICaptureItemResult[], batchPhotoUrl: string) => void;
   batchId: string;
 }
 
@@ -58,13 +70,55 @@ const SUBCATEGORIES: Record<string, string[]> = {
   Silverware: ['Spoon', 'Fork', 'Knife', 'Serving Piece', 'Other'],
 };
 
+/** Crop a region from an image using canvas. Returns a data URL. */
+function cropImageFromDataUrl(
+  imageDataUrl: string,
+  bbox: { x_min: number; y_min: number; x_max: number; y_max: number },
+  padding = 0.03 // 3% padding around bbox
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const w = img.naturalWidth;
+      const h = img.naturalHeight;
+      // Add padding and clamp
+      const x1 = Math.max(0, Math.floor((bbox.x_min - padding) * w));
+      const y1 = Math.max(0, Math.floor((bbox.y_min - padding) * h));
+      const x2 = Math.min(w, Math.ceil((bbox.x_max + padding) * w));
+      const y2 = Math.min(h, Math.ceil((bbox.y_max + padding) * h));
+      const cw = x2 - x1;
+      const ch = y2 - y1;
+      if (cw <= 0 || ch <= 0) { resolve(imageDataUrl); return; }
+      const canvas = document.createElement('canvas');
+      canvas.width = cw;
+      canvas.height = ch;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, x1, y1, cw, ch, 0, 0, cw, ch);
+      resolve(canvas.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = reject;
+    img.src = imageDataUrl;
+  });
+}
+
+/** Convert data URL to File */
+function dataUrlToFile(dataUrl: string, filename: string): File {
+  const [header, base64] = dataUrl.split(',');
+  const mime = header.match(/:(.*?);/)?.[1] || 'image/jpeg';
+  const bytes = atob(base64);
+  const arr = new Uint8Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+  return new File([arr], filename, { type: mime });
+}
+
 export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICaptureModalProps) {
-  const [step, setStep] = useState<'method' | 'capture' | 'qr' | 'analyzing' | 'review'>('method');
+  const [step, setStep] = useState<'method' | 'capture' | 'qr' | 'analyzing' | 'cropping' | 'review'>('method');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [reviewItems, setReviewItems] = useState<ReviewItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [qrSessionId, setQrSessionId] = useState<string | null>(null);
+  const [cropProgress, setCropProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const qrPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -76,6 +130,7 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
     setReviewItems([]);
     setSelectedIds(new Set());
     setQrSessionId(null);
+    setCropProgress(0);
     if (qrPollRef.current) {
       clearInterval(qrPollRef.current);
       qrPollRef.current = null;
@@ -103,8 +158,9 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
     reader.readAsDataURL(file);
   }, []);
 
-  const buildReviewItems = useCallback((result: AICaptureResult): ReviewItem[] => {
+  const buildReviewItems = useCallback(async (result: AICaptureResult, batchImageUrl: string): Promise<ReviewItem[]> => {
     const items: ReviewItem[] = [];
+    // Flatten: each detected item with count > 1 at same bbox gets expanded
     for (const detected of result.items) {
       const isEarring = isEarringType(detected.type);
       const isPair = isEarring && (
@@ -113,36 +169,50 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
       );
 
       if (isPair) {
-        // Create one pair item
+        const id = `ai_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+        let cropDataUrl: string | undefined;
+        if (detected.bbox && batchImageUrl) {
+          try { cropDataUrl = await cropImageFromDataUrl(batchImageUrl, detected.bbox); } catch {}
+        }
         items.push({
-          id: `ai_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          id,
           type: 'Earrings',
           color_notes: detected.color_notes || '',
           notes: `Pair${detected.notes ? ' — ' + detected.notes : ''}`,
           isPair: true,
           category: 'Jewelry',
+          cropDataUrl,
+          bbox: detected.bbox,
         });
-        // If count > 2 there might be extra singles
         const remaining = detected.count - 2;
         for (let i = 0; i < remaining; i++) {
           items.push({
-            id: `ai_${Date.now()}_${Math.random().toString(36).slice(2, 7)}_s${i}`,
+            id: `${id}_s${i}`,
             type: 'Earring (single)',
             color_notes: detected.color_notes || '',
             notes: detected.notes || '',
             isPair: false,
             category: 'Jewelry',
+            cropDataUrl,
+            bbox: detected.bbox,
           });
         }
       } else {
         for (let i = 0; i < detected.count; i++) {
+          const id = `ai_${Date.now()}_${Math.random().toString(36).slice(2, 7)}_${i}`;
+          let cropDataUrl: string | undefined;
+          if (detected.bbox && batchImageUrl) {
+            try { cropDataUrl = await cropImageFromDataUrl(batchImageUrl, detected.bbox); } catch {}
+          }
           items.push({
-            id: `ai_${Date.now()}_${Math.random().toString(36).slice(2, 7)}_${i}`,
+            id,
             type: isEarring ? 'Earring (single)' : detected.type,
             color_notes: detected.color_notes || '',
             notes: detected.notes || '',
             isPair: false,
             category: categorize(detected.type),
+            cropDataUrl,
+            bbox: detected.bbox,
           });
         }
       }
@@ -161,7 +231,11 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       const result = data as AICaptureResult;
-      setReviewItems(buildReviewItems(result));
+
+      // Crop phase
+      setStep('cropping');
+      const items = await buildReviewItems(result, imagePreview);
+      setReviewItems(items);
       setStep('review');
     } catch (err: any) {
       console.error('AI capture error:', err);
@@ -228,7 +302,7 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
     setReviewItems(prev => [
       ...prev.filter(i => i.id !== id),
       { ...item, id: `${id}_a`, type: 'Earring (single)', isPair: false, notes: 'Split from pair' },
-      { ...item, id: `${id}_b`, type: 'Earring (single)', isPair: false, notes: 'Split from pair' },
+      { ...item, id: `${id}_b`, type: 'Earring (single)', isPair: false, notes: 'Split from pair', cropDataUrl: item.cropDataUrl },
     ]);
   };
 
@@ -241,10 +315,21 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
     setReviewItems(prev => prev.map(i => i.id === id ? { ...i, ...updates } : i));
   };
 
+  // Upload a crop to storage and return public URL
+  const uploadCrop = async (cropDataUrl: string, itemIndex: number): Promise<string> => {
+    const file = dataUrlToFile(cropDataUrl, `crop-${itemIndex}.jpg`);
+    const filePath = `${batchId}/crops/item-${itemIndex}-${Date.now()}.jpg`;
+    const { error } = await supabase.storage.from('batch-photos').upload(filePath, file, { upsert: true });
+    if (error) throw error;
+    const { data: urlData } = supabase.storage.from('batch-photos').getPublicUrl(filePath);
+    return urlData?.publicUrl || '';
+  };
+
   // Confirm and send to TakeIn
   const handleConfirm = useCallback(async () => {
     if (reviewItems.length === 0) return;
     try {
+      // Upload batch photo
       let batchPhotoUrl = '';
       if (imageFile) {
         const ext = imageFile.name.split('.').pop() || 'jpg';
@@ -254,21 +339,37 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
         batchPhotoUrl = urlData?.publicUrl || '';
       }
 
-      // Convert review items to detected items format
-      const detected: DetectedItem[] = reviewItems.map(ri => ({
-        type: ri.type,
-        count: 1,
-        notes: ri.notes,
-        color_notes: ri.color_notes,
-      }));
+      // Upload individual crops
+      const results: AICaptureItemResult[] = [];
+      for (let i = 0; i < reviewItems.length; i++) {
+        const ri = reviewItems[i];
+        let cropUrl = '';
+        if (ri.cropDataUrl) {
+          try {
+            cropUrl = await uploadCrop(ri.cropDataUrl, i);
+          } catch (err) {
+            console.error('Failed to upload crop', i, err);
+          }
+        }
+        results.push({
+          type: ri.type,
+          count: 1,
+          notes: ri.notes,
+          color_notes: ri.color_notes,
+          cropUrl,
+        });
+      }
 
-      onItemsDetected(detected, batchPhotoUrl);
+      onItemsDetected(results, batchPhotoUrl);
       handleClose();
-      toast.success(`Added ${reviewItems.length} draft items to your batch`);
+      toast.success(`Added ${reviewItems.length} draft items with individual photos`);
     } catch (err: any) {
+      console.error('Failed to save', err);
       toast.error('Failed to save batch photo');
-      const detected: DetectedItem[] = reviewItems.map(ri => ({ type: ri.type, count: 1, notes: ri.notes, color_notes: ri.color_notes }));
-      onItemsDetected(detected, '');
+      const results: AICaptureItemResult[] = reviewItems.map(ri => ({
+        type: ri.type, count: 1, notes: ri.notes, color_notes: ri.color_notes,
+      }));
+      onItemsDetected(results, '');
       handleClose();
     }
   }, [reviewItems, imageFile, batchId, onItemsDetected, handleClose]);
@@ -286,7 +387,7 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
             AI Tray Capture
           </DialogTitle>
           <DialogDescription>
-            Take a photo of items spread out on a tray. AI will detect, count, and categorize each piece.
+            Take a photo of items spread out on a tray. AI will detect, count, crop, and categorize each piece.
           </DialogDescription>
         </DialogHeader>
 
@@ -372,6 +473,17 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
           </div>
         )}
 
+        {/* Step: Cropping */}
+        {step === 'cropping' && (
+          <div className="py-12 text-center space-y-4">
+            <Loader2 className="h-10 w-10 mx-auto animate-spin text-primary" />
+            <div>
+              <p className="font-medium">Generating item crops...</p>
+              <p className="text-sm text-muted-foreground">Extracting individual item images from the batch photo</p>
+            </div>
+          </div>
+        )}
+
         {/* Step: Review */}
         {step === 'review' && (
           <div className="space-y-4">
@@ -400,45 +512,54 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
               </div>
             )}
 
-            <div className="space-y-2 max-h-60 overflow-auto">
+            <div className="space-y-2 max-h-72 overflow-auto">
               {reviewItems.map((item) => (
                 <div key={item.id} className={`p-3 rounded-lg border transition-colors ${selectedIds.has(item.id) ? 'bg-primary/5 border-primary/30' : 'bg-muted/50'}`}>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.has(item.id)}
-                        onChange={() => toggleSelect(item.id)}
-                        className="rounded border-muted-foreground/30 mt-0.5"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <Input
-                            value={item.type}
-                            onChange={(e) => updateReviewItem(item.id, { type: e.target.value })}
-                            className="h-6 text-xs font-medium border-0 border-b border-transparent hover:border-border focus:border-primary bg-transparent px-0 w-auto max-w-[140px]"
-                          />
-                          <Select value={item.category} onValueChange={(v) => updateReviewItem(item.id, { category: v })}>
-                            <SelectTrigger className="h-6 w-20 text-[10px] border-0 bg-muted/50">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Jewelry">Jewelry</SelectItem>
-                              <SelectItem value="Watch">Watch</SelectItem>
-                              <SelectItem value="Bullion">Bullion</SelectItem>
-                              <SelectItem value="Silverware">Silverware</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          {item.isPair && <Badge variant="secondary" className="text-[9px] h-4 px-1">Pair</Badge>}
-                        </div>
-                        {item.color_notes && (
-                          <span className="text-[10px] text-muted-foreground italic">{item.color_notes}</span>
-                        )}
-                        {item.notes && (
-                          <p className="text-[10px] text-muted-foreground truncate">{item.notes}</p>
-                        )}
-                      </div>
+                  <div className="flex items-start gap-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(item.id)}
+                      onChange={() => toggleSelect(item.id)}
+                      className="rounded border-muted-foreground/30 mt-1"
+                    />
+
+                    {/* Crop thumbnail */}
+                    <div className="w-14 h-14 rounded border bg-muted flex-shrink-0 overflow-hidden flex items-center justify-center">
+                      {item.cropDataUrl ? (
+                        <img src={item.cropDataUrl} alt={item.type} className="w-full h-full object-cover" />
+                      ) : (
+                        <ImageIcon className="h-5 w-5 text-muted-foreground/40" />
+                      )}
                     </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Input
+                          value={item.type}
+                          onChange={(e) => updateReviewItem(item.id, { type: e.target.value })}
+                          className="h-6 text-xs font-medium border-0 border-b border-transparent hover:border-border focus:border-primary bg-transparent px-0 w-auto max-w-[120px]"
+                        />
+                        <Select value={item.category} onValueChange={(v) => updateReviewItem(item.id, { category: v })}>
+                          <SelectTrigger className="h-6 w-20 text-[10px] border-0 bg-muted/50">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Jewelry">Jewelry</SelectItem>
+                            <SelectItem value="Watch">Watch</SelectItem>
+                            <SelectItem value="Bullion">Bullion</SelectItem>
+                            <SelectItem value="Silverware">Silverware</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {item.isPair && <Badge variant="secondary" className="text-[9px] h-4 px-1">Pair</Badge>}
+                      </div>
+                      {item.color_notes && (
+                        <span className="text-[10px] text-muted-foreground italic">{item.color_notes}</span>
+                      )}
+                      {item.notes && (
+                        <p className="text-[10px] text-muted-foreground truncate">{item.notes}</p>
+                      )}
+                    </div>
+
                     <div className="flex items-center gap-0.5 flex-shrink-0">
                       {item.isPair && (
                         <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => splitItem(item.id)} title="Split into singles">
@@ -455,7 +576,7 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
             </div>
 
             <p className="text-xs text-muted-foreground italic">
-              Draft items only — metal type, karat, and weight still need manual verification.
+              Each item will get its own cropped photo. Metal type, karat, and weight still need manual verification.
             </p>
 
             <div className="flex gap-2">
