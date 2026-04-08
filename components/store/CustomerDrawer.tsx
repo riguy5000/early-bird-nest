@@ -251,7 +251,7 @@ export function CustomerDrawer({
     qrPollRef.current = setInterval(async () => {
       try {
         const { data } = await supabase
-          .from('kv_store_62d2b480' as any)
+          .from('kv_store_62d2b480')
           .select('value')
           .eq('key', `qr_scan_${sessionId}`)
           .maybeSingle();
@@ -264,7 +264,7 @@ export function CustomerDrawer({
             setFrontImage(payload.front_image_base64);
             analyzeLicense(payload.front_image_base64, payload.back_image_base64 || null);
             // Cleanup the KV entry
-            await supabase.from('kv_store_62d2b480' as any).delete().eq('key', `qr_scan_${sessionId}`);
+            await supabase.from('kv_store_62d2b480').delete().eq('key', `qr_scan_${sessionId}`);
           }
         }
       } catch (e) {

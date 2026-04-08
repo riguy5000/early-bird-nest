@@ -105,7 +105,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
   );
   const [items, setItems] = useState<Item[]>([]);
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
-  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [customer, setCustomer] = useState<CustomerData | null>(null);
   const [isCustomerDrawerOpen, setIsCustomerDrawerOpen] = useState(false);
   const [customerDrawerMode, setCustomerDrawerMode] = useState<'scan' | 'manual'>('manual');
   const [batchId, setBatchId] = useState('');
