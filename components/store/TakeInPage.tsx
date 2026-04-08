@@ -417,6 +417,9 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
             onItemRemove={removeItem}
             onItemSelect={setActiveItemId}
             store={store}
+            customer={customer}
+            onCustomerUpdate={setCustomer}
+            onOpenCustomerDrawer={openCustomerDrawer}
           />
         ) : (
           <TakeInSlim
@@ -430,13 +433,14 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
         )}
       </div>
 
-
       {/* Customer Drawer */}
       <CustomerDrawer
         isOpen={isCustomerDrawerOpen}
         onClose={() => setIsCustomerDrawerOpen(false)}
         customer={customer}
         onCustomerUpdate={setCustomer}
+        mode={customerDrawerMode}
+        storeId={store.id}
       />
 
       {/* AI Capture Modal */}
