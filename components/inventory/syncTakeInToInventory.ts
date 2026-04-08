@@ -14,6 +14,7 @@ export async function syncTakeInToInventory(transactionData: {
   totalMarketValue: number;
   totalPayout: number;
   status: string;
+  batchPhotos?: string[];
 }) {
   // Only sync completed purchases, not quotes or drafts
   if (transactionData.status !== 'Purchase') return null;
@@ -36,7 +37,7 @@ export async function syncTakeInToInventory(transactionData: {
       employeeProfileId = ep?.id || null;
     }
 
-    // Create inventory batch
+    // Create inventory batch with batch photos (original full batch image)
     const { data: batch, error: batchErr } = await supabase.from('inventory_batches').insert({
       store_id: transactionData.storeId,
       take_in_ref: transactionData.batchId,
@@ -46,6 +47,7 @@ export async function syncTakeInToInventory(transactionData: {
       total_items: transactionData.items.length,
       source: 'take-in',
       status: 'active',
+      batch_photos: transactionData.batchPhotos || [],
     } as any).select().single();
 
     if (batchErr) throw batchErr;

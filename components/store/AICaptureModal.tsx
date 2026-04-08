@@ -70,17 +70,23 @@ const SUBCATEGORIES: Record<string, string[]> = {
   Silverware: ['Spoon', 'Fork', 'Knife', 'Serving Piece', 'Other'],
 };
 
-/** Crop a region from an image using canvas. Returns a data URL. */
+/** Crop a region from an image using canvas. Returns a data URL.
+ *  Uses adaptive padding: smaller items get more relative padding to avoid cutting edges.
+ */
 function cropImageFromDataUrl(
   imageDataUrl: string,
   bbox: { x_min: number; y_min: number; x_max: number; y_max: number },
-  padding = 0.03 // 3% padding around bbox
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
       const w = img.naturalWidth;
       const h = img.naturalHeight;
+      const bboxW = bbox.x_max - bbox.x_min;
+      const bboxH = bbox.y_max - bbox.y_min;
+      // Adaptive padding: small items get up to 8%, large items get 4%
+      const itemSize = Math.max(bboxW, bboxH);
+      const padding = itemSize < 0.15 ? 0.08 : itemSize < 0.3 ? 0.06 : 0.04;
       // Add padding and clamp
       const x1 = Math.max(0, Math.floor((bbox.x_min - padding) * w));
       const y1 = Math.max(0, Math.floor((bbox.y_min - padding) * h));
@@ -88,13 +94,14 @@ function cropImageFromDataUrl(
       const y2 = Math.min(h, Math.ceil((bbox.y_max + padding) * h));
       const cw = x2 - x1;
       const ch = y2 - y1;
-      if (cw <= 0 || ch <= 0) { resolve(imageDataUrl); return; }
+      // Reject obviously bad crops (too small or blank)
+      if (cw < 20 || ch < 20) { resolve(imageDataUrl); return; }
       const canvas = document.createElement('canvas');
       canvas.width = cw;
       canvas.height = ch;
       const ctx = canvas.getContext('2d')!;
       ctx.drawImage(img, x1, y1, cw, ch, 0, 0, cw, ch);
-      resolve(canvas.toDataURL('image/jpeg', 0.85));
+      resolve(canvas.toDataURL('image/jpeg', 0.90));
     };
     img.onerror = reject;
     img.src = imageDataUrl;

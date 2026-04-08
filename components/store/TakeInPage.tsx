@@ -123,6 +123,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
   const [showConfirmPurchase, setShowConfirmPurchase] = useState(false);
   const [completing, setCompleting] = useState(false);
   const [completionSuccess, setCompletionSuccess] = useState(false);
+  const [batchPhotoUrl, setBatchPhotoUrl] = useState<string>('');
 
   const openCustomerDrawer = (mode: 'scan' | 'manual') => {
     setCustomerDrawerMode(mode);
@@ -287,6 +288,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
         paymentMethod,
         checkNumber,
         followUpReminder,
+        batchPhotos: batchPhotoUrl ? [batchPhotoUrl] : [],
         ...totals,
         status: 'Purchase',
         createdAt: new Date().toISOString()
@@ -314,7 +316,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
     } finally {
       setCompleting(false);
     }
-  }, [validateForPurchase, store, batchId, employee.id, items, customer, paymentMethod, checkNumber, followUpReminder, calculateTotals, onComplete, showConfirmPurchase]);
+  }, [validateForPurchase, store, batchId, employee.id, items, customer, paymentMethod, checkNumber, followUpReminder, batchPhotoUrl, calculateTotals, onComplete, showConfirmPurchase]);
 
   // ---- SAVE QUOTE ----
   const handleSaveQuote = useCallback(() => {
@@ -345,7 +347,8 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
     setShowAICaptureModal(true);
   }, []);
 
-  const handleItemsDetected = useCallback((detectedItems: Array<{ type: string; count: number; notes?: string; color_notes?: string; cropUrl?: string }>, batchPhotoUrl: string) => {
+  const handleItemsDetected = useCallback((detectedItems: Array<{ type: string; count: number; notes?: string; color_notes?: string; cropUrl?: string }>, batchPhotoUrlArg: string) => {
+    if (batchPhotoUrlArg) setBatchPhotoUrl(batchPhotoUrlArg);
     const newItems: Item[] = [];
     for (const detected of detectedItems) {
       for (let i = 0; i < detected.count; i++) {
@@ -356,7 +359,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
         // Build photos array: crop first (item-specific), then batch photo as fallback
         const photos: string[] = [];
         if (detected.cropUrl) photos.push(detected.cropUrl);
-        if (batchPhotoUrl && !photos.includes(batchPhotoUrl)) photos.push(batchPhotoUrl);
+        if (batchPhotoUrlArg && !photos.includes(batchPhotoUrlArg)) photos.push(batchPhotoUrlArg);
         newItems.push({
           id: `item_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
           category: category as Item['category'],

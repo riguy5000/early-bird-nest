@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronRight, Package, Calendar, DollarSign } from 'lucide-react';
+import { ChevronDown, ChevronRight, Package, Calendar, DollarSign, ImageIcon } from 'lucide-react';
 import { InventoryItemTable } from './InventoryItemTable';
 import type { InventoryBatchRecord, InventoryItemRecord } from './types';
 
@@ -75,6 +75,21 @@ export function BatchView({ batches, allItems, onViewItem, onEditItem, onPartOut
             </div>
             {isExpanded && (
               <CardContent className="pt-0 px-4 pb-4">
+                {/* Batch-level photos (original full batch image) */}
+                {batch.batch_photos?.length > 0 && (
+                  <div className="mb-3">
+                    <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                      <ImageIcon className="h-3 w-3" /> Batch Source Image
+                    </h5>
+                    <div className="flex gap-2 overflow-x-auto pb-2">
+                      {batch.batch_photos.map((url, i) => (
+                        <a key={i} href={url} target="_blank" rel="noopener noreferrer">
+                          <img src={url} className="w-28 h-20 rounded-lg object-cover border cursor-pointer hover:opacity-80 transition-opacity" alt={`Batch photo ${i + 1}`} />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {batch.batch_notes && (
                   <p className="text-xs text-muted-foreground mb-3 bg-muted/50 rounded p-2">{batch.batch_notes}</p>
                 )}

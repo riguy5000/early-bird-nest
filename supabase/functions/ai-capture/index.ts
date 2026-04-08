@@ -28,16 +28,26 @@ serve(async (req) => {
       });
     }
 
-    const systemPrompt = `You are a jewelry and precious metals identification expert. Analyze the image and identify each individual item visible.
+    const systemPrompt = `You are a jewelry and precious metals identification expert with precise object localization skills. Analyze the image and identify each individual item visible.
 
 For each item, determine:
 1. The type/subcategory: Ring, Wedding Band, Earring (pair counts as 1 if matched, standalone earring is separate), Pendant, Chain, Necklace, Bracelet, Anklet, Brooch, Charm, Cufflinks, Pin, Watch, Bar, Coin, Round, Spoon, Fork, Knife, or other descriptive type
 2. A count if there are multiples of the same type
 3. Visible color notes: describe the apparent color (yellow, white/silver, rose/pink, two-tone, mixed). Do NOT claim metal type or karat — only describe what color you see.
 4. Brief distinguishing notes
-5. The approximate bounding box of each item in the image, expressed as normalized coordinates (0.0 to 1.0) relative to the image dimensions: x_min, y_min, x_max, y_max where (0,0) is top-left and (1,1) is bottom-right.
+5. The PRECISE bounding box of each item in the image, expressed as normalized coordinates (0.0 to 1.0) relative to the image dimensions: x_min, y_min, x_max, y_max where (0,0) is top-left and (1,1) is bottom-right.
 
-Important rules:
+CRITICAL bounding box rules:
+- The bounding box MUST tightly wrap around the ENTIRE visible item with a small margin.
+- Do NOT cut off any part of the item. The full ring, full bracelet, full chain mass, full earring including hooks — everything visible must be INSIDE the box.
+- Do NOT make the box too large. Minimize empty background space. The item should fill most of the bounding box area.
+- For chains: wrap the entire visible chain mass, not just a small section.
+- For rings: include the full circular body and any stone/setting on top.
+- For earrings (pair): use one box that covers both earrings snugly.
+- For bracelets: include the full arc/body visible.
+- Estimate boundaries carefully by looking at where the actual item pixels start and end.
+
+Other important rules:
 - Count each individual piece carefully
 - A pair of earrings = 1 item with count 1 (note "pair" in notes). Use one bounding box that covers both earrings.
 - A standalone single earring = 1 item with count 1 (note "single" in notes)
@@ -66,7 +76,7 @@ Important rules:
               },
               {
                 type: 'text',
-                text: 'Identify all jewelry/precious metal items in this image. For EACH item, provide its bounding box as normalized coordinates (0.0-1.0). If there are 3 rings in different positions, list 3 separate entries each with their own bounding box. Do not guess metal type or karat.',
+                text: 'Identify all jewelry/precious metal items in this image. For EACH item, provide a TIGHT bounding box as normalized coordinates (0.0-1.0) that wraps snugly around the full visible item. Do not cut off any part of any item. Do not include excessive background. If there are 3 rings in different positions, list 3 separate entries each with their own bounding box. Do not guess metal type or karat.',
               },
             ],
           },
