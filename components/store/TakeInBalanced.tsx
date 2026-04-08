@@ -575,26 +575,33 @@ export function TakeInBalanced({
           </div>
 
            {/* Customer Information */}
-          <div className="p-4 border-b border-slate-200">
-            <h3 className="text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-3">Customer</h3>
-            <Button 
-              variant="outline" 
-              onClick={() => setCustomerDrawerOpen(true)}
-              className="w-full flex items-center gap-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50"
-            >
-              <ScanLine className="h-4 w-4" />
-              Scan Customer ID
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setCustomerDrawerOpen(true)}
-              className="w-full mt-1.5 text-xs text-slate-600 rounded-lg border border-slate-200 bg-white hover:bg-slate-50"
-            >
-              <Edit className="h-3.5 w-3.5 mr-1.5" />
-              Enter Manually
-            </Button>
-          </div>
+          {customer ? (
+            <CustomerSummaryCard 
+              customer={customer} 
+              onEdit={() => onOpenCustomerDrawer('manual')} 
+            />
+          ) : (
+            <div className="p-4 border-b border-slate-200">
+              <h3 className="text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-3">Customer</h3>
+              <Button 
+                variant="outline" 
+                onClick={() => onOpenCustomerDrawer('scan')}
+                className="w-full flex items-center gap-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50"
+              >
+                <ScanLine className="h-4 w-4" />
+                Scan Customer ID
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => onOpenCustomerDrawer('manual')}
+                className="w-full mt-1.5 text-xs text-slate-600 rounded-lg border border-slate-200 bg-white hover:bg-slate-50"
+              >
+                <Edit className="h-3.5 w-3.5 mr-1.5" />
+                Enter Manually
+              </Button>
+            </div>
+          )}
 
           {/* Payout Information */}
           <div className="p-4 border-b border-slate-200">
@@ -684,13 +691,6 @@ export function TakeInBalanced({
         </div>
       </div>
 
-      {/* Customer Drawer */}
-      <CustomerDrawer 
-        isOpen={customerDrawerOpen}
-        onClose={() => setCustomerDrawerOpen(false)}
-        customer={customer}
-        onCustomerUpdate={setCustomer}
-      />
     </div>
   );
 }
