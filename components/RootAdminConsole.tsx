@@ -552,6 +552,9 @@ export function RootAdminConsole({ user, onLogout }: RootAdminConsoleProps) {
         {activeSection === 'settings' && <RootAdminPlatformSettings />}
       </main>
 
+      {/* Add Store Modal */}
+      <RootAdminAddStore open={addStoreOpen} onOpenChange={setAddStoreOpen} onCreated={loadStores} />
+
       {/* Store Details Sheet */}
       <Sheet open={detailsOpen} onOpenChange={setDetailsOpen}>
         <SheetContent className="w-[500px] sm:w-[600px] overflow-y-auto">
