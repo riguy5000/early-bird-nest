@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import type { CustomerData } from './CustomerDrawer';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -23,7 +24,6 @@ import {
   Coins,
   Sparkles,
   Utensils,
-  Heart,
   DollarSign,
   Save as SaveIcon,
   Printer,
@@ -39,6 +39,9 @@ interface TakeInBalancedProps {
   onItemRemove: (itemId: string) => void;
   onItemSelect: (itemId: string) => void;
   store: any;
+  customer: CustomerData | null;
+  onCustomerUpdate: (customer: CustomerData) => void;
+  onOpenCustomerDrawer: (mode: 'scan' | 'manual') => void;
 }
 
 export function TakeInBalanced({
@@ -48,12 +51,13 @@ export function TakeInBalanced({
   onItemUpdate,
   onItemRemove,
   onItemSelect,
-  store
+  store,
+  customer,
+  onCustomerUpdate,
+  onOpenCustomerDrawer
 }: TakeInBalancedProps) {
   const { toast } = useToast();
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set());
-  const [customerDrawerOpen, setCustomerDrawerOpen] = useState(false);
-  const [customer, setCustomer] = useState(null);
   const [batchPhotoOpen, setBatchPhotoOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('Check');
   const [checkNumber, setCheckNumber] = useState('');
