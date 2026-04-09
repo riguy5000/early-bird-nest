@@ -77,8 +77,12 @@ const App = () => {
 
   useEffect(() => {
     let mounted = true;
+    let isResolved = false;
 
     const resolveProfile = async (session: any) => {
+      if (isResolved) return;
+      isResolved = true;
+
       try {
         const { data: profileData, error } = await supabase.functions.invoke('employee-management', {
           body: { action: 'resolve-profile' }
@@ -88,6 +92,7 @@ const App = () => {
 
         if (error || profileData?.error) {
           console.error('Profile resolution failed:', profileData?.error || error);
+          isResolved = false;
           setIsLoading(false);
           return;
         }
@@ -100,6 +105,7 @@ const App = () => {
         setIsAuthenticated(true);
       } catch (err) {
         console.error('Error resolving profile:', err);
+        isResolved = false;
       }
       if (mounted) setIsLoading(false);
     };
@@ -117,6 +123,7 @@ const App = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
         if (mounted) {
+          isResolved = false;
           setUser(null);
           setIsAuthenticated(false);
           setIsLoading(false);
@@ -124,7 +131,11 @@ const App = () => {
         return;
       }
 
-      if (event === 'SIGNED_IN') {
+      // Ignore token refreshes and redundant sign-in events
+      if (event === 'TOKEN_REFRESHED') return;
+      if (isResolved) return;
+
+      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
         resolveProfile(session);
       }
     });
