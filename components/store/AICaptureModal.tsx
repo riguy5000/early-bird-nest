@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { QRCodeSVG } from 'qrcode.react';
-import { Camera, Upload, Loader2, Sparkles, Check, X, QrCode, Smartphone, Merge, Split, Trash2, ImageIcon, AlertTriangle, ShieldCheck, ShieldAlert, Eye } from 'lucide-react';
+import { Camera, Upload, Loader2, Sparkles, Check, X, QrCode, Smartphone, Merge, Split, Trash2, ImageIcon, AlertTriangle, ShieldCheck, ShieldAlert, Eye, Crop } from 'lucide-react';
+import { CropEditor } from './CropEditor';
 
 interface DetectedItem {
   type: string;
@@ -31,13 +32,10 @@ interface ReviewItem {
   cropDataUrl?: string;
   cropUrl?: string;
   bbox?: { x_min: number; y_min: number; x_max: number; y_max: number };
-  // Stage 1 detection confidence
   detectionConfidence: number;
   overlapFlag: boolean;
-  // Stage 3 classification confidence
   classificationConfidence: number;
   isMixedCrop: boolean;
-  // Stage 4 validation
   status: ReviewStatus;
 }
 
@@ -74,7 +72,7 @@ function categorize(type: string): string {
   return 'Jewelry';
 }
 
-/** Crop a region from an image using canvas with adaptive padding */
+/** Crop a region from an image using canvas with TIGHT padding */
 function cropImageFromDataUrl(
   imageDataUrl: string,
   bbox: { x_min: number; y_min: number; x_max: number; y_max: number },
@@ -86,9 +84,9 @@ function cropImageFromDataUrl(
       const h = img.naturalHeight;
       const bboxW = bbox.x_max - bbox.x_min;
       const bboxH = bbox.y_max - bbox.y_min;
-      // Adaptive padding: small items get more padding
+      // Tighter padding: much less space around item
       const itemSize = Math.max(bboxW, bboxH);
-      const padding = itemSize < 0.1 ? 0.10 : itemSize < 0.2 ? 0.07 : itemSize < 0.35 ? 0.05 : 0.03;
+      const padding = itemSize < 0.08 ? 0.04 : itemSize < 0.15 ? 0.025 : itemSize < 0.3 ? 0.015 : 0.01;
       const x1 = Math.max(0, Math.floor((bbox.x_min - padding) * w));
       const y1 = Math.max(0, Math.floor((bbox.y_min - padding) * h));
       const x2 = Math.min(w, Math.ceil((bbox.x_max + padding) * w));
@@ -108,7 +106,6 @@ function cropImageFromDataUrl(
   });
 }
 
-/** Extract base64 from data URL */
 function dataUrlToBase64(dataUrl: string): string {
   return dataUrl.split(',')[1] || '';
 }
@@ -122,7 +119,6 @@ function dataUrlToFile(dataUrl: string, filename: string): File {
   return new File([arr], filename, { type: mime });
 }
 
-/** Compute review status from confidence scores and flags */
 function computeStatus(item: { detectionConfidence: number; classificationConfidence: number; overlapFlag: boolean; isMixedCrop: boolean }): ReviewStatus {
   if (item.isMixedCrop) return 'mixed_crop';
   if (item.overlapFlag && item.detectionConfidence < 0.7) return 'needs_review';
@@ -147,6 +143,7 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [qrSessionId, setQrSessionId] = useState<string | null>(null);
   const [stageProgress, setStageProgress] = useState('');
+  const [reCropItemId, setReCropItemId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const qrPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -159,6 +156,7 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
     setSelectedIds(new Set());
     setQrSessionId(null);
     setStageProgress('');
+    setReCropItemId(null);
     if (qrPollRef.current) {
       clearInterval(qrPollRef.current);
       qrPollRef.current = null;
@@ -178,12 +176,9 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
   }, []);
 
   // ========== 4-STAGE PIPELINE ==========
-
   const handleAnalyze = useCallback(async () => {
     if (!imagePreview) return;
-
     try {
-      // === STAGE 1: Detect item regions ===
       setStep('detecting');
       setStageProgress('Stage 1/4 — Detecting item regions…');
       const base64 = imagePreview.split(',')[1];
@@ -200,7 +195,6 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
         return;
       }
 
-      // === STAGE 2: Generate crops ===
       setStep('cropping');
       setStageProgress(`Stage 2/4 — Cropping ${detections.items.length} items…`);
 
@@ -214,31 +208,16 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
         if (!detected.bbox) continue;
         try {
           const cropDataUrl = await cropImageFromDataUrl(imagePreview, detected.bbox);
-          // Check if crop is valid (not just the full image returned)
-          if (cropDataUrl !== imagePreview) {
-            cropsWithMeta.push({
-              detected,
-              cropDataUrl,
-              cropBase64: dataUrlToBase64(cropDataUrl),
-            });
-          } else {
-            cropsWithMeta.push({
-              detected,
-              cropDataUrl: imagePreview,
-              cropBase64: base64,
-            });
-          }
-        } catch {
-          // Fallback: use full image
           cropsWithMeta.push({
             detected,
-            cropDataUrl: imagePreview,
-            cropBase64: base64,
+            cropDataUrl: cropDataUrl !== imagePreview ? cropDataUrl : imagePreview,
+            cropBase64: cropDataUrl !== imagePreview ? dataUrlToBase64(cropDataUrl) : base64,
           });
+        } catch {
+          cropsWithMeta.push({ detected, cropDataUrl: imagePreview, cropBase64: base64 });
         }
       }
 
-      // === STAGE 3: Classify each crop independently ===
       setStep('classifying');
       setStageProgress(`Stage 3/4 — Classifying ${cropsWithMeta.length} crops…`);
 
@@ -253,15 +232,13 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
       }> = [];
 
       try {
-        const cropsPayload = cropsWithMeta.map((c, i) => ({
+        const cropsPayload = cropsWithMeta.map((c) => ({
           crop_base64: c.cropBase64,
           original_type_hint: c.detected.type,
         }));
-
         const { data: classifyData, error: classifyError } = await supabase.functions.invoke('ai-classify-crop', {
           body: { crops: cropsPayload },
         });
-
         if (!classifyError && classifyData?.classifications) {
           classifications = classifyData.classifications;
         }
@@ -269,17 +246,13 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
         console.warn('Stage 3 classification failed, using Stage 1 types as fallback', err);
       }
 
-      // === STAGE 4: Validate and build review items ===
       setStageProgress('Stage 4/4 — Validating results…');
 
       const items: ReviewItem[] = [];
-
       for (let i = 0; i < cropsWithMeta.length; i++) {
         const crop = cropsWithMeta[i];
         const detected = crop.detected;
         const classification = classifications.find(c => c.crop_index === i);
-
-        // Use classification result if available, otherwise fall back to detection
         const finalType = classification?.type || detected.type;
         const finalCategory = classification?.category || categorize(detected.type);
         const finalColorNotes = classification?.color_notes || detected.color_notes || '';
@@ -288,36 +261,20 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
         const isMixedCrop = classification?.is_mixed_crop ?? false;
         const detectionConfidence = detected.detection_confidence ?? 0.7;
         const overlapFlag = detected.overlap_flag ?? false;
-
         const isEarring = isEarringType(finalType);
-        const isPair = isEarring && (
-          finalType.toLowerCase().includes('earrings') ||
-          (finalNotes || '').toLowerCase().includes('pair')
-        );
-
+        const isPair = isEarring && (finalType.toLowerCase().includes('earrings') || (finalNotes || '').toLowerCase().includes('pair'));
         const id = `ai_${Date.now()}_${Math.random().toString(36).slice(2, 7)}_${i}`;
 
         const reviewItem: ReviewItem = {
-          id,
-          type: isPair ? 'Earrings' : (isEarring ? 'Earring (single)' : finalType),
-          color_notes: finalColorNotes,
-          notes: isPair ? `Pair${finalNotes ? ' — ' + finalNotes : ''}` : finalNotes,
-          isPair,
-          category: finalCategory,
-          cropDataUrl: crop.cropDataUrl,
-          bbox: detected.bbox,
-          detectionConfidence,
-          overlapFlag,
-          classificationConfidence,
-          isMixedCrop,
-          status: 'clean', // will be computed below
+          id, type: isPair ? 'Earrings' : (isEarring ? 'Earring (single)' : finalType),
+          color_notes: finalColorNotes, notes: isPair ? `Pair${finalNotes ? ' — ' + finalNotes : ''}` : finalNotes,
+          isPair, category: finalCategory, cropDataUrl: crop.cropDataUrl, bbox: detected.bbox,
+          detectionConfidence, overlapFlag, classificationConfidence, isMixedCrop, status: 'clean',
         };
-
         reviewItem.status = computeStatus(reviewItem);
         items.push(reviewItem);
       }
 
-      // Sort: needs_review and mixed_crop first so user sees problems at top
       items.sort((a, b) => {
         const order: Record<ReviewStatus, number> = { mixed_crop: 0, needs_review: 1, low_confidence: 2, clean: 3 };
         return order[a.status] - order[b.status];
@@ -325,12 +282,8 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
 
       setReviewItems(items);
       setStep('review');
-
       const flagged = items.filter(i => i.status !== 'clean').length;
-      if (flagged > 0) {
-        toast.info(`${flagged} item(s) flagged for review — please verify before confirming`);
-      }
-
+      if (flagged > 0) toast.info(`${flagged} item(s) flagged for review`);
     } catch (err: any) {
       console.error('AI capture pipeline error:', err);
       toast.error(err.message || 'Failed to analyze image');
@@ -346,11 +299,7 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
     if (qrPollRef.current) clearInterval(qrPollRef.current);
     qrPollRef.current = setInterval(async () => {
       try {
-        const { data } = await supabase
-          .from('kv_store_62d2b480')
-          .select('value')
-          .eq('key', `qr_scan_${sessionId}`)
-          .maybeSingle();
+        const { data } = await supabase.from('kv_store_62d2b480').select('value').eq('key', `qr_scan_${sessionId}`).maybeSingle();
         if (data?.value) {
           clearInterval(qrPollRef.current!);
           qrPollRef.current = null;
@@ -405,13 +354,21 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
     setReviewItems(prev => prev.map(i => {
       if (i.id !== id) return i;
       const updated = { ...i, ...updates };
-      // If user manually changes category/type, mark as clean (user verified)
       if (updates.category || updates.type) {
         updated.status = 'clean';
         updated.classificationConfidence = 1.0;
       }
       return updated;
     }));
+  };
+
+  const handleReCropSave = (itemId: string, croppedDataUrl: string, newBbox: { x_min: number; y_min: number; x_max: number; y_max: number }) => {
+    setReviewItems(prev => prev.map(i => {
+      if (i.id !== itemId) return i;
+      return { ...i, cropDataUrl: croppedDataUrl, bbox: newBbox, status: 'clean' as ReviewStatus, classificationConfidence: 1.0 };
+    }));
+    setReCropItemId(null);
+    toast.success('Crop updated');
   };
 
   const uploadCrop = async (cropDataUrl: string, itemIndex: number): Promise<string> => {
@@ -442,9 +399,7 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
         if (ri.cropDataUrl) {
           try { cropUrl = await uploadCrop(ri.cropDataUrl, i); } catch (err) { console.error('Failed to upload crop', i, err); }
         }
-        results.push({
-          type: ri.type, count: 1, notes: ri.notes, color_notes: ri.color_notes, cropUrl,
-        });
+        results.push({ type: ri.type, count: 1, notes: ri.notes, color_notes: ri.color_notes, cropUrl });
       }
 
       onItemsDetected(results, batchPhotoUrl);
@@ -467,248 +422,257 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
 
   const confidencePercent = (val: number) => `${Math.round(val * 100)}%`;
 
+  const reCropItem = reCropItemId ? reviewItems.find(i => i.id === reCropItemId) : null;
+
   return (
-    <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
+    <Sheet open={open} onOpenChange={(v) => !v && handleClose()}>
+      <SheetContent side="right" className="w-full sm:max-w-md md:max-w-lg p-0 flex flex-col">
+        <SheetHeader className="px-4 pt-4 pb-2 border-b flex-shrink-0">
+          <SheetTitle className="flex items-center gap-2 text-base">
+            <Sparkles className="h-4 w-4 text-primary" />
             AI Tray Capture
-          </DialogTitle>
-          <DialogDescription>
-            Take a photo of items spread out on a tray. AI will detect, crop, classify, and validate each piece.
-          </DialogDescription>
-        </DialogHeader>
+          </SheetTitle>
+          <SheetDescription className="text-xs">
+            Photo items on a tray — AI detects, crops, and classifies each piece.
+          </SheetDescription>
+        </SheetHeader>
 
-        {/* Method selection */}
-        {step === 'method' && (
-          <div className="space-y-3">
-            <Button className="w-full h-12 rounded-lg flex items-center gap-3" onClick={() => cameraInputRef.current?.click()}>
-              <Camera className="h-5 w-5" />
-              <div className="text-left">
-                <div className="text-sm font-medium">Use This Device Camera</div>
-                <div className="text-[11px] opacity-80">Take a photo directly</div>
+        <div className="flex-1 overflow-y-auto px-4 py-3">
+          {/* Re-crop editor overlay */}
+          {reCropItem && imagePreview && (
+            <CropEditor
+              imageSrc={imagePreview}
+              initialBox={reCropItem.bbox || { x_min: 0.1, y_min: 0.1, x_max: 0.9, y_max: 0.9 }}
+              onSave={(dataUrl, newBbox) => handleReCropSave(reCropItem.id, dataUrl, newBbox)}
+              onCancel={() => setReCropItemId(null)}
+            />
+          )}
+
+          {/* Method selection */}
+          {!reCropItem && step === 'method' && (
+            <div className="space-y-3 pt-2">
+              <Button className="w-full h-12 rounded-lg flex items-center gap-3" onClick={() => cameraInputRef.current?.click()}>
+                <Camera className="h-5 w-5" />
+                <div className="text-left">
+                  <div className="text-sm font-medium">Use This Device Camera</div>
+                  <div className="text-[11px] opacity-80">Take a photo directly</div>
+                </div>
+              </Button>
+              <Button variant="outline" className="w-full h-12 rounded-lg flex items-center gap-3" onClick={() => fileInputRef.current?.click()}>
+                <Upload className="h-5 w-5" />
+                <div className="text-left">
+                  <div className="text-sm font-medium">Upload Image</div>
+                  <div className="text-[11px] text-muted-foreground">Select from your files</div>
+                </div>
+              </Button>
+              <Button variant="outline" className="w-full h-12 rounded-lg flex items-center gap-3" onClick={startQrFlow}>
+                <QrCode className="h-5 w-5" />
+                <div className="text-left">
+                  <div className="text-sm font-medium">QR Code Remote Capture</div>
+                  <div className="text-[11px] text-muted-foreground">Scan QR with phone to take photo</div>
+                </div>
+              </Button>
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
+              <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileSelect} />
+            </div>
+          )}
+
+          {/* QR waiting */}
+          {!reCropItem && step === 'qr' && (
+            <div className="py-6 text-center space-y-4">
+              <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+                <Smartphone className="h-6 w-6 text-primary" />
               </div>
-            </Button>
-            <Button variant="outline" className="w-full h-12 rounded-lg flex items-center gap-3" onClick={() => fileInputRef.current?.click()}>
-              <Upload className="h-5 w-5" />
-              <div className="text-left">
-                <div className="text-sm font-medium">Upload Image</div>
-                <div className="text-[11px] text-muted-foreground">Select from your files</div>
+              <div>
+                <p className="font-medium">Scan with Phone</p>
+                <p className="text-xs text-muted-foreground mt-1">Take one photo of all items spread out</p>
               </div>
-            </Button>
-            <Button variant="outline" className="w-full h-12 rounded-lg flex items-center gap-3" onClick={startQrFlow}>
-              <QrCode className="h-5 w-5" />
-              <div className="text-left">
-                <div className="text-sm font-medium">QR Code Remote Capture</div>
-                <div className="text-[11px] text-muted-foreground">Scan QR with phone to take photo</div>
+              <div className="flex justify-center py-2">
+                <QRCodeSVG value={qrUrl} size={180} />
               </div>
-            </Button>
-            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
-            <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileSelect} />
-          </div>
-        )}
-
-        {/* QR waiting */}
-        {step === 'qr' && (
-          <div className="py-6 text-center space-y-4">
-            <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
-              <Smartphone className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <p className="font-medium">Scan with Phone</p>
-              <p className="text-xs text-muted-foreground mt-1">Take one photo of all items spread out</p>
-            </div>
-            <div className="flex justify-center py-2">
-              <QRCodeSVG value={qrUrl} size={180} />
-            </div>
-            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-              <Loader2 className="h-3 w-3 animate-spin" />
-              Waiting for photo…
-            </div>
-            <Button variant="ghost" size="sm" onClick={reset} className="text-xs text-muted-foreground">Cancel</Button>
-          </div>
-        )}
-
-        {/* Preview captured image */}
-        {step === 'capture' && (
-          <div className="space-y-4">
-            {imagePreview && (
-              <div className="relative rounded-lg overflow-hidden border">
-                <img src={imagePreview} alt="Batch preview" className="w-full max-h-64 object-contain bg-muted" />
-                <Button variant="ghost" size="sm" className="absolute top-2 right-2 bg-background/80 backdrop-blur" onClick={() => { setImagePreview(null); setImageFile(null); setStep('method'); }}>
-                  <X className="h-4 w-4" />
-                </Button>
+              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Waiting for photo…
               </div>
-            )}
-            <Button className="w-full" onClick={handleAnalyze}>
-              <Sparkles className="h-4 w-4 mr-2" />
-              Analyze with AI
-            </Button>
-            <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground" onClick={() => setStep('method')}>
-              Choose different method
-            </Button>
-          </div>
-        )}
-
-        {/* Processing stages */}
-        {(step === 'detecting' || step === 'cropping' || step === 'classifying') && (
-          <div className="py-12 text-center space-y-4">
-            <Loader2 className="h-10 w-10 mx-auto animate-spin text-primary" />
-            <div>
-              <p className="font-medium">{stageProgress}</p>
-              <p className="text-sm text-muted-foreground mt-1">This may take a moment…</p>
+              <Button variant="ghost" size="sm" onClick={reset} className="text-xs text-muted-foreground">Cancel</Button>
             </div>
-            {/* Stage indicators */}
-            <div className="flex items-center justify-center gap-1">
-              {['Detect', 'Crop', 'Classify', 'Validate'].map((label, idx) => {
-                const stageIdx = step === 'detecting' ? 0 : step === 'cropping' ? 1 : 2;
-                return (
-                  <div key={label} className="flex items-center gap-1">
-                    <div className={`w-2 h-2 rounded-full ${idx <= stageIdx ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
-                    <span className={`text-[10px] ${idx <= stageIdx ? 'text-primary font-medium' : 'text-muted-foreground/50'}`}>{label}</span>
-                    {idx < 3 && <span className="text-muted-foreground/30 text-[10px] mx-0.5">→</span>}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+          )}
 
-        {/* Review */}
-        {step === 'review' && (
-          <div className="space-y-4">
-            {imagePreview && (
-              <div className="rounded-lg overflow-hidden border max-h-28">
-                <img src={imagePreview} alt="Batch" className="w-full max-h-28 object-contain bg-muted" />
+          {/* Preview captured image */}
+          {!reCropItem && step === 'capture' && (
+            <div className="space-y-4">
+              {imagePreview && (
+                <div className="relative rounded-lg overflow-hidden border">
+                  <img src={imagePreview} alt="Batch preview" className="w-full max-h-56 object-contain bg-muted" />
+                  <Button variant="ghost" size="sm" className="absolute top-2 right-2 bg-background/80 backdrop-blur" onClick={() => { setImagePreview(null); setImageFile(null); setStep('method'); }}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              <Button className="w-full" onClick={handleAnalyze}>
+                <Sparkles className="h-4 w-4 mr-2" />
+                Analyze with AI
+              </Button>
+              <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground" onClick={() => setStep('method')}>
+                Choose different method
+              </Button>
+            </div>
+          )}
+
+          {/* Processing stages */}
+          {!reCropItem && (step === 'detecting' || step === 'cropping' || step === 'classifying') && (
+            <div className="py-12 text-center space-y-4">
+              <Loader2 className="h-10 w-10 mx-auto animate-spin text-primary" />
+              <div>
+                <p className="font-medium">{stageProgress}</p>
+                <p className="text-sm text-muted-foreground mt-1">This may take a moment…</p>
               </div>
-            )}
-
-            <div className="flex items-center justify-between">
-              <h4 className="font-medium">Review Detected Items</h4>
-              <div className="flex items-center gap-1.5">
-                {(() => {
-                  const clean = reviewItems.filter(i => i.status === 'clean').length;
-                  const flagged = reviewItems.length - clean;
+              <div className="flex items-center justify-center gap-1">
+                {['Detect', 'Crop', 'Classify', 'Validate'].map((label, idx) => {
+                  const stageIdx = step === 'detecting' ? 0 : step === 'cropping' ? 1 : 2;
                   return (
-                    <>
-                      <Badge variant="secondary">{reviewItems.length} items</Badge>
-                      {flagged > 0 && <Badge variant="destructive" className="text-[10px]">{flagged} flagged</Badge>}
-                    </>
+                    <div key={label} className="flex items-center gap-1">
+                      <div className={`w-2 h-2 rounded-full ${idx <= stageIdx ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+                      <span className={`text-[10px] ${idx <= stageIdx ? 'text-primary font-medium' : 'text-muted-foreground/50'}`}>{label}</span>
+                      {idx < 3 && <span className="text-muted-foreground/30 text-[10px] mx-0.5">→</span>}
+                    </div>
                   );
-                })()}
+                })}
               </div>
             </div>
+          )}
 
-            {/* Merge toolbar */}
-            {selectedIds.size > 0 && (
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/20">
-                <span className="text-xs font-medium">{selectedIds.size} selected</span>
-                <Button variant="outline" size="sm" className="h-7 text-xs" onClick={mergeSelected}>
-                  <Merge className="h-3 w-3 mr-1" /> Merge as Pair
-                </Button>
-                <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setSelectedIds(new Set())}>
-                  Clear
-                </Button>
+          {/* Review */}
+          {!reCropItem && step === 'review' && (
+            <div className="space-y-3">
+              {imagePreview && (
+                <div className="rounded-lg overflow-hidden border max-h-28">
+                  <img src={imagePreview} alt="Batch" className="w-full max-h-28 object-contain bg-muted" />
+                </div>
+              )}
+
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium text-sm">Review Detected Items</h4>
+                <div className="flex items-center gap-1.5">
+                  {(() => {
+                    const clean = reviewItems.filter(i => i.status === 'clean').length;
+                    const flagged = reviewItems.length - clean;
+                    return (
+                      <>
+                        <Badge variant="secondary" className="text-[10px]">{reviewItems.length} items</Badge>
+                        {flagged > 0 && <Badge variant="destructive" className="text-[10px]">{flagged} flagged</Badge>}
+                      </>
+                    );
+                  })()}
+                </div>
               </div>
-            )}
 
-            <div className="space-y-2 max-h-72 overflow-auto">
-              {reviewItems.map((item) => {
-                const statusConfig = STATUS_CONFIG[item.status];
-                const StatusIcon = statusConfig.icon;
-                return (
-                  <div key={item.id} className={`p-3 rounded-lg border transition-colors ${selectedIds.has(item.id) ? 'bg-primary/5 border-primary/30' : item.status !== 'clean' ? 'bg-yellow-50/50 border-yellow-200/50' : 'bg-muted/50'}`}>
-                    <div className="flex items-start gap-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.has(item.id)}
-                        onChange={() => toggleSelect(item.id)}
-                        className="rounded border-muted-foreground/30 mt-1"
-                      />
+              {selectedIds.size > 0 && (
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/20">
+                  <span className="text-xs font-medium">{selectedIds.size} selected</span>
+                  <Button variant="outline" size="sm" className="h-7 text-xs" onClick={mergeSelected}>
+                    <Merge className="h-3 w-3 mr-1" /> Merge as Pair
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setSelectedIds(new Set())}>
+                    Clear
+                  </Button>
+                </div>
+              )}
 
-                      {/* Crop thumbnail */}
-                      <div className="w-14 h-14 rounded border bg-muted flex-shrink-0 overflow-hidden flex items-center justify-center">
-                        {item.cropDataUrl ? (
-                          <img src={item.cropDataUrl} alt={item.type} className="w-full h-full object-cover" />
-                        ) : (
-                          <ImageIcon className="h-5 w-5 text-muted-foreground/40" />
-                        )}
-                      </div>
+              <div className="space-y-2">
+                {reviewItems.map((item) => {
+                  const statusConfig = STATUS_CONFIG[item.status];
+                  const StatusIcon = statusConfig.icon;
+                  return (
+                    <div key={item.id} className={`p-2.5 rounded-lg border transition-colors ${selectedIds.has(item.id) ? 'bg-primary/5 border-primary/30' : item.status !== 'clean' ? 'bg-yellow-50/50 border-yellow-200/50' : 'bg-muted/30'}`}>
+                      <div className="flex items-start gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(item.id)}
+                          onChange={() => toggleSelect(item.id)}
+                          className="rounded border-muted-foreground/30 mt-1"
+                        />
 
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <Input
-                            value={item.type}
-                            onChange={(e) => updateReviewItem(item.id, { type: e.target.value })}
-                            className="h-6 text-xs font-medium border-0 border-b border-transparent hover:border-border focus:border-primary bg-transparent px-0 w-auto max-w-[120px]"
-                          />
-                          <Select value={item.category} onValueChange={(v) => updateReviewItem(item.id, { category: v })}>
-                            <SelectTrigger className="h-6 w-20 text-[10px] border-0 bg-muted/50">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Jewelry">Jewelry</SelectItem>
-                              <SelectItem value="Watch">Watch</SelectItem>
-                              <SelectItem value="Bullion">Bullion</SelectItem>
-                              <SelectItem value="Silverware">Silverware</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          {item.isPair && <Badge variant="secondary" className="text-[9px] h-4 px-1">Pair</Badge>}
+                        <div className="w-12 h-12 rounded border bg-muted flex-shrink-0 overflow-hidden flex items-center justify-center">
+                          {item.cropDataUrl ? (
+                            <img src={item.cropDataUrl} alt={item.type} className="w-full h-full object-cover" />
+                          ) : (
+                            <ImageIcon className="h-4 w-4 text-muted-foreground/40" />
+                          )}
                         </div>
 
-                        {/* Status + confidence row */}
-                        <div className="flex items-center gap-1.5 mt-1">
-                          <span className={`inline-flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full border ${statusConfig.color}`}>
-                            <StatusIcon className="h-2.5 w-2.5" />
-                            {statusConfig.label}
-                          </span>
-                          <span className="text-[9px] text-muted-foreground">
-                            Det: {confidencePercent(item.detectionConfidence)} · Class: {confidencePercent(item.classificationConfidence)}
-                          </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1 flex-wrap">
+                            <Input
+                              value={item.type}
+                              onChange={(e) => updateReviewItem(item.id, { type: e.target.value })}
+                              className="h-5 text-xs font-medium border-0 border-b border-transparent hover:border-border focus:border-primary bg-transparent px-0 w-auto max-w-[110px]"
+                            />
+                            <Select value={item.category} onValueChange={(v) => updateReviewItem(item.id, { category: v })}>
+                              <SelectTrigger className="h-5 w-[70px] text-[10px] border-0 bg-muted/50">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Jewelry">Jewelry</SelectItem>
+                                <SelectItem value="Watch">Watch</SelectItem>
+                                <SelectItem value="Bullion">Bullion</SelectItem>
+                                <SelectItem value="Silverware">Silverware</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            {item.isPair && <Badge variant="secondary" className="text-[8px] h-3.5 px-1">Pair</Badge>}
+                          </div>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <span className={`inline-flex items-center gap-0.5 text-[8px] px-1 py-0 rounded-full border ${statusConfig.color}`}>
+                              <StatusIcon className="h-2 w-2" />
+                              {statusConfig.label}
+                            </span>
+                            <span className="text-[8px] text-muted-foreground">
+                              {confidencePercent(item.detectionConfidence)}/{confidencePercent(item.classificationConfidence)}
+                            </span>
+                          </div>
+                          {item.color_notes && <span className="text-[9px] text-muted-foreground italic block truncate">{item.color_notes}</span>}
                         </div>
 
-                        {item.color_notes && (
-                          <span className="text-[10px] text-muted-foreground italic">{item.color_notes}</span>
-                        )}
-                        {item.notes && (
-                          <p className="text-[10px] text-muted-foreground truncate">{item.notes}</p>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-0.5 flex-shrink-0">
-                        {item.isPair && (
-                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => splitItem(item.id)} title="Split into singles">
-                            <Split className="h-3 w-3" />
+                        <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setReCropItemId(item.id)} title="Re-crop">
+                            <Crop className="h-3 w-3" />
                           </Button>
-                        )}
-                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-destructive" onClick={() => deleteItem(item.id)} title="Remove">
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
+                          {item.isPair && (
+                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => splitItem(item.id)} title="Split">
+                              <Split className="h-3 w-3" />
+                            </Button>
+                          )}
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-destructive" onClick={() => deleteItem(item.id)} title="Remove">
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
 
-            <p className="text-xs text-muted-foreground italic">
-              Items are classified from their individual crops. Flagged items need manual verification. Metal type, karat, and weight still need manual entry.
-            </p>
-
-            <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" onClick={reset}>
-                <Camera className="h-4 w-4 mr-2" />
-                Retake
-              </Button>
-              <Button className="flex-1" onClick={handleConfirm} disabled={reviewItems.length === 0}>
-                <Check className="h-4 w-4 mr-2" />
-                Add {reviewItems.length} Items
-              </Button>
+              <p className="text-[10px] text-muted-foreground italic">
+                Metal type, karat, and weight still need manual entry. Use Re-crop to fix any mixed or inaccurate crops.
+              </p>
             </div>
+          )}
+        </div>
+
+        {/* Bottom actions */}
+        {!reCropItem && step === 'review' && (
+          <div className="flex gap-2 p-4 border-t flex-shrink-0">
+            <Button variant="outline" className="flex-1" onClick={reset}>
+              <Camera className="h-4 w-4 mr-1" />
+              Retake
+            </Button>
+            <Button className="flex-1" onClick={handleConfirm} disabled={reviewItems.length === 0}>
+              <Check className="h-4 w-4 mr-1" />
+              Add {reviewItems.length} Items
+            </Button>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }
