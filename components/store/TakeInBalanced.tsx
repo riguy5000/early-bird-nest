@@ -75,6 +75,7 @@ export function TakeInBalanced({
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set());
   const [batchPhotoOpen, setBatchPhotoOpen] = useState(false);
   const [storeCreditNumber, setStoreCreditNumber] = useState('');
+  const [transactionType, setTransactionType] = useState<'Purchase' | 'Consignment' | 'Pawn'>('Purchase');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const weightInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
@@ -772,60 +773,55 @@ export function TakeInBalanced({
           </div>
         </div>
 
-        {/* Right Panel — Frosted Summary */}
-        <div className="w-80 border-l border-white/40 bg-white/80 backdrop-blur-xl flex flex-col flex-shrink-0 h-full overflow-auto" style={{boxShadow:"-4px 0 24px rgba(0,0,0,0.04)"}}>
-          {/* Payout Total */}
-          <div className="p-6 border-b border-black/[0.06]">
-            <div className="text-center">
-              <div className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-2">Total Payout</div>
-              <div className="text-[40px] font-semibold text-[#2B2833] tabular-nums tracking-tight">
-                ${totalPayout.toFixed(2)}
-              </div>
-              <div className="text-[12px] text-[#A8A3AE] mt-1">
-                Average {avgPayout.toFixed(0)}% · {items.length} item{items.length !== 1 ? 's' : ''}
-              </div>
+        {/* Right Panel — Frosted Summary — matches approved screenshot layout */}
+        <div className="w-[300px] border-l border-white/40 bg-white/80 backdrop-blur-xl flex flex-col flex-shrink-0 h-full overflow-auto" style={{boxShadow:"-4px 0 20px rgba(0,0,0,0.04)"}}>
+
+          {/* ── Payout Total — large number first, label below (screenshot layout) ── */}
+          <div className="px-5 pt-6 pb-5 border-b border-black/[0.06]">
+            <div className="text-[40px] font-semibold text-[#2B2833] tabular-nums tracking-tight leading-none">
+              ${totalPayout.toFixed(2)}
             </div>
+            <div className="text-[12px] text-[#76707F] mt-1.5">Total Payout</div>
           </div>
 
-           {/* Customer Information */}
+          {/* ── Customer ── */}
           {customer ? (
-            <CustomerSummaryCard 
-              customer={customer} 
-              onEdit={() => onOpenCustomerDrawer('manual')} 
+            <CustomerSummaryCard
+              customer={customer}
+              onEdit={() => onOpenCustomerDrawer('manual')}
             />
           ) : (
-            <div className="p-4 border-b border-black/[0.06]">
+            <div className="px-5 py-4 border-b border-black/[0.06]">
               <h3 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-3">Customer</h3>
-              <Button 
-                variant="outline" 
+              {/* Scan input row — matches screenshot exactly */}
+              <button
                 onClick={() => onOpenCustomerDrawer('scan')}
-                className="w-full flex items-center gap-2 rounded-[10px] border border-black/[0.06] bg-white/60 hover:bg-white/80 text-[#2B2833] text-[13px]"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 bg-white/60 border border-black/[0.06] rounded-[10px] text-[13px] text-[#A8A3AE] hover:bg-white/80 transition-all text-left"
+                style={{boxShadow:"0 1px 2px rgba(0,0,0,0.02)"}}
               >
-                <ScanLine className="h-4 w-4 text-[#6B5EF9]" />
+                <ScanLine className="h-4 w-4 text-[#6B5EF9] flex-shrink-0" />
                 Scan Customer ID
-              </Button>
+              </button>
               {store.allowManualEntry !== false && (
-                <Button 
-                  variant="outline" 
-                  size="sm"
+                <button
                   onClick={() => onOpenCustomerDrawer('manual')}
-                  className="w-full mt-1.5 text-[12px] text-[#76707F] rounded-[10px] border border-black/[0.06] bg-white/60 hover:bg-white/80"
+                  className="w-full mt-1.5 flex items-center gap-2 px-3 py-2 text-[12px] text-[#76707F] hover:text-[#2B2833] transition-colors"
                 >
-                  <Edit className="h-3.5 w-3.5 mr-1.5 text-[#A8A3AE]" />
+                  <Edit className="h-3.5 w-3.5 text-[#A8A3AE]" />
                   Enter Manually
-                </Button>
+                </button>
               )}
             </div>
           )}
 
-          {/* Payout Information */}
-          <div className="p-4 border-b border-black/[0.06]">
+          {/* ── Payment Method ── */}
+          <div className="px-5 py-4 border-b border-black/[0.06]">
             <h3 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-3">Payment Method</h3>
             <Select value={paymentMethod} onValueChange={onPaymentMethodChange}>
               <SelectTrigger className="w-full rounded-[10px] bg-white/60 border border-black/[0.06] text-[14px] text-[#2B2833]">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="rounded-[14px] bg-white/90 backdrop-blur-xl border-white/60 shadow-2xl">
+              <SelectContent className="rounded-[14px] bg-white/95 backdrop-blur-xl border-white/60 shadow-2xl">
                 <SelectItem value="Check">Check</SelectItem>
                 <SelectItem value="Cash">Cash</SelectItem>
                 <SelectItem value="Store Credit">Store Credit</SelectItem>
@@ -849,73 +845,92 @@ export function TakeInBalanced({
             )}
           </div>
 
-          {/* Summary Stats */}
-          <div className="flex-1 p-4 space-y-4">
+          {/* ── Transaction Type — segmented control (visual only, matches screenshot) ── */}
+          <div className="px-5 py-4 border-b border-black/[0.06]">
+            <h3 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-3">Transaction Type</h3>
+            <div className="flex rounded-[10px] overflow-hidden border border-black/[0.06] bg-white/60">
+              {(['Purchase', 'Consignment', 'Pawn'] as const).map((type, idx) => (
+                <button
+                  key={type}
+                  onClick={() => setTransactionType(type)}
+                  className={[
+                    'flex-1 py-2 text-[13px] font-medium transition-all',
+                    idx > 0 ? 'border-l border-black/[0.06]' : '',
+                    transactionType === type
+                      ? 'bg-[#2B2833] text-white'
+                      : 'text-[#76707F] hover:bg-white/80 hover:text-[#2B2833]',
+                  ].join(' ')}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Summary ── */}
+          <div className="flex-1 px-5 py-4 space-y-3 overflow-auto">
             <h3 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Summary</h3>
-            <div className="space-y-3">
-              {!store.hideMarketValue && (
-                <div className="flex justify-between text-[14px]">
-                  <span className="text-[#76707F]">Market Value</span>
-                  <span className="font-medium text-[#2B2833] tabular-nums">${totalMarket.toFixed(2)}</span>
-                </div>
-              )}
-              <div className="flex justify-between text-[14px]">
-                <span className="text-[#76707F]">Total Payout</span>
-                <span className="font-semibold text-[#6B5EF9] tabular-nums">${totalPayout.toFixed(2)}</span>
-              </div>
-              {!store.hidePayout && (
-                <div className="flex justify-between text-[14px]">
-                  <span className="text-[#76707F]">Average %</span>
-                  <span className="font-medium text-[#2B2833] tabular-nums">{avgPayout.toFixed(1)}%</span>
-                </div>
-              )}
-              {!store.hideProfit && (
-                <div className="flex justify-between text-[14px]">
-                  <span className="text-[#76707F]">Profit</span>
-                  <span className="font-medium text-[#4ADB8A] tabular-nums">${profit.toFixed(2)}</span>
-                </div>
-              )}
+
+            {/* Items count */}
+            <div className="flex justify-between text-[14px]">
+              <span className="text-[#76707F]">Items</span>
+              <span className="font-medium text-[#2B2833] tabular-nums">{items.length}</span>
             </div>
 
-            {/* Reminder box */}
-            <div className="tip-box">
-              <div className="flex items-start gap-2">
+            {/* Market Value */}
+            {!store.hideMarketValue && (
+              <div className="flex justify-between text-[14px]">
+                <span className="text-[#76707F]">Market Value</span>
+                <span className="font-medium text-[#2B2833] tabular-nums">${totalMarket.toFixed(2)}</span>
+              </div>
+            )}
+
+            {/* Payout Multiplier */}
+            {!store.hidePayout && (
+              <div className="flex justify-between text-[14px]">
+                <span className="text-[#76707F]">Payout Multiplier</span>
+                <span className="font-medium text-[#2B2833] tabular-nums">{avgPayout.toFixed(0)}%</span>
+              </div>
+            )}
+
+            {/* Total Payout — large purple, bottom of summary */}
+            <div className="flex justify-between items-baseline pt-1 border-t border-black/[0.04]">
+              <span className="text-[14px] font-semibold text-[#2B2833]">Total Payout</span>
+              <span className="text-[22px] font-semibold text-[#6B5EF9] tabular-nums tracking-tight">
+                ${totalPayout.toFixed(2)}
+              </span>
+            </div>
+
+            {/* Profit (hidden per visibility setting) */}
+            {!store.hideProfit && (
+              <div className="flex justify-between text-[13px]">
+                <span className="text-[#A8A3AE]">Profit</span>
+                <span className="font-medium text-[#4ADB8A] tabular-nums">${profit.toFixed(2)}</span>
+              </div>
+            )}
+
+            {/* ── Reminder tip box ── */}
+            <div className="tip-box mt-2">
+              <div className="flex items-start gap-2.5">
                 <div className="w-5 h-5 rounded-full bg-[#4889FA] flex items-center justify-center flex-shrink-0 mt-0.5">
                   <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div>
-                  <div className="text-[12px] font-medium text-[#2B2833]">Remember</div>
-                  <div className="text-[11px] text-[#5A5463] leading-relaxed">Verify customer ID before completing purchase</div>
+                  <div className="text-[12px] font-medium text-[#2B2833]">Remember to verify ID</div>
+                  <div className="text-[11px] text-[#5A5463] leading-relaxed mt-0.5">
+                    All purchases require valid government-issued identification.
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="p-4 space-y-2 border-t border-black/[0.06]">
-            {store.enableSaveForLater !== false && (
-              <Button 
-                variant="ghost" 
-                className="w-full flex items-center justify-center gap-2 btn-secondary-light text-[13px]"
-                disabled={items.length === 0}
-                onClick={onSaveQuote}
-              >
-                <SaveIcon className="h-4 w-4 text-[#A8A3AE]" />
-                Save as Quote
-              </Button>
-            )}
-            <Button 
-              variant="ghost" 
-              className="w-full flex items-center justify-center gap-2 btn-secondary-light text-[13px]"
-              disabled={items.length === 0}
-            >
-              <Printer className="h-4 w-4 text-[#A8A3AE]" />
-              Print Receipt
-            </Button>
+          {/* ── Footer actions ── */}
+          <div className="px-5 py-4 border-t border-black/[0.06] space-y-2">
             {store.canCompletePurchase !== false && (
-              <Button 
+              <button
                 className="w-full flex items-center justify-center gap-2 btn-primary-dark"
                 disabled={items.length === 0 || completing}
                 onClick={onCompletePurchase}
@@ -926,9 +941,29 @@ export function TakeInBalanced({
                   <DollarSign className="h-4 w-4" />
                 )}
                 {completing ? 'Completing…' : 'Complete Purchase'}
-              </Button>
+              </button>
+            )}
+            <div className="flex gap-2">
+              <button
+                className="flex-1 flex items-center justify-center gap-1.5 btn-secondary-light text-[13px]"
+                disabled={items.length === 0}
+              >
+                <Printer className="h-3.5 w-3.5 text-[#A8A3AE]" />
+                Print Receipt
+              </button>
+            </div>
+            {/* Save as Quote — plain text link at bottom, matches screenshot */}
+            {store.enableSaveForLater !== false && (
+              <button
+                className="w-full text-[13px] text-[#76707F] hover:text-[#2B2833] py-1 transition-colors"
+                disabled={items.length === 0}
+                onClick={onSaveQuote}
+              >
+                Save as Quote
+              </button>
             )}
           </div>
+
         </div>
       </div>
 

@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { User, Edit, ScanLine, CreditCard, Image as ImageIcon } from 'lucide-react';
+import { User, Edit, ScanLine, Image as ImageIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import type { CustomerData } from './CustomerDrawer';
 
@@ -22,33 +20,37 @@ export function CustomerSummaryCard({ customer, onEdit }: CustomerSummaryCardPro
   };
 
   const frontUrl = getIdImageUrl(customer.idScanUrl);
-  const backUrl = getIdImageUrl(customer.idScanBackUrl);
+  const backUrl  = getIdImageUrl(customer.idScanBackUrl);
   const hasIdImages = !!(frontUrl || backUrl);
 
   return (
     <>
-      <div className="p-4 border-b border-slate-200">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Customer</h3>
-          <Button
-            variant="ghost"
-            size="sm"
+      <div className="px-5 py-4 border-b border-black/[0.06]">
+        {/* Header row */}
+        <div className="flex items-center justify-between mb-2.5">
+          <h3 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">
+            Customer
+          </h3>
+          <button
             onClick={onEdit}
-            className="h-6 px-2 text-[10px] text-slate-500 hover:text-primary rounded-lg"
+            className="flex items-center gap-1 text-[11px] font-medium text-[#6B5EF9] hover:text-[#5848D9] transition-colors"
           >
-            <Edit className="h-3 w-3 mr-1" />
+            <Edit className="h-3 w-3" />
             Edit
-          </Button>
+          </button>
         </div>
-        <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-1.5">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <User className="h-3.5 w-3.5 text-primary" />
+
+        {/* Customer card */}
+        <div className="bg-white/60 border border-black/[0.06] rounded-[10px] p-3 space-y-1.5">
+          <div className="flex items-center gap-2.5">
+            {/* Avatar initials */}
+            <div className="w-8 h-8 rounded-full icon-container flex-shrink-0 text-[12px] font-semibold text-[#6B5EF9]">
+              {customer.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'CU'}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-foreground truncate">{customer.name}</p>
+              <p className="text-[14px] font-semibold text-[#2B2833] truncate">{customer.name}</p>
               {customer.licenseNumber && (
-                <p className="text-[11px] text-muted-foreground font-mono truncate">
+                <p className="text-[11px] text-[#A8A3AE] font-mono truncate">
                   ID: {customer.licenseNumber}
                 </p>
               )}
@@ -56,45 +58,51 @@ export function CustomerSummaryCard({ customer, onEdit }: CustomerSummaryCardPro
             {hasIdImages && (
               <button
                 onClick={() => setShowIdImage(true)}
-                className="w-8 h-8 rounded-md border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-100 transition-colors flex-shrink-0"
+                className="btn-icon flex-shrink-0"
                 title="View scanned ID"
               >
-                <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                <ImageIcon className="h-3.5 w-3.5 text-[#76707F]" />
               </button>
             )}
           </div>
+
           {(customer.phone || customer.dateOfBirth) && (
-            <div className="flex items-center gap-3 text-[11px] text-muted-foreground pl-9">
+            <div className="flex items-center gap-3 text-[12px] text-[#76707F] pl-10">
               {customer.phone && <span>{customer.phone}</span>}
               {customer.dateOfBirth && <span>DOB: {customer.dateOfBirth}</span>}
             </div>
           )}
-          <div className="flex gap-1.5 pl-9">
-            {customer.source === 'scan' && (
-              <Badge variant="secondary" className="rounded text-[9px] px-1.5 py-0 h-4">
-                <ScanLine className="h-2.5 w-2.5 mr-0.5" />
+
+          {customer.source === 'scan' && (
+            <div className="pl-10">
+              <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#E8F5E9] text-[#2E7D32]">
+                <ScanLine className="h-2.5 w-2.5" />
                 ID Scanned
-              </Badge>
-            )}
-          </div>
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
       {/* ID Image Viewer */}
       <Dialog open={showIdImage} onOpenChange={setShowIdImage}>
-        <DialogContent className="sm:max-w-lg">
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold">Scanned ID — {customer.name}</h3>
+        <DialogContent className="sm:max-w-lg bg-white/90 backdrop-blur-xl rounded-[20px] border border-white/60 shadow-2xl">
+          <div className="space-y-3 p-2">
+            <h3 className="text-[15px] font-semibold text-[#2B2833]">
+              Scanned ID — {customer.name}
+            </h3>
             {frontUrl && (
               <div>
-                <p className="text-xs text-muted-foreground mb-1">Front</p>
-                <img src={frontUrl} alt="ID Front" className="w-full rounded-lg border object-contain max-h-64 bg-muted" />
+                <p className="text-[12px] text-[#76707F] mb-1.5">Front</p>
+                <img src={frontUrl} alt="ID Front"
+                  className="w-full rounded-[10px] border border-black/[0.06] object-contain max-h-64 bg-[#F8F7FB]" />
               </div>
             )}
             {backUrl && (
               <div>
-                <p className="text-xs text-muted-foreground mb-1">Back</p>
-                <img src={backUrl} alt="ID Back" className="w-full rounded-lg border object-contain max-h-64 bg-muted" />
+                <p className="text-[12px] text-[#76707F] mb-1.5">Back</p>
+                <img src={backUrl} alt="ID Back"
+                  className="w-full rounded-[10px] border border-black/[0.06] object-contain max-h-64 bg-[#F8F7FB]" />
               </div>
             )}
           </div>
