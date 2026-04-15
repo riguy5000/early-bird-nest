@@ -107,10 +107,9 @@ function NavItem({ icon: Icon, label, active, onClick }: { icon: any; label: str
       onClick={onClick}
       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[13px] font-medium transition-all ${
         active
-          ? 'bg-white/80 text-[#2B2833] shadow-md ring-1 ring-white/70'
-          : 'text-[#76707F] hover:text-[#2B2833] hover:bg-white/40'
+          ? 'bg-[#2B2833] text-white shadow-sm'
+          : 'text-[#76707F] hover:text-[#2B2833] hover:bg-black/[0.04]'
       }`}
-      style={active ? { boxShadow: '0 4px 6px -1px rgba(0,0,0,0.04)' } : {}}
     >
       <Icon className="h-4 w-4 shrink-0" />
       <span className="truncate">{label}</span>
@@ -124,8 +123,8 @@ function ToggleRow({ label, description, checked, onChange }: { label: string; d
   return (
     <div className="flex items-center justify-between py-3">
       <div className="pr-4">
-        <p className="text-sm font-medium text-foreground">{label}</p>
-        {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
+        <p className="text-[14px] font-medium text-[#2B2833]">{label}</p>
+        {description && <p className="text-[12px] text-[#76707F] mt-0.5">{description}</p>}
       </div>
       <Switch checked={checked} onCheckedChange={onChange} />
     </div>
@@ -136,12 +135,12 @@ function ToggleRow({ label, description, checked, onChange }: { label: string; d
 
 function SettingsCard({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
   return (
-    <div className="glass-card">
-      <div className="px-6 pt-6 pb-4">
-        <h3 className="text-[15px] font-semibold text-[#2B2833]">{title}</h3>
-        {description && <p className="text-[12px] text-[#76707F] mt-0.5">{description}</p>}
+    <div className="glass-card px-7 py-7 space-y-5">
+      <div>
+        <h2 className="text-[22px] font-semibold text-[#2B2833] tracking-tight">{title}</h2>
+        {description && <p className="text-[13px] text-[#76707F] mt-0.5">{description}</p>}
       </div>
-      <div className="px-6 pb-6 space-y-1">{children}</div>
+      {children}
     </div>
   );
 }
@@ -361,10 +360,7 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate, onSettingsSav
   if (!currentStore) {
     return (
       <div className="w-full max-w-4xl mx-auto p-6">
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>Please select a store to configure settings.</AlertDescription>
-        </Alert>
+        <div className="tip-box flex items-start gap-3"><div className="w-5 h-5 rounded-full bg-[#4889FA] flex items-center justify-center flex-shrink-0 mt-0.5"><svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div><p className="text-[13px] text-[#2B2833]">Please select a store to configure settings.</p></div>
       </div>
     );
   }
@@ -400,12 +396,10 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate, onSettingsSav
               <span className="text-[12px] text-[#76707F]">Unsaved changes</span>
             </div>
           )}
-          <button onClick={handleReset} disabled={!hasUnsavedChanges || isLoading} className="btn-secondary-light flex items-center gap-1.5 text-[13px] px-4 py-2 disabled:opacity-50">
-            <RotateCcw className="w-4 h-4" />
+          <button onClick={handleReset} disabled={!hasUnsavedChanges || isLoading} className="btn-secondary-light disabled:opacity-50">
             Reset
           </button>
-          <button onClick={handleSave} disabled={!hasUnsavedChanges || isLoading} className="btn-primary-dark flex items-center gap-1.5 disabled:opacity-50">
-            <Save className="w-4 h-4" />
+          <button onClick={handleSave} disabled={!hasUnsavedChanges || isLoading} className="btn-primary-dark disabled:opacity-50">
             {isLoading ? 'Saving…' : 'Save Changes'}
           </button>
         </div>
@@ -454,25 +448,23 @@ function GeneralTab({ general, setGeneral, markDirty }: any) {
   return (
     <>
       <SettingsCard title="Store Profile">
-        <div className="flex items-center gap-5 pb-4">
-          <div className="relative">
-            <Avatar className="w-16 h-16">
-              <AvatarImage src={general.logo} />
-              <AvatarFallback className="text-lg">{general.name?.substring(0, 2)?.toUpperCase() || 'ST'}</AvatarFallback>
-            </Avatar>
-            <Button size="icon" variant="secondary" className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full">
-              <Camera className="w-3 h-3" />
-            </Button>
+        <div className="flex items-center gap-5">
+          {/* Logo tile — rounded square with lavender gradient, initials */}
+          <div
+            className="w-16 h-16 rounded-[12px] flex items-center justify-center text-[20px] font-bold text-[#6B5EF9] flex-shrink-0 cursor-pointer"
+            style={{ background: 'linear-gradient(to bottom right, #ECEAFF, #C8DCFF)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+          >
+            {general.name?.substring(0, 2)?.toUpperCase() || 'ST'}
           </div>
-          <div className="text-xs text-muted-foreground">
-            <p>Upload a square logo (200×200 recommended)</p>
+          <div className="text-[13px] text-[#A8A3AE]">
+            Upload a square logo (200×200 recommended)
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div><Label className="text-xs">Store Name *</Label><Input value={general.name} onChange={(e) => set('name', e.target.value)} placeholder="Enter store name" className="mt-1" /></div>
+          <div><Label className="form-label">Store Name *</Label><Input value={general.name} onChange={(e) => set('name', e.target.value)} placeholder="Enter store name" className="mt-1" /></div>
           <div>
-            <Label className="text-xs">Store Type</Label>
+            <Label className="form-label">Store Type</Label>
             <Select value={general.type} onValueChange={(v) => set('type', v)}>
               <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -486,20 +478,20 @@ function GeneralTab({ general, setGeneral, markDirty }: any) {
         </div>
 
         <div className="pt-3">
-          <Label className="text-xs">Address</Label>
+          <Label className="form-label">Address</Label>
           <Textarea value={general.address} onChange={(e) => set('address', e.target.value)} placeholder="Street, City, State, ZIP" rows={2} className="mt-1" />
         </div>
 
         <div className="grid grid-cols-2 gap-4 pt-3">
-          <div><Label className="text-xs">Phone</Label><Input type="tel" value={general.phone} onChange={(e) => set('phone', e.target.value)} placeholder="(555) 123-4567" className="mt-1" /></div>
-          <div><Label className="text-xs">Email</Label><Input type="email" value={general.email} onChange={(e) => set('email', e.target.value)} placeholder="store@example.com" className="mt-1" /></div>
+          <div><Label className="form-label">Phone</Label><Input type="tel" value={general.phone} onChange={(e) => set('phone', e.target.value)} placeholder="(555) 123-4567" className="mt-1" /></div>
+          <div><Label className="form-label">Email</Label><Input type="email" value={general.email} onChange={(e) => set('email', e.target.value)} placeholder="store@example.com" className="mt-1" /></div>
         </div>
       </SettingsCard>
 
       <SettingsCard title="Operational Defaults">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label className="text-xs">Time Zone</Label>
+            <Label className="form-label">Time Zone</Label>
             <Select value={general.timezone} onValueChange={(v) => set('timezone', v)}>
               <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -511,7 +503,7 @@ function GeneralTab({ general, setGeneral, markDirty }: any) {
             </Select>
           </div>
           <div>
-            <Label className="text-xs">Currency</Label>
+            <Label className="form-label">Currency</Label>
             <Select value={general.currency} onValueChange={(v) => set('currency', v)}>
               <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -524,16 +516,16 @@ function GeneralTab({ general, setGeneral, markDirty }: any) {
         </div>
 
         <div className="pt-3">
-          <Label className="text-xs">Default Weight Unit</Label>
+          <Label className="form-label">Default Weight Unit</Label>
           <RadioGroup value={general.weightUnit} onValueChange={(v) => set('weightUnit', v)} className="flex gap-5 mt-2">
-            <div className="flex items-center gap-1.5"><RadioGroupItem value="g" id="wg" /><Label htmlFor="wg" className="text-sm">Grams</Label></div>
-            <div className="flex items-center gap-1.5"><RadioGroupItem value="dwt" id="wdwt" /><Label htmlFor="wdwt" className="text-sm">DWT</Label></div>
-            <div className="flex items-center gap-1.5"><RadioGroupItem value="oz" id="woz" /><Label htmlFor="woz" className="text-sm">Ounces</Label></div>
+            <div className="flex items-center gap-1.5"><RadioGroupItem value="g" id="wg" /><Label htmlFor="wg" className="text-[14px] text-[#2B2833] cursor-pointer">Grams</Label></div>
+            <div className="flex items-center gap-1.5"><RadioGroupItem value="dwt" id="wdwt" /><Label htmlFor="wdwt" className="text-[14px] text-[#2B2833] cursor-pointer">DWT</Label></div>
+            <div className="flex items-center gap-1.5"><RadioGroupItem value="oz" id="woz" /><Label htmlFor="woz" className="text-[14px] text-[#2B2833] cursor-pointer">Ounces</Label></div>
           </RadioGroup>
         </div>
 
         <div className="pt-3">
-          <Label className="text-xs">Default Hold Period (days)</Label>
+          <Label className="form-label">Default Hold Period (days)</Label>
           <Input type="number" min={1} max={365} value={general.legalHoldPeriod} onChange={(e) => set('legalHoldPeriod', parseInt(e.target.value) || 90)} className="mt-1 w-28" />
         </div>
       </SettingsCard>
@@ -713,9 +705,9 @@ function EmployeesTab({ employees, setEmployees, showAdd, setShowAdd, markDirty,
                 <DialogDescription>Send an invite link. The employee will set up their own password and profile.</DialogDescription>
               </DialogHeader>
               <div className="space-y-3 pt-2">
-                <div><Label className="text-xs">Email *</Label><Input type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} className="mt-1" placeholder="employee@example.com" /></div>
+                <div><Label className="form-label">Email *</Label><Input type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} className="mt-1" placeholder="employee@example.com" /></div>
                 <div>
-                  <Label className="text-xs">Role</Label>
+                  <Label className="form-label">Role</Label>
                   <Select value={inviteRole} onValueChange={setInviteRole}>
                     <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -746,13 +738,13 @@ function EmployeesTab({ employees, setEmployees, showAdd, setShowAdd, markDirty,
               </DialogHeader>
               <div className="space-y-3 pt-2">
                 <div className="grid grid-cols-2 gap-3">
-                  <div><Label className="text-xs">First Name *</Label><Input value={newEmp.firstName} onChange={e => setNewEmp(p => ({ ...p, firstName: e.target.value }))} className="mt-1" /></div>
-                  <div><Label className="text-xs">Last Name *</Label><Input value={newEmp.lastName} onChange={e => setNewEmp(p => ({ ...p, lastName: e.target.value }))} className="mt-1" /></div>
+                  <div><Label className="form-label">First Name *</Label><Input value={newEmp.firstName} onChange={e => setNewEmp(p => ({ ...p, firstName: e.target.value }))} className="mt-1" /></div>
+                  <div><Label className="form-label">Last Name *</Label><Input value={newEmp.lastName} onChange={e => setNewEmp(p => ({ ...p, lastName: e.target.value }))} className="mt-1" /></div>
                 </div>
-                <div><Label className="text-xs">Email *</Label><Input type="email" value={newEmp.email} onChange={e => setNewEmp(p => ({ ...p, email: e.target.value }))} className="mt-1" /></div>
-                <div><Label className="text-xs">Phone</Label><Input type="tel" value={newEmp.phone} onChange={e => setNewEmp(p => ({ ...p, phone: e.target.value }))} className="mt-1" /></div>
+                <div><Label className="form-label">Email *</Label><Input type="email" value={newEmp.email} onChange={e => setNewEmp(p => ({ ...p, email: e.target.value }))} className="mt-1" /></div>
+                <div><Label className="form-label">Phone</Label><Input type="tel" value={newEmp.phone} onChange={e => setNewEmp(p => ({ ...p, phone: e.target.value }))} className="mt-1" /></div>
                 <div>
-                  <Label className="text-xs">Role</Label>
+                  <Label className="form-label">Role</Label>
                   <Select value={newEmp.role} onValueChange={v => setNewEmp(p => ({ ...p, role: v }))}>
                     <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -764,7 +756,7 @@ function EmployeesTab({ employees, setEmployees, showAdd, setShowAdd, markDirty,
                     </SelectContent>
                   </Select>
                 </div>
-                <div><Label className="text-xs">Temporary Password</Label><Input type="password" value={newEmp.password} onChange={e => setNewEmp(p => ({ ...p, password: e.target.value }))} className="mt-1" placeholder="Min 6 chars. Employee can reset later." /></div>
+                <div><Label className="form-label">Temporary Password</Label><Input type="password" value={newEmp.password} onChange={e => setNewEmp(p => ({ ...p, password: e.target.value }))} className="mt-1" placeholder="Min 6 chars. Employee can reset later." /></div>
                 <div className="flex justify-end gap-2 pt-2">
                   <Button variant="outline" size="sm" onClick={() => setShowAdd(false)}>Cancel</Button>
                   <Button size="sm" onClick={handleAdd} disabled={!newEmp.firstName || !newEmp.lastName || !newEmp.email || isCreating}>{isCreating ? 'Creating…' : 'Add Employee'}</Button>
@@ -775,46 +767,46 @@ function EmployeesTab({ employees, setEmployees, showAdd, setShowAdd, markDirty,
         </div>
 
         {employees.length === 0 ? (
-          <div className="text-center py-10 text-muted-foreground">
+          <div className="text-center py-10 text-[#76707F]">
             <Users className="mx-auto h-10 w-10 mb-3 opacity-40" />
-            <p className="text-sm">No employees added yet</p>
+            <p className="text-[14px] text-[#2B2833] cursor-pointer">No employees added yet</p>
           </div>
         ) : (
-          <div className="border rounded-md overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Employee</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Invite</TableHead>
-                  <TableHead>Last Login</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+          <div className="rounded-[12px] overflow-hidden border border-black/[0.06]">
+            <table className="w-full">
+              <thead className="table-header-gradient border-b border-black/[0.04]">
+                <tr className="hover:bg-[#FAFAF9] transition-colors">
+                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Employee</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Role</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Invite</th>
+                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Last Login</th>
+                  <th className="px-6 py-3 text-right text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-black/[0.04]">
                 {employees.map((emp: any) => (
-                  <TableRow key={emp.id}>
-                    <TableCell>
+                  <tr className="hover:bg-[#FAFAF9] transition-colors" key={emp.id}>
+                    <td className="px-6 py-3 text-[14px] text-[#2B2833]">
                       <div className="flex items-center gap-2.5">
                         <Avatar className="h-7 w-7">
                           <AvatarFallback className="text-[10px]">{emp.firstName?.[0]}{emp.lastName?.[0]}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="text-sm font-medium">{emp.name || `${emp.firstName} ${emp.lastName}`.trim()}</p>
-                          <p className="text-xs text-muted-foreground">{emp.email}</p>
+                          <p className="text-[14px] font-medium text-[#2B2833]">{emp.name || `${emp.firstName} ${emp.lastName}`.trim()}</p>
+                          <p className="text-[12px] text-[#76707F]">{emp.email}</p>
                         </div>
                       </div>
-                    </TableCell>
-                    <TableCell><Badge variant="outline" className="text-xs capitalize">{(emp.role || '').replace('_', ' ')}</Badge></TableCell>
-                    <TableCell><Badge variant={emp.isActive ? 'default' : 'secondary'} className="text-xs">{emp.isActive ? 'Active' : 'Inactive'}</Badge></TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-xs capitalize">
+                    </td>
+                    <td className="px-6 py-3 text-[14px] text-[#2B2833]"><span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-[#E8E6FF] text-[#6B5EF9] capitalize">{(emp.role || '').replace('_', ' ')}</span></td>
+                    <td className="px-6 py-3 text-[14px] text-[#2B2833]"><span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium ${emp.isActive ? 'bg-[#E8F5E9] text-[#2E7D32]' : 'bg-[#F5F5F5] text-[#76707F]'}`}>{emp.isActive ? 'Active' : 'Inactive'}</span></td>
+                    <td className="px-6 py-3 text-[14px] text-[#2B2833]">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-[#E8E6FF] text-[#6B5EF9] capitalize">
                         {emp.inviteStatus || 'active'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{emp.lastLogin || '—'}</TableCell>
-                    <TableCell className="text-right">
+                      </span>
+                    </td>
+                    <td className="text-[12px] text-[#76707F]">{emp.lastLogin || '—'}</td>
+                    <td className="text-right">
                       <div className="flex items-center justify-end gap-1">
                         <Button variant="ghost" size="icon" className="h-7 w-7" title="Reset password" onClick={() => handleResetPassword(emp.id)}>
                           <KeyRound className="w-3.5 h-3.5" />
@@ -826,11 +818,11 @@ function EmployeesTab({ employees, setEmployees, showAdd, setShowAdd, markDirty,
                           <Trash2 className="w-3.5 h-3.5 text-destructive" />
                         </Button>
                       </div>
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
         )}
       </SettingsCard>
@@ -872,19 +864,19 @@ function EmployeePermissionsCard({ employee, setEmployees, markDirty }: { employ
   ];
 
   return (
-    <div className="border rounded-md">
-      <button onClick={() => setExpanded(!expanded)} className="w-full flex items-center justify-between p-3 hover:bg-muted/50 transition-colors">
+    <div className="rounded-[12px] border border-black/[0.06] overflow-hidden">
+      <button onClick={() => setExpanded(!expanded)} className="w-full flex items-center justify-between p-3 hover:bg-black/[0.02] transition-colors">
         <div className="flex items-center gap-2">
           <Avatar className="h-6 w-6"><AvatarFallback className="text-[9px]">{employee.firstName?.[0]}{employee.lastName?.[0]}</AvatarFallback></Avatar>
-          <span className="text-sm font-medium">{employee.name}</span>
+          <span className="text-[14px] font-medium text-[#2B2833]">{employee.name}</span>
           <Badge variant="outline" className="text-[10px] capitalize">{employee.role.replace('_', ' ')}</Badge>
         </div>
-        <ChevronRight className={`w-4 h-4 text-muted-foreground transition-transform ${expanded ? 'rotate-90' : ''}`} />
+        <ChevronRight className={`w-4 h-4 text-[#76707F] transition-transform ${expanded ? 'rotate-90' : ''}`} />
       </button>
       {expanded && (
         <div className="border-t px-4 py-3 grid grid-cols-2 gap-y-2 gap-x-6">
           {permLabels.map(({ key, label }) => (
-            <label key={key} className="flex items-center gap-2 text-sm cursor-pointer">
+            <label key={key} className="flex items-center gap-2 text-[13px] text-[#2B2833] cursor-pointer">
               <Checkbox checked={employee.permissions[key]} onCheckedChange={() => togglePerm(key)} />
               <span>{label}</span>
             </label>
@@ -909,45 +901,45 @@ function VisibilityTab({ global, setGlobal, employees, setEmployees, markDirty }
     <>
       <SettingsCard title="Global Visibility Toggles" description="These apply to all non-admin employees by default">
         <ToggleRow label="Show Profit on Take-In page" checked={global.showProfit} onChange={v => setG('showProfit', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Show Payout Percentage on Take-In page" checked={global.showPayoutPercent} onChange={v => setG('showPayoutPercent', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Show Market Value on Take-In page" checked={global.showMarketValue} onChange={v => setG('showMarketValue', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Show Profit in footer summary" checked={global.showProfitInFooter} onChange={v => setG('showProfitInFooter', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Show Average Rate in footer summary" checked={global.showAverageRateInFooter} onChange={v => setG('showAverageRateInFooter', v)} />
 
-        <div className="pt-3 text-xs text-muted-foreground bg-muted/50 rounded-md p-3 mt-3">
+        <div className="pt-3 text-[12px] text-[#76707F] bg-black/[0.03] rounded-[8px] p-3 mt-3">
           <strong>Note:</strong> Store Admins always see everything. These toggles affect Managers, Buyers, Front Desk, and Read Only roles.
         </div>
       </SettingsCard>
 
       {employees.length > 0 && (
         <SettingsCard title="Employee-Level Overrides" description="Override the global defaults for individual employees">
-          <div className="border rounded-md overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Employee</TableHead>
-                  <TableHead className="text-center">Hide Profit</TableHead>
-                  <TableHead className="text-center">Hide % Paid</TableHead>
-                  <TableHead className="text-center">Hide Market</TableHead>
-                  <TableHead className="text-center">Hide Breakdown</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+          <div className="rounded-[12px] overflow-hidden border border-black/[0.06]">
+            <table className="w-full">
+              <thead className="table-header-gradient border-b border-black/[0.04]">
+                <tr className="hover:bg-[#FAFAF9] transition-colors">
+                  <th className="px-6 py-3 text-left text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Employee</th>
+                  <th className="px-6 py-3 text-center text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Hide Profit</th>
+                  <th className="px-6 py-3 text-center text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Hide % Paid</th>
+                  <th className="px-6 py-3 text-center text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Hide Market</th>
+                  <th className="px-6 py-3 text-center text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Hide Breakdown</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-black/[0.04]">
                 {employees.map((emp: Employee) => (
-                  <TableRow key={emp.id}>
-                    <TableCell className="text-sm font-medium">{emp.name}</TableCell>
-                    <TableCell className="text-center"><Checkbox checked={emp.visibility.hideProfit} onCheckedChange={() => toggleEmpVis(emp.id, 'hideProfit')} /></TableCell>
-                    <TableCell className="text-center"><Checkbox checked={emp.visibility.hidePercentagePaid} onCheckedChange={() => toggleEmpVis(emp.id, 'hidePercentagePaid')} /></TableCell>
-                    <TableCell className="text-center"><Checkbox checked={emp.visibility.hideMarketValue} onCheckedChange={() => toggleEmpVis(emp.id, 'hideMarketValue')} /></TableCell>
-                    <TableCell className="text-center"><Checkbox checked={emp.visibility.hideTotalPayoutBreakdown} onCheckedChange={() => toggleEmpVis(emp.id, 'hideTotalPayoutBreakdown')} /></TableCell>
-                  </TableRow>
+                  <tr className="hover:bg-[#FAFAF9] transition-colors" key={emp.id}>
+                    <td className="px-6 py-3 text-[14px] font-medium text-[#2B2833]">{emp.name}</td>
+                    <td className="text-center"><Checkbox checked={emp.visibility.hideProfit} onCheckedChange={() => toggleEmpVis(emp.id, 'hideProfit')} /></td>
+                    <td className="text-center"><Checkbox checked={emp.visibility.hidePercentagePaid} onCheckedChange={() => toggleEmpVis(emp.id, 'hidePercentagePaid')} /></td>
+                    <td className="text-center"><Checkbox checked={emp.visibility.hideMarketValue} onCheckedChange={() => toggleEmpVis(emp.id, 'hideMarketValue')} /></td>
+                    <td className="text-center"><Checkbox checked={emp.visibility.hideTotalPayoutBreakdown} onCheckedChange={() => toggleEmpVis(emp.id, 'hideTotalPayoutBreakdown')} /></td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
         </SettingsCard>
       )}
@@ -966,18 +958,18 @@ function IntakePayoutTab({ intake, setIntake, payout, setPayout, rates, setRates
     <>
       <SettingsCard title="Intake Defaults" description="How the Take-In page behaves when opened">
         <ToggleRow label="Fast Entry mode ON by default" checked={intake.fastEntryDefault} onChange={v => setI('fastEntryDefault', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Auto-focus first weight field" checked={intake.autoFocusWeight} onChange={v => setI('autoFocusWeight', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Enable Save For Later" checked={intake.enableSaveForLater} onChange={v => setI('enableSaveForLater', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Enable Batch Photos" checked={intake.enableBatchPhotos} onChange={v => setI('enableBatchPhotos', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Enable AI Assist button" checked={intake.enableAiAssist} onChange={v => setI('enableAiAssist', v)} />
 
         <div className="pt-3 grid grid-cols-2 gap-4">
           <div>
-            <Label className="text-xs">Default Category</Label>
+            <Label className="form-label">Default Category</Label>
             <Select value={intake.defaultCategory} onValueChange={v => setI('defaultCategory', v)}>
               <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -990,7 +982,7 @@ function IntakePayoutTab({ intake, setIntake, payout, setPayout, rates, setRates
             </Select>
           </div>
           <div>
-            <Label className="text-xs">Item Card Layout</Label>
+            <Label className="form-label">Item Card Layout</Label>
             <Select value={intake.itemCardLayout} onValueChange={v => setI('itemCardLayout', v)}>
               <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -1004,7 +996,7 @@ function IntakePayoutTab({ intake, setIntake, payout, setPayout, rates, setRates
 
       <SettingsCard title="Payout Defaults">
         <div className="pb-3">
-          <Label className="text-xs">Default Payout Method</Label>
+          <Label className="form-label">Default Payout Method</Label>
           <Select value={payout.defaultMethod} onValueChange={v => setP('defaultMethod', v)}>
             <SelectTrigger className="mt-1 w-48"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -1014,19 +1006,19 @@ function IntakePayoutTab({ intake, setIntake, payout, setPayout, rates, setRates
             </SelectContent>
           </Select>
         </div>
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Allow split payout methods" checked={payout.allowSplitPayout} onChange={v => setP('allowSplitPayout', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Show confirmation modal before purchase" checked={payout.showConfirmationModal} onChange={v => setP('showConfirmationModal', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Require payout info before completion" checked={payout.requirePayoutInfoBeforeCompletion} onChange={v => setP('requirePayoutInfoBeforeCompletion', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Require customer info before completion" checked={payout.requireCustomerInfoBeforeCompletion} onChange={v => setP('requireCustomerInfoBeforeCompletion', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Allow override of final payout amount" checked={payout.allowOverrideFinalPayout} onChange={v => setP('allowOverrideFinalPayout', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Allow per-item rate edits" checked={payout.allowPerItemRateEdits} onChange={v => setP('allowPerItemRateEdits', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Allow batch-wide rate edits" checked={payout.allowBatchRateEdits} onChange={v => setP('allowBatchRateEdits', v)} />
       </SettingsCard>
 
@@ -1034,10 +1026,10 @@ function IntakePayoutTab({ intake, setIntake, payout, setPayout, rates, setRates
         <div className="space-y-3">
           {Object.entries(rates).map(([key, val]) => (
             <div key={key} className="flex items-center justify-between">
-              <span className="text-sm font-medium capitalize">{key}</span>
+              <span className="text-[14px] font-medium text-[#2B2833] capitalize">{key}</span>
               <div className="flex items-center gap-1.5">
-                <Input type="number" min={0} max={100} value={val as number} onChange={e => setR(key, parseFloat(e.target.value) || 0)} className="w-20 text-center text-sm" />
-                <span className="text-sm text-muted-foreground">%</span>
+                <Input type="number" min={0} max={100} value={val as number} onChange={e => setR(key, parseFloat(e.target.value) || 0)} className="w-20 text-center text-[14px]" />
+                <span className="text-[14px] text-[#76707F]">%</span>
               </div>
             </div>
           ))}
@@ -1057,43 +1049,43 @@ function CustomerComplianceTab({ customer, setCustomer, compliance, setComplianc
     <>
       <SettingsCard title="Customer Capture" description="What information is required from customers">
         <ToggleRow label="Require customer ID scan" checked={customer.requireIdScan} onChange={v => setC('requireIdScan', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Allow manual entry if no ID scanned" checked={customer.allowManualEntry} onChange={v => setC('allowManualEntry', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Require phone number" checked={customer.requirePhone} onChange={v => setC('requirePhone', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Require email" checked={customer.requireEmail} onChange={v => setC('requireEmail', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Require address" checked={customer.requireAddress} onChange={v => setC('requireAddress', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Require gender" checked={customer.requireGender} onChange={v => setC('requireGender', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Require date of birth" checked={customer.requireDob} onChange={v => setC('requireDob', v)} />
       </SettingsCard>
 
       <SettingsCard title="Compliance Settings">
         <div className="grid grid-cols-2 gap-4 pb-3">
-          <div><Label className="text-xs">Hold Period (days)</Label><Input type="number" min={1} max={365} value={compliance.holdPeriodDays} onChange={e => setCo('holdPeriodDays', parseInt(e.target.value) || 90)} className="mt-1 w-28" /></div>
+          <div><Label className="form-label">Hold Period (days)</Label><Input type="number" min={1} max={365} value={compliance.holdPeriodDays} onChange={e => setCo('holdPeriodDays', parseInt(e.target.value) || 90)} className="mt-1 w-28" /></div>
         </div>
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Require customer signature before purchase" checked={compliance.requireSignature} onChange={v => setCo('requireSignature', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Require employee name on transaction" checked={compliance.requireEmployeeName} onChange={v => setCo('requireEmployeeName', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Require note if payout over threshold" description={compliance.requireNoteOverAmount ? `Currently: $${compliance.noteThreshold}` : undefined} checked={compliance.requireNoteOverAmount} onChange={v => setCo('requireNoteOverAmount', v)} />
         {compliance.requireNoteOverAmount && (
           <div className="pl-6 pb-2">
-            <Label className="text-xs">Threshold Amount ($)</Label>
+            <Label className="form-label">Threshold Amount ($)</Label>
             <Input type="number" min={0} value={compliance.noteThreshold} onChange={e => setCo('noteThreshold', parseInt(e.target.value) || 500)} className="mt-1 w-28" />
           </div>
         )}
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Show warning for transactions over threshold" checked={compliance.showWarningOverThreshold} onChange={v => setCo('showWarningOverThreshold', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Require manager approval over threshold" description={compliance.requireManagerApproval ? `Currently: $${compliance.approvalThreshold}` : undefined} checked={compliance.requireManagerApproval} onChange={v => setCo('requireManagerApproval', v)} />
         {compliance.requireManagerApproval && (
           <div className="pl-6 pb-2">
-            <Label className="text-xs">Approval Threshold ($)</Label>
+            <Label className="form-label">Approval Threshold ($)</Label>
             <Select value={String(compliance.approvalThreshold)} onValueChange={v => setCo('approvalThreshold', parseInt(v))}>
               <SelectTrigger className="mt-1 w-36"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -1118,13 +1110,13 @@ function LabelsPrintingTab({ settings, setSettings, markDirty }: any) {
     <>
       <SettingsCard title="Printing Controls">
         <ToggleRow label="Enable Print Receipt button" checked={settings.enablePrintReceipt} onChange={v => set('enablePrintReceipt', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Enable Print Labels button" checked={settings.enablePrintLabels} onChange={v => set('enablePrintLabels', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Auto-print receipt after completion" checked={settings.autoPrintReceipt} onChange={v => set('autoPrintReceipt', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Auto-print batch QR label" checked={settings.autoPrintBatchQr} onChange={v => set('autoPrintBatchQr', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Auto-print item QR labels" checked={settings.autoPrintItemQr} onChange={v => set('autoPrintItemQr', v)} />
       </SettingsCard>
 
@@ -1139,7 +1131,7 @@ function LabelsPrintingTab({ settings, setSettings, markDirty }: any) {
             ['showDate', 'Date'],
             ['showQrCode', 'QR Code'],
           ].map(([key, label]) => (
-            <label key={key} className="flex items-center gap-2 text-sm py-1.5 cursor-pointer">
+            <label key={key} className="flex items-center gap-2 text-[13px] text-[#2B2833] py-1.5 cursor-pointer">
               <Checkbox checked={settings[key]} onCheckedChange={(v) => set(key, !!v)} />
               <span>{label}</span>
             </label>
@@ -1149,13 +1141,13 @@ function LabelsPrintingTab({ settings, setSettings, markDirty }: any) {
 
       <SettingsCard title="Quote / Receipt Options">
         <ToggleRow label="Show store logo" checked={settings.showStoreLogo} onChange={v => set('showStoreLogo', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Show footer note" checked={settings.showFooterNote} onChange={v => set('showFooterNote', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Show custom disclaimer" checked={settings.showDisclaimer} onChange={v => set('showDisclaimer', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Show Saved-For-Later items on quote" checked={settings.showSavedForLaterOnQuote} onChange={v => set('showSavedForLaterOnQuote', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Hide payout percentages on printed documents" checked={settings.hidePayoutPercentsOnPrint} onChange={v => set('hidePayoutPercentsOnPrint', v)} />
       </SettingsCard>
     </>
@@ -1171,24 +1163,24 @@ function NotificationsTab({ settings, setSettings, markDirty }: any) {
     <>
       <SettingsCard title="Alert Toggles">
         <ToggleRow label="Send email when a quote is saved" checked={settings.emailOnQuoteSaved} onChange={v => set('emailOnQuoteSaved', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Send reminder for Save For Later items" checked={settings.reminderSaveForLater} onChange={v => set('reminderSaveForLater', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Notify admin when employee completes purchase" checked={settings.notifyAdminOnPurchase} onChange={v => set('notifyAdminOnPurchase', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Notify admin when payout exceeds threshold" checked={settings.notifyAdminPayoutThreshold} onChange={v => set('notifyAdminPayoutThreshold', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Notify admin when employee changes rate" checked={settings.notifyAdminRateChange} onChange={v => set('notifyAdminRateChange', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Daily summary email" checked={settings.dailySummary} onChange={v => set('dailySummary', v)} />
       </SettingsCard>
 
       <SettingsCard title="Reminder Timing" description="When to follow up on Save For Later items">
         <RadioGroup value={settings.reminderInterval} onValueChange={v => { set('reminderInterval', v); }} className="space-y-2">
-          <div className="flex items-center gap-2"><RadioGroupItem value="1day" id="r1" /><Label htmlFor="r1" className="text-sm">After 1 day</Label></div>
-          <div className="flex items-center gap-2"><RadioGroupItem value="3days" id="r3" /><Label htmlFor="r3" className="text-sm">After 3 days</Label></div>
-          <div className="flex items-center gap-2"><RadioGroupItem value="7days" id="r7" /><Label htmlFor="r7" className="text-sm">After 7 days</Label></div>
-          <div className="flex items-center gap-2"><RadioGroupItem value="custom" id="rc" /><Label htmlFor="rc" className="text-sm">Custom interval</Label></div>
+          <div className="flex items-center gap-2"><RadioGroupItem value="1day" id="r1" /><Label htmlFor="r1" className="text-[14px] text-[#2B2833] cursor-pointer">After 1 day</Label></div>
+          <div className="flex items-center gap-2"><RadioGroupItem value="3days" id="r3" /><Label htmlFor="r3" className="text-[14px] text-[#2B2833] cursor-pointer">After 3 days</Label></div>
+          <div className="flex items-center gap-2"><RadioGroupItem value="7days" id="r7" /><Label htmlFor="r7" className="text-[14px] text-[#2B2833] cursor-pointer">After 7 days</Label></div>
+          <div className="flex items-center gap-2"><RadioGroupItem value="custom" id="rc" /><Label htmlFor="rc" className="text-[14px] text-[#2B2833] cursor-pointer">Custom interval</Label></div>
         </RadioGroup>
       </SettingsCard>
     </>
@@ -1204,7 +1196,7 @@ function AppearanceTab({ settings, setSettings, markDirty }: any) {
     <>
       <SettingsCard title="Theme">
         <div>
-          <Label className="text-xs">Theme Mode</Label>
+          <Label className="form-label">Theme Mode</Label>
           <Select value={settings.theme} onValueChange={v => set('theme', v)}>
             <SelectTrigger className="mt-1 w-48"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -1215,7 +1207,7 @@ function AppearanceTab({ settings, setSettings, markDirty }: any) {
           </Select>
         </div>
         <div className="pt-3">
-          <Label className="text-xs">Accent Color</Label>
+          <Label className="form-label">Accent Color</Label>
           <div className="flex gap-2 mt-2">
             {['blue', 'indigo', 'green', 'amber', 'rose'].map(color => (
               <button
@@ -1231,9 +1223,9 @@ function AppearanceTab({ settings, setSettings, markDirty }: any) {
 
       <SettingsCard title="Layout Preferences">
         <ToggleRow label="Compact mode" description="Reduce spacing and padding throughout the app" checked={settings.compactMode} onChange={v => set('compactMode', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Large input mode" description="Increase size of text inputs for easier use" checked={settings.largeInputMode} onChange={v => set('largeInputMode', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Sidebar collapsed by default" checked={settings.sidebarCollapsed} onChange={v => set('sidebarCollapsed', v)} />
       </SettingsCard>
     </>
@@ -1249,34 +1241,34 @@ function AdvancedTab({ settings, setSettings, markDirty }: any) {
     <>
       <SettingsCard title="Data & Storage">
         <div className="pb-3">
-          <Label className="text-xs">Archive completed take-ins after (days)</Label>
+          <Label className="form-label">Archive completed take-ins after (days)</Label>
           <Input type="number" min={1} max={365} value={settings.archiveAfterDays} onChange={e => set('archiveAfterDays', parseInt(e.target.value) || 90)} className="mt-1 w-28" />
         </div>
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Enable automatic draft save" checked={settings.autoDraftSave} onChange={v => set('autoDraftSave', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Enable duplicate item detection" checked={settings.duplicateDetection} onChange={v => set('duplicateDetection', v)} />
       </SettingsCard>
 
       <SettingsCard title="Workflow">
         <ToggleRow label="Enable keyboard shortcuts" checked={settings.keyboardShortcuts} onChange={v => set('keyboardShortcuts', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Enable category grouping on Take-In page" checked={settings.categoryGrouping} onChange={v => set('categoryGrouping', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Enable subcategory grouping on Take-In page" checked={settings.subcategoryGrouping} onChange={v => set('subcategoryGrouping', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Lock completed transactions from editing" checked={settings.lockCompletedTransactions} onChange={v => set('lockCompletedTransactions', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Allow reopening completed transactions" checked={settings.allowReopenCompleted} onChange={v => set('allowReopenCompleted', v)} />
       </SettingsCard>
 
       <SettingsCard title="Safety Confirmations" description="Require confirmation before critical actions">
         <ToggleRow label="Confirm before deleting item" checked={settings.confirmDeleteItem} onChange={v => set('confirmDeleteItem', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Confirm before completing purchase" checked={settings.confirmCompletePurchase} onChange={v => set('confirmCompletePurchase', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Confirm before changing payout method" checked={settings.confirmChangePayoutMethod} onChange={v => set('confirmChangePayoutMethod', v)} />
-        <Separator />
+        <div className="border-t border-black/[0.04]" />
         <ToggleRow label="Confirm before removing saved-for-later item" checked={settings.confirmRemoveSavedForLater} onChange={v => set('confirmRemoveSavedForLater', v)} />
       </SettingsCard>
     </>
