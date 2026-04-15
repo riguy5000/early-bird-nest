@@ -47,7 +47,7 @@ export function InventoryItemRow({ item, onView, onEdit, onPartOut, onArchive, o
     <TableRow className="cursor-pointer hover:bg-muted/50" onClick={() => onView(item)}>
       <TableCell className="w-10">
         {item.photos?.[0] ? (
-          <img src={item.photos[0]} className="w-8 h-8 rounded object-cover" alt="" />
+          <img src={item.photos[0]} className="w-8 h-8 rounded object-cover flex-shrink-0" alt="" />
         ) : (
           <div className="w-8 h-8 rounded bg-muted flex items-center justify-center text-xs text-muted-foreground">
             {item.category.charAt(0)}

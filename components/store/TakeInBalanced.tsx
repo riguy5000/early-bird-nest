@@ -346,16 +346,23 @@ export function TakeInBalanced({
                                       <Input 
                                         ref={(el) => weightInputRefs.current[`${item.id}_${metal.id}`] = el}
                                         type="text"
-                                        value={metal.weight || ''} 
+                                        inputMode="decimal"
+                                        value={metal.weightRaw ?? (metal.weight || '')} 
                                         onChange={(e) => {
                                           const value = e.target.value;
-                                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                                            updateMetal(item.id, metal.id, { weight: value === '' ? 0 : parseFloat(value) || 0 });
+                                          if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+                                            const numValue = value === '' ? 0 : parseFloat(value) || 0;
+                                            updateMetal(item.id, metal.id, { weight: numValue, weightRaw: value });
                                           }
+                                        }}
+                                        onBlur={(e) => {
+                                          const value = e.target.value;
+                                          const numValue = parseFloat(value) || 0;
+                                          updateMetal(item.id, metal.id, { weight: numValue, weightRaw: undefined });
                                         }}
                                         onKeyDown={(e) => handleKeyPress(e, item.id, metal.id)}
                                         placeholder="0.00"
-                                        className="w-12 h-6 text-[11px] bg-white border border-slate-200 rounded-md [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        className="w-16 h-6 text-[11px] bg-white border border-slate-200 rounded-md [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                         style={{ MozAppearance: 'textfield' as any }}
                                         onClick={(e) => e.stopPropagation()}
                                       />
