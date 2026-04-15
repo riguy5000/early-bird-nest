@@ -8,6 +8,7 @@ import {
   Package, Users, DollarSign, TrendingUp, TrendingDown, Plus, Clock,
   User, ArrowUpRight, ArrowDownRight, BarChart3, Flame, ShoppingBag
 } from 'lucide-react';
+import { PremiumIcon } from '../ui/PremiumIcon';
 
 interface OwnerDashboardProps {
   storeId: string;
@@ -18,8 +19,8 @@ interface OwnerDashboardProps {
 const fmt = (v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
 const fmtFull = (v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v);
 
-function KPICard({ label, value, subtitle, trend, icon: Icon }: {
-  label: string; value: string; subtitle?: string; trend?: number; icon: any;
+function KPICard({ label, value, subtitle, trend, iconType }: {
+  label: string; value: string; subtitle?: string; trend?: number; iconType: string;
 }) {
   const isPositive = (trend || 0) >= 0;
   return (
@@ -27,7 +28,7 @@ function KPICard({ label, value, subtitle, trend, icon: Icon }: {
       <div className="flex items-start justify-between mb-4">
         <div className="text-[12px] text-[#76707F] font-medium uppercase tracking-wider">{label}</div>
         <div className="w-11 h-11 rounded-[12px] icon-container">
-          <Icon className="h-5 w-5 text-[#6B5EF9]" />
+          <PremiumIcon type={iconType} className="h-5 w-5" />
         </div>
       </div>
       <div className="text-[28px] font-semibold text-[#2B2833] tracking-tight">{value}</div>
@@ -112,24 +113,24 @@ export function OwnerDashboard({ storeId, storeName, onNavigate }: OwnerDashboar
 
       {/* Primary KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        <KPICard label="Items in Stock" value={m.itemsInStock.toString()} icon={Package} />
-        <KPICard label="Active Customers" value={m.activeCustomers.toString()} icon={Users} />
-        <KPICard label="Today's Take-In" value={m.dailyTakeIns.toString()} icon={Plus} />
-        <KPICard label="Today's Payout" value={fmt(m.dailyPayout)} icon={DollarSign} />
-        <KPICard label="Realized Profit (Mtd)" value={fmt(m.realizedProfitMonth)} icon={TrendingUp} />
+        <KPICard label="Items in Stock" value={m.itemsInStock.toString()} iconType="package" />
+        <KPICard label="Active Customers" value={m.activeCustomers.toString()} iconType="users" />
+        <KPICard label="Today's Take-In" value={m.dailyTakeIns.toString()} iconType="plus" />
+        <KPICard label="Today's Payout" value={fmt(m.dailyPayout)} iconType="dollar-sign" />
+        <KPICard label="Realized Profit (Mtd)" value={fmt(m.realizedProfitMonth)} iconType="trending-up" />
       </div>
 
       {/* Portfolio Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KPICard label="Cost Basis" value={fmt(m.costBasis)} subtitle="based on active inventory" icon={DollarSign} />
-        <KPICard label="Live Inventory Value" value={fmt(m.liveValue)} subtitle="current market-based estimate" icon={TrendingUp} />
+        <KPICard label="Cost Basis" value={fmt(m.costBasis)} subtitle="based on active inventory" iconType="dollar-sign" />
+        <KPICard label="Live Inventory Value" value={fmt(m.liveValue)} subtitle="current market-based estimate" iconType="trending-up" />
         <KPICard
           label="Unrealized P/L"
           value={`${m.unrealizedPL >= 0 ? '+' : ''}${fmt(m.unrealizedPL)}`}
           trend={m.unrealizedPLPercent}
-          icon={m.unrealizedPL >= 0 ? TrendingUp : TrendingDown}
+          iconType={m.unrealizedPL >= 0 ? 'trending-up' : 'trending-down'}
         />
-        <KPICard label="Scrap Pipeline" value={fmt(m.scrapPipelineValue)} subtitle="showroom value" icon={Flame} />
+        <KPICard label="Scrap Pipeline" value={fmt(m.scrapPipelineValue)} subtitle="showroom value" iconType="flame" />
       </div>
 
       {/* Chart + Quick Actions */}
