@@ -277,7 +277,11 @@ export function CustomerModule({ user }: CustomerModuleProps) {
               </TableHeader>
               <TableBody>
                 {filteredCustomers.map((customer) => (
-                  <TableRow key={customer.id}>
+                  <TableRow 
+                    key={customer.id} 
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => { setSelectedCustomer(customer); setShowDetailDrawer(true); }}
+                  >
                     <TableCell>
                       <div className="flex items-center">
                         <User className="w-4 h-4 mr-2 text-muted-foreground" />
