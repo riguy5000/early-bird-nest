@@ -12,6 +12,7 @@ import {
   ArrowUpRight, ArrowDownRight, Flame, ShoppingBag, Zap, AlertTriangle,
   Info, CheckCircle, BarChart3, Layers
 } from 'lucide-react';
+import { PremiumIcon } from '../ui/PremiumIcon';
 
 interface AnalyticsModuleProps {
   storeId: string;
@@ -22,7 +23,7 @@ const fmt = (v: number) => new Intl.NumberFormat('en-US', { style: 'currency', c
 const fmtFull = (v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v);
 const PIE_COLORS = ['hsl(217, 91%, 60%)', 'hsl(142, 71%, 45%)', 'hsl(47, 96%, 53%)', 'hsl(0, 84%, 60%)', 'hsl(262, 83%, 58%)', 'hsl(199, 89%, 48%)'];
 
-function KPI({ label, value, subtitle, trend, icon: Icon, variant = 'default' }: any) {
+function KPI({ label, value, subtitle, trend, iconType, variant = 'default' }: any) {
   const isPos = (trend || 0) >= 0;
   return (
     <div className="kpi-card p-5">
@@ -33,7 +34,7 @@ function KPI({ label, value, subtitle, trend, icon: Icon, variant = 'default' }:
           {subtitle && <p className="text-[12px] text-[#76707F]">{subtitle}</p>}
         </div>
         <div className="icon-container w-11 h-11 rounded-[12px]">
-          <Icon className="h-5 w-5 text-[#6B5EF9]" strokeWidth={2.5} />
+          <PremiumIcon type={iconType} className="h-5 w-5" />
         </div>
       </div>
       {trend !== undefined && (
