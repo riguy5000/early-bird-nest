@@ -43,9 +43,12 @@ function fmt(n: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 }
 
-function metalSummary(metals: any[]) {
-  if (!metals?.length) return '—';
-  const first = metals[0];
+function metalSummary(metals: any) {
+  if (!metals) return '—';
+  const arr = Array.isArray(metals) ? metals : [];
+  if (!arr.length) return '—';
+  const first = arr[0];
+  if (!first) return '—';
   const karat = first.karat || first.type || '';
   return karat ? `${karat.replace('Gold ', '').replace('k', ' kt')}` : '—';
 }
