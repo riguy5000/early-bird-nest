@@ -134,6 +134,9 @@ export function CustomerModule({ user }: CustomerModuleProps) {
         notes: c.notes || '',
         createdAt: c.created_at,
         storeId: c.store_id,
+        gender: c.gender || '',
+        idScanUrl: c.id_scan_url || '',
+        idScanBackUrl: c.id_scan_back_url || '',
       }));
 
       setCustomers(mapped);
