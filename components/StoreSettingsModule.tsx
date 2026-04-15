@@ -408,7 +408,7 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate, onSettingsSav
       {/* Body: Sidebar + Content */}
       <div className="flex gap-6">
         {/* Left Sidebar */}
-        <aside className="w-56 flex-shrink-0 space-y-3">
+        <aside className="w-52 flex-shrink-0 space-y-1">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A8A3AE]" />
             <input
@@ -446,27 +446,33 @@ function GeneralTab({ general, setGeneral, markDirty }: any) {
   const set = (field: string, value: any) => { setGeneral((p: any) => ({ ...p, [field]: value })); markDirty(); };
 
   return (
-    <>
-      <SettingsCard title="Store Profile">
+    <div className="glass-card px-8 py-8 space-y-10">
+
+      {/* ── Store Profile ── */}
+      <div className="space-y-5">
+        <h2 className="text-[22px] font-semibold text-[#2B2833] tracking-tight">Store Profile</h2>
+
+        {/* Logo tile */}
         <div className="flex items-center gap-5">
-          {/* Logo tile — rounded square with lavender gradient, initials */}
           <div
             className="w-16 h-16 rounded-[12px] flex items-center justify-center text-[20px] font-bold text-[#6B5EF9] flex-shrink-0 cursor-pointer"
             style={{ background: 'linear-gradient(to bottom right, #ECEAFF, #C8DCFF)', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
           >
             {general.name?.substring(0, 2)?.toUpperCase() || 'ST'}
           </div>
-          <div className="text-[13px] text-[#A8A3AE]">
-            Upload a square logo (200×200 recommended)
-          </div>
+          <p className="text-[13px] text-[#A8A3AE]">Upload a square logo (200×200 recommended)</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div><Label className="form-label">Store Name *</Label><Input value={general.name} onChange={(e) => set('name', e.target.value)} placeholder="Enter store name" className="mt-1" /></div>
+        {/* Store name + type */}
+        <div className="grid grid-cols-2 gap-5">
+          <div>
+            <Label className="form-label">Store Name *</Label>
+            <Input value={general.name} onChange={(e) => set('name', e.target.value)} placeholder="Enter store name" className="mt-1.5" />
+          </div>
           <div>
             <Label className="form-label">Store Type</Label>
             <Select value={general.type} onValueChange={(v) => set('type', v)}>
-              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="jewelry">Jewelry</SelectItem>
                 <SelectItem value="pawn">Pawn</SelectItem>
@@ -477,23 +483,38 @@ function GeneralTab({ general, setGeneral, markDirty }: any) {
           </div>
         </div>
 
-        <div className="pt-3">
+        {/* Address — single line */}
+        <div>
           <Label className="form-label">Address</Label>
-          <Textarea value={general.address} onChange={(e) => set('address', e.target.value)} placeholder="Street, City, State, ZIP" rows={2} className="mt-1" />
+          <Input value={general.address} onChange={(e) => set('address', e.target.value)} placeholder="Street, City, State, ZIP" className="mt-1.5" />
         </div>
 
-        <div className="grid grid-cols-2 gap-4 pt-3">
-          <div><Label className="form-label">Phone</Label><Input type="tel" value={general.phone} onChange={(e) => set('phone', e.target.value)} placeholder="(555) 123-4567" className="mt-1" /></div>
-          <div><Label className="form-label">Email</Label><Input type="email" value={general.email} onChange={(e) => set('email', e.target.value)} placeholder="store@example.com" className="mt-1" /></div>
+        {/* Phone + Email */}
+        <div className="grid grid-cols-2 gap-5">
+          <div>
+            <Label className="form-label">Phone</Label>
+            <Input type="tel" value={general.phone} onChange={(e) => set('phone', e.target.value)} placeholder="(555) 123-4567" className="mt-1.5" />
+          </div>
+          <div>
+            <Label className="form-label">Email</Label>
+            <Input type="email" value={general.email} onChange={(e) => set('email', e.target.value)} placeholder="store@example.com" className="mt-1.5" />
+          </div>
         </div>
-      </SettingsCard>
+      </div>
 
-      <SettingsCard title="Operational Defaults">
-        <div className="grid grid-cols-2 gap-4">
+      {/* Divider */}
+      <div className="border-t border-black/[0.04]" />
+
+      {/* ── Operational Defaults ── */}
+      <div className="space-y-5">
+        <h2 className="text-[22px] font-semibold text-[#2B2833] tracking-tight">Operational Defaults</h2>
+
+        {/* Timezone + Currency */}
+        <div className="grid grid-cols-2 gap-5">
           <div>
             <Label className="form-label">Time Zone</Label>
             <Select value={general.timezone} onValueChange={(v) => set('timezone', v)}>
-              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="America/New_York">Eastern</SelectItem>
                 <SelectItem value="America/Chicago">Central</SelectItem>
@@ -505,7 +526,7 @@ function GeneralTab({ general, setGeneral, markDirty }: any) {
           <div>
             <Label className="form-label">Currency</Label>
             <Select value={general.currency} onValueChange={(v) => set('currency', v)}>
-              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="USD">USD ($)</SelectItem>
                 <SelectItem value="CAD">CAD ($)</SelectItem>
@@ -515,25 +536,39 @@ function GeneralTab({ general, setGeneral, markDirty }: any) {
           </div>
         </div>
 
-        <div className="pt-3">
+        {/* Default Weight Unit */}
+        <div>
           <Label className="form-label">Default Weight Unit</Label>
-          <RadioGroup value={general.weightUnit} onValueChange={(v) => set('weightUnit', v)} className="flex gap-5 mt-2">
-            <div className="flex items-center gap-1.5"><RadioGroupItem value="g" id="wg" /><Label htmlFor="wg" className="text-[14px] text-[#2B2833] cursor-pointer">Grams</Label></div>
-            <div className="flex items-center gap-1.5"><RadioGroupItem value="dwt" id="wdwt" /><Label htmlFor="wdwt" className="text-[14px] text-[#2B2833] cursor-pointer">DWT</Label></div>
-            <div className="flex items-center gap-1.5"><RadioGroupItem value="oz" id="woz" /><Label htmlFor="woz" className="text-[14px] text-[#2B2833] cursor-pointer">Ounces</Label></div>
+          <RadioGroup value={general.weightUnit} onValueChange={(v) => set('weightUnit', v)} className="flex items-center gap-6 mt-2">
+            <div className="flex items-center gap-2"><RadioGroupItem value="g"   id="wg"   /><Label htmlFor="wg"   className="text-[14px] text-[#2B2833] cursor-pointer font-normal">Grams</Label></div>
+            <div className="flex items-center gap-2"><RadioGroupItem value="dwt" id="wdwt" /><Label htmlFor="wdwt" className="text-[14px] text-[#2B2833] cursor-pointer font-normal">DWT</Label></div>
+            <div className="flex items-center gap-2"><RadioGroupItem value="oz"  id="woz"  /><Label htmlFor="woz"  className="text-[14px] text-[#2B2833] cursor-pointer font-normal">Ounces</Label></div>
           </RadioGroup>
         </div>
 
-        <div className="pt-3">
+        {/* Default Hold Period */}
+        <div>
           <Label className="form-label">Default Hold Period (days)</Label>
-          <Input type="number" min={1} max={365} value={general.legalHoldPeriod} onChange={(e) => set('legalHoldPeriod', parseInt(e.target.value) || 90)} className="mt-1 w-28" />
+          <Input type="number" min={1} max={365} value={general.legalHoldPeriod} onChange={(e) => set('legalHoldPeriod', parseInt(e.target.value) || 90)} className="mt-1.5 w-28" />
         </div>
-      </SettingsCard>
+      </div>
 
-      <SettingsCard title="Quote / Receipt Footer">
-        <Textarea value={general.quoteFooter} onChange={(e) => set('quoteFooter', e.target.value)} placeholder="Footer message for printed quotes and receipts" rows={3} />
-      </SettingsCard>
-    </>
+      {/* Divider */}
+      <div className="border-t border-black/[0.04]" />
+
+      {/* ── Quote / Receipt Footer ── */}
+      <div className="space-y-4">
+        <h2 className="text-[22px] font-semibold text-[#2B2833] tracking-tight">Quote / Receipt Footer</h2>
+        <p className="text-[13px] text-[#76707F] -mt-2">Footer message for printed quotes and receipts</p>
+        <Textarea
+          value={general.quoteFooter}
+          onChange={(e) => set('quoteFooter', e.target.value)}
+          placeholder="Footer message for printed quotes and receipts"
+          rows={4}
+          className="textarea-glass"
+        />
+      </div>
+    </div>
   );
 }
 
