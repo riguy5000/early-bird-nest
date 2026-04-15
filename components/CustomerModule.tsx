@@ -68,6 +68,7 @@ export function CustomerModule({ user }: CustomerModuleProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [showDetailDrawer, setShowDetailDrawer] = useState(false);
   const [showAddCustomer, setShowAddCustomer] = useState(false);
   const [showEditCustomer, setShowEditCustomer] = useState(false);
 
