@@ -389,7 +389,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
   const totals = calculateTotals();
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full" style={{ background: 'linear-gradient(135deg, #FFF3FF 0%, #F5EBFF 30%, #E8E6FF 60%, #C8DCFF 100%)' }}>
       {/* Completion success overlay */}
       {completionSuccess && (
         <div className="absolute inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">

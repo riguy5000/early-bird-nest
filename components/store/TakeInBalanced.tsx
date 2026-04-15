@@ -205,7 +205,7 @@ export function TakeInBalanced({
   };
 
   return (
-    <div className="h-full flex bg-slate-50 overflow-hidden">
+    <div className="h-full flex overflow-hidden" style={{ background: 'linear-gradient(135deg, #FFF3FF 0%, #F5EBFF 30%, #E8E6FF 60%, #C8DCFF 100%)' }}>
       <div className="flex w-full h-full">
         {/* Left Panel - Item Processing (scrollable) */}
         <div className="flex-1 flex flex-col min-h-0">
@@ -237,7 +237,7 @@ export function TakeInBalanced({
               <div className="h-full overflow-auto p-4">
                 <div className="max-w-7xl mx-auto space-y-3">
                   {Object.entries(itemsByCategory).map(([category, categoryItems]) => (
-                    <div key={category} className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                    <div key={category} className="glass-card overflow-hidden">
                       {/* Category Header */}
                       <div className={`px-4 py-2.5 ${categoryColors[category]?.bg || 'bg-slate-50'} border-b ${categoryColors[category]?.border || 'border-slate-200'}`}>
                         <div className="flex items-center justify-between">
