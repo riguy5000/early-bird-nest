@@ -46,9 +46,9 @@ export function InventoryDetailDrawer({ item, open, onClose, onPartOut, onArchiv
   return (
     <>
       <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
-        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto bg-white/95 backdrop-blur-2xl border-l border-white/60">
           <SheetHeader>
-            <SheetTitle className="text-lg">
+            <SheetTitle className="text-lg text-[#2B2833]">
               {item.description || `${item.category} - ${item.subcategory}`}
             </SheetTitle>
             <div className="flex gap-2 mt-1 items-center">
@@ -92,8 +92,8 @@ export function InventoryDetailDrawer({ item, open, onClose, onPartOut, onArchiv
               </div>
             )}
 
-            <div>
-              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Item Info</h4>
+            <div className="bg-white/60 rounded-[12px] p-4 ring-1 ring-white/50">
+              <h4 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-2">Item Info</h4>
               <Field label="Item ID" value={item.id.slice(0, 12)} />
               <Field label="Batch ID" value={item.batch_id?.slice(0, 12)} />
               <Field label="Category" value={item.category} />
@@ -106,8 +106,8 @@ export function InventoryDetailDrawer({ item, open, onClose, onPartOut, onArchiv
 
             <Separator />
 
-            <div>
-              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Values</h4>
+            <div className="bg-white/60 rounded-[12px] p-4 ring-1 ring-white/50">
+              <h4 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-2">Values</h4>
               <Field label="Market Value at Intake" value={fmt(item.market_value_at_intake)} />
               <Field label="Payout" value={fmt(item.payout_amount)} />
               <Field label="Payout %" value={`${item.payout_percentage}%`} />

@@ -88,12 +88,12 @@ export function CustomerDetailDrawer({ customer, open, onClose, onEdit }: Props)
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto bg-white/95 backdrop-blur-2xl border-l border-white/60">
         <SheetHeader>
           <div className="flex items-center justify-between">
             <SheetTitle className="text-lg flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <User className="h-5 w-5 text-primary" />
+              <div className="w-10 h-10 rounded-full bg-[#F0EEFF] flex items-center justify-center">
+                <User className="h-5 w-5 text-[#6B5EF9]" />
               </div>
               {fullName || 'Unknown Customer'}
             </SheetTitle>
@@ -102,8 +102,8 @@ export function CustomerDetailDrawer({ customer, open, onClose, onEdit }: Props)
 
         <div className="mt-6 space-y-4">
           {/* Contact Info */}
-          <div>
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Contact Information</h4>
+          <div className="bg-white/60 rounded-[12px] p-4 ring-1 ring-white/50">
+            <h4 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-2">Contact Information</h4>
             <div className="space-y-1">
               <Field icon={Mail} label="Email" value={customer.email} />
               <Field icon={Phone} label="Phone" value={customer.phone} />
@@ -114,8 +114,8 @@ export function CustomerDetailDrawer({ customer, open, onClose, onEdit }: Props)
           <Separator />
 
           {/* Personal Info */}
-          <div>
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Personal Details</h4>
+          <div className="bg-white/60 rounded-[12px] p-4 ring-1 ring-white/50">
+            <h4 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-2">Personal Details</h4>
             <div className="space-y-1">
               <Field icon={Calendar} label="Date of Birth" value={customer.dateOfBirth} />
               {customer.gender && <Field label="Gender" value={customer.gender} />}

@@ -389,7 +389,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
   const totals = calculateTotals();
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full" style={{ background: 'linear-gradient(135deg, #FFF3FF 0%, #F5EBFF 30%, #E8E6FF 60%, #C8DCFF 100%)' }}>
       {/* Completion success overlay */}
       {completionSuccess && (
         <div className="absolute inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
@@ -402,7 +402,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
       )}
 
       {/* Global Header */}
-      <div className="h-14 flex items-center justify-between px-6 border-b border-border/60 bg-background/80 backdrop-blur-xl sticky top-0 z-10">
+      <div className="h-14 flex items-center justify-between px-6 border-b border-white/40 bg-white/60 backdrop-blur-xl sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <Package className="h-5 w-5 text-muted-foreground" />
           <h1 className="text-lg font-semibold tracking-tight text-foreground">Take-In</h1>
@@ -425,12 +425,12 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
       </div>
 
       {/* Metal Ticker */}
-      <div className="border-b border-border/40 px-6 py-1.5">
+      <div className="border-b border-white/40 px-6 py-1.5 bg-white/30">
         <MetalPriceTicker />
       </div>
 
       {/* Quick Controls Row */}
-      <div className="px-6 py-3 flex items-center justify-between gap-6 border-b border-border/40">
+      <div className="px-6 py-3 flex items-center justify-between gap-6 border-b border-white/40 bg-white/40 backdrop-blur-sm">
         <div className="flex items-center gap-5">
           <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
             {['Jewelry', 'Watch', 'Bullion', 'Stones', 'Silverware'].map((category) => {
