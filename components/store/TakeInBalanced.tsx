@@ -545,62 +545,153 @@ export function TakeInBalanced({
                                <CollapsibleContent className="px-4 pb-4 animate-accordion-down data-[state=closed]:animate-accordion-up">
                                  <div className="bg-slate-50 rounded-lg p-4 space-y-4 border border-slate-200">
                                    
-                                   <div className="grid grid-cols-3 gap-4">
-                                     <div>
-                                       <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Brand/Maker</label>
-                                       <Input 
-                                         value={item.brand || ''} 
-                                         onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })}
-                                         placeholder="e.g., Tiffany & Co"
-                                         className="h-8 text-xs bg-background border-border/40 rounded-lg"
-                                       />
-                                     </div>
-                                     <div>
-                                       <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Condition</label>
-                                       <Select 
-                                         value={item.condition || ''} 
-                                         onValueChange={(value) => onItemUpdate(item.id, { condition: value })}
-                                       >
-                                         <SelectTrigger className="h-8 text-xs bg-background border-border/40 rounded-lg">
-                                           <SelectValue placeholder="Select" />
-                                         </SelectTrigger>
-                                         <SelectContent className="rounded-lg">
-                                           <SelectItem value="New">New</SelectItem>
-                                           <SelectItem value="Excellent">Excellent</SelectItem>
-                                           <SelectItem value="Good">Good</SelectItem>
-                                           <SelectItem value="Fair">Fair</SelectItem>
-                                           <SelectItem value="Poor">Poor</SelectItem>
-                                         </SelectContent>
-                                       </Select>
-                                     </div>
-                                     <div>
-                                       <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Size</label>
-                                       <Input 
-                                         value={item.size || ''} 
-                                         onChange={(e) => onItemUpdate(item.id, { size: e.target.value })}
-                                         placeholder="e.g., Size 7, 18in"
-                                         className="h-8 text-xs bg-background border-border/40 rounded-lg"
-                                       />
-                                     </div>
-                                   </div>
+                                   {item.category === 'Watch' ? (
+                                     /* ---- WATCH SPECS ---- */
+                                     <>
+                                       <div className="grid grid-cols-3 gap-4">
+                                         <div>
+                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Brand</label>
+                                           <Input value={item.brand || ''} onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })} placeholder="e.g., Rolex" className="h-8 text-xs bg-background border-border/40 rounded-lg" />
+                                         </div>
+                                         <div>
+                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Model</label>
+                                           <Input value={item.watchModel || ''} onChange={(e) => onItemUpdate(item.id, { watchModel: e.target.value })} placeholder="e.g., Submariner" className="h-8 text-xs bg-background border-border/40 rounded-lg" />
+                                         </div>
+                                         <div>
+                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Reference #</label>
+                                           <Input value={item.watchReference || ''} onChange={(e) => onItemUpdate(item.id, { watchReference: e.target.value })} placeholder="e.g., 116610LN" className="h-8 text-xs bg-background border-border/40 rounded-lg" />
+                                         </div>
+                                       </div>
+                                       <div className="grid grid-cols-3 gap-4">
+                                         <div>
+                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Serial #</label>
+                                           <Input value={item.watchSerial || ''} onChange={(e) => onItemUpdate(item.id, { watchSerial: e.target.value })} placeholder="Serial number" className="h-8 text-xs bg-background border-border/40 rounded-lg" />
+                                         </div>
+                                         <div>
+                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Condition</label>
+                                           <Select value={item.condition || ''} onValueChange={(v) => onItemUpdate(item.id, { condition: v })}>
+                                             <SelectTrigger className="h-8 text-xs bg-background border-border/40 rounded-lg"><SelectValue placeholder="Select" /></SelectTrigger>
+                                             <SelectContent className="rounded-lg">
+                                               <SelectItem value="New">New</SelectItem>
+                                               <SelectItem value="Excellent">Excellent</SelectItem>
+                                               <SelectItem value="Good">Good</SelectItem>
+                                               <SelectItem value="Fair">Fair</SelectItem>
+                                               <SelectItem value="Poor">Poor</SelectItem>
+                                             </SelectContent>
+                                           </Select>
+                                         </div>
+                                         <div>
+                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Dial Color</label>
+                                           <Input value={item.watchDialColor || ''} onChange={(e) => onItemUpdate(item.id, { watchDialColor: e.target.value })} placeholder="e.g., Black" className="h-8 text-xs bg-background border-border/40 rounded-lg" />
+                                         </div>
+                                       </div>
+                                       <div className="grid grid-cols-4 gap-4">
+                                         <div>
+                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Case Size</label>
+                                           <Input value={item.watchCaseSize || ''} onChange={(e) => onItemUpdate(item.id, { watchCaseSize: e.target.value })} placeholder="e.g., 40mm" className="h-8 text-xs bg-background border-border/40 rounded-lg" />
+                                         </div>
+                                         <div>
+                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Working</label>
+                                           <Select value={item.watchWorking || ''} onValueChange={(v) => onItemUpdate(item.id, { watchWorking: v })}>
+                                             <SelectTrigger className="h-8 text-xs bg-background border-border/40 rounded-lg"><SelectValue placeholder="Select" /></SelectTrigger>
+                                             <SelectContent className="rounded-lg">
+                                               <SelectItem value="Working">Working</SelectItem>
+                                               <SelectItem value="Not Working">Not Working</SelectItem>
+                                               <SelectItem value="Untested">Untested</SelectItem>
+                                             </SelectContent>
+                                           </Select>
+                                         </div>
+                                         <div>
+                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Movement</label>
+                                           <Select value={item.watchMovement || ''} onValueChange={(v) => onItemUpdate(item.id, { watchMovement: v })}>
+                                             <SelectTrigger className="h-8 text-xs bg-background border-border/40 rounded-lg"><SelectValue placeholder="Select" /></SelectTrigger>
+                                             <SelectContent className="rounded-lg">
+                                               <SelectItem value="With Movement">With Movement</SelectItem>
+                                               <SelectItem value="Without Movement">Without Movement</SelectItem>
+                                             </SelectContent>
+                                           </Select>
+                                         </div>
+                                         <div>
+                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Band</label>
+                                           <Select value={item.watchBand || ''} onValueChange={(v) => onItemUpdate(item.id, { watchBand: v })}>
+                                             <SelectTrigger className="h-8 text-xs bg-background border-border/40 rounded-lg"><SelectValue placeholder="Select" /></SelectTrigger>
+                                             <SelectContent className="rounded-lg">
+                                               <SelectItem value="Original Band">Original Band</SelectItem>
+                                               <SelectItem value="Aftermarket Band">Aftermarket Band</SelectItem>
+                                               <SelectItem value="No Band">No Band</SelectItem>
+                                             </SelectContent>
+                                           </Select>
+                                         </div>
+                                       </div>
+                                       <div className="grid grid-cols-3 gap-4">
+                                         <div className="flex items-center gap-3">
+                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Box</label>
+                                           <Select value={item.watchBox || 'No'} onValueChange={(v) => onItemUpdate(item.id, { watchBox: v })}>
+                                             <SelectTrigger className="h-7 w-16 text-xs bg-background border-border/40 rounded-lg"><SelectValue /></SelectTrigger>
+                                             <SelectContent className="rounded-lg">
+                                               <SelectItem value="Yes">Yes</SelectItem>
+                                               <SelectItem value="No">No</SelectItem>
+                                             </SelectContent>
+                                           </Select>
+                                         </div>
+                                         <div className="flex items-center gap-3">
+                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Papers</label>
+                                           <Select value={item.watchPapers || 'No'} onValueChange={(v) => onItemUpdate(item.id, { watchPapers: v })}>
+                                             <SelectTrigger className="h-7 w-16 text-xs bg-background border-border/40 rounded-lg"><SelectValue /></SelectTrigger>
+                                             <SelectContent className="rounded-lg">
+                                               <SelectItem value="Yes">Yes</SelectItem>
+                                               <SelectItem value="No">No</SelectItem>
+                                             </SelectContent>
+                                           </Select>
+                                         </div>
+                                       </div>
+                                     </>
+                                   ) : (
+                                     /* ---- JEWELRY / DEFAULT SPECS ---- */
+                                     <>
+                                       <div className="grid grid-cols-3 gap-4">
+                                         <div>
+                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Brand/Maker</label>
+                                           <Input value={item.brand || ''} onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })} placeholder="e.g., Tiffany & Co" className="h-8 text-xs bg-background border-border/40 rounded-lg" />
+                                         </div>
+                                         <div>
+                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Condition</label>
+                                           <Select value={item.condition || ''} onValueChange={(value) => onItemUpdate(item.id, { condition: value })}>
+                                             <SelectTrigger className="h-8 text-xs bg-background border-border/40 rounded-lg"><SelectValue placeholder="Select" /></SelectTrigger>
+                                             <SelectContent className="rounded-lg">
+                                               <SelectItem value="New">New</SelectItem>
+                                               <SelectItem value="Excellent">Excellent</SelectItem>
+                                               <SelectItem value="Good">Good</SelectItem>
+                                               <SelectItem value="Fair">Fair</SelectItem>
+                                               <SelectItem value="Poor">Poor</SelectItem>
+                                             </SelectContent>
+                                           </Select>
+                                         </div>
+                                         <div>
+                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Size</label>
+                                           <Input value={item.size || ''} onChange={(e) => onItemUpdate(item.id, { size: e.target.value })} placeholder="e.g., Size 7, 18in" className="h-8 text-xs bg-background border-border/40 rounded-lg" />
+                                         </div>
+                                       </div>
 
-                                    {(item.metals || []).length > 0 && (
-                                      <div>
-                                        <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Metals</label>
-                                        <div className="space-y-1">
-                                          {(item.metals || []).map((metal: any) => (
-                                            <div key={metal.id} className="flex items-center gap-2 text-xs text-slate-600 bg-white rounded-lg border border-slate-200 px-3 py-1.5">
-                                              <span className="font-medium">{metal.type} {metal.karat}K</span>
-                                              <span>·</span>
-                                              <span>{metal.weight || 0}g</span>
-                                              <span>·</span>
-                                              <span>{metal.payoutPercentage ?? 75}%</span>
-                                              <span className="ml-auto font-medium text-green-600">${(metal.payoutAmount || 0).toFixed(2)}</span>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </div>
-                                    )}
+                                       {(item.metals || []).length > 0 && (
+                                         <div>
+                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Metals</label>
+                                           <div className="space-y-1">
+                                             {(item.metals || []).map((metal: any) => (
+                                               <div key={metal.id} className="flex items-center gap-2 text-xs text-slate-600 bg-white rounded-lg border border-slate-200 px-3 py-1.5">
+                                                 <span className="font-medium">{metal.type} {metal.karat}K</span>
+                                                 <span>·</span>
+                                                 <span>{metal.weight || 0}g</span>
+                                                 <span>·</span>
+                                                 <span>{metal.payoutPercentage ?? 75}%</span>
+                                                 <span className="ml-auto font-medium text-green-600">${(metal.payoutAmount || 0).toFixed(2)}</span>
+                                               </div>
+                                             ))}
+                                           </div>
+                                         </div>
+                                       )}
+                                     </>
+                                   )}
 
                                    <div className="grid grid-cols-2 gap-4">
                                      <div>
