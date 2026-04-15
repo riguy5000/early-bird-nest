@@ -128,16 +128,16 @@ export function AnalyticsModule({ storeId, storeName }: AnalyticsModuleProps) {
         {/* ── PERFORMANCE ── */}
         <TabsContent value="performance" className="space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <KPI label="Cost Basis" value={fmt(d.costBasis)} icon={DollarSign} />
-            <KPI label="Live Value" value={fmt(d.liveValue)} icon={TrendingUp} />
-            <KPI label="Unrealized P/L" value={`${d.unrealizedPL >= 0 ? '+' : ''}${fmt(d.unrealizedPL)}`} trend={d.unrealizedPLPercent} icon={d.unrealizedPL >= 0 ? TrendingUp : TrendingDown} variant={plVariant} />
-            <KPI label="Realized Profit" value={fmt(d.realizedProfit)} icon={CheckCircle} />
+            <KPI label="Cost Basis" value={fmt(d.costBasis)} iconType="dollar-sign" />
+            <KPI label="Live Value" value={fmt(d.liveValue)} iconType="trending-up" />
+            <KPI label="Unrealized P/L" value={`${d.unrealizedPL >= 0 ? '+' : ''}${fmt(d.unrealizedPL)}`} trend={d.unrealizedPLPercent} iconType={d.unrealizedPL >= 0 ? 'trending-up' : 'trending-down'} variant={plVariant} />
+            <KPI label="Realized Profit" value={fmt(d.realizedProfit)} iconType="check-circle" />
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <KPI label="Avg. Margin" value={`${d.avgMarginAtIntake.toFixed(1)}%`} icon={BarChart3} />
-            <KPI label="Combined Performance" value={fmt(d.combinedPerformance)} icon={Layers} />
-            <KPI label="Scrap Candidate Value" value={fmt(d.scrapValue)} icon={Flame} />
-            <KPI label="Showroom Value" value={fmt(d.showroomValue)} icon={ShoppingBag} />
+            <KPI label="Avg. Margin" value={`${d.avgMarginAtIntake.toFixed(1)}%`} iconType="bar-chart" />
+            <KPI label="Combined Performance" value={fmt(d.combinedPerformance)} iconType="layers" />
+            <KPI label="Scrap Candidate Value" value={fmt(d.scrapValue)} iconType="flame" />
+            <KPI label="Showroom Value" value={fmt(d.showroomValue)} iconType="shopping-bag" />
           </div>
 
           {/* Portfolio chart */}
