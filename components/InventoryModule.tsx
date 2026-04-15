@@ -1,9 +1,8 @@
 import React, { useState, useCallback } from 'react';
-import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Search, Package, Plus, Download, Gem, Archive, Factory, Sparkles, Layers, X } from 'lucide-react';
+import { Search, Plus, X } from 'lucide-react';
 import { useInventoryData } from './inventory/useInventoryData';
 import { InventoryItemTable } from './inventory/InventoryItemTable';
 import { InventoryDetailDrawer } from './inventory/InventoryDetailDrawer';
@@ -111,7 +110,7 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
   ];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
 
       {/* ── Page header ── */}
       <div className="flex items-start justify-between">
@@ -150,9 +149,10 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
         ))}
       </div>
 
-      {/* ── Search + Filters — single glass card ── */}
-      <div className="glass-card px-5 py-4">
-        <div className="flex items-center gap-3">
+      {/* ── Search + Filters + Tabs — single glass card matching screenshot ── */}
+      <div className="glass-card overflow-hidden">
+        {/* Search row */}
+        <div className="px-5 py-4 flex items-center gap-3 border-b border-black/[0.04]">
           {/* Search input — left, flex-1 */}
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A8A3AE] pointer-events-none" />
@@ -166,7 +166,6 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
 
           {/* Filter controls — right cluster */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            {/* Category dropdown */}
             <Select value={filters.category || 'all'} onValueChange={v => setFilters(prev => ({ ...prev, category: v === 'all' ? '' : v }))}>
               <SelectTrigger className="h-9 w-32 bg-white/60 border-black/[0.06] rounded-[10px] text-[13px] text-[#2B2833]">
                 <SelectValue placeholder="Category" />
@@ -177,7 +176,6 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
               </SelectContent>
             </Select>
 
-            {/* Department / disposition dropdown */}
             <Select value={filters.disposition || 'all'} onValueChange={v => setFilters(prev => ({ ...prev, disposition: v === 'all' ? '' : v }))}>
               <SelectTrigger className="h-9 w-36 bg-white/60 border-black/[0.06] rounded-[10px] text-[13px] text-[#2B2833]">
                 <SelectValue placeholder="Department" />
@@ -188,7 +186,6 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
               </SelectContent>
             </Select>
 
-            {/* Date dropdown */}
             <Select value={filters.date_preset || 'all'} onValueChange={v => setFilters(prev => ({ ...prev, date_preset: v === 'all' ? '' : v }))}>
               <SelectTrigger className="h-9 w-24 bg-white/60 border-black/[0.06] rounded-[10px] text-[13px] text-[#2B2833]">
                 <SelectValue placeholder="Date" />
@@ -202,18 +199,16 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
               </SelectContent>
             </Select>
 
-            {/* Clear filters */}
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="flex items-center gap-1 text-[13px] text-[#76707F] hover:text-[#2B2833] px-2 py-1.5 rounded-[8px] hover:bg-white/40 transition-colors"
+                className="flex items-center gap-1 text-[13px] text-[#76707F] hover:text-[#2B2833] px-2 py-1.5 rounded-[8px] hover:bg-black/[0.04] transition-colors"
               >
                 <X className="h-3.5 w-3.5" />
                 Clear
               </button>
             )}
 
-            {/* Export — plain text style, matches screenshot */}
             <button
               onClick={handleExportCSV}
               className="text-[13px] font-medium text-[#2B2833] hover:text-[#6B5EF9] px-2 py-1.5 transition-colors"
@@ -223,8 +218,8 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
           </div>
         </div>
 
-        {/* ── View tabs — inside search card, second row ── */}
-        <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-black/[0.04]">
+        {/* Tabs row — separated by border, inside the same card */}
+        <div className="px-5 py-3 flex items-center gap-1.5">
           {tabs.map(tab => (
             <button
               key={tab.id}
@@ -254,9 +249,9 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
             onDispositionChange={handleDispositionChange}
           />
         ) : loading ? (
-          <div className="flex items-center justify-center py-16 text-[#76707F] gap-3">
+          <div className="flex items-center justify-center py-16 gap-3">
             <div className="h-5 w-5 border-2 border-[#6B5EF9] border-t-transparent rounded-full animate-spin" />
-            <span className="text-[14px]">Loading...</span>
+            <span className="text-[14px] text-[#76707F]">Loading...</span>
           </div>
         ) : (
           <InventoryItemTable

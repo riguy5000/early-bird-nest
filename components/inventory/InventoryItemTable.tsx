@@ -14,7 +14,7 @@ interface Props {
   emptyMessage?: string;
 }
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 export function InventoryItemTable({
   items, onView, onEdit, onPartOut, onArchive, onDispositionChange, hideProfit, emptyMessage,
@@ -50,8 +50,8 @@ export function InventoryItemTable({
     <div>
       <div className="overflow-x-auto">
         <table className="w-full">
-          {/* ── thead — subtle gradient ── */}
-          <thead className="table-header-gradient">
+          {/* ── thead — subtle gradient with bottom border ── */}
+          <thead className="table-header-gradient border-b border-black/[0.04]">
             <tr>
               {/* Icon column — no label */}
               <th className="w-14 px-5 py-3" />
@@ -86,9 +86,8 @@ export function InventoryItemTable({
         </table>
       </div>
 
-      {/* ── Pagination footer — matches approved screenshot ── */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between px-5 py-3.5 border-t border-black/[0.04]">
+      {/* ── Pagination footer — always visible, matches approved screenshot ── */}
+      <div className="flex items-center justify-between px-5 py-3.5 border-t border-black/[0.04]">
           {/* "Showing X to Y of Z items" */}
           <p className="text-[13px] text-[#A8A3AE]">
             Showing {((currentPage - 1) * PAGE_SIZE) + 1} to {Math.min(currentPage * PAGE_SIZE, items.length)} of {items.length} items
@@ -130,7 +129,6 @@ export function InventoryItemTable({
             </button>
           </div>
         </div>
-      )}
     </div>
   );
 }
