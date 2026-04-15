@@ -496,8 +496,10 @@ export function TakeInBalanced({
                                     </div>
                                   ))}
                                 </div>
+                                )}
 
                                 <div className="flex items-center gap-2 flex-shrink-0 mt-0.5">
+                                  {item.category !== 'Watch' && (
                                   <Button
                                     variant="ghost"
                                     size="sm"
