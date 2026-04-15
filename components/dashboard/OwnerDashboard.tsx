@@ -73,11 +73,11 @@ export function OwnerDashboard({ storeId, storeName, onNavigate }: OwnerDashboar
   ];
 
   const quickActions = [
-    { label: 'New Take-In', icon: Plus, action: 'take-in' },
-    { label: 'Find Customer', icon: Users, action: 'customers' },
-    { label: 'View Inventory', icon: Package, action: 'inventory' },
-    { label: 'Process Payout', icon: DollarSign, action: 'payouts' },
-    { label: 'Analytics', icon: BarChart3, action: 'analytics' },
+    { label: 'New Take-In', iconType: 'plus', action: 'take-in' },
+    { label: 'Find Customer', iconType: 'users', action: 'customers' },
+    { label: 'View Inventory', iconType: 'package', action: 'inventory' },
+    { label: 'Process Payout', iconType: 'dollar-sign', action: 'payouts' },
+    { label: 'Analytics', iconType: 'bar-chart', action: 'analytics' },
   ];
 
   return (
@@ -170,14 +170,14 @@ export function OwnerDashboard({ storeId, storeName, onNavigate }: OwnerDashboar
         <div className="glass-card p-6">
           <h3 className="text-[18px] font-semibold text-[#2B2833] tracking-tight mb-4">Quick Actions</h3>
           <div className="space-y-2">
-            {quickActions.map(({ label, icon: Icon, action }) => (
+            {quickActions.map(({ label, iconType, action }) => (
               <button
                 key={action}
                 onClick={() => onNavigate(action)}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-[12px] hover:bg-white/60 transition-all text-left group"
               >
                 <div className="w-10 h-10 rounded-[10px] icon-container flex items-center justify-center">
-                  <Icon className="h-4 w-4 text-[#6B5EF9]" />
+                  <PremiumIcon type={iconType} className="h-4 w-4" />
                 </div>
                 <span className="text-[14px] font-medium text-[#2B2833] group-hover:text-[#6B5EF9] transition-colors">{label}</span>
               </button>
