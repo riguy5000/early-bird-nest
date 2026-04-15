@@ -1,104 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Bravo Premium 2026 Design Tokens — HSL */
+    --background: 240 20% 97%;
+    --foreground: 260 18% 18%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 260 18% 18%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 260 18% 18%;
 
-    /* Apple-Clean Design Tokens */
-    --primary: 217 91% 60%; /* #3B82F6 */
+    --primary: 245 93% 67%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 13% 91%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 230 25% 95%;
+    --secondary-foreground: 260 18% 18%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
+    --muted: 240 14% 96%;
+    --muted-foreground: 257 8% 47%;
 
-    --accent: 217 91% 60%; /* Same as primary for consistency */
+    --accent: 245 93% 67%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: transparent;
-    --ring: 217 91% 60%;
+    --border: 0 0% 0% / 0.06;
+    --input: 0 0% 0% / 0.06;
+    --ring: 245 93% 67%;
 
-    --radius: 0.75rem; /* 12px for Apple-style rounded corners */
+    --radius: 16px;
 
-    /* Apple-Clean specific tokens */
-    --slate-50: 210 40% 98%;
-    --slate-100: 210 40% 96%;
-    --slate-400: 215 20% 65%;
-    --slate-500: 220 9% 46%;
-    --slate-900: 222 47% 11%;
+    /* Extended semantic tokens */
+    --text-primary: 260 18% 18%;
+    --text-secondary: 257 8% 47%;
+    --text-tertiary: 257 6% 66%;
+    --text-muted: 260 10% 33%;
 
-    --sidebar-background: 0 0% 98%;
+    --accent-purple: 245 93% 67%;
+    --accent-blue: 215 95% 63%;
+    --accent-teal: 177 66% 49%;
+    --accent-orange: 29 100% 63%;
+    --accent-green: 148 63% 58%;
+    --accent-red: 0 93% 71%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --surface-card: 0 0% 100% / 0.85;
+    --surface-drawer: 0 0% 100% / 0.80;
+    --surface-input: 0 0% 100% / 0.60;
+    --surface-list: 0 0% 100% / 0.50;
 
-    --sidebar-primary: 240 5.9% 10%;
+    --shadow-card: 0 0% 0% / 0.04;
+    --shadow-drawer: 0 0% 0% / 0.08;
+    --shadow-button: 0 0% 0% / 0.10;
 
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 0 0% 100% / 0.60;
+    --sidebar-foreground: 260 18% 18%;
+    --sidebar-primary: 245 93% 67%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 14% 96%;
+    --sidebar-accent-foreground: 260 18% 18%;
+    --sidebar-border: 0 0% 0% / 0.06;
+    --sidebar-ring: 245 93% 67%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --background: 240 10% 6%;
+    --foreground: 0 0% 95%;
+    --card: 240 10% 8%;
+    --card-foreground: 0 0% 95%;
+    --popover: 240 10% 8%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 245 93% 67%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 10% 14%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 240 10% 14%;
+    --muted-foreground: 240 5% 64%;
+    --accent: 240 10% 14%;
+    --accent-foreground: 0 0% 95%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 95%;
+    --border: 240 10% 14%;
+    --input: 240 10% 14%;
+    --ring: 245 93% 67%;
+    --sidebar-background: 240 10% 6%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 245 93% 67%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 240 10% 14%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 240 10% 14%;
+    --sidebar-ring: 245 93% 67%;
   }
 }
 
@@ -108,22 +106,13 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground font-inter;
-  }
-
-  /* Apple-Clean Typography */
-  .font-inter {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    @apply bg-background text-foreground antialiased;
   }
 
   /* Borderless inputs with underline focus */
   .input-clean {
     @apply border-0 border-b border-border bg-transparent px-0 py-2 focus:border-primary focus:ring-0 transition-colors;
-  }
-
-  /* Pill-style inputs */
-  .input-pill {
-    @apply rounded-full px-4 py-2 bg-slate-100 border-0 focus:bg-background focus:ring-2 focus:ring-primary/20;
   }
 
   /* Count-up animation for price changes */
@@ -144,5 +133,69 @@ All colors MUST be HSL.
 
   .animate-scale-in {
     animation: scale-in 0.2s ease-out;
+  }
+}
+
+/* Premium glassmorphism utilities */
+@layer components {
+  .glass-card {
+    @apply bg-white/85 backdrop-blur-sm rounded-[16px] shadow-lg ring-1 ring-white/60;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04), 0 4px 6px -2px rgba(0,0,0,0.04);
+  }
+
+  .glass-card-hover {
+    @apply glass-card hover:shadow-xl transition-all;
+  }
+
+  .glass-card-hover:hover {
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.08), 0 10px 10px -5px rgba(0,0,0,0.08);
+  }
+
+  .glass-surface {
+    @apply bg-white/60 backdrop-blur-sm rounded-[14px] ring-1 ring-black/[0.04];
+  }
+
+  .page-gradient {
+    background: linear-gradient(to right, #FFF3FF, #F5EBFF, #E8E6FF, #C8DCFF);
+  }
+
+  .title-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(to right, #4889FA, #6B5EF9, #F95DF9);
+  }
+
+  .icon-container {
+    @apply flex items-center justify-center shadow-md ring-2 ring-white/80;
+    background: linear-gradient(to bottom right, #FFF3FF, #ECEAFF, #C8DCFF);
+  }
+
+  .table-header-gradient {
+    background: linear-gradient(to right, #FAFAFA, #F8F7FB);
+  }
+
+  .tip-box {
+    background: linear-gradient(to right, #E8F4FF, #F0E8FF);
+    @apply rounded-[12px] p-4 shadow-sm;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  }
+
+  .btn-primary-dark {
+    @apply px-5 py-2.5 bg-[#2B2833] text-white rounded-[10px] text-[15px] font-semibold hover:bg-[#3B3846] transition-all;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.10), 0 4px 6px -2px rgba(0,0,0,0.10);
+  }
+
+  .btn-secondary-light {
+    @apply px-5 py-2.5 bg-white/60 border border-black/[0.06] text-[#2B2833] rounded-[10px] text-[15px] font-medium hover:bg-white/80 transition-all;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  }
+
+  .input-glass {
+    @apply w-full px-4 py-2.5 bg-white border border-black/[0.06] rounded-[10px] text-[15px] text-[#2B2833] placeholder:text-[#A8A3AE] focus:outline-none focus:border-[#6B5EF9]/40 focus:ring-4 focus:ring-[#6B5EF9]/10 transition-all;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  }
+
+  .kpi-card {
+    @apply bg-white/85 backdrop-blur-sm rounded-[16px] p-5 shadow-lg ring-1 ring-white/60 hover:shadow-xl transition-all;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04), 0 4px 6px -2px rgba(0,0,0,0.04);
   }
 }
