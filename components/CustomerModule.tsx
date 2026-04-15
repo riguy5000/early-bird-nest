@@ -393,6 +393,13 @@ export function CustomerModule({ user }: CustomerModuleProps) {
           )}
         </CardContent>
       </Card>
+
+      <CustomerDetailDrawer
+        customer={selectedCustomer}
+        open={showDetailDrawer}
+        onClose={() => { setShowDetailDrawer(false); setSelectedCustomer(null); }}
+        onEdit={(c) => { setShowDetailDrawer(false); setSelectedCustomer(c); setShowEditCustomer(true); }}
+      />
     </div>
   );
 }
