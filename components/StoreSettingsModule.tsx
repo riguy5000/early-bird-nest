@@ -386,47 +386,43 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate, onSettingsSav
   };
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex-shrink-0 border-b border-white/40 bg-white/60 backdrop-blur-xl px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-[36px] font-semibold tracking-tight title-gradient">Store Settings</h1>
-            <p className="text-[13px] text-[#76707F]">{general.name || 'Configure your store'}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            {hasUnsavedChanges && (
-              <div className="flex items-center gap-1.5 mr-2">
-                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
-                <span className="text-xs text-muted-foreground">Unsaved changes</span>
-              </div>
-            )}
-            <Button variant="outline" size="sm" onClick={handleReset} disabled={!hasUnsavedChanges || isLoading}>
-              <RotateCcw className="w-4 h-4 mr-1.5" />
-              Reset
-            </Button>
-            <Button size="sm" onClick={handleSave} disabled={!hasUnsavedChanges || isLoading}>
-              <Save className="w-4 h-4 mr-1.5" />
-              {isLoading ? 'Saving…' : 'Save Changes'}
-            </Button>
-          </div>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-[36px] font-semibold tracking-tight title-gradient">Store Settings</h1>
+          <p className="text-[15px] text-[#76707F]">{general.name || 'Configure your store'}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {hasUnsavedChanges && (
+            <div className="flex items-center gap-1.5 mr-2">
+              <div className="w-2 h-2 bg-[#FF9F43] rounded-full animate-pulse" />
+              <span className="text-[12px] text-[#76707F]">Unsaved changes</span>
+            </div>
+          )}
+          <button onClick={handleReset} disabled={!hasUnsavedChanges || isLoading} className="btn-secondary-light flex items-center gap-1.5 text-[13px] px-4 py-2 disabled:opacity-50">
+            <RotateCcw className="w-4 h-4" />
+            Reset
+          </button>
+          <button onClick={handleSave} disabled={!hasUnsavedChanges || isLoading} className="btn-primary-dark flex items-center gap-1.5 disabled:opacity-50">
+            <Save className="w-4 h-4" />
+            {isLoading ? 'Saving…' : 'Save Changes'}
+          </button>
         </div>
       </div>
 
       {/* Body: Sidebar + Content */}
-      <div className="flex-1 flex min-h-0 overflow-hidden">
+      <div className="flex gap-6">
         {/* Left Sidebar */}
-        <aside className="w-56 flex-shrink-0 border-r border-white/40 bg-white/30 backdrop-blur-sm p-3 overflow-y-auto">
-          <div className="mb-3">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-              <Input
-                placeholder="Search settings…"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 h-8 text-xs"
-              />
-            </div>
+        <aside className="w-56 flex-shrink-0 space-y-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A8A3AE]" />
+            <input
+              placeholder="Search settings..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="input-glass pl-10 text-[13px]"
+            />
           </div>
           <nav className="space-y-0.5">
             {filteredTabs.map((tab) => (
@@ -436,7 +432,7 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate, onSettingsSav
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 min-w-0">
           <div className="max-w-3xl space-y-6">
             {renderContent()}
           </div>
