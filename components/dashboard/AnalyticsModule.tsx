@@ -316,14 +316,14 @@ export function AnalyticsModule({ storeId, storeName }: AnalyticsModuleProps) {
                 <tbody className="divide-y divide-black/[0.04]">
                   {d.batchPerformance.map((b, i) => (
                     <tr key={i} className="hover:bg-[#FAFAF9] transition-colors">
-                      <td className="px-6 py-3 text-[14px] font-medium text-[#2B2833]">{b.batchRef || b.batchId?.slice(0, 8)}</td>
+                      <td className="px-6 py-3 text-[14px] font-medium text-[#2B2833]">{b.batchId?.slice(0, 8)}</td>
                       <td className="px-6 py-3 text-[14px] text-[#76707F]">{b.itemCount}</td>
-                      <td className="px-6 py-3 text-[14px] text-[#2B2833]">{fmt(b.totalPaid)}</td>
-                      <td className="px-6 py-3 text-[14px] text-[#2B2833]">{fmt(b.liveValue)}</td>
-                      <td className={`px-6 py-3 text-[14px] font-medium ${b.unrealizedPL >= 0 ? 'text-[#4ADB8A]' : 'text-[#F87171]'}`}>
-                        {b.unrealizedPL >= 0 ? '+' : ''}{fmt(b.unrealizedPL)}
+                      <td className="px-6 py-3 text-[14px] text-[#2B2833]">{fmt(b.totalPayout)}</td>
+                      <td className="px-6 py-3 text-[14px] text-[#2B2833]">{fmt(b.currentLiveValue)}</td>
+                      <td className={`px-6 py-3 text-[14px] font-medium ${b.unrealizedProfit >= 0 ? 'text-[#4ADB8A]' : 'text-[#F87171]'}`}>
+                        {b.unrealizedProfit >= 0 ? '+' : ''}{fmt(b.unrealizedProfit)}
                       </td>
-                      <td className="px-6 py-3"><Badge className="bg-[#F8F7FB] text-[#6B5EF9] border-0 text-[11px] rounded-full px-3 py-0.5">{b.status}</Badge></td>
+                      <td className="px-6 py-3"><Badge className="bg-[#F8F7FB] text-[#6B5EF9] border-0 text-[11px] rounded-full px-3 py-0.5">{Object.keys(b.statusMix || {})[0] || 'Active'}</Badge></td>
                     </tr>
                   ))}
                 </tbody>
@@ -352,10 +352,10 @@ export function AnalyticsModule({ storeId, storeName }: AnalyticsModuleProps) {
                 <tbody className="divide-y divide-black/[0.04]">
                   {d.buyerPerformance.map((buyer, i) => (
                     <tr key={i} className="hover:bg-[#FAFAF9] transition-colors">
-                      <td className="px-6 py-3 text-[14px] font-medium text-[#2B2833]">{buyer.name}</td>
-                      <td className="px-6 py-3 text-[14px] text-[#76707F]">{buyer.purchaseCount}</td>
-                      <td className="px-6 py-3 text-[14px] text-[#2B2833]">{fmt(buyer.totalPaid)}</td>
-                      <td className="px-6 py-3 text-[14px] text-[#76707F]">{fmt(buyer.avgPerVisit)}</td>
+                      <td className="px-6 py-3 text-[14px] font-medium text-[#2B2833]">{buyer.employeeName}</td>
+                      <td className="px-6 py-3 text-[14px] text-[#76707F]">{buyer.takeInCount}</td>
+                      <td className="px-6 py-3 text-[14px] text-[#2B2833]">{fmt(buyer.totalPayout)}</td>
+                      <td className="px-6 py-3 text-[14px] text-[#76707F]">{fmt(buyer.avgBatchValue)}</td>
                     </tr>
                   ))}
                 </tbody>
