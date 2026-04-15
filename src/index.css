@@ -37,28 +37,6 @@
 
     --radius: 16px;
 
-    /* Extended semantic tokens */
-    --text-primary: 260 18% 18%;
-    --text-secondary: 257 8% 47%;
-    --text-tertiary: 257 6% 66%;
-    --text-muted: 260 10% 33%;
-
-    --accent-purple: 245 93% 67%;
-    --accent-blue: 215 95% 63%;
-    --accent-teal: 177 66% 49%;
-    --accent-orange: 29 100% 63%;
-    --accent-green: 148 63% 58%;
-    --accent-red: 0 93% 71%;
-
-    --surface-card: 0 0% 100% / 0.85;
-    --surface-drawer: 0 0% 100% / 0.80;
-    --surface-input: 0 0% 100% / 0.60;
-    --surface-list: 0 0% 100% / 0.50;
-
-    --shadow-card: 0 0% 0% / 0.04;
-    --shadow-drawer: 0 0% 0% / 0.08;
-    --shadow-button: 0 0% 0% / 0.10;
-
     --sidebar-background: 0 0% 100% / 0.60;
     --sidebar-foreground: 260 18% 18%;
     --sidebar-primary: 245 93% 67%;
@@ -110,12 +88,10 @@
     @apply bg-background text-foreground antialiased;
   }
 
-  /* Borderless inputs with underline focus */
   .input-clean {
     @apply border-0 border-b border-border bg-transparent px-0 py-2 focus:border-primary focus:ring-0 transition-colors;
   }
 
-  /* Count-up animation for price changes */
   @keyframes count-up {
     from { transform: scale(1.1); }
     to { transform: scale(1); }
@@ -125,7 +101,6 @@
     animation: count-up 0.3s ease-out;
   }
 
-  /* Scale-in animation for new items */
   @keyframes scale-in {
     from { transform: scale(0.95); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
@@ -136,8 +111,20 @@
   }
 }
 
-/* Premium glassmorphism utilities */
+/* ── Premium Design System Utilities ── */
 @layer components {
+  /* Page background gradient */
+  .page-gradient {
+    background: linear-gradient(to right, #FFF3FF, #F5EBFF, #E8E6FF, #C8DCFF);
+  }
+
+  /* Title gradient text */
+  .title-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(to right, #4889FA, #6B5EF9, #F95DF9);
+  }
+
+  /* Glass card — primary content container */
   .glass-card {
     @apply bg-white/85 backdrop-blur-sm rounded-[16px] shadow-lg ring-1 ring-white/60;
     box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04), 0 4px 6px -2px rgba(0,0,0,0.04);
@@ -151,51 +138,50 @@
     box-shadow: 0 20px 25px -5px rgba(0,0,0,0.08), 0 10px 10px -5px rgba(0,0,0,0.08);
   }
 
+  /* Secondary surface */
   .glass-surface {
     @apply bg-white/60 backdrop-blur-sm rounded-[14px] ring-1 ring-black/[0.04];
   }
 
-  .page-gradient {
-    background: linear-gradient(to right, #FFF3FF, #F5EBFF, #E8E6FF, #C8DCFF);
+  /* KPI / Metric card */
+  .kpi-card {
+    @apply bg-white/85 backdrop-blur-sm rounded-[16px] p-5 shadow-lg ring-1 ring-white/60 hover:shadow-xl transition-all;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04), 0 4px 6px -2px rgba(0,0,0,0.04);
   }
 
-  .title-gradient {
-    @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(to right, #4889FA, #6B5EF9, #F95DF9);
-  }
-
+  /* Icon container — gradient background with white ring */
   .icon-container {
     @apply flex items-center justify-center shadow-md ring-2 ring-white/80;
     background: linear-gradient(to bottom right, #FFF3FF, #ECEAFF, #C8DCFF);
   }
 
+  /* Table header gradient */
   .table-header-gradient {
     background: linear-gradient(to right, #FAFAFA, #F8F7FB);
   }
 
+  /* Tip / notice box */
   .tip-box {
     background: linear-gradient(to right, #E8F4FF, #F0E8FF);
-    @apply rounded-[12px] p-4 shadow-sm;
+    @apply rounded-[12px] p-4;
     box-shadow: 0 1px 2px rgba(0,0,0,0.02);
   }
 
+  /* Primary dark button */
   .btn-primary-dark {
     @apply px-5 py-2.5 bg-[#2B2833] text-white rounded-[10px] text-[15px] font-semibold hover:bg-[#3B3846] transition-all;
     box-shadow: 0 10px 15px -3px rgba(0,0,0,0.10), 0 4px 6px -2px rgba(0,0,0,0.10);
   }
 
+  /* Secondary light button */
   .btn-secondary-light {
     @apply px-5 py-2.5 bg-white/60 border border-black/[0.06] text-[#2B2833] rounded-[10px] text-[15px] font-medium hover:bg-white/80 transition-all;
     box-shadow: 0 1px 2px rgba(0,0,0,0.02);
   }
 
+  /* Glass input */
   .input-glass {
     @apply w-full px-4 py-2.5 bg-white border border-black/[0.06] rounded-[10px] text-[15px] text-[#2B2833] placeholder:text-[#A8A3AE] focus:outline-none focus:border-[#6B5EF9]/40 focus:ring-4 focus:ring-[#6B5EF9]/10 transition-all;
     box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-  }
-
-  .kpi-card {
-    @apply bg-white/85 backdrop-blur-sm rounded-[16px] p-5 shadow-lg ring-1 ring-white/60 hover:shadow-xl transition-all;
-    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04), 0 4px 6px -2px rgba(0,0,0,0.04);
   }
 }
