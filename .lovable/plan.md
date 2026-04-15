@@ -1,60 +1,64 @@
 
 
-## Root Cause: Auth Token Refresh Triggers Full App Re-mount
+## Visual Alignment Fixes
 
-The flickering is caused by **Supabase auth token refresh events** in `src/App.tsx`.
+### Issues Found
 
-### The Problem
+1. **Background gradient** — Current: `linear-gradient(to right, #FFF3FF, #F5EBFF, #E8E6FF, #C8DCFF)` (4 stops). Figma shows: `0%: #FFF3FF → 56%: #ECEAFF → 100%: #C8DCFF` (3 stops). The direction and stop positions need correction.
 
-The `onAuthStateChange` listener (line 117) only handles two events:
-- `SIGNED_IN` → calls `resolveProfile()` (re-fetches user data, sets loading state)
-- `SIGNED_OUT` → clears user
+2. **Title gradient missing on Analytics and Store Settings** — Dashboard, Inventory, Customers, and Payouts use `title-gradient`. Analytics uses plain `text-2xl font-bold` with Cormorant Garamond. Store Settings uses plain `text-xl font-semibold` with Cormorant Garamond. Both need the `title-gradient` class.
 
-But Supabase fires **other events** periodically:
-- `TOKEN_REFRESHED` — every ~55 minutes when the JWT is renewed
-- `INITIAL_SESSION` — on first load
+3. **Inventory Value Trend chart style mismatch** — The Figma screenshots show a **bar chart** with rounded-top teal/green bars and value labels on top (like the "Requests" chart in the screenshot). Currently it's an AreaChart with gradient fills.
 
-When `TOKEN_REFRESHED` fires:
-1. The session is valid, so it doesn't hit the `SIGNED_OUT` branch
-2. It's not `SIGNED_IN`, so nothing happens — BUT the real issue is actually the **race between `getSession()` and `onAuthStateChange`**
+4. **Drawer/Sheet styling** — Current drawers are flush against the right edge. The user wants them frosted, offset from the right corner (matching the design). This means adding margin/inset, rounded corners on all sides, and frosted glass background.
 
-More importantly, `SIGNED_IN` fires **every time** the auth listener is set up if a session already exists. This calls `resolveProfile()` again, which **doesn't set `isLoading = true`** but does call `setUser()` and `setIsAuthenticated()` with new object references, causing the entire app tree (`JewelryPawnApp`, `TakeInPage`, modals) to **re-render and reset local state** — closing any open modals like AI Assist.
+5. **Payouts detail** — Currently uses a centered `Dialog`. Should be a right-side `Sheet` drawer matching the frosted offset style.
 
-### The Fix
+---
 
-**File: `src/App.tsx`**
+### Plan
 
-1. **Ignore redundant auth events** — Only call `resolveProfile` if the user isn't already authenticated. Handle `TOKEN_REFRESHED` as a no-op (the session is still valid, no need to re-fetch the profile).
+#### 1. Fix page-gradient (background)
+**File: `src/index.css`**
+- Change `.page-gradient` to: `linear-gradient(135deg, #FFF3FF 0%, #ECEAFF 56%, #C8DCFF 100%)` — matching the Figma 3-stop gradient exactly.
 
-2. **Guard against duplicate profile resolution** — Add a ref flag (`isResolvingRef`) to prevent concurrent `resolveProfile` calls from racing.
+#### 2. Add title-gradient to Analytics and Store Settings
+**File: `components/dashboard/AnalyticsModule.tsx`**
+- Replace the Analytics header `h2` to use `title-gradient` class at 36px, same pattern as Dashboard/Inventory/Customers.
 
-3. **Handle all auth events properly**:
-   - `SIGNED_IN` → resolve profile only if not already authenticated
-   - `TOKEN_REFRESHED` → do nothing (session is still valid)
-   - `SIGNED_OUT` → clear user
-   - `INITIAL_SESSION` → resolve profile only if not already authenticated
+**File: `components/StoreSettingsModule.tsx`**
+- Replace the Settings header `h1` to use `title-gradient` class at 36px.
 
-The key change (conceptual):
+#### 3. Restyle Dashboard chart as bar chart
+**File: `components/dashboard/OwnerDashboard.tsx`**
+- Replace the `AreaChart` with a `BarChart` using rounded-top teal bars.
+- Add value labels on top of each bar.
+- Match the screenshot style: single metric bars with rounded tops, value displayed inside/above each bar.
 
-```typescript
-supabase.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'SIGNED_OUT' || !session) {
-    // clear state
-    return;
-  }
-  // Only resolve profile on first sign-in, not on token refresh
-  if (event === 'TOKEN_REFRESHED') return;
-  if (isAuthenticated) return; // already resolved
-  resolveProfile(session);
-});
-```
+#### 4. Frosted offset drawers
+**File: `components/ui/sheet.tsx`**
+- For `side="right"`, change the default styling to:
+  - Add `m-3` (12px inset from edges)
+  - Add `rounded-[20px]` on all sides
+  - Use `bg-white/80 backdrop-blur-2xl` frosted glass
+  - Remove `border-l`, add `ring-1 ring-white/60 shadow-2xl`
+  - Adjust `h-full` to `h-[calc(100%-24px)]` to account for margin
 
-This single change prevents the entire component tree from re-mounting when the token refreshes, which is what causes open modals (like AI Assist) to disappear.
+This will automatically apply to all drawers: Inventory detail, Customer detail, AI Assist, Customer intake, and Payouts.
+
+#### 5. Convert Payouts detail from Dialog to Sheet
+**File: `components/PayoutsModule.tsx`**
+- Replace the `Dialog`/`DialogContent` with `Sheet`/`SheetContent` (right-side drawer).
+- Keep the same content inside.
+
+#### 6. Remove overrides on individual drawer components
+**Files: `InventoryDetailDrawer.tsx`, `CustomerDetailDrawer.tsx`, `CustomerDrawer.tsx`**
+- Remove per-component `bg-white/95 backdrop-blur-2xl border-l border-white/60` overrides since the base Sheet component will handle frosted styling globally.
+
+---
 
 ### Technical Details
-
-- No database changes needed
-- No new files needed
-- Only `src/App.tsx` needs to be modified
-- The fix adds ~5 lines of guard logic to the existing auth listener
+- 6 files modified, 0 new files
+- No backend, schema, auth, or workflow changes
+- All changes are CSS/visual only
 
