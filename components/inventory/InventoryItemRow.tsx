@@ -112,9 +112,9 @@ export function InventoryItemRow({ item, onView, onEdit, onPartOut, onArchive, o
         </Badge>
       </td>
       <td className="px-6 py-4 text-[14px] text-[#76707F]">{item.location || '—'}</td>
-      <td className="px-6 py-4 text-right text-[14px] font-medium text-[#2B2833] tabular-nums">{fmt(item.payout_amount)}</td>
+      <td className="px-6 py-4 text-right text-[14px] font-medium text-[#2B2833] tabular-nums">{fmt(item.payout_amount || 0)}</td>
       <td className="px-6 py-4 text-right text-[14px] font-semibold text-[#2B2833] tabular-nums">
-        {fmt(item.estimated_resale_value || item.estimated_scrap_value || item.market_value_at_intake)}
+        {fmt(item.estimated_resale_value || item.estimated_scrap_value || item.market_value_at_intake || 0)}
       </td>
       <td className="px-6 py-4 text-[13px] text-[#A8A3AE]">
         {new Date(item.created_at).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' })}
