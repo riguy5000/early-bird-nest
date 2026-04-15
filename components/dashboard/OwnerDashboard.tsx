@@ -1,9 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
+import { CardContent } from '../ui/card';
 import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
 import { useDashboardData } from './useDashboardData';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import {
   Package, Users, DollarSign, TrendingUp, TrendingDown, Plus, Clock,
@@ -19,31 +18,27 @@ interface OwnerDashboardProps {
 const fmt = (v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(v);
 const fmtFull = (v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v);
 
-function KPICard({ label, value, subtitle, trend, icon: Icon, variant = 'default' }: {
-  label: string; value: string; subtitle?: string; trend?: number; icon: any; variant?: string;
+function KPICard({ label, value, subtitle, trend, icon: Icon }: {
+  label: string; value: string; subtitle?: string; trend?: number; icon: any;
 }) {
   const isPositive = (trend || 0) >= 0;
   return (
-    <Card>
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</p>
-            <p className="text-2xl font-bold">{value}</p>
-            {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
-          </div>
-          <div className={`p-2 rounded-lg ${variant === 'positive' ? 'bg-emerald-500/10' : variant === 'negative' ? 'bg-red-500/10' : 'bg-primary/10'}`}>
-            <Icon className={`h-4 w-4 ${variant === 'positive' ? 'text-emerald-600' : variant === 'negative' ? 'text-red-600' : 'text-primary'}`} />
-          </div>
+    <div className="kpi-card">
+      <div className="flex items-start justify-between mb-4">
+        <div className="text-[12px] text-[#76707F] font-medium uppercase tracking-wider">{label}</div>
+        <div className="w-11 h-11 rounded-[12px] icon-container">
+          <Icon className="h-5 w-5 text-[#6B5EF9]" />
         </div>
-        {trend !== undefined && (
-          <div className={`flex items-center mt-2 text-xs ${isPositive ? 'text-emerald-600' : 'text-red-600'}`}>
-            {isPositive ? <ArrowUpRight className="h-3 w-3 mr-0.5" /> : <ArrowDownRight className="h-3 w-3 mr-0.5" />}
-            {isPositive ? '+' : ''}{trend.toFixed(1)}%
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      </div>
+      <div className="text-[28px] font-semibold text-[#2B2833] tracking-tight">{value}</div>
+      {subtitle && <p className="text-[12px] text-[#76707F] mt-1">{subtitle}</p>}
+      {trend !== undefined && (
+        <div className={`flex items-center mt-2 text-[12px] font-medium ${isPositive ? 'text-[#4ADB8A]' : 'text-[#F87171]'}`}>
+          {isPositive ? <ArrowUpRight className="h-3 w-3 mr-0.5" /> : <ArrowDownRight className="h-3 w-3 mr-0.5" />}
+          {isPositive ? '+' : ''}{trend.toFixed(1)}%
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -52,10 +47,10 @@ export function OwnerDashboard({ storeId, storeName, onNavigate }: OwnerDashboar
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="space-y-6">
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
-          <p className="mt-2 text-muted-foreground">Loading dashboard...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6B5EF9] mx-auto" />
+          <p className="mt-2 text-[#76707F] text-[14px]">Loading dashboard...</p>
         </div>
       </div>
     );
@@ -68,171 +63,185 @@ export function OwnerDashboard({ storeId, storeName, onNavigate }: OwnerDashboar
     metalPrices: {}, metalExposure: [], recentActivity: [],
   };
 
-  const plVariant = m.unrealizedPL >= 0 ? 'positive' : 'negative';
-
-  // Mini trend data (placeholder structure for when historical data exists)
   const trendData = [
-    { label: 'W1', costBasis: m.costBasis * 0.85, liveValue: m.liveValue * 0.82 },
-    { label: 'W2', costBasis: m.costBasis * 0.90, liveValue: m.liveValue * 0.88 },
-    { label: 'W3', costBasis: m.costBasis * 0.95, liveValue: m.liveValue * 0.94 },
+    { label: 'Week 1', costBasis: m.costBasis * 0.85, liveValue: m.liveValue * 0.82 },
+    { label: 'Week 2', costBasis: m.costBasis * 0.90, liveValue: m.liveValue * 0.88 },
+    { label: 'Week 3', costBasis: m.costBasis * 0.93, liveValue: m.liveValue * 0.92 },
+    { label: 'Week 4', costBasis: m.costBasis * 0.97, liveValue: m.liveValue * 0.96 },
     { label: 'Now', costBasis: m.costBasis, liveValue: m.liveValue },
   ];
 
+  const quickActions = [
+    { label: 'New Take-In', icon: Plus, action: 'take-in' },
+    { label: 'Find Customer', icon: Users, action: 'customers' },
+    { label: 'View Inventory', icon: Package, action: 'inventory' },
+    { label: 'Process Payout', icon: DollarSign, action: 'payouts' },
+    { label: 'Analytics', icon: BarChart3, action: 'analytics' },
+  ];
+
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Dashboard</h2>
-          <p className="text-muted-foreground">{storeName} — Owner Summary</p>
+          <h2 className="text-[36px] font-semibold tracking-tight title-gradient">Dashboard</h2>
+          <p className="text-[15px] text-[#76707F]">Owner Summary</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => onNavigate('analytics')}>
-          <BarChart3 className="h-4 w-4 mr-2" />
+        <button onClick={() => onNavigate('analytics')} className="btn-primary-dark flex items-center gap-2">
+          <BarChart3 className="h-4 w-4" />
           Deep Analytics
-        </Button>
+        </button>
       </div>
 
-      {/* Primary KPIs Row 1 */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-        <KPICard label="Items In Stock" value={m.itemsInStock.toString()} icon={Package} />
+      {/* Quick Tip */}
+      {m.unrealizedPLPercent > 0 && (
+        <div className="tip-box flex items-start gap-3">
+          <div className="w-5 h-5 rounded-full bg-[#4889FA] flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <div className="text-[13px] font-medium text-[#2B2833] mb-0.5">Quick Tip</div>
+            <div className="text-[12px] text-[#5A5463] leading-relaxed">
+              Your unrealized profit is up {m.unrealizedPLPercent.toFixed(0)}% this month. Consider reviewing high-value items for potential sales opportunities.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Primary KPIs */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <KPICard label="Items in Stock" value={m.itemsInStock.toString()} icon={Package} />
         <KPICard label="Active Customers" value={m.activeCustomers.toString()} icon={Users} />
-        <KPICard label="Today's Take-Ins" value={m.dailyTakeIns.toString()} icon={Plus} />
+        <KPICard label="Today's Take-In" value={m.dailyTakeIns.toString()} icon={Plus} />
         <KPICard label="Today's Payout" value={fmt(m.dailyPayout)} icon={DollarSign} />
-        <KPICard label="Realized Profit (Mo)" value={fmt(m.realizedProfitMonth)} icon={TrendingUp} variant={m.realizedProfitMonth >= 0 ? 'positive' : 'negative'} />
+        <KPICard label="Realized Profit (Mtd)" value={fmt(m.realizedProfitMonth)} icon={TrendingUp} />
       </div>
 
-      {/* Portfolio Performance Row */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-        <KPICard label="Cost Basis" value={fmt(m.costBasis)} subtitle="Total invested in active inventory" icon={DollarSign} />
-        <KPICard label="Live Inventory Value" value={fmt(m.liveValue)} subtitle="Current market-based estimate" icon={TrendingUp} />
+      {/* Portfolio Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <KPICard label="Cost Basis" value={fmt(m.costBasis)} subtitle="based on active inventory" icon={DollarSign} />
+        <KPICard label="Live Inventory Value" value={fmt(m.liveValue)} subtitle="current market-based estimate" icon={TrendingUp} />
         <KPICard
           label="Unrealized P/L"
           value={`${m.unrealizedPL >= 0 ? '+' : ''}${fmt(m.unrealizedPL)}`}
           trend={m.unrealizedPLPercent}
           icon={m.unrealizedPL >= 0 ? TrendingUp : TrendingDown}
-          variant={plVariant}
         />
-        <KPICard label="Scrap Pipeline" value={fmt(m.scrapPipelineValue)} icon={Flame} />
-        <KPICard label="Showroom Value" value={fmt(m.showroomValue)} icon={ShoppingBag} />
+        <KPICard label="Scrap Pipeline" value={fmt(m.scrapPipelineValue)} subtitle="showroom value" icon={Flame} />
       </div>
 
-      {/* Charts + Quick Actions */}
+      {/* Chart + Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Mini Trend Chart */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Inventory Value Trend</CardTitle>
-            <CardDescription>Cost basis vs live value</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {m.costBasis === 0 && m.liveValue === 0 ? (
-              <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">
-                Complete a purchase in Take-In to start tracking
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height={200}>
-                <AreaChart data={trendData}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis dataKey="label" className="text-xs" />
-                  <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} className="text-xs" />
-                  <Tooltip formatter={(v: number) => fmtFull(v)} />
-                  <Area type="monotone" dataKey="costBasis" stroke="hsl(var(--muted-foreground))" fill="hsl(var(--muted-foreground) / 0.1)" name="Cost Basis" />
-                  <Area type="monotone" dataKey="liveValue" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.15)" name="Live Value" />
-                </AreaChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
+        <div className="lg:col-span-2 glass-card p-6">
+          <h3 className="text-[18px] font-semibold text-[#2B2833] tracking-tight">Inventory Value Trend</h3>
+          <p className="text-[13px] text-[#76707F] mb-4">Cost basis vs live value</p>
+          {m.costBasis === 0 && m.liveValue === 0 ? (
+            <div className="h-48 flex items-center justify-center text-[#76707F] text-[14px]">
+              Complete a purchase in Take-In to start tracking
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={220}>
+              <AreaChart data={trendData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                <XAxis dataKey="label" tick={{ fontSize: 12, fill: '#76707F' }} />
+                <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 12, fill: '#76707F' }} />
+                <Tooltip formatter={(v: number) => fmtFull(v)} />
+                <defs>
+                  <linearGradient id="liveGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2ECCC4" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#2ECCC4" stopOpacity={0.05} />
+                  </linearGradient>
+                  <linearGradient id="costGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#FF9F43" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#FF9F43" stopOpacity={0.05} />
+                  </linearGradient>
+                </defs>
+                <Area type="monotone" dataKey="liveValue" stroke="#2ECCC4" fill="url(#liveGrad)" strokeWidth={2} name="Live Value" dot={{ fill: '#2ECCC4', r: 4, strokeWidth: 2, stroke: '#fff' }} />
+                <Area type="monotone" dataKey="costBasis" stroke="#FF9F43" fill="url(#costGrad)" strokeWidth={2} name="Cost Basis" dot={{ fill: '#FF9F43', r: 4, strokeWidth: 2, stroke: '#fff' }} />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
+        </div>
 
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <Button onClick={() => onNavigate('take-in')} className="w-full justify-start" size="sm">
-              <Plus className="h-4 w-4 mr-2" /> New Take-In
-            </Button>
-            <Button variant="outline" onClick={() => onNavigate('customers')} className="w-full justify-start" size="sm">
-              <Users className="h-4 w-4 mr-2" /> Find Customer
-            </Button>
-            <Button variant="outline" onClick={() => onNavigate('inventory')} className="w-full justify-start" size="sm">
-              <Package className="h-4 w-4 mr-2" /> View Inventory
-            </Button>
-            <Button variant="outline" onClick={() => onNavigate('payouts')} className="w-full justify-start" size="sm">
-              <DollarSign className="h-4 w-4 mr-2" /> Process Payout
-            </Button>
-            <Button variant="outline" onClick={() => onNavigate('analytics')} className="w-full justify-start" size="sm">
-              <BarChart3 className="h-4 w-4 mr-2" /> Analytics
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="glass-card p-6">
+          <h3 className="text-[18px] font-semibold text-[#2B2833] tracking-tight mb-4">Quick Actions</h3>
+          <div className="space-y-2">
+            {quickActions.map(({ label, icon: Icon, action }) => (
+              <button
+                key={action}
+                onClick={() => onNavigate(action)}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-[12px] hover:bg-white/60 transition-all text-left group"
+              >
+                <div className="w-10 h-10 rounded-[10px] icon-container flex items-center justify-center">
+                  <Icon className="h-4 w-4 text-[#6B5EF9]" />
+                </div>
+                <span className="text-[14px] font-medium text-[#2B2833] group-hover:text-[#6B5EF9] transition-colors">{label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* Metal Exposure Summary + Recent Activity */}
+      {/* Metal Exposure + Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Metal Exposure */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Metal Exposure</CardTitle>
-            <CardDescription>Active inventory by metal type</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {m.metalExposure.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">No metal inventory data yet</p>
-            ) : (
-              <div className="space-y-2">
-                {m.metalExposure.slice(0, 5).map((row, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 border-b last:border-0">
+        <div className="glass-card p-6">
+          <h3 className="text-[18px] font-semibold text-[#2B2833] tracking-tight">Metal Exposure</h3>
+          <p className="text-[13px] text-[#76707F] mb-4">Active inventory by metal type</p>
+          {m.metalExposure.length === 0 ? (
+            <p className="text-[14px] text-[#76707F] py-4 text-center">No metal inventory data yet</p>
+          ) : (
+            <div className="space-y-2">
+              {m.metalExposure.slice(0, 5).map((row: any, i: number) => (
+                <div key={i} className="flex items-center justify-between py-3 border-b border-black/[0.04] last:border-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-[10px] bg-gradient-to-br from-[#FFF9E6] via-[#FFECB3] to-[#FFD966] flex items-center justify-center shadow-sm">
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z" fill="#D4A029" opacity="0.4" stroke="#B8860B" strokeWidth="1.5" />
+                        <path d="M2 17l10 5 10-5" stroke="#D4A029" strokeWidth="2" strokeLinecap="round" />
+                        <path d="M2 12l10 5 10-5" stroke="#D4A029" strokeWidth="2" strokeLinecap="round" />
+                      </svg>
+                    </div>
                     <div>
-                      <span className="font-medium text-sm">{row.metal} {row.karat}</span>
-                      <span className="text-xs text-muted-foreground ml-2">{row.totalWeight.toFixed(1)}g · {row.itemCount} items</span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-sm font-medium">{fmt(row.liveValue)}</span>
-                      <span className={`text-xs ml-2 ${row.unrealizedPL >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                        {row.unrealizedPL >= 0 ? '+' : ''}{row.unrealizedPLPercent.toFixed(1)}%
-                      </span>
+                      <span className="text-[14px] font-semibold text-[#2B2833]">{row.metal} {row.karat}</span>
+                      <span className="text-[12px] text-[#76707F] ml-2">{row.totalWeight.toFixed(1)}g · {row.itemCount} items</span>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  <span className="text-[15px] font-semibold text-[#2B2833]">{fmt(row.liveValue)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {m.recentActivity.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">No recent activity</p>
-            ) : (
-              <div className="space-y-2">
-                {m.recentActivity.map((a, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 border-b last:border-0">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
-                        {a.type === 'take-in' && <Plus className="h-3 w-3 text-primary" />}
-                        {a.type === 'customer' && <User className="h-3 w-3 text-primary" />}
-                        {a.type === 'payout' && <DollarSign className="h-3 w-3 text-primary" />}
-                      </div>
-                      <div>
-                        <p className="text-sm">{a.description}</p>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="h-2.5 w-2.5" /> {a.time}
-                        </p>
-                      </div>
+        <div className="glass-card p-6">
+          <h3 className="text-[18px] font-semibold text-[#2B2833] tracking-tight mb-4">Recent Activity</h3>
+          {m.recentActivity.length === 0 ? (
+            <p className="text-[14px] text-[#76707F] py-4 text-center">No recent activity</p>
+          ) : (
+            <div className="space-y-2">
+              {m.recentActivity.map((a: any, i: number) => (
+                <div key={i} className="flex items-center justify-between py-3 border-b border-black/[0.04] last:border-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-[10px] icon-container flex items-center justify-center">
+                      {a.type === 'take-in' && <Plus className="h-4 w-4 text-[#6B5EF9]" />}
+                      {a.type === 'customer' && <User className="h-4 w-4 text-[#6B5EF9]" />}
+                      {a.type === 'payout' && <DollarSign className="h-4 w-4 text-[#6B5EF9]" />}
                     </div>
-                    {a.value !== null && <span className="text-sm font-medium">{fmtFull(a.value)}</span>}
+                    <div>
+                      <p className="text-[14px] text-[#2B2833]">{a.description}</p>
+                      <p className="text-[11px] text-[#A8A3AE] flex items-center gap-1">
+                        <Clock className="h-2.5 w-2.5" /> {a.time}
+                      </p>
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  {a.value !== null && <span className="text-[15px] font-semibold text-[#2B2833]">{fmtFull(a.value)}</span>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
