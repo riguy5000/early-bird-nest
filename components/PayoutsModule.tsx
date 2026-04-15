@@ -3,7 +3,7 @@ import { Badge } from './ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Calendar } from './ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from './ui/sheet';
 import { apiCall } from '../utils/supabase/simple-client';
 import { Search, Plus, DollarSign, Calendar as CalendarIcon, User, Receipt, TrendingUp, Download, Eye } from 'lucide-react';
 

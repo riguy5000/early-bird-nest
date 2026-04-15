@@ -2,7 +2,7 @@ import { CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { useDashboardData } from './useDashboardData';
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList
 } from 'recharts';
 import {
   Package, Users, DollarSign, TrendingUp, TrendingDown, Plus, Clock,
@@ -143,24 +143,15 @@ export function OwnerDashboard({ storeId, storeName, onNavigate }: OwnerDashboar
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={220}>
-              <AreaChart data={trendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
-                <XAxis dataKey="label" tick={{ fontSize: 12, fill: '#76707F' }} />
-                <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 12, fill: '#76707F' }} />
+              <BarChart data={trendData} barCategoryGap="20%">
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" vertical={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 12, fill: '#76707F' }} axisLine={false} tickLine={false} />
+                <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 12, fill: '#76707F' }} axisLine={false} tickLine={false} />
                 <Tooltip formatter={(v: number) => fmtFull(v)} />
-                <defs>
-                  <linearGradient id="liveGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2ECCC4" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#2ECCC4" stopOpacity={0.05} />
-                  </linearGradient>
-                  <linearGradient id="costGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#FF9F43" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#FF9F43" stopOpacity={0.05} />
-                  </linearGradient>
-                </defs>
-                <Area type="monotone" dataKey="liveValue" stroke="#2ECCC4" fill="url(#liveGrad)" strokeWidth={2} name="Live Value" dot={{ fill: '#2ECCC4', r: 4, strokeWidth: 2, stroke: '#fff' }} />
-                <Area type="monotone" dataKey="costBasis" stroke="#FF9F43" fill="url(#costGrad)" strokeWidth={2} name="Cost Basis" dot={{ fill: '#FF9F43', r: 4, strokeWidth: 2, stroke: '#fff' }} />
-              </AreaChart>
+                <Bar dataKey="liveValue" fill="#2ECCC4" radius={[8, 8, 0, 0]} name="Live Value">
+                  <LabelList dataKey="liveValue" position="top" formatter={(v: number) => `$${(v / 1000).toFixed(0)}k`} style={{ fontSize: 11, fill: '#76707F' }} />
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           )}
         </div>

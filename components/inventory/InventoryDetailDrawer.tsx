@@ -46,7 +46,7 @@ export function InventoryDetailDrawer({ item, open, onClose, onPartOut, onArchiv
   return (
     <>
       <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
-        <SheetContent className="w-full sm:max-w-lg overflow-y-auto bg-white/95 backdrop-blur-2xl border-l border-white/60">
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
           <SheetHeader>
             <SheetTitle className="text-lg text-[#2B2833]">
               {item.description || `${item.category} - ${item.subcategory}`}
