@@ -41,14 +41,31 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex w-full items-center justify-between gap-2 rounded-md border bg-input-background px-3 py-2 text-sm whitespace-nowrap transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        // Base layout
+        "flex w-full items-center justify-between gap-2 whitespace-nowrap",
+        // Design system surface
+        "bg-white border border-black/[0.06] rounded-[10px] px-4 py-2.5",
+        "text-[15px] text-[#2B2833]",
+        "shadow-sm shadow-black/[0.02]",
+        // Placeholder
+        "data-[placeholder]:text-[#A8A3AE]",
+        // Focus
+        "focus:outline-none focus-visible:border-[#6B5EF9]/40 focus-visible:ring-4 focus-visible:ring-[#6B5EF9]/10",
+        // Transition
+        "transition-all",
+        // Disabled
+        "disabled:cursor-not-allowed disabled:opacity-50",
+        // Chevron icon
+        "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg]:text-[#A8A3AE]",
+        // Value slot
+        "*:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2",
         className,
       )}
       {...props}
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <ChevronDownIcon className="size-4 opacity-50" />
+        <ChevronDownIcon className="size-4 opacity-50 flex-shrink-0" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   );

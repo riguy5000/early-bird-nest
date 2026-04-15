@@ -1,37 +1,49 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-
 import { cn } from "./utils";
 
+/**
+ * Button — Bravo Jewellers 2026 Design System
+ * Source: /design/COMPONENT_LIBRARY.md — Button Components
+ */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-4 focus-visible:ring-[#6B5EF9]/10 focus-visible:border-[#6B5EF9]/40",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        /* Primary dark — main CTA */
+        default:
+          "bg-[#2B2833] text-white rounded-[10px] font-semibold hover:bg-[#3B3846] shadow-lg shadow-black/10",
+        /* Destructive */
         destructive:
-          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+          "bg-[#F87171] text-white rounded-[10px] font-semibold hover:bg-[#EF4444] shadow-lg shadow-black/10",
+        /* Secondary light */
         outline:
-          "border bg-background text-foreground hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+          "bg-white/60 border border-black/[0.06] text-[#2B2833] rounded-[10px] font-medium hover:bg-white/80 shadow-sm shadow-black/[0.02]",
+        /* Ghost — hover only */
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "bg-white/60 border border-black/[0.06] text-[#2B2833] rounded-[10px] font-medium hover:bg-white/80 shadow-sm shadow-black/[0.02]",
         ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline",
+          "text-[#76707F] hover:text-[#2B2833] hover:bg-white/40 rounded-[10px]",
+        link:
+          "text-[#6B5EF9] underline-offset-4 hover:underline rounded-none shadow-none",
+        /* Accent teal — highlighted action */
+        accent:
+          "bg-[#2ECCC4] text-white rounded-[12px] font-semibold hover:bg-[#28B8B0] shadow-lg shadow-[#2ECCC4]/20",
       },
       size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
-        icon: "size-9 rounded-md",
+        default: "h-10 px-5 py-2.5 text-[15px]",
+        sm: "h-8 px-4 py-1.5 text-[13px] rounded-[8px]",
+        lg: "h-12 px-5 py-3.5 text-[15px]",
+        icon: "w-9 h-9 rounded-[8px]",
       },
     },
     defaultVariants: {
       variant: "default",
       size: "default",
     },
-  },
+  }
 );
 
 const Button = React.forwardRef<
@@ -42,7 +54,6 @@ const Button = React.forwardRef<
     }
 >(({ className, variant, size, asChild = false, ...props }, ref) => {
   const Comp = asChild ? Slot : "button";
-
   return (
     <Comp
       data-slot="button"
