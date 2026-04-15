@@ -512,7 +512,7 @@ export function TakeInBalanced({
                                     <Plus className="h-2.5 w-2.5 mr-0.5" />
                                     Metal
                                   </Button>
-
+                                  )}
                                   <div className="text-xs font-semibold text-green-600 min-w-[55px] text-right tabular-nums">
                                     ${(item.payoutAmount || 0).toFixed(2)}
                                   </div>
