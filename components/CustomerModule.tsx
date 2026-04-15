@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Alert, AlertDescription } from './ui/alert';
 import { CustomerForm } from './CustomerForm';
+import { CustomerDetailDrawer } from './CustomerDetailDrawer';
 import { toast } from 'sonner';
 import { 
   Search, 
