@@ -205,7 +205,7 @@ export function TakeInBalanced({
   };
 
   return (
-    <div className="h-full flex overflow-hidden" style={{ background: 'linear-gradient(135deg, #FFF3FF 0%, #F5EBFF 30%, #E8E6FF 60%, #C8DCFF 100%)' }}>
+    <div className="h-full flex overflow-hidden">
       <div className="flex w-full h-full">
         {/* Left Panel - Item Processing (scrollable) */}
         <div className="flex-1 flex flex-col min-h-0">
@@ -213,18 +213,18 @@ export function TakeInBalanced({
             {items.length === 0 ? (
               <div className="flex items-center justify-center h-full p-6">
                 <div className="text-center max-w-md">
-                  <div className="w-16 h-16 mx-auto mb-5 bg-slate-100 border border-slate-200 rounded-2xl flex items-center justify-center">
-                    <Package className="h-8 w-8 text-muted-foreground" />
+                  <div className="w-16 h-16 mx-auto mb-5 icon-container rounded-[16px] flex items-center justify-center">
+                    <Package className="h-8 w-8 text-[#6B5EF9]" strokeWidth={2} />
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-2">Ready to Process Items</h3>
-                  <p className="text-sm text-muted-foreground mb-6">Select a category above to begin adding items for evaluation</p>
+                  <h3 className="text-[18px] font-semibold text-[#2B2833] mb-2">Ready to Process Items</h3>
+                  <p className="text-[14px] text-[#76707F] mb-6">Select a category above to begin adding items for evaluation</p>
                   <div className="flex justify-center gap-2">
                     {Object.entries(categoryIcons).slice(0, 3).map(([category, Icon]) => (
                       <Button
                         key={category}
                         onClick={() => addItemByCategory(category)}
                         variant="outline"
-                        className="flex items-center gap-2 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 transition-all"
+                        className="flex items-center gap-2 btn-secondary-light"
                       >
                         <Icon className="h-4 w-4" />
                         {category}
@@ -234,28 +234,28 @@ export function TakeInBalanced({
                 </div>
               </div>
             ) : (
-              <div className="h-full overflow-auto p-4">
+              <div className="h-full overflow-auto px-5 py-4">
                 <div className="max-w-7xl mx-auto space-y-3">
                   {Object.entries(itemsByCategory).map(([category, categoryItems]) => (
                     <div key={category} className="glass-card overflow-hidden">
                       {/* Category Header */}
-                      <div className={`px-4 py-2.5 ${categoryColors[category]?.bg || 'bg-slate-50'} border-b ${categoryColors[category]?.border || 'border-slate-200'}`}>
+                      <div className="px-5 py-3 bg-white/50 border-b border-black/[0.04]">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2.5">
-                            <div className={`w-6 h-6 ${categoryColors[category]?.icon || 'bg-slate-200 text-muted-foreground'} rounded-lg flex items-center justify-center`}>
+                            <div className="w-7 h-7 rounded-[8px] icon-container flex items-center justify-center">
                               {React.createElement(categoryIcons[category as keyof typeof categoryIcons] || Gem, { 
                                 className: "h-3.5 w-3.5" 
                               })}
                             </div>
                             <div className="flex flex-col">
                               <div className="flex items-center gap-2">
-                                <h3 className="text-sm font-semibold text-foreground">{category}</h3>
-                                <span className="text-xs text-slate-500 bg-slate-200 px-1.5 py-0.5 rounded-lg">
+                                <h3 className="text-[14px] font-semibold text-[#2B2833]">{category}</h3>
+                                <span className="text-[11px] text-[#76707F] bg-black/[0.05] px-1.5 py-0.5 rounded-full">
                                   {(categoryItems as any[]).length}
                                 </span>
                               </div>
                               {(categoryItems as any[]).length > 0 && getTypeBreakdown(categoryItems as any[]) && (
-                                <div className="text-[11px] text-muted-foreground">
+                                <div className="text-[11px] text-[#A8A3AE]">
                                   {getTypeBreakdown(categoryItems as any[])}
                                 </div>
                               )}
@@ -265,7 +265,7 @@ export function TakeInBalanced({
                             onClick={() => addItemByCategory(category)}
                             size="sm"
                             variant="ghost"
-                            className="h-7 px-2.5 text-xs text-primary hover:bg-primary/5 rounded-lg"
+                            className="h-7 px-2.5 text-[12px] text-[#6B5EF9] hover:bg-[#6B5EF9]/5 rounded-[8px] font-medium"
                           >
                             <Plus className="h-3 w-3 mr-1" />
                             Add
@@ -276,7 +276,7 @@ export function TakeInBalanced({
                       {/* Items */}
                       <div className="p-2 space-y-1.5">
                         {(categoryItems as any[]).map((item, index) => (
-                           <div key={item.id} className="bg-white rounded-lg border border-slate-150 shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_2px_4px_rgba(0,0,0,0.06)] transition-shadow duration-150">
+                           <div key={item.id} className="bg-white/85 backdrop-blur-sm rounded-[12px] border border-white/60 shadow-sm hover:shadow-md transition-all duration-150" style={{boxShadow:"0 1px 3px rgba(0,0,0,0.04)"}}>
                               <div 
                                 className="flex items-start gap-2 px-3 py-2 cursor-pointer"
                                 onClick={(e) => {
@@ -287,7 +287,7 @@ export function TakeInBalanced({
                                   }
                                 }}
                               >
-                                <div className="w-6 h-6 bg-slate-200 rounded-md flex items-center justify-center text-[11px] font-semibold text-slate-600 mt-0.5 flex-shrink-0">
+                                <div className="w-6 h-6 rounded-[6px] icon-container flex items-center justify-center text-[11px] font-semibold text-[#6B5EF9] mt-0.5 flex-shrink-0">
                                   {items.findIndex(i => i.id === item.id) + 1}
                                 </div>
 
@@ -296,7 +296,7 @@ export function TakeInBalanced({
                                     value={item.itemType || ''}
                                     onChange={(e) => onItemUpdate(item.id, { itemType: e.target.value })}
                                     placeholder={`Type...`}
-                                    className="h-6 text-xs bg-transparent border-0 border-b border-slate-300 rounded-none px-0 focus:border-primary focus:ring-0 w-28"
+                                    className="h-6 text-[11px] bg-transparent border-0 border-b border-black/[0.10] rounded-none px-0 focus:border-[#6B5EF9] focus:ring-0 w-28"
                                     onClick={(e) => e.stopPropagation()}
                                   />
                                   <div className="flex flex-wrap gap-0.5">
@@ -307,7 +307,7 @@ export function TakeInBalanced({
                                           e.stopPropagation();
                                           onItemUpdate(item.id, { itemType: type });
                                         }}
-                                        className="px-1.5 py-0 text-[10px] bg-slate-100 hover:bg-blue-50 text-slate-500 hover:text-blue-600 rounded-lg border border-slate-200 transition-colors cursor-pointer leading-4"
+                                        className="px-1.5 py-0 text-[10px] bg-white/60 hover:bg-[#6B5EF9]/5 text-[#76707F] hover:text-[#6B5EF9] rounded-[6px] border border-black/[0.06] transition-colors cursor-pointer leading-4"
                                       >
                                         {type}
                                       </button>
@@ -315,10 +315,10 @@ export function TakeInBalanced({
                                   </div>
                                   {/* AI source + color notes */}
                                   {item.source === 'AI Assist' && (
-                                    <Badge variant="secondary" className="text-[9px] w-fit px-1.5 py-0 h-4">AI</Badge>
+                                    <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-[#E8E6FF] text-[#6B5EF9]">AI</span>
                                   )}
                                   {item.colorNotes && (
-                                    <span className="text-[10px] text-muted-foreground italic">{item.colorNotes}</span>
+                                    <span className="text-[10px] text-[#A8A3AE] italic">{item.colorNotes}</span>
                                   )}
                                 </div>
 
@@ -327,10 +327,10 @@ export function TakeInBalanced({
                                   <div className="flex flex-col gap-1 flex-1 min-w-0">
                                     <div className="flex items-center gap-1.5">
                                       <Select value={item.watchMaterial || 'Stainless Steel'} onValueChange={(value) => onItemUpdate(item.id, { watchMaterial: value })}>
-                                        <SelectTrigger className="w-[110px] h-6 text-[11px] bg-white border border-slate-200 rounded-md hover:bg-slate-50 transition-colors">
+                                        <SelectTrigger className="w-[110px] h-6 text-[11px] bg-white/80 border border-black/[0.06] rounded-[8px] hover:bg-white transition-colors">
                                           <SelectValue placeholder="Material" />
                                         </SelectTrigger>
-                                        <SelectContent className="rounded-lg max-h-[250px]">
+                                        <SelectContent className="rounded-[12px] max-h-[250px] bg-white/95 backdrop-blur-xl border-white/60 shadow-2xl">
                                           {watchMaterials.map(m => (
                                             <SelectItem key={m} value={m} className="text-xs">{m}</SelectItem>
                                           ))}
@@ -353,11 +353,11 @@ export function TakeInBalanced({
                                           onItemUpdate(item.id, { watchOffer: numValue, watchOfferRaw: undefined, payoutAmount: numValue });
                                         }}
                                         placeholder="Offer $"
-                                        className="w-20 h-6 text-[11px] bg-white border border-slate-200 rounded-md [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        className="w-20 h-6 text-[11px] bg-white/80 border border-black/[0.06] rounded-[8px] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                         onClick={(e) => e.stopPropagation()}
                                       />
 
-                                      <span className="text-[11px] font-medium text-green-600 min-w-[45px] text-right tabular-nums">
+                                      <span className="text-[11px] font-medium text-[#4ADB8A] min-w-[45px] text-right tabular-nums">
                                         ${(item.payoutAmount || 0).toFixed(2)}
                                       </span>
                                     </div>
@@ -366,10 +366,10 @@ export function TakeInBalanced({
                                     {isWatchPreciousMaterial(item.watchMaterial || '') && (item.metals || []).map((metal: any) => (
                                       <div key={metal.id} className="flex items-center gap-1.5">
                                         <Select value={metal.karat?.toString()} onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}>
-                                          <SelectTrigger className="w-14 h-6 text-[11px] bg-white border border-slate-200 rounded-md">
+                                          <SelectTrigger className="w-14 h-6 text-[11px] bg-white/80 border border-black/[0.06] rounded-[8px]">
                                             <SelectValue />
                                           </SelectTrigger>
-                                          <SelectContent className="rounded-lg">
+                                          <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
                                             <SelectItem value="9">9K</SelectItem>
                                             <SelectItem value="10">10K</SelectItem>
                                             <SelectItem value="14">14K</SelectItem>
@@ -390,10 +390,10 @@ export function TakeInBalanced({
                                           }}
                                           onBlur={(e) => updateMetal(item.id, metal.id, { weight: parseFloat(e.target.value) || 0, weightRaw: undefined })}
                                           placeholder="0.00"
-                                          className="w-16 h-6 text-[11px] bg-white border border-slate-200 rounded-md"
+                                          className="w-16 h-6 text-[11px] bg-white/80 border border-black/[0.06] rounded-[8px]"
                                           onClick={(e) => e.stopPropagation()}
                                         />
-                                        <span className="text-[10px] text-muted-foreground">g</span>
+                                        <span className="text-[10px] text-[#A8A3AE]">g</span>
                                       </div>
                                     ))}
                                   </div>
@@ -403,10 +403,10 @@ export function TakeInBalanced({
                                   {(item.metals || []).map((metal: any) => (
                                     <div key={metal.id} className="flex items-center gap-1.5">
                                       <Select value={metal.type} onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}>
-                                        <SelectTrigger className="w-[72px] h-6 text-[11px] bg-white border border-slate-200 rounded-md hover:bg-slate-50 transition-colors">
+                                        <SelectTrigger className="w-[72px] h-6 text-[11px] bg-white/80 border border-black/[0.06] rounded-[8px] hover:bg-white transition-colors">
                                           <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent className="rounded-lg">
+                                        <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
                                           <SelectItem value="Gold">Gold</SelectItem>
                                           <SelectItem value="Silver">Silver</SelectItem>
                                           <SelectItem value="Platinum">Platinum</SelectItem>
@@ -415,10 +415,10 @@ export function TakeInBalanced({
                                       </Select>
 
                                       <Select value={metal.karat?.toString()} onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}>
-                                        <SelectTrigger className="w-14 h-6 text-[11px] bg-white border border-slate-200 rounded-md hover:bg-slate-50 transition-colors">
+                                        <SelectTrigger className="w-14 h-6 text-[11px] bg-white/80 border border-black/[0.06] rounded-[8px]">
                                           <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent className="rounded-lg">
+                                        <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
                                           <SelectItem value="9">9K</SelectItem>
                                           <SelectItem value="10">10K</SelectItem>
                                           <SelectItem value="14">14K</SelectItem>
@@ -446,11 +446,11 @@ export function TakeInBalanced({
                                         }}
                                         onKeyDown={(e) => handleKeyPress(e, item.id, metal.id)}
                                         placeholder="0.00"
-                                        className="w-16 h-6 text-[11px] bg-white border border-slate-200 rounded-md [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        className="w-16 h-6 text-[11px] bg-white/80 border border-black/[0.06] rounded-[8px] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                         style={{ MozAppearance: 'textfield' as any }}
                                         onClick={(e) => e.stopPropagation()}
                                       />
-                                      <span className="text-[10px] text-muted-foreground">g</span>
+                                      <span className="text-[10px] text-[#A8A3AE]">g</span>
 
                                       {!store.hidePayout && (
                                         <>
@@ -465,15 +465,15 @@ export function TakeInBalanced({
                                               }
                                             }}
                                             placeholder="75"
-                                            className="w-10 h-6 text-[11px] bg-white border border-slate-200 rounded-md text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                            className="w-10 h-6 text-[11px] bg-white/80 border border-black/[0.06] rounded-[8px] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                             style={{ MozAppearance: 'textfield' as any }}
                                             onClick={(e) => e.stopPropagation()}
                                           />
-                                          <span className="text-[10px] text-muted-foreground">%</span>
+                                          <span className="text-[10px] text-[#A8A3AE]">%</span>
                                         </>
                                       )}
 
-                                      <span className="text-[11px] font-medium text-green-600 min-w-[45px] text-right tabular-nums">
+                                      <span className="text-[11px] font-medium text-[#4ADB8A] min-w-[45px] text-right tabular-nums">
                                         ${(metal.payoutAmount || 0).toFixed(2)}
                                       </span>
 
@@ -488,7 +488,7 @@ export function TakeInBalanced({
                                             const totalPayoutAmount = updatedMetals.reduce((sum: number, m: any) => sum + (m.payoutAmount || 0), 0);
                                             onItemUpdate(item.id, { metals: updatedMetals, marketValue: totalMarketValue, payoutAmount: totalPayoutAmount });
                                           }}
-                                          className="h-5 w-5 p-0 hover:text-destructive rounded-lg"
+                                          className="h-5 w-5 p-0 hover:text-[#F87171] rounded-[6px]"
                                         >
                                           <X className="h-2.5 w-2.5" />
                                         </Button>
@@ -507,17 +507,17 @@ export function TakeInBalanced({
                                       e.stopPropagation();
                                       addMetal(item.id);
                                     }}
-                                    className="h-5 px-1.5 text-[10px] text-primary hover:bg-primary/5 rounded-lg"
+                                    className="h-5 px-1.5 text-[10px] text-[#6B5EF9] hover:bg-[#6B5EF9]/5 rounded-[6px] font-medium"
                                   >
                                     <Plus className="h-2.5 w-2.5 mr-0.5" />
                                     Metal
                                   </Button>
                                   )}
-                                  <div className="text-xs font-semibold text-green-600 min-w-[55px] text-right tabular-nums">
+                                  <div className="text-[12px] font-semibold text-[#4ADB8A] min-w-[55px] text-right tabular-nums">
                                     ${(item.payoutAmount || 0).toFixed(2)}
                                   </div>
 
-                                  <div className="flex items-center gap-0.5 text-[11px] text-slate-500 px-1 py-0.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer">
+                                  <div className="flex items-center gap-0.5 text-[11px] text-[#76707F] px-2 py-0.5 rounded-[6px] hover:bg-black/[0.04] transition-colors cursor-pointer">
                                     <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${expandedAdvanced.has(item.id) ? 'rotate-90' : ''}`} />
                                     <span>Specs</span>
                                   </div>
@@ -530,7 +530,7 @@ export function TakeInBalanced({
                                         e.stopPropagation();
                                         onItemRemove(item.id);
                                       }}
-                                      className="h-5 w-5 p-0 hover:bg-destructive/10 hover:text-destructive rounded-lg"
+                                      className="h-5 w-5 p-0 hover:bg-[#F87171]/10 hover:text-[#F87171] rounded-[6px]"
                                     >
                                       <X className="h-3 w-3" />
                                     </Button>
@@ -543,35 +543,35 @@ export function TakeInBalanced({
                                onOpenChange={() => toggleAdvanced(item.id)}
                              >
                                <CollapsibleContent className="px-4 pb-4 animate-accordion-down data-[state=closed]:animate-accordion-up">
-                                 <div className="bg-slate-50 rounded-lg p-4 space-y-4 border border-slate-200">
+                                 <div className="bg-white/60 rounded-[12px] p-5 space-y-4 border border-black/[0.04]">
                                    
                                    {item.category === 'Watch' ? (
                                      /* ---- WATCH SPECS ---- */
                                      <>
                                        <div className="grid grid-cols-3 gap-4">
                                          <div>
-                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Brand</label>
-                                           <Input value={item.brand || ''} onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })} placeholder="e.g., Rolex" className="h-8 text-xs bg-background border-border/40 rounded-lg" />
+                                           <label className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider block mb-1.5">Brand</label>
+                                           <Input value={item.brand || ''} onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })} placeholder="e.g., Rolex" className="h-8 text-[12px] bg-white border border-black/[0.06] rounded-[8px]" />
                                          </div>
                                          <div>
-                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Model</label>
-                                           <Input value={item.watchModel || ''} onChange={(e) => onItemUpdate(item.id, { watchModel: e.target.value })} placeholder="e.g., Submariner" className="h-8 text-xs bg-background border-border/40 rounded-lg" />
+                                           <label className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider block mb-1.5">Model</label>
+                                           <Input value={item.watchModel || ''} onChange={(e) => onItemUpdate(item.id, { watchModel: e.target.value })} placeholder="e.g., Submariner" className="h-8 text-[12px] bg-white border border-black/[0.06] rounded-[8px]" />
                                          </div>
                                          <div>
-                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Reference #</label>
-                                           <Input value={item.watchReference || ''} onChange={(e) => onItemUpdate(item.id, { watchReference: e.target.value })} placeholder="e.g., 116610LN" className="h-8 text-xs bg-background border-border/40 rounded-lg" />
+                                           <label className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider block mb-1.5">Reference #</label>
+                                           <Input value={item.watchReference || ''} onChange={(e) => onItemUpdate(item.id, { watchReference: e.target.value })} placeholder="e.g., 116610LN" className="h-8 text-[12px] bg-white border border-black/[0.06] rounded-[8px]" />
                                          </div>
                                        </div>
                                        <div className="grid grid-cols-3 gap-4">
                                          <div>
-                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Serial #</label>
-                                           <Input value={item.watchSerial || ''} onChange={(e) => onItemUpdate(item.id, { watchSerial: e.target.value })} placeholder="Serial number" className="h-8 text-xs bg-background border-border/40 rounded-lg" />
+                                           <label className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider block mb-1.5">Serial #</label>
+                                           <Input value={item.watchSerial || ''} onChange={(e) => onItemUpdate(item.id, { watchSerial: e.target.value })} placeholder="Serial number" className="h-8 text-[12px] bg-white border border-black/[0.06] rounded-[8px]" />
                                          </div>
                                          <div>
-                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Condition</label>
+                                           <label className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider block mb-1.5">Condition</label>
                                            <Select value={item.condition || ''} onValueChange={(v) => onItemUpdate(item.id, { condition: v })}>
-                                             <SelectTrigger className="h-8 text-xs bg-background border-border/40 rounded-lg"><SelectValue placeholder="Select" /></SelectTrigger>
-                                             <SelectContent className="rounded-lg">
+                                             <SelectTrigger className="h-8 text-[12px] bg-white border border-black/[0.06] rounded-[8px]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                             <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
                                                <SelectItem value="New">New</SelectItem>
                                                <SelectItem value="Excellent">Excellent</SelectItem>
                                                <SelectItem value="Good">Good</SelectItem>
@@ -581,20 +581,20 @@ export function TakeInBalanced({
                                            </Select>
                                          </div>
                                          <div>
-                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Dial Color</label>
-                                           <Input value={item.watchDialColor || ''} onChange={(e) => onItemUpdate(item.id, { watchDialColor: e.target.value })} placeholder="e.g., Black" className="h-8 text-xs bg-background border-border/40 rounded-lg" />
+                                           <label className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider block mb-1.5">Dial Color</label>
+                                           <Input value={item.watchDialColor || ''} onChange={(e) => onItemUpdate(item.id, { watchDialColor: e.target.value })} placeholder="e.g., Black" className="h-8 text-[12px] bg-white border border-black/[0.06] rounded-[8px]" />
                                          </div>
                                        </div>
                                        <div className="grid grid-cols-4 gap-4">
                                          <div>
-                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Case Size</label>
-                                           <Input value={item.watchCaseSize || ''} onChange={(e) => onItemUpdate(item.id, { watchCaseSize: e.target.value })} placeholder="e.g., 40mm" className="h-8 text-xs bg-background border-border/40 rounded-lg" />
+                                           <label className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider block mb-1.5">Case Size</label>
+                                           <Input value={item.watchCaseSize || ''} onChange={(e) => onItemUpdate(item.id, { watchCaseSize: e.target.value })} placeholder="e.g., 40mm" className="h-8 text-[12px] bg-white border border-black/[0.06] rounded-[8px]" />
                                          </div>
                                          <div>
-                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Working</label>
+                                           <label className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider block mb-1.5">Working</label>
                                            <Select value={item.watchWorking || ''} onValueChange={(v) => onItemUpdate(item.id, { watchWorking: v })}>
-                                             <SelectTrigger className="h-8 text-xs bg-background border-border/40 rounded-lg"><SelectValue placeholder="Select" /></SelectTrigger>
-                                             <SelectContent className="rounded-lg">
+                                             <SelectTrigger className="h-8 text-[12px] bg-white border border-black/[0.06] rounded-[8px]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                             <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
                                                <SelectItem value="Working">Working</SelectItem>
                                                <SelectItem value="Not Working">Not Working</SelectItem>
                                                <SelectItem value="Untested">Untested</SelectItem>
@@ -602,20 +602,20 @@ export function TakeInBalanced({
                                            </Select>
                                          </div>
                                          <div>
-                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Movement</label>
+                                           <label className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider block mb-1.5">Movement</label>
                                            <Select value={item.watchMovement || ''} onValueChange={(v) => onItemUpdate(item.id, { watchMovement: v })}>
-                                             <SelectTrigger className="h-8 text-xs bg-background border-border/40 rounded-lg"><SelectValue placeholder="Select" /></SelectTrigger>
-                                             <SelectContent className="rounded-lg">
+                                             <SelectTrigger className="h-8 text-[12px] bg-white border border-black/[0.06] rounded-[8px]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                             <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
                                                <SelectItem value="With Movement">With Movement</SelectItem>
                                                <SelectItem value="Without Movement">Without Movement</SelectItem>
                                              </SelectContent>
                                            </Select>
                                          </div>
                                          <div>
-                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Band</label>
+                                           <label className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider block mb-1.5">Band</label>
                                            <Select value={item.watchBand || ''} onValueChange={(v) => onItemUpdate(item.id, { watchBand: v })}>
-                                             <SelectTrigger className="h-8 text-xs bg-background border-border/40 rounded-lg"><SelectValue placeholder="Select" /></SelectTrigger>
-                                             <SelectContent className="rounded-lg">
+                                             <SelectTrigger className="h-8 text-[12px] bg-white border border-black/[0.06] rounded-[8px]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                             <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
                                                <SelectItem value="Original Band">Original Band</SelectItem>
                                                <SelectItem value="Aftermarket Band">Aftermarket Band</SelectItem>
                                                <SelectItem value="No Band">No Band</SelectItem>
@@ -625,20 +625,20 @@ export function TakeInBalanced({
                                        </div>
                                        <div className="grid grid-cols-3 gap-4">
                                          <div className="flex items-center gap-3">
-                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Box</label>
+                                           <label className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Box</label>
                                            <Select value={item.watchBox || 'No'} onValueChange={(v) => onItemUpdate(item.id, { watchBox: v })}>
-                                             <SelectTrigger className="h-7 w-16 text-xs bg-background border-border/40 rounded-lg"><SelectValue /></SelectTrigger>
-                                             <SelectContent className="rounded-lg">
+                                             <SelectTrigger className="h-7 w-16 text-[12px] bg-white border border-black/[0.06] rounded-[8px]"><SelectValue /></SelectTrigger>
+                                             <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
                                                <SelectItem value="Yes">Yes</SelectItem>
                                                <SelectItem value="No">No</SelectItem>
                                              </SelectContent>
                                            </Select>
                                          </div>
                                          <div className="flex items-center gap-3">
-                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Papers</label>
+                                           <label className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Papers</label>
                                            <Select value={item.watchPapers || 'No'} onValueChange={(v) => onItemUpdate(item.id, { watchPapers: v })}>
-                                             <SelectTrigger className="h-7 w-16 text-xs bg-background border-border/40 rounded-lg"><SelectValue /></SelectTrigger>
-                                             <SelectContent className="rounded-lg">
+                                             <SelectTrigger className="h-7 w-16 text-[12px] bg-white border border-black/[0.06] rounded-[8px]"><SelectValue /></SelectTrigger>
+                                             <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
                                                <SelectItem value="Yes">Yes</SelectItem>
                                                <SelectItem value="No">No</SelectItem>
                                              </SelectContent>
@@ -651,14 +651,14 @@ export function TakeInBalanced({
                                      <>
                                        <div className="grid grid-cols-3 gap-4">
                                          <div>
-                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Brand/Maker</label>
-                                           <Input value={item.brand || ''} onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })} placeholder="e.g., Tiffany & Co" className="h-8 text-xs bg-background border-border/40 rounded-lg" />
+                                           <label className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider block mb-1.5">Brand/Maker</label>
+                                           <Input value={item.brand || ''} onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })} placeholder="e.g., Tiffany & Co" className="h-8 text-[12px] bg-white border border-black/[0.06] rounded-[8px]" />
                                          </div>
                                          <div>
-                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Condition</label>
+                                           <label className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider block mb-1.5">Condition</label>
                                            <Select value={item.condition || ''} onValueChange={(value) => onItemUpdate(item.id, { condition: value })}>
-                                             <SelectTrigger className="h-8 text-xs bg-background border-border/40 rounded-lg"><SelectValue placeholder="Select" /></SelectTrigger>
-                                             <SelectContent className="rounded-lg">
+                                             <SelectTrigger className="h-8 text-[12px] bg-white border border-black/[0.06] rounded-[8px]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                             <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
                                                <SelectItem value="New">New</SelectItem>
                                                <SelectItem value="Excellent">Excellent</SelectItem>
                                                <SelectItem value="Good">Good</SelectItem>
@@ -668,17 +668,17 @@ export function TakeInBalanced({
                                            </Select>
                                          </div>
                                          <div>
-                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Size</label>
-                                           <Input value={item.size || ''} onChange={(e) => onItemUpdate(item.id, { size: e.target.value })} placeholder="e.g., Size 7, 18in" className="h-8 text-xs bg-background border-border/40 rounded-lg" />
+                                           <label className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider block mb-1.5">Size</label>
+                                           <Input value={item.size || ''} onChange={(e) => onItemUpdate(item.id, { size: e.target.value })} placeholder="e.g., Size 7, 18in" className="h-8 text-[12px] bg-white border border-black/[0.06] rounded-[8px]" />
                                          </div>
                                        </div>
 
                                        {(item.metals || []).length > 0 && (
                                          <div>
-                                           <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Metals</label>
+                                           <label className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider block mb-1.5">Metals</label>
                                            <div className="space-y-1">
                                              {(item.metals || []).map((metal: any) => (
-                                               <div key={metal.id} className="flex items-center gap-2 text-xs text-slate-600 bg-white rounded-lg border border-slate-200 px-3 py-1.5">
+                                               <div key={metal.id} className="flex items-center gap-2 text-[12px] text-[#76707F] bg-white/80 rounded-[8px] border border-black/[0.06] px-3 py-1.5">
                                                  <span className="font-medium">{metal.type} {metal.karat}K</span>
                                                  <span>·</span>
                                                  <span>{metal.weight || 0}g</span>
@@ -695,21 +695,21 @@ export function TakeInBalanced({
 
                                    <div className="grid grid-cols-2 gap-4">
                                      <div>
-                                       <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Notes</label>
+                                       <label className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider block mb-1.5">Notes</label>
                                        <Textarea 
                                          value={item.notes || ''} 
                                          onChange={(e) => onItemUpdate(item.id, { notes: e.target.value })}
                                          placeholder="Additional details…"
-                                         className="h-16 text-xs resize-none bg-background border-border/40 rounded-lg"
+                                         className="h-16 text-[12px] resize-none bg-white border border-black/[0.06] rounded-[8px] placeholder:text-[#A8A3AE] focus:outline-none focus:border-[#6B5EF9]/40 focus:ring-4 focus:ring-[#6B5EF9]/10 transition-all"
                                        />
                                      </div>
                                       <div>
-                                        <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Photos</label>
+                                        <label className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider block mb-1.5">Photos</label>
                                         {item.photos?.length > 0 ? (
                                           <div className="flex gap-2 flex-wrap">
                                             {item.photos.map((url: string, pi: number) => (
                                               <div key={pi} className="relative group">
-                                                <img src={url} alt={`Item photo ${pi + 1}`} className="w-16 h-16 rounded-lg object-cover border border-border/60" />
+                                                <img src={url} alt={`Item photo ${pi + 1}`} className="w-16 h-16 rounded-[8px] object-cover border border-black/[0.06]" />
                                                 <button
                                                   className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
                                                   onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { photos: item.photos.filter((_: string, j: number) => j !== pi) }); }}
@@ -721,19 +721,19 @@ export function TakeInBalanced({
                                             ))}
                                           </div>
                                         ) : (
-                                          <div className="border border-dashed border-slate-300 rounded-lg p-3 text-center bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer h-16 flex flex-col items-center justify-center">
-                                            <Camera className="h-4 w-4 text-muted-foreground mb-1" />
-                                            <span className="text-[11px] text-muted-foreground">Upload Photos</span>
+                                          <div className="border border-dashed border-[#6B5EF9]/20 rounded-[8px] p-3 text-center bg-white/60 hover:bg-white/80 transition-colors cursor-pointer h-16 flex flex-col items-center justify-center">
+                                            <Camera className="h-4 w-4 text-[#6B5EF9] mb-1" />
+                                            <span className="text-[11px] text-[#A8A3AE]">Upload Photos</span>
                                           </div>
                                         )}
                                       </div>
                                     </div>
 
-                                    <div className="flex justify-end gap-2 pt-3 border-t border-border/40 mt-3">
+                                    <div className="flex justify-end gap-2 pt-3 border-t border-black/[0.04] mt-3">
                                       <Button
                                         variant="outline"
                                         size="sm"
-                                        className="rounded-lg text-xs px-4"
+                                        className="btn-secondary-light text-[12px] px-4 py-1.5"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           onItemUpdate(item.id, { brand: '', condition: '', size: '', notes: '' });
@@ -743,7 +743,7 @@ export function TakeInBalanced({
                                       </Button>
                                       <Button
                                         size="sm"
-                                        className="rounded-lg text-xs px-4"
+                                        className="btn-primary-dark text-[12px] px-4 py-1.5"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           setExpandedAdvanced(prev => {
@@ -773,12 +773,12 @@ export function TakeInBalanced({
         </div>
 
         {/* Right Panel — Frosted Summary */}
-        <div className="w-80 border-l border-white/40 bg-white/70 backdrop-blur-xl flex flex-col flex-shrink-0 h-full overflow-auto">
+        <div className="w-80 border-l border-white/40 bg-white/80 backdrop-blur-xl flex flex-col flex-shrink-0 h-full overflow-auto" style={{boxShadow:"-4px 0 24px rgba(0,0,0,0.04)"}}>
           {/* Payout Total */}
           <div className="p-6 border-b border-black/[0.06]">
             <div className="text-center">
               <div className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-2">Total Payout</div>
-              <div className="text-[32px] font-semibold title-gradient tabular-nums tracking-tight">
+              <div className="text-[40px] font-semibold text-[#2B2833] tabular-nums tracking-tight">
                 ${totalPayout.toFixed(2)}
               </div>
               <div className="text-[12px] text-[#A8A3AE] mt-1">
@@ -878,7 +878,7 @@ export function TakeInBalanced({
             </div>
 
             {/* Reminder box */}
-            <div className="bg-gradient-to-r from-[#E8F4FF] to-[#F0E8FF] rounded-[12px] p-3">
+            <div className="tip-box">
               <div className="flex items-start gap-2">
                 <div className="w-5 h-5 rounded-full bg-[#4889FA] flex items-center justify-center flex-shrink-0 mt-0.5">
                   <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -898,7 +898,7 @@ export function TakeInBalanced({
             {store.enableSaveForLater !== false && (
               <Button 
                 variant="ghost" 
-                className="w-full flex items-center gap-2 rounded-[10px] bg-white/60 hover:bg-white/80 text-[#2B2833] border border-black/[0.06] text-[13px]"
+                className="w-full flex items-center justify-center gap-2 btn-secondary-light text-[13px]"
                 disabled={items.length === 0}
                 onClick={onSaveQuote}
               >
@@ -908,7 +908,7 @@ export function TakeInBalanced({
             )}
             <Button 
               variant="ghost" 
-              className="w-full flex items-center gap-2 rounded-[10px] bg-white/60 hover:bg-white/80 text-[#2B2833] border border-black/[0.06] text-[13px]"
+              className="w-full flex items-center justify-center gap-2 btn-secondary-light text-[13px]"
               disabled={items.length === 0}
             >
               <Printer className="h-4 w-4 text-[#A8A3AE]" />
@@ -916,7 +916,7 @@ export function TakeInBalanced({
             </Button>
             {store.canCompletePurchase !== false && (
               <Button 
-                className="w-full flex items-center gap-2 btn-primary-dark rounded-[10px] text-[14px] font-medium"
+                className="w-full flex items-center justify-center gap-2 btn-primary-dark"
                 disabled={items.length === 0 || completing}
                 onClick={onCompletePurchase}
               >
