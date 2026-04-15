@@ -307,7 +307,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
         <div className="flex items-center justify-between">
           {/* Left: Title + batch ID */}
           <div>
-            <h1 className="text-[28px] font-semibold tracking-tight title-gradient leading-tight">
+            <h1 className="text-[36px] font-semibold tracking-tight title-gradient leading-tight">
               Take-In
             </h1>
             {batchId && (

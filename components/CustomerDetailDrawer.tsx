@@ -81,8 +81,12 @@ export function CustomerDetailDrawer({ customer, open, onClose, onEdit }: Props)
 
   if (!open) return null;
 
+  // Slide-in animation keyframe injected inline
+  const slideStyle = `@keyframes slideInRight { from { transform: translateX(100%); opacity: 0.8; } to { transform: translateX(0); opacity: 1; } }`;
+
   return (
     <>
+      <style>{slideStyle}</style>
       {/* ── Backdrop — dimmed haze, matches approved screenshot ── */}
       <div
         className="fixed inset-0 z-40 bg-black/[0.08] backdrop-blur-[2px]"
@@ -92,6 +96,7 @@ export function CustomerDetailDrawer({ customer, open, onClose, onEdit }: Props)
       {/* ── Drawer panel — right-edge flush, full height, rounded left corners ── */}
       <div
         className="fixed top-0 right-0 bottom-0 z-50 flex flex-col"
+        style={{ animation: 'slideInRight 0.25s cubic-bezier(0,0,0.2,1)' }}
         style={{
           width: '300px',
           background: 'rgba(255,255,255,0.95)',

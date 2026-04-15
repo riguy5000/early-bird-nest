@@ -455,31 +455,31 @@ export function CustomerDrawer({
   return (
     <>
       <Sheet open={isOpen} onOpenChange={handleClose}>
-        <SheetContent side="right" className="w-full sm:w-[440px] p-0 flex flex-col border-l border-border/40">
-          <SheetHeader className="px-6 pt-6 pb-4 border-b border-border/40">
+        <SheetContent side="right" className="w-full sm:w-[440px] p-0 flex flex-col">
+          <SheetHeader className="px-6 pt-6 pb-4 border-b border-black/[0.06]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-muted/60 flex items-center justify-center">
-                  <User className="h-4 w-4 text-muted-foreground" />
+                <div className="w-8 h-8 rounded-full icon-container flex items-center justify-center">
+                  <User className="h-4 w-4 text-[#6B5EF9]" />
                 </div>
-                <SheetTitle className="text-base font-semibold">Customer</SheetTitle>
+                <SheetTitle className="text-[18px] font-semibold text-[#2B2833]">Customer</SheetTitle>
               </div>
               <div className="flex items-center gap-2">
                 {customer && !editMode && (
-                  <Button variant="ghost" size="sm" onClick={() => setEditMode(true)} className="rounded-lg text-xs">
+                  <Button variant="ghost" size="sm" onClick={() => setEditMode(true)} className="text-[12px] font-medium text-[#76707F] px-3 py-1.5 rounded-[8px] hover:bg-[#F8F7FB] transition-colors">
                     <Edit className="h-3.5 w-3.5 mr-1" />
                     Edit
                   </Button>
                 )}
                 {editMode && (
-                  <Button size="sm" onClick={handleSave} disabled={saving} className="rounded-lg text-xs bg-primary hover:bg-primary/90">
+                  <Button size="sm" onClick={handleSave} disabled={saving} className="btn-primary-dark">
                     {saving ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Save className="h-3.5 w-3.5 mr-1" />}
                     Save
                   </Button>
                 )}
               </div>
             </div>
-            <SheetDescription className="text-xs">
+            <SheetDescription className="text-[12px] text-[#76707F]">
               {editMode ? 'Enter details or scan their ID' : 'Customer details for this transaction'}
             </SheetDescription>
           </SheetHeader>
@@ -494,7 +494,7 @@ export function CustomerDrawer({
                       <Button 
                         variant="outline" 
                         onClick={() => setScanStep('choose')}
-                        className="w-full flex items-center gap-2 h-11 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-all"
+                        className="w-full flex items-center gap-2 btn-secondary-light"
                       >
                         <Scan className="h-4 w-4" />
                         Scan Government ID
@@ -503,14 +503,14 @@ export function CustomerDrawer({
                   )}
 
                   {scanStep === 'choose' && (
-                    <div className="border border-slate-200 rounded-lg p-5 space-y-3 bg-slate-50">
+                    <div className="glass-surface p-5 space-y-3">
                       <div className="text-center mb-2">
-                        <p className="font-medium text-sm">How do you want to capture the ID?</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">Driver License, State ID, or Passport</p>
+                        <p className="text-[14px] font-semibold text-[#2B2833]">How do you want to capture the ID?</p>
+                        <p className="text-[12px] text-[#76707F] mt-0.5">Driver License, State ID, or Passport</p>
                       </div>
                       <Button 
                         onClick={startDeviceCapture}
-                        className="w-full rounded-lg flex items-center gap-2"
+                        className="w-full btn-primary-dark flex items-center gap-2"
                       >
                         <Camera className="h-4 w-4" />
                         Use This Device Camera
@@ -518,7 +518,7 @@ export function CustomerDrawer({
                       <Button 
                         variant="outline"
                         onClick={startQrFlow}
-                        className="w-full rounded-lg flex items-center gap-2"
+                        className="w-full btn-primary-dark flex items-center gap-2"
                       >
                         <QrCode className="h-4 w-4" />
                         Scan with Another Device
@@ -526,7 +526,7 @@ export function CustomerDrawer({
                       <Button 
                         variant="ghost" size="sm"
                         onClick={() => setScanStep('idle')}
-                        className="w-full text-xs text-muted-foreground"
+                        className="w-full text-[12px] text-[#76707F]"
                       >
                         Cancel
                       </Button>
@@ -534,20 +534,20 @@ export function CustomerDrawer({
                   )}
 
                   {scanStep === 'qr' && (
-                    <div className="border border-slate-200 rounded-lg p-5 text-center space-y-3 bg-slate-50">
+                    <div className="glass-surface p-5 text-center space-y-3">
                       <div className="w-12 h-12 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
                         <Smartphone className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <p className="font-medium text-sm">Scan from Another Device</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
+                        <p className="text-[14px] font-semibold text-[#2B2833]">Scan from Another Device</p>
+                        <p className="text-[12px] text-[#76707F] mt-0.5">
                           Scan this QR code with a phone to capture the ID photo
                         </p>
                       </div>
                       <div className="flex justify-center py-2">
                         <QRCodeSVG value={qrUrl} size={180} />
                       </div>
-                      <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                      <div className="flex items-center justify-center gap-2 text-[12px] text-[#76707F]">
                         <Loader2 className="h-3 w-3 animate-spin" />
                         Waiting for photo…
                       </div>
@@ -560,7 +560,7 @@ export function CustomerDrawer({
                           }
                           setScanStep('choose');
                         }}
-                        className="w-full text-xs text-muted-foreground"
+                        className="w-full text-[12px] text-[#76707F]"
                       >
                         Cancel
                       </Button>
@@ -568,19 +568,19 @@ export function CustomerDrawer({
                   )}
 
                   {scanStep === 'front' && (
-                    <div className="border border-slate-200 rounded-lg p-5 text-center space-y-3 bg-slate-50">
+                    <div className="glass-surface p-5 text-center space-y-3">
                       <div className="w-12 h-12 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
                         <Camera className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <p className="font-medium text-sm">Front of ID</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">Take a photo or upload the front side of the government ID</p>
+                        <p className="text-[14px] font-semibold text-[#2B2833]">Front of ID</p>
+                        <p className="text-[12px] text-[#76707F] mt-0.5">Take a photo or upload the front side of the government ID</p>
                       </div>
-                      <Button onClick={() => frontInputRef.current?.click()} className="w-full rounded-lg">
+                      <Button onClick={() => frontInputRef.current?.click()} className="w-full btn-primary-dark">
                         <Upload className="h-4 w-4 mr-2" />
                         Capture Front
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => setScanStep('choose')} className="w-full text-xs text-muted-foreground">
+                      <Button variant="ghost" size="sm" onClick={() => setScanStep('choose')} className="w-full text-[12px] text-[#76707F]">
                         Back
                       </Button>
                       <input ref={frontInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFrontCapture} />
@@ -588,23 +588,23 @@ export function CustomerDrawer({
                   )}
 
                   {scanStep === 'back' && (
-                    <div className="border border-slate-200 rounded-lg p-5 text-center space-y-3 bg-slate-50">
+                    <div className="glass-surface p-5 text-center space-y-3">
                       <div className="flex items-center justify-center gap-1.5 text-green-600 mb-1">
                         <CheckCircle2 className="h-3.5 w-3.5" />
-                        <span className="text-xs font-medium">Front captured</span>
+                        <span className="text-[12px] font-medium text-[#2B2833]">Front captured</span>
                       </div>
                       <div className="w-12 h-12 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
                         <Camera className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <p className="font-medium text-sm">Back of ID</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">Take a photo of the back side</p>
+                        <p className="text-[14px] font-semibold text-[#2B2833]">Back of ID</p>
+                        <p className="text-[12px] text-[#76707F] mt-0.5">Take a photo of the back side</p>
                       </div>
-                      <Button onClick={() => backInputRef.current?.click()} className="w-full rounded-lg">
+                      <Button onClick={() => backInputRef.current?.click()} className="w-full btn-primary-dark">
                         <Upload className="h-4 w-4 mr-2" />
                         Capture Back
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={skipBack} className="w-full text-xs text-muted-foreground rounded-lg">
+                      <Button variant="ghost" size="sm" onClick={skipBack} className="w-full text-[12px] text-[#76707F]">
                         Skip — analyze front only
                       </Button>
                       <input ref={backInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleBackCapture} />
@@ -612,28 +612,28 @@ export function CustomerDrawer({
                   )}
 
                   {scanStep === 'analyzing' && (
-                    <div className="border border-slate-200 rounded-lg p-6 text-center space-y-3 bg-slate-50">
+                    <div className="glass-surface p-6 text-center space-y-3">
                       <Loader2 className="h-6 w-6 mx-auto animate-spin text-primary" />
                       <div>
-                        <p className="font-medium text-sm">Analyzing ID…</p>
-                        <p className="text-xs text-muted-foreground">AI is extracting information</p>
+                        <p className="text-[14px] font-semibold text-[#2B2833]">Analyzing ID…</p>
+                        <p className="text-[12px] text-[#76707F]">AI is extracting information</p>
                       </div>
                     </div>
                   )}
 
                   {imageQualityWarning && (
-                    <div className="flex items-start gap-2.5 p-3 rounded-lg bg-yellow-50 border border-yellow-200/60 text-yellow-800">
+                    <div className="flex items-start gap-2.5 p-3 tip-box-warning flex items-start gap-2">
                       <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-                      <p className="text-xs">{imageQualityWarning}</p>
+                      <p className="text-[12px] text-[#E65100]">{imageQualityWarning}</p>
                     </div>
                   )}
 
                   {/* Scanned ID image thumbnails */}
                   {(frontUrl || backUrl) && scanStep === 'idle' && (
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 p-2.5 rounded-lg bg-green-50 border border-green-200/60 text-green-700">
+                      <div className="flex items-center gap-2 p-2.5 tip-box-success flex items-center gap-2">
                         <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
-                        <span className="text-xs font-medium">ID scanned</span>
+                        <span className="text-[12px] font-medium text-[#2E7D32]">ID scanned</span>
                         <Button 
                           variant="ghost" size="sm" 
                           onClick={() => setScanStep('choose')}
@@ -645,14 +645,14 @@ export function CustomerDrawer({
                       <div className="flex gap-2">
                         {frontUrl && (
                           <div className="flex-1">
-                            <p className="text-[10px] text-muted-foreground mb-1">Front</p>
-                            <img src={frontUrl} alt="ID Front" className="w-full h-20 object-cover rounded-md border border-slate-200" />
+                            <p className="text-[10px] text-[#A8A3AE] mb-1">Front</p>
+                            <img src={frontUrl} alt="ID Front" className="w-full h-20 object-cover rounded-[8px] border border-black/[0.06]" />
                           </div>
                         )}
                         {backUrl && (
                           <div className="flex-1">
-                            <p className="text-[10px] text-muted-foreground mb-1">Back</p>
-                            <img src={backUrl} alt="ID Back" className="w-full h-20 object-cover rounded-md border border-slate-200" />
+                            <p className="text-[10px] text-[#A8A3AE] mb-1">Back</p>
+                            <img src={backUrl} alt="ID Back" className="w-full h-20 object-cover rounded-[8px] border border-black/[0.06]" />
                           </div>
                         )}
                       </div>
@@ -664,18 +664,18 @@ export function CustomerDrawer({
               {/* View-mode ID images */}
               {!editMode && (frontUrl || backUrl) && (
                 <div className="space-y-2">
-                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Scanned ID</h4>
+                  <h4 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Scanned ID</h4>
                   <div className="flex gap-2">
                     {frontUrl && (
                       <div className="flex-1">
-                        <p className="text-[10px] text-muted-foreground mb-1">Front</p>
-                        <img src={frontUrl} alt="ID Front" className="w-full h-20 object-cover rounded-md border border-slate-200" />
+                        <p className="text-[10px] text-[#A8A3AE] mb-1">Front</p>
+                        <img src={frontUrl} alt="ID Front" className="w-full h-20 object-cover rounded-[8px] border border-black/[0.06]" />
                       </div>
                     )}
                     {backUrl && (
                       <div className="flex-1">
-                        <p className="text-[10px] text-muted-foreground mb-1">Back</p>
-                        <img src={backUrl} alt="ID Back" className="w-full h-20 object-cover rounded-md border border-slate-200" />
+                        <p className="text-[10px] text-[#A8A3AE] mb-1">Back</p>
+                        <img src={backUrl} alt="ID Back" className="w-full h-20 object-cover rounded-[8px] border border-black/[0.06]" />
                       </div>
                     )}
                   </div>
@@ -686,11 +686,11 @@ export function CustomerDrawer({
 
               {/* Personal Information */}
               <div className="space-y-3">
-                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Personal Information</h4>
+                <h4 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Personal Information</h4>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2 relative">
-                    <Label className="text-xs text-muted-foreground">Full Name *</Label>
+                    <Label className="text-[12px] text-[#76707F]">Full Name *</Label>
                     {editMode ? (
                       <>
                         <div className="relative">
@@ -698,28 +698,28 @@ export function CustomerDrawer({
                             value={formData.name} 
                             onChange={(e) => updateField('name', e.target.value)} 
                             placeholder="Full name" 
-                            className="mt-1 rounded-lg bg-white border border-slate-200 pr-8"
+                            className="mt-1 input-glass pr-8"
                             onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
                             onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                           />
                           {formData.name.length >= 2 && (
-                            <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground mt-0.5" />
+                            <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#A8A3AE] mt-0.5" />
                           )}
                         </div>
                         {/* Suggestions dropdown */}
                         {showSuggestions && suggestions.length > 0 && (
-                          <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
-                            <div className="px-3 py-1.5 text-[10px] text-muted-foreground uppercase tracking-wider bg-slate-50 border-b border-slate-200">
+                          <div className="absolute z-50 w-full mt-1 bg-white/95 border border-black/[0.06] rounded-[12px] shadow-xl overflow-hidden backdrop-blur-xl">
+                            <div className="px-3 py-1.5 text-[10px] text-[#A8A3AE] uppercase tracking-wider bg-black/[0.02] border-b border-black/[0.04]">
                               Existing Customers
                             </div>
                             {suggestions.map(s => (
                               <button
                                 key={s.id}
-                                className="w-full px-3 py-2 text-left hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0"
+                                className="w-full px-3 py-2.5 text-left hover:bg-[#FAFAF9] transition-colors border-b border-black/[0.04] last:border-0"
                                 onMouseDown={() => selectSuggestion(s)}
                               >
-                                <div className="text-sm font-medium">{s.full_name}</div>
-                                <div className="text-[11px] text-muted-foreground flex gap-2">
+                                <div className="text-[14px] font-medium text-[#2B2833]">{s.full_name}</div>
+                                <div className="text-[11px] text-[#A8A3AE] flex gap-2">
                                   {s.license_number && <span>ID: {s.license_number}</span>}
                                   {s.phone && <span>{s.phone}</span>}
                                   {s.email && <span>{s.email}</span>}
@@ -730,47 +730,47 @@ export function CustomerDrawer({
                         )}
                       </>
                     ) : (
-                      <div className="mt-1 text-sm font-medium">{customer?.name || 'Not provided'}</div>
+                      <div className="mt-1 text-[14px] font-medium text-[#2B2833]">{customer?.name || 'Not provided'}</div>
                     )}
                   </div>
 
                   <div>
-                    <Label className="text-xs text-muted-foreground">
+                    <Label className="text-[12px] text-[#76707F]">
                       Date of Birth {storeSettings?.requireDob && '*'}
                     </Label>
                     {editMode ? (
-                      <Input type="date" value={formData.dateOfBirth} onChange={(e) => updateField('dateOfBirth', e.target.value)} className="mt-1 rounded-lg bg-white border border-slate-200" />
+                      <Input type="date" value={formData.dateOfBirth} onChange={(e) => updateField('dateOfBirth', e.target.value)} className="mt-1 input-glass" />
                     ) : (
-                      <div className="mt-1 text-sm">{customer?.dateOfBirth || 'Not provided'}</div>
+                      <div className="mt-1 text-[14px] text-[#2B2833]">{customer?.dateOfBirth || 'Not provided'}</div>
                     )}
                   </div>
 
                   <div>
-                    <Label className="text-xs text-muted-foreground">
+                    <Label className="text-[12px] text-[#76707F]">
                       Gender {storeSettings?.requireGender && '*'}
                     </Label>
                     {editMode ? (
                       <Select value={formData.gender} onValueChange={(v) => updateField('gender', v)}>
-                        <SelectTrigger className="mt-1 rounded-lg bg-white border border-slate-200"><SelectValue placeholder="Select" /></SelectTrigger>
-                        <SelectContent className="rounded-lg">
+                        <SelectTrigger className="mt-1 input-glass"><SelectValue placeholder="Select" /></SelectTrigger>
+                        <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
                           <SelectItem value="M">Male</SelectItem>
                           <SelectItem value="F">Female</SelectItem>
                           <SelectItem value="Other">Other</SelectItem>
                         </SelectContent>
                       </Select>
                     ) : (
-                      <div className="mt-1 text-sm">{customer?.gender || 'Not provided'}</div>
+                      <div className="mt-1 text-[14px] text-[#2B2833]">{customer?.gender || 'Not provided'}</div>
                     )}
                   </div>
 
                   <div className="col-span-2">
-                    <Label className="text-xs text-muted-foreground">
+                    <Label className="text-[12px] text-[#76707F]">
                       ID / License / Passport # {storeSettings?.requireLicenseNumber && '*'}
                     </Label>
                     {editMode ? (
-                      <Input value={formData.licenseNumber} onChange={(e) => updateField('licenseNumber', e.target.value)} placeholder="Government ID number" className="mt-1 rounded-lg bg-white border border-slate-200 font-mono" />
+                      <Input value={formData.licenseNumber} onChange={(e) => updateField('licenseNumber', e.target.value)} placeholder="Government ID number" className="mt-1 input-glass font-mono" />
                     ) : (
-                      <div className="mt-1 text-sm font-mono">{customer?.licenseNumber || 'Not provided'}</div>
+                      <div className="mt-1 text-[14px] font-mono text-[#2B2833]">{customer?.licenseNumber || 'Not provided'}</div>
                     )}
                   </div>
                 </div>
@@ -780,48 +780,48 @@ export function CustomerDrawer({
 
               {/* Contact Information */}
               <div className="space-y-3">
-                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Contact</h4>
+                <h4 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Contact</h4>
 
                 <div className="space-y-3">
                   <div>
-                    <Label className="text-xs text-muted-foreground">
+                    <Label className="text-[12px] text-[#76707F]">
                       Email {storeSettings?.requireEmail && '*'}
                     </Label>
                     {editMode ? (
-                      <Input type="email" value={formData.email} onChange={(e) => updateField('email', e.target.value)} placeholder="customer@example.com" className="mt-1 rounded-lg bg-white border border-slate-200" />
+                      <Input type="email" value={formData.email} onChange={(e) => updateField('email', e.target.value)} placeholder="customer@example.com" className="mt-1 input-glass" />
                     ) : (
-                      <div className="mt-1 text-sm flex items-center gap-2"><Mail className="h-3 w-3 text-muted-foreground" />{customer?.email || 'Not provided'}</div>
+                      <div className="mt-1 text-[14px] text-[#2B2833] flex items-center gap-2"><Mail className="h-3 w-3 text-[#A8A3AE]" />{customer?.email || 'Not provided'}</div>
                     )}
                   </div>
 
                   <div>
-                    <Label className="text-xs text-muted-foreground">
+                    <Label className="text-[12px] text-[#76707F]">
                       Phone {storeSettings?.requirePhone && '*'}
                     </Label>
                     {editMode ? (
-                      <Input type="tel" value={formData.phone} onChange={(e) => updateField('phone', e.target.value)} placeholder="(555) 123-4567" className="mt-1 rounded-lg bg-white border border-slate-200" />
+                      <Input type="tel" value={formData.phone} onChange={(e) => updateField('phone', e.target.value)} placeholder="(555) 123-4567" className="mt-1 input-glass" />
                     ) : (
-                      <div className="mt-1 text-sm flex items-center gap-2"><Phone className="h-3 w-3 text-muted-foreground" />{customer?.phone || 'Not provided'}</div>
+                      <div className="mt-1 text-[14px] text-[#2B2833] flex items-center gap-2"><Phone className="h-3 w-3 text-[#A8A3AE]" />{customer?.phone || 'Not provided'}</div>
                     )}
                   </div>
 
                   <div>
-                    <Label className="text-xs text-muted-foreground">
+                    <Label className="text-[12px] text-[#76707F]">
                       Address {storeSettings?.requireAddress && '*'}
                     </Label>
                     {editMode ? (
-                      <Textarea value={formData.address} onChange={(e) => updateField('address', e.target.value)} placeholder="Full address" rows={2} className="mt-1 rounded-lg bg-white border border-slate-200 resize-none" />
+                      <Textarea value={formData.address} onChange={(e) => updateField('address', e.target.value)} placeholder="Full address" rows={2} className="mt-1 textarea-glass resize-none" />
                     ) : (
-                      <div className="mt-1 text-sm flex items-start gap-2"><MapPin className="h-3 w-3 mt-0.5 text-muted-foreground" /><span>{customer?.address || 'Not provided'}</span></div>
+                      <div className="mt-1 text-[14px] text-[#2B2833] flex items-start gap-2"><MapPin className="h-3 w-3 mt-0.5 text-[#A8A3AE]" /><span>{customer?.address || 'Not provided'}</span></div>
                     )}
                   </div>
 
                   <div>
-                    <Label className="text-xs text-muted-foreground">Notes</Label>
+                    <Label className="text-[12px] text-[#76707F]">Notes</Label>
                     {editMode ? (
-                      <Textarea value={formData.notes || ''} onChange={(e) => updateField('notes', e.target.value)} placeholder="Additional notes" rows={2} className="mt-1 rounded-lg bg-white border border-slate-200 resize-none" />
+                      <Textarea value={formData.notes || ''} onChange={(e) => updateField('notes', e.target.value)} placeholder="Additional notes" rows={2} className="mt-1 textarea-glass resize-none" />
                     ) : (
-                      formData.notes ? <div className="mt-1 text-sm text-muted-foreground">{formData.notes}</div> : null
+                      formData.notes ? <div className="mt-1 text-[14px] text-[#76707F]">{formData.notes}</div> : null
                     )}
                   </div>
                 </div>
@@ -832,12 +832,12 @@ export function CustomerDrawer({
                 <>
                   <div className="border-t border-border/30" />
                   <div className="space-y-2">
-                    <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</h4>
+                    <h4 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Status</h4>
                     <div className="flex gap-2">
                       {customer.source === 'scan' && (
-                        <Badge variant="secondary" className="rounded-lg text-xs">Verified ID</Badge>
+                        <Badge variant="secondary" className="text-[12px] font-medium text-[#76707F] px-3 py-1.5 rounded-[8px] hover:bg-[#F8F7FB] transition-colors">Verified ID</Badge>
                       )}
-                      <Badge variant="outline" className="rounded-lg text-xs">
+                      <Badge variant="outline" className="text-[12px] font-medium text-[#76707F] px-3 py-1.5 rounded-[8px] hover:bg-[#F8F7FB] transition-colors">
                         {customer.source === 'scan' ? 'Scanned' : 'Manual Entry'}
                       </Badge>
                     </div>
@@ -846,10 +846,10 @@ export function CustomerDrawer({
               )}
 
               {/* Compliance Notice */}
-              <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-lg">
+              <div className="bg-white/60 border border-black/[0.06] p-3.5 rounded-[12px]">
                 <div className="flex items-start gap-2.5">
-                  <CreditCard className="h-3.5 w-3.5 mt-0.5 text-muted-foreground" />
-                  <div className="text-xs text-muted-foreground">
+                  <CreditCard className="h-3.5 w-3.5 mt-0.5 text-[#A8A3AE]" />
+                  <div className="text-[12px] text-[#76707F]">
                     <p className="font-medium mb-0.5">Compliance Required</p>
                     <p>Valid government-issued photo ID required for all transactions.</p>
                   </div>

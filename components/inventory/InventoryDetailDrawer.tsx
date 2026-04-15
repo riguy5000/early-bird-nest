@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Scissors, Archive } from 'lucide-react';
 import { ImageLightbox } from './ImageLightbox';
@@ -158,14 +156,14 @@ export function InventoryDetailDrawer({ item, open, onClose, onPartOut, onArchiv
 
             <div className="flex gap-2 pt-2">
               {item.is_part_out_eligible && !item.is_archived && (
-                <Button variant="outline" size="sm" onClick={() => onPartOut(item)} className="btn-secondary-light text-[13px] px-4 py-2 flex items-center gap-1.5">
+                <button onClick={() => onPartOut(item)} className="btn-secondary-light flex items-center gap-1.5 text-[13px]">
                   <Scissors className="h-3.5 w-3.5" /> Part Out
-                </Button>
+                </button>
               )}
               {!item.is_archived && (
-                <Button variant="outline" size="sm" onClick={() => onArchive(item)} className="text-[13px] px-4 py-2 flex items-center gap-1.5 bg-white/60 border border-black/[0.06] rounded-[10px] text-[#F87171] hover:bg-[#FFF5F5]">
+                <button onClick={() => onArchive(item)} className="flex items-center gap-1.5 px-5 py-2.5 bg-white/60 border border-black/[0.06] rounded-[10px] text-[13px] font-medium text-[#F87171] hover:bg-[#FFF5F5] transition-all">
                   <Archive className="h-3.5 w-3.5" /> Archive
-                </Button>
+                </button>
               )}
             </div>
           </div>

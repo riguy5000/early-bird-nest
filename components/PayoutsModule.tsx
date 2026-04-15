@@ -174,9 +174,9 @@ export function PayoutsModule({ currentStore }: PayoutsModuleProps) {
           className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-[13px] font-medium border transition-all flex-shrink-0 ${
             statusFilter !== 'all'
               ? 'bg-[#2B2833] text-white border-transparent shadow-sm'
-              : 'bg-white/85 border-black/[0.06] text-[#2B2833] hover:bg-white shadow-sm'
+              : 'bg-white/85 border-black/[0.06] text-[#2B2833] hover:bg-white'
           }`}
-          style={{ boxShadow: statusFilter === 'all' ? '0 1px 3px rgba(0,0,0,0.06)' : undefined }}
+          style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
         >
           <Filter className="w-3.5 h-3.5" />
           {statusLabel}
@@ -188,9 +188,9 @@ export function PayoutsModule({ currentStore }: PayoutsModuleProps) {
           className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-[13px] font-medium border transition-all flex-shrink-0 ${
             methodFilter !== 'all'
               ? 'bg-[#2B2833] text-white border-transparent shadow-sm'
-              : 'bg-white/85 border-black/[0.06] text-[#2B2833] hover:bg-white shadow-sm'
+              : 'bg-white/85 border-black/[0.06] text-[#2B2833] hover:bg-white'
           }`}
-          style={{ boxShadow: methodFilter === 'all' ? '0 1px 3px rgba(0,0,0,0.06)' : undefined }}
+          style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
         >
           {methodLabel}
         </button>

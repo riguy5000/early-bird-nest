@@ -98,7 +98,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
 
       {/* Header — frosted glass */}
       <header className={`bg-white/60 backdrop-blur-xl border-b border-white/40 sticky top-0 z-50 ${isTakeIn ? 'flex-shrink-0' : ''}`}
-        style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+        style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>  {/* shadow-sm from design system */}
         <div className="max-w-[1600px] mx-auto px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-6">
             {/* Logo */}
@@ -121,10 +121,9 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
                     onClick={() => setActiveModule(module.id)}
                     className={`px-4 py-2 rounded-[10px] text-[14px] font-medium transition-all ${
                       isActive
-                        ? 'bg-white/80 text-[#2B2833] shadow-md ring-1 ring-white/70'
-                        : 'text-[#76707F] hover:text-[#2B2833] hover:bg-white/40'
+                        ? 'nav-tab-active'
+                        : 'nav-tab-inactive'
                     }`}
-                    style={isActive ? { boxShadow: '0 4px 6px -1px rgba(0,0,0,0.04)' } : {}}
                   >
                     {module.name}
                   </button>
@@ -140,7 +139,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
               <input
                 type="text"
                 placeholder="Search..."
-                className="w-48 pl-10 pr-4 py-2 bg-white/60 border border-white/80 rounded-[10px] text-[14px] text-[#2B2833] placeholder:text-[#A8A3AE] focus:outline-none focus:bg-white/80 focus:border-[#6B5EF9]/40 focus:ring-4 focus:ring-[#6B5EF9]/10 transition-all"
+                className="input-search-header"
                 style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}
               />
             </div>

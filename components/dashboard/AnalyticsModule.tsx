@@ -40,9 +40,8 @@ function KPI({ label, value, subtitle, trend, iconType }: {
     >
       <div className="flex items-start justify-between mb-3">
         <p className="text-[12px] font-medium text-[#76707F]">{label}</p>
-        {/* Icon tile — teal/blue circular treatment matching screenshot */}
-        <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-          style={{ background: 'linear-gradient(to bottom right, #E0F8F7, #C8DCFF)', boxShadow: '0 2px 6px rgba(0,0,0,0.06)' }}>
+        {/* Icon tile — icon-container (lavender→blue gradient, ring-2 ring-white/80) */}
+        <div className="w-9 h-9 rounded-[10px] icon-container flex-shrink-0">
           <PremiumIcon type={iconType} className="h-4 w-4" />
         </div>
       </div>

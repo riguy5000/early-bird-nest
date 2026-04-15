@@ -386,7 +386,7 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate, onSettingsSav
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[36px] font-semibold tracking-tight title-gradient">Store Settings</h1>
+          <h1 className="text-[36px] font-semibold tracking-tight leading-tight title-gradient">Store Settings</h1>
           <p className="text-[15px] text-[#76707F]">{general.name || 'Configure your store'}</p>
         </div>
         <div className="flex items-center gap-2">
