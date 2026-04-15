@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Alert, AlertDescription } from './ui/alert';
 import { CustomerForm } from './CustomerForm';
+import { CustomerDetailDrawer } from './CustomerDetailDrawer';
 import { toast } from 'sonner';
 import { 
   Search, 
@@ -67,6 +68,7 @@ export function CustomerModule({ user }: CustomerModuleProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [showDetailDrawer, setShowDetailDrawer] = useState(false);
   const [showAddCustomer, setShowAddCustomer] = useState(false);
   const [showEditCustomer, setShowEditCustomer] = useState(false);
 
@@ -132,6 +134,9 @@ export function CustomerModule({ user }: CustomerModuleProps) {
         notes: c.notes || '',
         createdAt: c.created_at,
         storeId: c.store_id,
+        gender: c.gender || '',
+        idScanUrl: c.id_scan_url || '',
+        idScanBackUrl: c.id_scan_back_url || '',
       }));
 
       setCustomers(mapped);
@@ -275,7 +280,11 @@ export function CustomerModule({ user }: CustomerModuleProps) {
               </TableHeader>
               <TableBody>
                 {filteredCustomers.map((customer) => (
-                  <TableRow key={customer.id}>
+                  <TableRow 
+                    key={customer.id} 
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => { setSelectedCustomer(customer); setShowDetailDrawer(true); }}
+                  >
                     <TableCell>
                       <div className="flex items-center">
                         <User className="w-4 h-4 mr-2 text-muted-foreground" />
@@ -387,6 +396,13 @@ export function CustomerModule({ user }: CustomerModuleProps) {
           )}
         </CardContent>
       </Card>
+
+      <CustomerDetailDrawer
+        customer={selectedCustomer}
+        open={showDetailDrawer}
+        onClose={() => { setShowDetailDrawer(false); setSelectedCustomer(null); }}
+        onEdit={(c) => { setShowDetailDrawer(false); setSelectedCustomer(c); setShowEditCustomer(true); }}
+      />
     </div>
   );
 }
