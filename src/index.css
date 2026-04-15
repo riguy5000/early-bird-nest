@@ -156,7 +156,7 @@
   }
 
   .page-gradient {
-    background: linear-gradient(135deg, #FFF3FF 0%, #ECEAFF 56%, #C8DCFF 100%);
+    background: linear-gradient(to right, #FFF3FF, #F5EBFF, #E8E6FF, #C8DCFF);
   }
 
   .title-gradient {
