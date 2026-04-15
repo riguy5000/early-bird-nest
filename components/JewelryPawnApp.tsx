@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useStoreSettings } from '../hooks/useStoreSettings';
 import { Button } from './ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
@@ -13,21 +12,8 @@ import { StoreSettingsModule } from './StoreSettingsModule';
 import { OwnerDashboard } from './dashboard/OwnerDashboard';
 import { AnalyticsModule } from './dashboard/AnalyticsModule';
 import { 
-  Store, 
-  Package, 
-  Users, 
-  DollarSign, 
-  BarChart3, 
-  Settings, 
-  LogOut, 
-  User,
-  Bell,
-  Search,
-  Plus,
-  TrendingUp,
-  Calendar,
-  Clock,
-  Menu
+  Store, Package, Users, DollarSign, BarChart3, Settings, LogOut, User,
+  Bell, Search, Plus, TrendingUp, Menu
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -39,7 +25,6 @@ interface JewelryPawnAppProps {
 export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
   const [activeModule, setActiveModule] = useState('dashboard');
   
-  // Derive store/employee IDs from authenticated user
   const storeId = user?.storeId || user?.store?.id || '';
   const employeeId = user?.id || '';
   const storeName = user?.store?.name || user?.name || 'Store';
@@ -48,26 +33,20 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
 
   const { resolved, refetch: refetchSettings, settings: storeSettings } = useStoreSettings(storeId, employeeId);
 
-  // Merge user-level visibility with store settings
   const effectiveVisibility = {
     hideProfit: user?.visibility?.hideProfit ?? resolved.visibility.hideProfit,
     hidePayout: user?.visibility?.hidePercentagePaid ?? resolved.visibility.hidePayout,
     hideMarketValue: user?.visibility?.hideMarketValue ?? resolved.visibility.hideMarketValue,
   };
 
-  // Build modules list based on permissions
   const allModules = [
     { id: 'dashboard', name: 'Dashboard', icon: BarChart3, requiresPermission: 'accessStatistics', component: () => <OwnerDashboard storeId={storeId} storeName={storeName} onNavigate={setActiveModule} /> },
     { id: 'take-in', name: 'Take-In', icon: Plus, requiresPermission: 'accessTakeIn', component: () => (
       <TakeInPage 
         store={{ 
-          id: storeId, 
-          name: storeName, 
-          defaultPayoutPercentage: 75, 
-          hideProfit: effectiveVisibility.hideProfit, 
-          hidePayout: effectiveVisibility.hidePayout, 
-          hideMarketValue: effectiveVisibility.hideMarketValue, 
-          enableFastEntry: resolved.enableFastEntry, 
+          id: storeId, name: storeName, defaultPayoutPercentage: 75, 
+          hideProfit: effectiveVisibility.hideProfit, hidePayout: effectiveVisibility.hidePayout, 
+          hideMarketValue: effectiveVisibility.hideMarketValue, enableFastEntry: resolved.enableFastEntry, 
           autoPrintLabels: resolved.enablePrintLabels,
           requireCustomerInfoBeforeCompletion: resolved.requireCustomerInfoBeforeCompletion,
           defaultPayoutMethod: resolved.defaultPayoutMethod,
@@ -102,94 +81,83 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
     )}
   ];
 
-  // Filter modules based on permissions (store_admin sees everything)
   const modules = allModules.filter(m => {
     if (isStoreAdmin) return true;
     const perm = m.requiresPermission as keyof typeof userPermissions;
     return userPermissions[perm] !== false;
   });
 
-  const quickStats: any[] = [];
-  const recentActivities: any[] = [];
-
-  const handleQuickAction = (action: string) => {
-    switch (action) {
-      case 'take-in':
-        setActiveModule('take-in');
-        toast.success('Take-In module opened');
-        break;
-      case 'find-customer':
-        setActiveModule('customers');
-        toast.success('Customer module opened');
-        break;
-      case 'inventory':
-        setActiveModule('inventory');
-        toast.success('Inventory module opened');
-        break;
-      case 'payout':
-        setActiveModule('payouts');
-        toast.success('Payouts module opened');
-        break;
-      default:
-        toast.info(`${action} feature coming soon`);
-    }
-  };
-
   const ActiveComponent = modules.find(m => m.id === activeModule)?.component;
-
   const isTakeIn = activeModule === 'take-in';
+  const userInitials = (user?.name?.split(' ').map((n: string) => n[0]).join('') || user?.email?.charAt(0) || 'U').toUpperCase();
 
   return (
-    <div className={`${isTakeIn ? 'h-screen flex flex-col overflow-hidden' : 'min-h-screen'} bg-background`}>
-      {/* Header */}
-      <header className={`border-b bg-card px-6 py-4 ${isTakeIn ? 'flex-shrink-0' : ''}`}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-2">
-              <Store className="h-6 w-6 text-primary" />
+    <div className={`${isTakeIn ? 'h-screen flex flex-col overflow-hidden' : 'min-h-screen'} relative`} style={{ fontFamily: "'DM Sans', sans-serif" }}>
+      {/* Fixed gradient background */}
+      {!isTakeIn && <div className="fixed inset-0 page-gradient -z-10" />}
+
+      {/* Header — frosted glass */}
+      <header className={`bg-white/60 backdrop-blur-xl border-b border-white/40 sticky top-0 z-50 ${isTakeIn ? 'flex-shrink-0' : ''}`}
+        style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+        <div className="max-w-[1600px] mx-auto px-8 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            {/* Logo */}
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-[10px] icon-container flex items-center justify-center">
+                <Store className="h-4.5 w-4.5 text-[#6B5EF9]" />
+              </div>
               <div>
-                <h1 className="text-xl font-bold">{storeName || 'Jewelry & Pawn Store'}</h1>
-                <p className="text-sm text-muted-foreground">Management System</p>
+                <h1 className="text-[15px] font-semibold text-[#2B2833] leading-tight">{storeName || 'Bravo Jewellers'}</h1>
               </div>
             </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-1">
+            <nav className="hidden lg:flex items-center gap-1">
               {modules.map((module) => {
-                const Icon = module.icon;
+                const isActive = activeModule === module.id;
                 return (
-                  <Button
+                  <button
                     key={module.id}
-                    variant={activeModule === module.id ? 'default' : 'ghost'}
                     onClick={() => setActiveModule(module.id)}
-                    className="flex items-center space-x-2"
+                    className={`px-4 py-2 rounded-[10px] text-[14px] font-medium transition-all ${
+                      isActive
+                        ? 'bg-white/80 text-[#2B2833] shadow-md ring-1 ring-white/70'
+                        : 'text-[#76707F] hover:text-[#2B2833] hover:bg-white/40'
+                    }`}
+                    style={isActive ? { boxShadow: '0 4px 6px -1px rgba(0,0,0,0.04)' } : {}}
                   >
-                    <Icon className="h-4 w-4" />
-                    <span>{module.name}</span>
-                  </Button>
+                    {module.name}
+                  </button>
                 );
               })}
             </nav>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <Button variant="outline" size="sm" onClick={() => toast.info('Search feature coming soon')}>
-              <Search className="h-4 w-4 mr-2" />
-              Search
-            </Button>
-            
-            <Button variant="outline" size="sm" onClick={() => toast.info('Notifications feature coming soon')}>
-              <Bell className="h-4 w-4" />
-            </Button>
+          <div className="flex items-center gap-3">
+            {/* Search */}
+            <div className="relative hidden md:block">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A8A3AE]" />
+              <input
+                type="text"
+                placeholder="Search..."
+                className="w-48 pl-10 pr-4 py-2 bg-white/60 border border-white/80 rounded-[10px] text-[14px] text-[#2B2833] placeholder:text-[#A8A3AE] focus:outline-none focus:bg-white/80 focus:border-[#6B5EF9]/40 focus:ring-4 focus:ring-[#6B5EF9]/10 transition-all"
+                style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}
+              />
+            </div>
+
+            {/* Notifications */}
+            <button className="w-9 h-9 flex items-center justify-center rounded-[8px] hover:bg-[#F8F7FB] transition-colors">
+              <Bell className="w-5 h-5 text-[#76707F]" />
+            </button>
 
             {/* Mobile Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild className="lg:hidden">
-                <Button variant="outline" size="sm">
-                  <Menu className="h-4 w-4" />
-                </Button>
+                <button className="w-9 h-9 flex items-center justify-center rounded-[8px] hover:bg-[#F8F7FB] transition-colors">
+                  <Menu className="w-5 h-5 text-[#76707F]" />
+                </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuContent align="end" className="w-64 bg-white/90 backdrop-blur-xl rounded-[14px] border border-white/60 shadow-2xl">
                 <DropdownMenuLabel>Navigation</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {modules.map((module) => {
@@ -198,9 +166,9 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
                     <DropdownMenuItem
                       key={module.id}
                       onClick={() => setActiveModule(module.id)}
-                      className={activeModule === module.id ? 'bg-accent' : ''}
+                      className={`rounded-[8px] ${activeModule === module.id ? 'bg-[#F8F7FB]' : ''}`}
                     >
-                      <Icon className="w-4 h-4 mr-2" />
+                      <Icon className="w-4 h-4 mr-2 text-[#76707F]" />
                       {module.name}
                     </DropdownMenuItem>
                   );
@@ -208,39 +176,30 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* User Menu */}
+            {/* User Avatar */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex items-center space-x-2">
-                  <Avatar className="h-6 w-6">
-                    <AvatarFallback>
-                      {user?.name?.charAt(0) || user?.email?.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="hidden sm:block">{user?.name || user?.email}</span>
-                </Button>
+                <button className="w-9 h-9 rounded-full bg-[#6B5EF9] flex items-center justify-center text-white text-[13px] font-semibold hover:opacity-90 transition-opacity ring-2 ring-white/80">
+                  {userInitials}
+                </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuContent align="end" className="w-64 bg-white/90 backdrop-blur-xl rounded-[14px] border border-white/60 shadow-2xl">
                 <DropdownMenuLabel>
-                  <div className="flex flex-col space-y-1">
-                    <div className="font-medium">{user?.name || 'User'}</div>
-                    <div className="text-xs text-muted-foreground">{user?.email}</div>
-                    <Badge variant="secondary" className="w-fit text-xs">
+                  <div className="flex flex-col gap-1">
+                    <div className="text-[14px] font-semibold text-[#2B2833]">{user?.name || 'User'}</div>
+                    <div className="text-[12px] text-[#76707F]">{user?.email}</div>
+                    <Badge className="w-fit text-[10px] bg-[#F8F7FB] text-[#6B5EF9] border-0 mt-0.5">
                       {user?.role === 'store_admin' ? 'Store Admin' : 'Employee'}
                     </Badge>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => toast.info('Profile settings coming soon')}>
-                  <User className="w-4 h-4 mr-2" />
-                  Profile Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setActiveModule('settings')}>
-                  <Settings className="w-4 h-4 mr-2" />
+                <DropdownMenuItem className="rounded-[8px]" onClick={() => setActiveModule('settings')}>
+                  <Settings className="w-4 h-4 mr-2 text-[#76707F]" />
                   Store Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={onLogout} className="text-destructive focus:text-destructive">
+                <DropdownMenuItem onClick={onLogout} className="rounded-[8px] text-[#F87171] focus:text-[#F87171]">
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign Out
                 </DropdownMenuItem>
@@ -251,7 +210,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
       </header>
 
       {/* Main Content */}
-      <main className={isTakeIn ? 'flex-1 min-h-0 overflow-hidden' : 'p-6'}>
+      <main className={isTakeIn ? 'flex-1 min-h-0 overflow-hidden' : 'max-w-[1600px] mx-auto px-8 py-8'}>
         {ActiveComponent && <ActiveComponent />}
       </main>
     </div>
