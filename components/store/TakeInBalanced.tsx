@@ -772,16 +772,17 @@ export function TakeInBalanced({
           </div>
         </div>
 
-        {/* Right Panel */}
-        <div className="w-72 border-l border-slate-200 bg-white flex flex-col flex-shrink-0 h-full overflow-auto">
+        {/* Right Panel — Frosted Summary */}
+        <div className="w-80 border-l border-white/40 bg-white/70 backdrop-blur-xl flex flex-col flex-shrink-0 h-full overflow-auto">
           {/* Payout Total */}
-          <div className="p-6 border-b border-slate-200">
+          <div className="p-6 border-b border-black/[0.06]">
             <div className="text-center">
-              <div className="text-3xl font-semibold text-primary tabular-nums tracking-tight">
+              <div className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-2">Total Payout</div>
+              <div className="text-[32px] font-semibold title-gradient tabular-nums tracking-tight">
                 ${totalPayout.toFixed(2)}
               </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                Total Payout · {avgPayout.toFixed(0)}%
+              <div className="text-[12px] text-[#A8A3AE] mt-1">
+                Average {avgPayout.toFixed(0)}% · {items.length} item{items.length !== 1 ? 's' : ''}
               </div>
             </div>
           </div>
@@ -793,14 +794,14 @@ export function TakeInBalanced({
               onEdit={() => onOpenCustomerDrawer('manual')} 
             />
           ) : (
-            <div className="p-4 border-b border-slate-200">
-              <h3 className="text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-3">Customer</h3>
+            <div className="p-4 border-b border-black/[0.06]">
+              <h3 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-3">Customer</h3>
               <Button 
                 variant="outline" 
                 onClick={() => onOpenCustomerDrawer('scan')}
-                className="w-full flex items-center gap-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50"
+                className="w-full flex items-center gap-2 rounded-[10px] border border-black/[0.06] bg-white/60 hover:bg-white/80 text-[#2B2833] text-[13px]"
               >
-                <ScanLine className="h-4 w-4" />
+                <ScanLine className="h-4 w-4 text-[#6B5EF9]" />
                 Scan Customer ID
               </Button>
               {store.allowManualEntry !== false && (
@@ -808,9 +809,9 @@ export function TakeInBalanced({
                   variant="outline" 
                   size="sm"
                   onClick={() => onOpenCustomerDrawer('manual')}
-                  className="w-full mt-1.5 text-xs text-slate-600 rounded-lg border border-slate-200 bg-white hover:bg-slate-50"
+                  className="w-full mt-1.5 text-[12px] text-[#76707F] rounded-[10px] border border-black/[0.06] bg-white/60 hover:bg-white/80"
                 >
-                  <Edit className="h-3.5 w-3.5 mr-1.5" />
+                  <Edit className="h-3.5 w-3.5 mr-1.5 text-[#A8A3AE]" />
                   Enter Manually
                 </Button>
               )}
@@ -818,13 +819,13 @@ export function TakeInBalanced({
           )}
 
           {/* Payout Information */}
-          <div className="p-4 border-b border-slate-200">
-            <h3 className="text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-3">Payment Method</h3>
+          <div className="p-4 border-b border-black/[0.06]">
+            <h3 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-3">Payment Method</h3>
             <Select value={paymentMethod} onValueChange={onPaymentMethodChange}>
-              <SelectTrigger className="w-full rounded-lg bg-white border border-slate-200">
+              <SelectTrigger className="w-full rounded-[10px] bg-white/60 border border-black/[0.06] text-[14px] text-[#2B2833]">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="rounded-lg">
+              <SelectContent className="rounded-[14px] bg-white/90 backdrop-blur-xl border-white/60 shadow-2xl">
                 <SelectItem value="Check">Check</SelectItem>
                 <SelectItem value="Cash">Cash</SelectItem>
                 <SelectItem value="Store Credit">Store Credit</SelectItem>
@@ -835,7 +836,7 @@ export function TakeInBalanced({
                 value={checkNumber}
                 onChange={(e) => onCheckNumberChange(e.target.value)}
                 placeholder="Check #"
-                className="mt-2 h-9 text-sm rounded-lg bg-white border border-slate-200"
+                className="mt-2 h-9 text-[13px] rounded-[10px] bg-white/60 border border-black/[0.06] text-[#2B2833] placeholder:text-[#A8A3AE]"
               />
             )}
             {paymentMethod === 'Store Credit' && (
@@ -843,63 +844,79 @@ export function TakeInBalanced({
                 value={storeCreditNumber}
                 onChange={(e) => setStoreCreditNumber(e.target.value)}
                 placeholder="Store Credit #"
-                className="mt-2 h-9 text-sm rounded-lg bg-white border border-slate-200"
+                className="mt-2 h-9 text-[13px] rounded-[10px] bg-white/60 border border-black/[0.06] text-[#2B2833] placeholder:text-[#A8A3AE]"
               />
             )}
           </div>
 
           {/* Summary Stats */}
           <div className="flex-1 p-4 space-y-4">
+            <h3 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Summary</h3>
             <div className="space-y-3">
               {!store.hideMarketValue && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Market Value</span>
-                  <span className="font-medium tabular-nums">${totalMarket.toFixed(2)}</span>
+                <div className="flex justify-between text-[14px]">
+                  <span className="text-[#76707F]">Market Value</span>
+                  <span className="font-medium text-[#2B2833] tabular-nums">${totalMarket.toFixed(2)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Total Payout</span>
-                <span className="font-semibold text-primary tabular-nums">${totalPayout.toFixed(2)}</span>
+              <div className="flex justify-between text-[14px]">
+                <span className="text-[#76707F]">Total Payout</span>
+                <span className="font-semibold text-[#6B5EF9] tabular-nums">${totalPayout.toFixed(2)}</span>
               </div>
               {!store.hidePayout && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Average %</span>
-                  <span className="font-medium tabular-nums">{avgPayout.toFixed(1)}%</span>
+                <div className="flex justify-between text-[14px]">
+                  <span className="text-[#76707F]">Average %</span>
+                  <span className="font-medium text-[#2B2833] tabular-nums">{avgPayout.toFixed(1)}%</span>
                 </div>
               )}
               {!store.hideProfit && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Profit</span>
-                  <span className="font-medium text-green-600 tabular-nums">${profit.toFixed(2)}</span>
+                <div className="flex justify-between text-[14px]">
+                  <span className="text-[#76707F]">Profit</span>
+                  <span className="font-medium text-[#4ADB8A] tabular-nums">${profit.toFixed(2)}</span>
                 </div>
               )}
+            </div>
+
+            {/* Reminder box */}
+            <div className="bg-gradient-to-r from-[#E8F4FF] to-[#F0E8FF] rounded-[12px] p-3">
+              <div className="flex items-start gap-2">
+                <div className="w-5 h-5 rounded-full bg-[#4889FA] flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-[12px] font-medium text-[#2B2833]">Remember</div>
+                  <div className="text-[11px] text-[#5A5463] leading-relaxed">Verify customer ID before completing purchase</div>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="p-4 space-y-2 border-t border-slate-200">
+          <div className="p-4 space-y-2 border-t border-black/[0.06]">
             {store.enableSaveForLater !== false && (
               <Button 
                 variant="ghost" 
-                className="w-full flex items-center gap-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
+                className="w-full flex items-center gap-2 rounded-[10px] bg-white/60 hover:bg-white/80 text-[#2B2833] border border-black/[0.06] text-[13px]"
                 disabled={items.length === 0}
                 onClick={onSaveQuote}
               >
-                <SaveIcon className="h-4 w-4" />
+                <SaveIcon className="h-4 w-4 text-[#A8A3AE]" />
                 Save as Quote
               </Button>
             )}
             <Button 
               variant="ghost" 
-              className="w-full flex items-center gap-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
+              className="w-full flex items-center gap-2 rounded-[10px] bg-white/60 hover:bg-white/80 text-[#2B2833] border border-black/[0.06] text-[13px]"
               disabled={items.length === 0}
             >
-              <Printer className="h-4 w-4" />
+              <Printer className="h-4 w-4 text-[#A8A3AE]" />
               Print Receipt
             </Button>
             {store.canCompletePurchase !== false && (
               <Button 
-                className="w-full flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg"
+                className="w-full flex items-center gap-2 btn-primary-dark rounded-[10px] text-[14px] font-medium"
                 disabled={items.length === 0 || completing}
                 onClick={onCompletePurchase}
               >
