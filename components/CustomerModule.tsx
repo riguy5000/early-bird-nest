@@ -401,7 +401,7 @@ export function CustomerModule({ user }: CustomerModuleProps) {
         customer={selectedCustomer}
         open={showDetailDrawer}
         onClose={() => { setShowDetailDrawer(false); setSelectedCustomer(null); }}
-        onEdit={(c) => { setShowDetailDrawer(false); setSelectedCustomer(c); setShowEditCustomer(true); }}
+        onEdit={(c: any) => { setShowDetailDrawer(false); setSelectedCustomer(c as Customer); setShowEditCustomer(true); }}
       />
     </div>
   );
