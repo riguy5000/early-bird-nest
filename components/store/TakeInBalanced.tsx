@@ -322,7 +322,84 @@ export function TakeInBalanced({
                                   )}
                                 </div>
 
-                                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                                {item.category === 'Watch' ? (
+                                  /* ---- WATCH INLINE CONTROLS ---- */
+                                  <div className="flex flex-col gap-1 flex-1 min-w-0">
+                                    <div className="flex items-center gap-1.5">
+                                      <Select value={item.watchMaterial || 'Stainless Steel'} onValueChange={(value) => onItemUpdate(item.id, { watchMaterial: value })}>
+                                        <SelectTrigger className="w-[110px] h-6 text-[11px] bg-white border border-slate-200 rounded-md hover:bg-slate-50 transition-colors">
+                                          <SelectValue placeholder="Material" />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-lg max-h-[250px]">
+                                          {watchMaterials.map(m => (
+                                            <SelectItem key={m} value={m} className="text-xs">{m}</SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+
+                                      <Input
+                                        type="text"
+                                        inputMode="decimal"
+                                        value={item.watchOfferRaw ?? (item.watchOffer || '')}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+                                            const numValue = value === '' ? 0 : parseFloat(value) || 0;
+                                            onItemUpdate(item.id, { watchOffer: numValue, watchOfferRaw: value, payoutAmount: numValue });
+                                          }
+                                        }}
+                                        onBlur={(e) => {
+                                          const numValue = parseFloat(e.target.value) || 0;
+                                          onItemUpdate(item.id, { watchOffer: numValue, watchOfferRaw: undefined, payoutAmount: numValue });
+                                        }}
+                                        placeholder="Offer $"
+                                        className="w-20 h-6 text-[11px] bg-white border border-slate-200 rounded-md [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        onClick={(e) => e.stopPropagation()}
+                                      />
+
+                                      <span className="text-[11px] font-medium text-green-600 min-w-[45px] text-right tabular-nums">
+                                        ${(item.payoutAmount || 0).toFixed(2)}
+                                      </span>
+                                    </div>
+
+                                    {/* Precious metal weight row if applicable */}
+                                    {isWatchPreciousMaterial(item.watchMaterial || '') && (item.metals || []).map((metal: any) => (
+                                      <div key={metal.id} className="flex items-center gap-1.5">
+                                        <Select value={metal.karat?.toString()} onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}>
+                                          <SelectTrigger className="w-14 h-6 text-[11px] bg-white border border-slate-200 rounded-md">
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent className="rounded-lg">
+                                            <SelectItem value="9">9K</SelectItem>
+                                            <SelectItem value="10">10K</SelectItem>
+                                            <SelectItem value="14">14K</SelectItem>
+                                            <SelectItem value="18">18K</SelectItem>
+                                            <SelectItem value="22">22K</SelectItem>
+                                            <SelectItem value="24">24K</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                        <Input
+                                          type="text"
+                                          inputMode="decimal"
+                                          value={metal.weightRaw ?? (metal.weight || '')}
+                                          onChange={(e) => {
+                                            const value = e.target.value;
+                                            if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+                                              updateMetal(item.id, metal.id, { weight: parseFloat(value) || 0, weightRaw: value });
+                                            }
+                                          }}
+                                          onBlur={(e) => updateMetal(item.id, metal.id, { weight: parseFloat(e.target.value) || 0, weightRaw: undefined })}
+                                          placeholder="0.00"
+                                          className="w-16 h-6 text-[11px] bg-white border border-slate-200 rounded-md"
+                                          onClick={(e) => e.stopPropagation()}
+                                        />
+                                        <span className="text-[10px] text-muted-foreground">g</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  /* ---- JEWELRY / DEFAULT INLINE CONTROLS ---- */
+                                  <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                                   {(item.metals || []).map((metal: any) => (
                                     <div key={metal.id} className="flex items-center gap-1.5">
                                       <Select value={metal.type} onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}>
@@ -364,8 +441,7 @@ export function TakeInBalanced({
                                           }
                                         }}
                                         onBlur={(e) => {
-                                          const value = e.target.value;
-                                          const numValue = parseFloat(value) || 0;
+                                          const numValue = parseFloat(e.target.value) || 0;
                                           updateMetal(item.id, metal.id, { weight: numValue, weightRaw: undefined });
                                         }}
                                         onKeyDown={(e) => handleKeyPress(e, item.id, metal.id)}
