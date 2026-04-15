@@ -105,11 +105,12 @@ function NavItem({ icon: Icon, label, active, onClick }: { icon: any; label: str
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[13px] font-medium transition-all ${
         active
-          ? 'bg-primary text-primary-foreground'
-          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+          ? 'bg-white/80 text-[#2B2833] shadow-md ring-1 ring-white/70'
+          : 'text-[#76707F] hover:text-[#2B2833] hover:bg-white/40'
       }`}
+      style={active ? { boxShadow: '0 4px 6px -1px rgba(0,0,0,0.04)' } : {}}
     >
       <Icon className="h-4 w-4 shrink-0" />
       <span className="truncate">{label}</span>
@@ -135,13 +136,13 @@ function ToggleRow({ label, description, checked, onChange }: { label: string; d
 
 function SettingsCard({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
   return (
-    <Card className="border border-border">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-base">{title}</CardTitle>
-        {description && <CardDescription>{description}</CardDescription>}
-      </CardHeader>
-      <CardContent className="space-y-1">{children}</CardContent>
-    </Card>
+    <div className="glass-card">
+      <div className="px-6 pt-6 pb-4">
+        <h3 className="text-[15px] font-semibold text-[#2B2833]">{title}</h3>
+        {description && <p className="text-[12px] text-[#76707F] mt-0.5">{description}</p>}
+      </div>
+      <div className="px-6 pb-6 space-y-1">{children}</div>
+    </div>
   );
 }
 
@@ -387,11 +388,11 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate, onSettingsSav
   return (
     <div className="w-full h-full flex flex-col">
       {/* Header */}
-      <div className="flex-shrink-0 border-b bg-card px-6 py-4">
+      <div className="flex-shrink-0 border-b border-white/40 bg-white/60 backdrop-blur-xl px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-semibold text-foreground">Store Settings</h1>
-            <p className="text-sm text-muted-foreground">{general.name || 'Configure your store'}</p>
+            <h1 className="text-xl font-semibold text-[#2B2833]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>Store Settings</h1>
+            <p className="text-[13px] text-[#76707F]">{general.name || 'Configure your store'}</p>
           </div>
           <div className="flex items-center gap-2">
             {hasUnsavedChanges && (
@@ -415,7 +416,7 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate, onSettingsSav
       {/* Body: Sidebar + Content */}
       <div className="flex-1 flex min-h-0 overflow-hidden">
         {/* Left Sidebar */}
-        <aside className="w-56 flex-shrink-0 border-r bg-muted/30 p-3 overflow-y-auto">
+        <aside className="w-56 flex-shrink-0 border-r border-white/40 bg-white/30 backdrop-blur-sm p-3 overflow-y-auto">
           <div className="mb-3">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />

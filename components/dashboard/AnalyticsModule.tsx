@@ -27,26 +27,28 @@ const PIE_COLORS = ['hsl(217, 91%, 60%)', 'hsl(142, 71%, 45%)', 'hsl(47, 96%, 53
 function KPI({ label, value, subtitle, trend, icon: Icon, variant = 'default' }: any) {
   const isPos = (trend || 0) >= 0;
   return (
-    <Card>
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</p>
-            <p className="text-xl font-bold">{value}</p>
-            {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
-          </div>
-          <div className={`p-2 rounded-lg ${variant === 'positive' ? 'bg-emerald-500/10' : variant === 'negative' ? 'bg-red-500/10' : 'bg-primary/10'}`}>
-            <Icon className={`h-4 w-4 ${variant === 'positive' ? 'text-emerald-600' : variant === 'negative' ? 'text-red-600' : 'text-primary'}`} />
-          </div>
+    <div className="kpi-card p-4">
+      <div className="flex items-start justify-between">
+        <div className="space-y-1">
+          <p className="text-[11px] font-medium text-[#76707F] uppercase tracking-wider">{label}</p>
+          <p className="text-xl font-bold text-[#2B2833]">{value}</p>
+          {subtitle && <p className="text-[11px] text-[#76707F]">{subtitle}</p>}
         </div>
-        {trend !== undefined && (
-          <div className={`flex items-center mt-1 text-xs ${isPos ? 'text-emerald-600' : 'text-red-600'}`}>
-            {isPos ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-            {isPos ? '+' : ''}{trend.toFixed(1)}%
-          </div>
-        )}
-      </CardContent>
-    </Card>
+        <div className={`icon-container w-9 h-9 rounded-[10px] flex items-center justify-center ${
+          variant === 'positive' ? 'bg-emerald-100' : variant === 'negative' ? 'bg-red-100' : ''
+        }`}>
+          <Icon className={`h-4 w-4 ${
+            variant === 'positive' ? 'text-emerald-600' : variant === 'negative' ? 'text-red-600' : 'text-[#6B5EF9]'
+          }`} />
+        </div>
+      </div>
+      {trend !== undefined && (
+        <div className={`flex items-center mt-1.5 text-[11px] font-medium ${isPos ? 'text-emerald-600' : 'text-red-500'}`}>
+          {isPos ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+          {isPos ? '+' : ''}{trend.toFixed(1)}%
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -58,8 +60,8 @@ export function AnalyticsModule({ storeId, storeName }: AnalyticsModuleProps) {
     return (
       <div className="space-y-6 max-w-7xl mx-auto">
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
-          <p className="mt-2 text-muted-foreground">Loading analytics...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6B5EF9] mx-auto" />
+          <p className="mt-2 text-[#76707F] text-sm">Loading analytics...</p>
         </div>
       </div>
     );
@@ -77,8 +79,6 @@ export function AnalyticsModule({ storeId, storeName }: AnalyticsModuleProps) {
   };
 
   const plVariant = d.unrealizedPL >= 0 ? 'positive' : 'negative';
-
-  // Pie data for metal exposure
   const metalPieData = d.metalExposure.map(m => ({ name: `${m.metal} ${m.karat}`, value: m.liveValue })).slice(0, 6);
 
   return (
@@ -86,15 +86,15 @@ export function AnalyticsModule({ storeId, storeName }: AnalyticsModuleProps) {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Analytics</h2>
-          <p className="text-muted-foreground">{storeName} — Deep Performance Analysis</p>
+          <h2 className="text-2xl font-bold text-[#2B2833]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>Analytics</h2>
+          <p className="text-[13px] text-[#76707F]">{storeName} — Deep Performance Analysis</p>
         </div>
         <Select value={dateRange} onValueChange={setDateRange}>
-          <SelectTrigger className="w-36">
-            <Calendar className="w-4 h-4 mr-2" />
+          <SelectTrigger className="w-36 bg-white/60 border-white/80 rounded-[10px] text-[13px]">
+            <Calendar className="w-4 h-4 mr-2 text-[#A8A3AE]" />
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white/90 backdrop-blur-xl rounded-[14px] border-white/60 shadow-2xl">
             <SelectItem value="today">Today</SelectItem>
             <SelectItem value="7d">7 Days</SelectItem>
             <SelectItem value="30d">30 Days</SelectItem>
@@ -105,14 +105,14 @@ export function AnalyticsModule({ storeId, storeName }: AnalyticsModuleProps) {
       </div>
 
       <Tabs defaultValue="performance" className="space-y-6">
-        <TabsList className="flex-wrap">
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="metals">Metal Exposure</TabsTrigger>
-          <TabsTrigger value="scrap">Scrap / Refinery</TabsTrigger>
-          <TabsTrigger value="showroom">Showroom</TabsTrigger>
-          <TabsTrigger value="batches">Batches</TabsTrigger>
-          <TabsTrigger value="buyers">Buyers</TabsTrigger>
-          <TabsTrigger value="insights">Insights</TabsTrigger>
+        <TabsList className="flex-wrap bg-white/60 backdrop-blur-sm border border-white/60 rounded-[12px] p-1">
+          <TabsTrigger value="performance" className="rounded-[8px] data-[state=active]:bg-white data-[state=active]:shadow-md text-[13px]">Performance</TabsTrigger>
+          <TabsTrigger value="metals" className="rounded-[8px] data-[state=active]:bg-white data-[state=active]:shadow-md text-[13px]">Metal Exposure</TabsTrigger>
+          <TabsTrigger value="scrap" className="rounded-[8px] data-[state=active]:bg-white data-[state=active]:shadow-md text-[13px]">Scrap / Refinery</TabsTrigger>
+          <TabsTrigger value="showroom" className="rounded-[8px] data-[state=active]:bg-white data-[state=active]:shadow-md text-[13px]">Showroom</TabsTrigger>
+          <TabsTrigger value="batches" className="rounded-[8px] data-[state=active]:bg-white data-[state=active]:shadow-md text-[13px]">Batches</TabsTrigger>
+          <TabsTrigger value="buyers" className="rounded-[8px] data-[state=active]:bg-white data-[state=active]:shadow-md text-[13px]">Buyers</TabsTrigger>
+          <TabsTrigger value="insights" className="rounded-[8px] data-[state=active]:bg-white data-[state=active]:shadow-md text-[13px]">Insights</TabsTrigger>
         </TabsList>
 
         {/* ── PERFORMANCE ── */}
@@ -131,108 +131,100 @@ export function AnalyticsModule({ storeId, storeName }: AnalyticsModuleProps) {
           </div>
 
           {/* Portfolio chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Inventory Portfolio</CardTitle>
-              <CardDescription>Cost basis vs live value over time</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {d.costBasis === 0 && d.liveValue === 0 ? (
-                <div className="h-64 flex items-center justify-center text-muted-foreground text-sm">No inventory data yet — complete a Take-In purchase to start tracking</div>
-              ) : (
-                <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={[
-                    { period: 'Start', costBasis: d.costBasis * 0.8, liveValue: d.liveValue * 0.75, pl: (d.liveValue * 0.75) - (d.costBasis * 0.8) },
-                    { period: 'Mid', costBasis: d.costBasis * 0.9, liveValue: d.liveValue * 0.88, pl: (d.liveValue * 0.88) - (d.costBasis * 0.9) },
-                    { period: 'Current', costBasis: d.costBasis, liveValue: d.liveValue, pl: d.unrealizedPL },
-                  ]}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="period" />
-                    <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-                    <Tooltip formatter={(v: number) => fmtFull(v)} />
-                    <Legend />
-                    <Area type="monotone" dataKey="costBasis" stroke="hsl(var(--muted-foreground))" fill="hsl(var(--muted-foreground) / 0.1)" name="Cost Basis" />
-                    <Area type="monotone" dataKey="liveValue" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.15)" name="Live Value" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              )}
-            </CardContent>
-          </Card>
+          <div className="glass-card p-6">
+            <div className="mb-4">
+              <h3 className="text-[15px] font-semibold text-[#2B2833]">Inventory Portfolio</h3>
+              <p className="text-[12px] text-[#76707F]">Cost basis vs live value over time</p>
+            </div>
+            {d.costBasis === 0 && d.liveValue === 0 ? (
+              <div className="h-64 flex items-center justify-center text-[#76707F] text-sm">No inventory data yet — complete a Take-In purchase to start tracking</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={[
+                  { period: 'Start', costBasis: d.costBasis * 0.8, liveValue: d.liveValue * 0.75 },
+                  { period: 'Mid', costBasis: d.costBasis * 0.9, liveValue: d.liveValue * 0.88 },
+                  { period: 'Current', costBasis: d.costBasis, liveValue: d.liveValue },
+                ]}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                  <XAxis dataKey="period" tick={{ fontSize: 12, fill: '#76707F' }} />
+                  <YAxis tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 12, fill: '#76707F' }} />
+                  <Tooltip formatter={(v: number) => fmtFull(v)} />
+                  <Legend />
+                  <Area type="monotone" dataKey="costBasis" stroke="#A8A3AE" fill="rgba(168,163,174,0.1)" name="Cost Basis" />
+                  <Area type="monotone" dataKey="liveValue" stroke="#6B5EF9" fill="rgba(107,94,249,0.15)" name="Live Value" />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </div>
         </TabsContent>
 
         {/* ── METAL EXPOSURE ── */}
         <TabsContent value="metals" className="space-y-6">
           {d.metalExposure.length === 0 ? (
-            <Card><CardContent className="py-12 text-center text-muted-foreground">No metal inventory data yet</CardContent></Card>
+            <div className="glass-card p-12 text-center text-[#76707F]">No metal inventory data yet</div>
           ) : (
             <>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader><CardTitle>Exposure by Metal / Karat</CardTitle></CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <PieChart>
-                        <Pie data={metalPieData} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                          {metalPieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
-                        </Pie>
-                        <Tooltip formatter={(v: number) => fmtFull(v)} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
+                <div className="glass-card p-6">
+                  <h3 className="text-[15px] font-semibold text-[#2B2833] mb-4">Exposure by Metal / Karat</h3>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie data={metalPieData} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                        {metalPieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
+                      </Pie>
+                      <Tooltip formatter={(v: number) => fmtFull(v)} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
 
-                <Card>
-                  <CardHeader><CardTitle>Weight Distribution</CardTitle></CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={d.metalExposure.slice(0, 8)}>
-                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                        <XAxis dataKey="karat" />
-                        <YAxis tickFormatter={(v) => `${v}g`} />
-                        <Tooltip formatter={(v: number) => `${v.toFixed(1)}g`} />
-                        <Bar dataKey="totalWeight" fill="hsl(var(--primary))" name="Weight (g)" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
+                <div className="glass-card p-6">
+                  <h3 className="text-[15px] font-semibold text-[#2B2833] mb-4">Weight Distribution</h3>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={d.metalExposure.slice(0, 8)}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                      <XAxis dataKey="karat" tick={{ fontSize: 12, fill: '#76707F' }} />
+                      <YAxis tickFormatter={(v) => `${v}g`} tick={{ fontSize: 12, fill: '#76707F' }} />
+                      <Tooltip formatter={(v: number) => `${v.toFixed(1)}g`} />
+                      <Bar dataKey="totalWeight" fill="#6B5EF9" radius={[6, 6, 0, 0]} name="Weight (g)" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
 
               {/* Detailed table */}
-              <Card>
-                <CardHeader><CardTitle>Metal Exposure Detail</CardTitle></CardHeader>
-                <CardContent>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b text-left text-muted-foreground">
-                          <th className="pb-2 pr-4">Metal</th>
-                          <th className="pb-2 pr-4">Karat</th>
-                          <th className="pb-2 pr-4 text-right">Items</th>
-                          <th className="pb-2 pr-4 text-right">Weight</th>
-                          <th className="pb-2 pr-4 text-right">Cost Basis</th>
-                          <th className="pb-2 pr-4 text-right">Live Value</th>
-                          <th className="pb-2 text-right">P/L</th>
+              <div className="glass-card p-6">
+                <h3 className="text-[15px] font-semibold text-[#2B2833] mb-4">Metal Exposure Detail</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-white/40 text-left text-[11px] text-[#76707F] uppercase tracking-wider">
+                        <th className="pb-3 pr-4">Metal</th>
+                        <th className="pb-3 pr-4">Karat</th>
+                        <th className="pb-3 pr-4 text-right">Items</th>
+                        <th className="pb-3 pr-4 text-right">Weight</th>
+                        <th className="pb-3 pr-4 text-right">Cost Basis</th>
+                        <th className="pb-3 pr-4 text-right">Live Value</th>
+                        <th className="pb-3 text-right">P/L</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {d.metalExposure.map((row, i) => (
+                        <tr key={i} className="border-b border-white/30 last:border-0">
+                          <td className="py-2.5 pr-4 font-medium text-[#2B2833]">{row.metal}</td>
+                          <td className="py-2.5 pr-4 text-[#76707F]">{row.karat}</td>
+                          <td className="py-2.5 pr-4 text-right text-[#76707F]">{row.itemCount}</td>
+                          <td className="py-2.5 pr-4 text-right text-[#76707F]">{row.totalWeight.toFixed(1)}g</td>
+                          <td className="py-2.5 pr-4 text-right text-[#2B2833]">{fmt(row.costBasis)}</td>
+                          <td className="py-2.5 pr-4 text-right text-[#2B2833]">{fmt(row.liveValue)}</td>
+                          <td className={`py-2.5 text-right font-medium ${row.unrealizedPL >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                            {row.unrealizedPL >= 0 ? '+' : ''}{fmt(row.unrealizedPL)} ({row.unrealizedPLPercent.toFixed(1)}%)
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {d.metalExposure.map((row, i) => (
-                          <tr key={i} className="border-b last:border-0">
-                            <td className="py-2 pr-4 font-medium">{row.metal}</td>
-                            <td className="py-2 pr-4">{row.karat}</td>
-                            <td className="py-2 pr-4 text-right">{row.itemCount}</td>
-                            <td className="py-2 pr-4 text-right">{row.totalWeight.toFixed(1)}g</td>
-                            <td className="py-2 pr-4 text-right">{fmt(row.costBasis)}</td>
-                            <td className="py-2 pr-4 text-right">{fmt(row.liveValue)}</td>
-                            <td className={`py-2 text-right font-medium ${row.unrealizedPL >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                              {row.unrealizedPL >= 0 ? '+' : ''}{fmt(row.unrealizedPL)} ({row.unrealizedPLPercent.toFixed(1)}%)
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </CardContent>
-              </Card>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </>
           )}
         </TabsContent>
@@ -252,39 +244,37 @@ export function AnalyticsModule({ storeId, storeName }: AnalyticsModuleProps) {
           </div>
 
           {d.refineryLots.length > 0 ? (
-            <Card>
-              <CardHeader><CardTitle>Refinery Lots</CardTitle></CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b text-left text-muted-foreground">
-                        <th className="pb-2 pr-4">Lot #</th>
-                        <th className="pb-2 pr-4">Sent</th>
-                        <th className="pb-2 pr-4 text-right">Expected</th>
-                        <th className="pb-2 pr-4 text-right">Settlement</th>
-                        <th className="pb-2 pr-4 text-right">Profit</th>
-                        <th className="pb-2">Status</th>
+            <div className="glass-card p-6">
+              <h3 className="text-[15px] font-semibold text-[#2B2833] mb-4">Refinery Lots</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/40 text-left text-[11px] text-[#76707F] uppercase tracking-wider">
+                      <th className="pb-3 pr-4">Lot #</th>
+                      <th className="pb-3 pr-4">Sent</th>
+                      <th className="pb-3 pr-4 text-right">Expected</th>
+                      <th className="pb-3 pr-4 text-right">Settlement</th>
+                      <th className="pb-3 pr-4 text-right">Profit</th>
+                      <th className="pb-3">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {d.refineryLots.map((lot, i) => (
+                      <tr key={i} className="border-b border-white/30 last:border-0">
+                        <td className="py-2.5 pr-4 font-medium text-[#2B2833]">{lot.lotNumber || '—'}</td>
+                        <td className="py-2.5 pr-4 text-[#76707F]">{lot.sentDate ? new Date(lot.sentDate).toLocaleDateString() : '—'}</td>
+                        <td className="py-2.5 pr-4 text-right text-[#2B2833]">{fmtFull(lot.expectedMelt)}</td>
+                        <td className="py-2.5 pr-4 text-right text-[#2B2833]">{fmtFull(lot.actualSettlement)}</td>
+                        <td className={`py-2.5 pr-4 text-right font-medium ${lot.profit >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>{fmtFull(lot.profit)}</td>
+                        <td className="py-2.5"><Badge className="bg-[#F8F7FB] text-[#6B5EF9] border-0 text-[10px]">{lot.status}</Badge></td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {d.refineryLots.map((lot, i) => (
-                        <tr key={i} className="border-b last:border-0">
-                          <td className="py-2 pr-4 font-medium">{lot.lotNumber || '—'}</td>
-                          <td className="py-2 pr-4">{lot.sentDate ? new Date(lot.sentDate).toLocaleDateString() : '—'}</td>
-                          <td className="py-2 pr-4 text-right">{fmtFull(lot.expectedMelt)}</td>
-                          <td className="py-2 pr-4 text-right">{fmtFull(lot.actualSettlement)}</td>
-                          <td className={`py-2 pr-4 text-right ${lot.profit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>{fmtFull(lot.profit)}</td>
-                          <td className="py-2"><Badge variant="secondary">{lot.status}</Badge></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           ) : (
-            <Card><CardContent className="py-12 text-center text-muted-foreground">No refinery lots created yet</CardContent></Card>
+            <div className="glass-card p-12 text-center text-[#76707F]">No refinery lots created yet</div>
           )}
         </TabsContent>
 
@@ -301,135 +291,119 @@ export function AnalyticsModule({ storeId, storeName }: AnalyticsModuleProps) {
             <KPI label="Showroom Margin" value={d.showroomCostBasis > 0 ? `${(((d.showroomResaleValue - d.showroomCostBasis) / d.showroomCostBasis) * 100).toFixed(1)}%` : '0%'} icon={BarChart3} />
           </div>
           {d.showroomCount === 0 && (
-            <Card><CardContent className="py-12 text-center text-muted-foreground">No showroom inventory yet — mark items as Showroom Candidate in Inventory</CardContent></Card>
+            <div className="glass-card p-12 text-center text-[#76707F]">No showroom inventory yet — mark items as Showroom Candidate in Inventory</div>
           )}
         </TabsContent>
 
         {/* ── BATCHES ── */}
         <TabsContent value="batches" className="space-y-6">
           {d.batchPerformance.length === 0 ? (
-            <Card><CardContent className="py-12 text-center text-muted-foreground">No batches in selected period</CardContent></Card>
+            <div className="glass-card p-12 text-center text-[#76707F]">No batches in selected period</div>
           ) : (
-            <Card>
-              <CardHeader><CardTitle>Batch Performance</CardTitle></CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b text-left text-muted-foreground">
-                        <th className="pb-2 pr-4">Batch</th>
-                        <th className="pb-2 pr-4">Date</th>
-                        <th className="pb-2 pr-4">Buyer</th>
-                        <th className="pb-2 pr-4 text-right">Items</th>
-                        <th className="pb-2 pr-4 text-right">Payout</th>
-                        <th className="pb-2 pr-4 text-right">Live Value</th>
-                        <th className="pb-2 pr-4 text-right">Unrealized</th>
-                        <th className="pb-2 text-right">Realized</th>
+            <div className="glass-card p-6">
+              <h3 className="text-[15px] font-semibold text-[#2B2833] mb-4">Batch Performance</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/40 text-left text-[11px] text-[#76707F] uppercase tracking-wider">
+                      <th className="pb-3 pr-4">Batch</th>
+                      <th className="pb-3 pr-4">Date</th>
+                      <th className="pb-3 pr-4">Buyer</th>
+                      <th className="pb-3 pr-4 text-right">Items</th>
+                      <th className="pb-3 pr-4 text-right">Payout</th>
+                      <th className="pb-3 pr-4 text-right">Live Value</th>
+                      <th className="pb-3 pr-4 text-right">Unrealized</th>
+                      <th className="pb-3 text-right">Realized</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {d.batchPerformance.map((b, i) => (
+                      <tr key={i} className="border-b border-white/30 last:border-0">
+                        <td className="py-2.5 pr-4 font-medium text-[#2B2833]">{b.batchId?.slice(0, 12) || '—'}</td>
+                        <td className="py-2.5 pr-4 text-[#76707F]">{b.date ? new Date(b.date).toLocaleDateString() : '—'}</td>
+                        <td className="py-2.5 pr-4 text-[#76707F]">{b.buyer || '—'}</td>
+                        <td className="py-2.5 pr-4 text-right text-[#76707F]">{b.itemCount}</td>
+                        <td className="py-2.5 pr-4 text-right text-[#2B2833]">{fmt(b.totalPayout)}</td>
+                        <td className="py-2.5 pr-4 text-right text-[#2B2833]">{fmt(b.liveValue)}</td>
+                        <td className={`py-2.5 pr-4 text-right font-medium ${b.unrealizedPL >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                          {b.unrealizedPL >= 0 ? '+' : ''}{fmt(b.unrealizedPL)}
+                        </td>
+                        <td className={`py-2.5 text-right font-medium ${b.realizedPL >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                          {fmt(b.realizedPL)}
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {d.batchPerformance.map((b, i) => (
-                        <tr key={i} className="border-b last:border-0">
-                          <td className="py-2 pr-4 font-mono text-xs">{b.batchId}</td>
-                          <td className="py-2 pr-4">{b.date}</td>
-                          <td className="py-2 pr-4">{b.employee}</td>
-                          <td className="py-2 pr-4 text-right">{b.itemCount}</td>
-                          <td className="py-2 pr-4 text-right">{fmtFull(b.totalPayout)}</td>
-                          <td className="py-2 pr-4 text-right">{fmtFull(b.currentLiveValue)}</td>
-                          <td className={`py-2 pr-4 text-right ${b.unrealizedProfit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>{fmtFull(b.unrealizedProfit)}</td>
-                          <td className={`py-2 text-right ${b.realizedProfit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>{fmtFull(b.realizedProfit)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           )}
         </TabsContent>
 
         {/* ── BUYERS ── */}
         <TabsContent value="buyers" className="space-y-6">
           {d.buyerPerformance.length === 0 ? (
-            <Card><CardContent className="py-12 text-center text-muted-foreground">No buyer data in selected period</CardContent></Card>
+            <div className="glass-card p-12 text-center text-[#76707F]">No buyer data in selected period</div>
           ) : (
-            <Card>
-              <CardHeader><CardTitle>Buyer Performance</CardTitle></CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b text-left text-muted-foreground">
-                        <th className="pb-2 pr-4">Buyer</th>
-                        <th className="pb-2 pr-4 text-right">Take-Ins</th>
-                        <th className="pb-2 pr-4 text-right">Total Payout</th>
-                        <th className="pb-2 pr-4 text-right">Avg Margin</th>
-                        <th className="pb-2 pr-4 text-right">Unrealized</th>
-                        <th className="pb-2 pr-4 text-right">Realized</th>
-                        <th className="pb-2 text-right">Avg Batch</th>
+            <div className="glass-card p-6">
+              <h3 className="text-[15px] font-semibold text-[#2B2833] mb-4">Buyer Performance</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/40 text-left text-[11px] text-[#76707F] uppercase tracking-wider">
+                      <th className="pb-3 pr-4">Buyer</th>
+                      <th className="pb-3 pr-4 text-right">Transactions</th>
+                      <th className="pb-3 pr-4 text-right">Items</th>
+                      <th className="pb-3 pr-4 text-right">Total Payout</th>
+                      <th className="pb-3 pr-4 text-right">Avg Rate</th>
+                      <th className="pb-3 text-right">Unrealized</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {d.buyerPerformance.map((bp, i) => (
+                      <tr key={i} className="border-b border-white/30 last:border-0">
+                        <td className="py-2.5 pr-4 font-medium text-[#2B2833]">{bp.buyerName || '—'}</td>
+                        <td className="py-2.5 pr-4 text-right text-[#76707F]">{bp.transactionCount}</td>
+                        <td className="py-2.5 pr-4 text-right text-[#76707F]">{bp.itemCount}</td>
+                        <td className="py-2.5 pr-4 text-right text-[#2B2833]">{fmt(bp.totalPayout)}</td>
+                        <td className="py-2.5 pr-4 text-right text-[#76707F]">{bp.avgRate.toFixed(1)}%</td>
+                        <td className={`py-2.5 text-right font-medium ${bp.unrealizedPL >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                          {bp.unrealizedPL >= 0 ? '+' : ''}{fmt(bp.unrealizedPL)}
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {d.buyerPerformance.map((b, i) => (
-                        <tr key={i} className="border-b last:border-0">
-                          <td className="py-2 pr-4 font-medium">{b.employeeName}</td>
-                          <td className="py-2 pr-4 text-right">{b.takeInCount}</td>
-                          <td className="py-2 pr-4 text-right">{fmtFull(b.totalPayout)}</td>
-                          <td className="py-2 pr-4 text-right">{b.avgMargin.toFixed(1)}%</td>
-                          <td className={`py-2 pr-4 text-right ${b.unrealizedPerformance >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>{fmtFull(b.unrealizedPerformance)}</td>
-                          <td className={`py-2 pr-4 text-right ${b.realizedProfit >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>{fmtFull(b.realizedProfit)}</td>
-                          <td className="py-2 text-right">{fmtFull(b.avgBatchValue)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           )}
         </TabsContent>
 
         {/* ── INSIGHTS ── */}
-        <TabsContent value="insights" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Zap className="h-5 w-5" /> Insights & Recommended Actions</CardTitle>
-              <CardDescription>Rule-based analysis of your current inventory</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {d.insights.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">No insights yet — build inventory to generate recommendations</p>
-              ) : (
-                d.insights.map((insight, i) => (
-                  <div key={i} className={`p-4 rounded-lg border ${
-                    insight.type === 'positive' ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800' :
-                    insight.type === 'warning' ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800' :
-                    'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800'
-                  }`}>
-                    <div className="flex items-center gap-2">
-                      {insight.type === 'positive' && <CheckCircle className="h-4 w-4 text-emerald-600" />}
-                      {insight.type === 'warning' && <AlertTriangle className="h-4 w-4 text-amber-600" />}
-                      {insight.type === 'info' && <Info className="h-4 w-4 text-blue-600" />}
-                      <span className="font-medium">{insight.title}</span>
-                    </div>
-                    <p className="text-sm mt-1 text-muted-foreground">{insight.message}</p>
-                  </div>
-                ))
-              )}
-
-              {/* Watch analytics placeholder */}
-              <div className="mt-6 p-4 rounded-lg border border-dashed border-muted-foreground/30">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Info className="h-4 w-4" />
-                  <span className="font-medium">Watch Market Analytics</span>
-                  <Badge variant="outline" className="text-xs">Coming Soon</Badge>
+        <TabsContent value="insights" className="space-y-4">
+          {d.insights.length === 0 ? (
+            <div className="glass-card p-12 text-center text-[#76707F]">No insights generated yet — add more inventory data</div>
+          ) : (
+            d.insights.map((insight, i) => (
+              <div key={i} className="glass-card p-5 flex items-start gap-4">
+                <div className={`icon-container w-9 h-9 rounded-[10px] flex items-center justify-center flex-shrink-0 ${
+                  insight.type === 'warning' ? 'bg-amber-100' : insight.type === 'positive' ? 'bg-emerald-100' : ''
+                }`}>
+                  {insight.type === 'warning' ? (
+                    <AlertTriangle className="h-4 w-4 text-amber-600" />
+                  ) : insight.type === 'positive' ? (
+                    <TrendingUp className="h-4 w-4 text-emerald-600" />
+                  ) : (
+                    <Info className="h-4 w-4 text-[#6B5EF9]" />
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Watch pricing API integration will enable market value tracking, hold/sell suggestions, and brand-level exposure analytics.
-                </p>
+                <div>
+                  <p className="text-[14px] font-semibold text-[#2B2833]">{insight.title}</p>
+                  <p className="text-[12px] text-[#76707F] mt-0.5">{insight.description}</p>
+                </div>
               </div>
-            </CardContent>
-          </Card>
+            ))
+          )}
         </TabsContent>
       </Tabs>
     </div>
