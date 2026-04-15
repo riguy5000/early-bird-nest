@@ -172,11 +172,19 @@ export function TakeInBalanced({
 
   const itemTypesByCategory = {
     Jewelry: ['Ring', 'Pendant', 'Earrings', 'Bracelet', 'Necklace', 'Chain', 'Charm'],
-    Watch: ['Watch', 'Watch Band', 'Watch Case'],
+    Watch: ['Wristwatch', 'Pocket Watch', 'Clock', 'Other Timepiece'],
     Bullion: ['Coin', 'Bar', 'Round'],
     Stones: ['Diamond', 'Ruby', 'Sapphire', 'Emerald', 'Other'],
     Silverware: ['Spoon', 'Fork', 'Knife', 'Serving Piece', 'Decorative']
   };
+
+  const watchMaterials = [
+    'Stainless Steel', 'Gold', 'Platinum', 'Silver', 'Titanium', 
+    'Base Metal', 'Two-Tone', 'Ceramic', 'Carbon', 'Gold Plated', 
+    'Mixed Materials', 'Other'
+  ];
+  const preciousWatchMaterials = ['Gold', 'Platinum', 'Silver'];
+  const isWatchPreciousMaterial = (material: string) => preciousWatchMaterials.includes(material);
 
   const itemsByCategory = items.reduce((acc, item) => {
     const category = item.category || 'Jewelry';
