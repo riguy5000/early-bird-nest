@@ -86,7 +86,7 @@ export function AnalyticsModule({ storeId, storeName }: AnalyticsModuleProps) {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-[#2B2833]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>Analytics</h2>
+          <h2 className="text-[36px] font-semibold tracking-tight title-gradient">Analytics</h2>
           <p className="text-[13px] text-[#76707F]">{storeName} — Deep Performance Analysis</p>
         </div>
         <Select value={dateRange} onValueChange={setDateRange}>

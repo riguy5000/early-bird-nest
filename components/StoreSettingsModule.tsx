@@ -391,7 +391,7 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate, onSettingsSav
       <div className="flex-shrink-0 border-b border-white/40 bg-white/60 backdrop-blur-xl px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-semibold text-[#2B2833]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>Store Settings</h1>
+            <h1 className="text-[36px] font-semibold tracking-tight title-gradient">Store Settings</h1>
             <p className="text-[13px] text-[#76707F]">{general.name || 'Configure your store'}</p>
           </div>
           <div className="flex items-center gap-2">

@@ -3,7 +3,7 @@ import { Badge } from './ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Calendar } from './ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from './ui/sheet';
 import { apiCall } from '../utils/supabase/simple-client';
 import { Search, Plus, DollarSign, Calendar as CalendarIcon, User, Receipt, TrendingUp, Download, Eye } from 'lucide-react';
 
@@ -214,14 +214,14 @@ export function PayoutsModule({ currentStore }: PayoutsModuleProps) {
         )}
       </div>
 
-      {/* Detail Dialog */}
-      <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent className="max-w-2xl bg-white/90 backdrop-blur-xl rounded-[20px] border border-white/60 shadow-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-[22px] font-semibold text-[#2B2833]">Payout Details</DialogTitle>
-          </DialogHeader>
+      {/* Detail Drawer */}
+      <Sheet open={showDetails} onOpenChange={setShowDetails}>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="text-[22px] font-semibold text-[#2B2833]">Payout Details</SheetTitle>
+          </SheetHeader>
           {selectedPayout && (
-            <div className="space-y-4">
+            <div className="space-y-4 mt-4">
               <div className="grid grid-cols-2 gap-4">
                 <div><div className="text-[11px] text-[#76707F] uppercase tracking-wider">Customer</div><div className="text-[15px] font-medium text-[#2B2833] mt-1">{selectedPayout.customerName}</div></div>
                 <div><div className="text-[11px] text-[#76707F] uppercase tracking-wider">Amount</div><div className="text-[15px] font-medium text-[#2B2833] mt-1">{fmtCurrency(selectedPayout.amount)}</div></div>
@@ -233,8 +233,8 @@ export function PayoutsModule({ currentStore }: PayoutsModuleProps) {
               {selectedPayout.notes && <div><div className="text-[11px] text-[#76707F] uppercase tracking-wider">Notes</div><p className="text-[14px] text-[#2B2833] mt-1">{selectedPayout.notes}</p></div>}
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

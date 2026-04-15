@@ -88,7 +88,7 @@ export function CustomerDetailDrawer({ customer, open, onClose, onEdit }: Props)
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto bg-white/95 backdrop-blur-2xl border-l border-white/60">
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader>
           <div className="flex items-center justify-between">
             <SheetTitle className="text-lg flex items-center gap-2">
