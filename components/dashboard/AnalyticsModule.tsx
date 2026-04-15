@@ -366,7 +366,7 @@ export function AnalyticsModule({ storeId, storeName }: AnalyticsModuleProps) {
                         <td className="py-2.5 pr-4 text-right text-[#76707F]">{bp.transactionCount}</td>
                         <td className="py-2.5 pr-4 text-right text-[#76707F]">{bp.itemCount}</td>
                         <td className="py-2.5 pr-4 text-right text-[#2B2833]">{fmt(bp.totalPayout)}</td>
-                        <td className="py-2.5 pr-4 text-right text-[#76707F]">{bp.avgRate.toFixed(1)}%</td>
+                        <td className="py-2.5 pr-4 text-right text-[#76707F]">{(bp.avgRate ?? 0).toFixed(1)}%</td>
                         <td className={`py-2.5 text-right font-medium ${bp.unrealizedPL >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
                           {bp.unrealizedPL >= 0 ? '+' : ''}{fmt(bp.unrealizedPL)}
                         </td>
