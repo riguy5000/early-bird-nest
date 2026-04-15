@@ -1,14 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Badge } from './ui/badge';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { CustomerForm } from './CustomerForm';
 import { CustomerDetailDrawer } from './CustomerDetailDrawer';
 import { toast } from 'sonner';
-import { Search, Plus, User, Phone, Mail, MapPin, Calendar, Eye, Edit } from 'lucide-react';
+import { Search, Plus, User, Calendar } from 'lucide-react';
 
 interface Customer {
   id: string;
@@ -91,20 +87,29 @@ export function CustomerModule({ user }: CustomerModuleProps) {
     toast.success('Customer updated successfully!');
   };
 
-  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+  // Avatar initials from name
+  const getInitials = (c: Customer) =>
+    `${c.firstName?.[0] ?? ''}${c.lastName?.[0] ?? ''}`.toUpperCase() || '?';
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+
+      {/* ── Page header ── */}
+      <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-[36px] font-semibold tracking-tight title-gradient">Customer CRM</h2>
-          <p className="text-[15px] text-[#76707F]">{user?.store?.name || 'Your Store'}</p>
+          <h1 className="text-[36px] font-semibold tracking-tight title-gradient leading-tight">
+            Customer CRM
+          </h1>
+          <p className="text-[15px] text-[#76707F] mt-0.5">{user?.store?.name || 'Your Store'}</p>
         </div>
         <Dialog open={showAddCustomer} onOpenChange={setShowAddCustomer}>
           <DialogTrigger asChild>
-            <button className="btn-primary-dark flex items-center gap-2">
-              <Plus className="w-4 h-4" /> Add Customer
+            <button className="btn-primary-dark flex items-center gap-2 mt-1">
+              <Plus className="w-4 h-4" />
+              Add Customer
             </button>
           </DialogTrigger>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto bg-white/90 backdrop-blur-xl rounded-[20px] border border-white/60 shadow-2xl">
@@ -117,40 +122,48 @@ export function CustomerModule({ user }: CustomerModuleProps) {
         </Dialog>
       </div>
 
-      {/* Search */}
-      <div className="glass-card p-4">
-        <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#A8A3AE]" />
-          <input
-            placeholder="Search customers by name, email, or phone..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="input-glass pl-10"
-          />
-        </div>
+      {/* ── Search — standalone full-width input, no card wrapper ── */}
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A8A3AE] pointer-events-none" />
+        <input
+          placeholder="Search customers by name, email, or phone..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="input-glass pl-11 w-full"
+        />
       </div>
 
-      {/* Table */}
+      {/* ── Count label — above table, outside card ── */}
+      <p className="text-[14px] text-[#76707F]">
+        Customers{' '}
+        <span className="text-[#2B2833] font-medium">({filteredCustomers.length})</span>
+      </p>
+
+      {/* ── Table card — thead starts immediately, no internal header ── */}
       <div className="glass-card overflow-hidden">
-        <div className="px-6 py-4 border-b border-black/[0.04]">
-          <h3 className="text-[18px] font-semibold text-[#2B2833]">Customers ({filteredCustomers.length})</h3>
-        </div>
         {loading ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6B5EF9] mx-auto" />
-            <p className="mt-2 text-[#76707F] text-[14px]">Loading customers...</p>
+          <div className="flex flex-col items-center py-16 gap-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#6B5EF9] border-t-transparent" />
+            <p className="text-[14px] text-[#76707F]">Loading customers...</p>
           </div>
         ) : filteredCustomers.length === 0 ? (
-          <div className="text-center py-8">
-            <User className="w-12 h-12 text-[#A8A3AE] mx-auto mb-4" />
-            <p className="text-[#76707F] text-[14px]">{customers.length === 0 ? 'No customers yet.' : 'No customers match your search.'}</p>
+          <div className="flex flex-col items-center py-16 gap-3">
+            <div className="w-14 h-14 rounded-[14px] icon-container flex items-center justify-center">
+              <User className="w-7 h-7 text-[#6B5EF9]" strokeWidth={2} />
+            </div>
+            <p className="text-[14px] text-[#A8A3AE]">
+              {customers.length === 0 ? 'No customers yet.' : 'No customers match your search.'}
+            </p>
           </div>
         ) : (
           <table className="w-full">
-            <thead className="table-header-gradient">
+            {/* thead — gradient, border-bottom */}
+            <thead className="table-header-gradient border-b border-black/[0.04]">
               <tr>
                 {['NAME', 'CONTACT', 'LOCATION', 'ID INFO', 'ADDED', 'ACTIONS'].map(h => (
-                  <th key={h} className="px-6 py-3 text-left text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">{h}</th>
+                  <th key={h} className="px-6 py-3 text-left text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">
+                    {h}
+                  </th>
                 ))}
               </tr>
             </thead>
@@ -161,49 +174,64 @@ export function CustomerModule({ user }: CustomerModuleProps) {
                   className="hover:bg-[#FAFAF9] transition-colors cursor-pointer"
                   onClick={() => { setSelectedCustomer(customer); setShowDetailDrawer(true); }}
                 >
+                  {/* NAME — avatar tile + name */}
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#6B5EF9]/10 flex items-center justify-center text-[12px] font-semibold text-[#6B5EF9]">
-                        {customer.firstName?.[0]}{customer.lastName?.[0]}
+                      {/* Avatar: lavender→blue gradient tile, initials in purple */}
+                      <div className="w-9 h-9 rounded-full icon-container flex-shrink-0 text-[13px] font-semibold text-[#6B5EF9]">
+                        {getInitials(customer)}
                       </div>
-                      <span className="text-[14px] font-medium text-[#2B2833]">{customer.firstName} {customer.lastName}</span>
+                      <span className="text-[14px] font-medium text-[#2B2833]">
+                        {customer.firstName} {customer.lastName}
+                      </span>
                     </div>
                   </td>
+
+                  {/* CONTACT — email + phone stacked */}
                   <td className="px-6 py-4">
                     <div className="space-y-0.5">
-                      {customer.email && <div className="text-[13px] text-[#76707F]">{customer.email}</div>}
-                      {customer.phone && <div className="text-[13px] text-[#76707F]">{customer.phone}</div>}
-                      {!customer.email && !customer.phone && <span className="text-[13px] text-[#A8A3AE]">—</span>}
+                      {customer.email && (
+                        <div className="text-[13px] text-[#76707F]">{customer.email}</div>
+                      )}
+                      {customer.phone && (
+                        <div className="text-[13px] text-[#76707F]">{customer.phone}</div>
+                      )}
+                      {!customer.email && !customer.phone && (
+                        <span className="text-[13px] text-[#A8A3AE]">—</span>
+                      )}
                     </div>
                   </td>
+
+                  {/* LOCATION — bullet dot + text, no icon */}
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-1.5 text-[13px] text-[#76707F]">
-                      <MapPin className="w-3 h-3" />
-                      {customer.city && customer.state ? `${customer.city}, ${customer.state}` : 'N/A'}
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#A8A3AE] flex-shrink-0" />
+                      {customer.city && customer.state
+                        ? `${customer.city}, ${customer.state}`
+                        : 'N/A'}
                     </div>
                   </td>
+
+                  {/* ID INFO — type + number stacked */}
                   <td className="px-6 py-4">
-                    <div className="text-[13px]">
-                      <div className="text-[#76707F]">{customer.idType || 'Government ID'}</div>
-                      <div className="text-[#A8A3AE]">{customer.idNumber || '—'}</div>
+                    <div className="text-[13px] text-[#76707F]">
+                      {customer.idType || 'Government ID'}
+                    </div>
+                    <div className="text-[13px] text-[#A8A3AE]">
+                      {customer.idNumber || '—'}
                     </div>
                   </td>
+
+                  {/* ADDED — calendar icon + date */}
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-1.5 text-[13px] text-[#76707F]">
-                      <Calendar className="w-3 h-3" />
+                      <Calendar className="w-3.5 h-3.5 text-[#A8A3AE] flex-shrink-0" />
                       {formatDate(customer.createdAt)}
                     </div>
                   </td>
-                  <td className="px-6 py-4" onClick={e => e.stopPropagation()}>
-                    <div className="flex items-center gap-1">
-                      <button onClick={() => { setSelectedCustomer(customer); setShowDetailDrawer(true); }} className="w-8 h-8 flex items-center justify-center rounded-[8px] hover:bg-[#F8F7FB] transition-colors">
-                        <Eye className="w-4 h-4 text-[#76707F]" />
-                      </button>
-                      <button onClick={() => { setSelectedCustomer(customer); setShowEditCustomer(true); }} className="w-8 h-8 flex items-center justify-center rounded-[8px] hover:bg-[#F8F7FB] transition-colors">
-                        <Edit className="w-4 h-4 text-[#76707F]" />
-                      </button>
-                    </div>
-                  </td>
+
+                  {/* ACTIONS — empty column, row click handles navigation */}
+                  <td className="px-6 py-4" onClick={e => e.stopPropagation()} />
                 </tr>
               ))}
             </tbody>
@@ -211,7 +239,7 @@ export function CustomerModule({ user }: CustomerModuleProps) {
         )}
       </div>
 
-      {/* Edit Dialog */}
+      {/* ── Edit dialog ── */}
       <Dialog open={showEditCustomer} onOpenChange={setShowEditCustomer}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto bg-white/90 backdrop-blur-xl rounded-[20px] border border-white/60 shadow-2xl">
           <DialogHeader>
@@ -219,16 +247,26 @@ export function CustomerModule({ user }: CustomerModuleProps) {
             <DialogDescription className="text-[14px] text-[#76707F]">Update customer information.</DialogDescription>
           </DialogHeader>
           {selectedCustomer && (
-            <CustomerForm customer={selectedCustomer} isEditing={true} onSave={handleEditCustomer} onCancel={() => { setShowEditCustomer(false); setSelectedCustomer(null); }} />
+            <CustomerForm
+              customer={selectedCustomer}
+              isEditing={true}
+              onSave={handleEditCustomer}
+              onCancel={() => { setShowEditCustomer(false); setSelectedCustomer(null); }}
+            />
           )}
         </DialogContent>
       </Dialog>
 
+      {/* ── Detail drawer ── */}
       <CustomerDetailDrawer
         customer={selectedCustomer}
         open={showDetailDrawer}
         onClose={() => { setShowDetailDrawer(false); setSelectedCustomer(null); }}
-        onEdit={(c: any) => { setShowDetailDrawer(false); setSelectedCustomer(c as Customer); setShowEditCustomer(true); }}
+        onEdit={(c: any) => {
+          setShowDetailDrawer(false);
+          setSelectedCustomer(c as Customer);
+          setShowEditCustomer(true);
+        }}
       />
     </div>
   );

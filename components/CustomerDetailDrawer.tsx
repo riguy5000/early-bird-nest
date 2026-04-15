@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
-import { User, Mail, Phone, MapPin, Calendar, CreditCard, History, Package, DollarSign } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface Customer {
   id: string;
@@ -39,16 +36,6 @@ interface BatchRecord {
   source: string;
 }
 
-function Field({ label, value }: { label: string; value: React.ReactNode }) {
-  if (!value) return null;
-  return (
-    <div className="py-2">
-      <div className="text-[11px] text-[#76707F] uppercase tracking-wider font-semibold">{label}</div>
-      <div className="text-[15px] font-medium text-[#2B2833] mt-0.5">{value}</div>
-    </div>
-  );
-}
-
 export function CustomerDetailDrawer({ customer, open, onClose, onEdit }: Props) {
   const [batches, setBatches] = useState<BatchRecord[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -57,6 +44,14 @@ export function CustomerDetailDrawer({ customer, open, onClose, onEdit }: Props)
     if (!customer || !open) return;
     loadHistory();
   }, [customer?.id, open]);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [open, onClose]);
 
   const loadHistory = async () => {
     if (!customer) return;
@@ -79,68 +74,129 @@ export function CustomerDetailDrawer({ customer, open, onClose, onEdit }: Props)
   if (!customer) return null;
 
   const fullName = `${customer.firstName} ${customer.lastName}`.trim();
-  const fmtCurrency = (v: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v);
-  const totalSpent = batches.reduce((s, b) => s + b.total_payout, 0);
-  const totalItems = batches.reduce((s, b) => s + b.total_items, 0);
+  const fmtCurrency = (v: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v);
+  const totalSpent = batches.reduce((s, b) => s + (b.total_payout || 0), 0);
+  const totalItems = batches.reduce((s, b) => s + (b.total_items || 0), 0);
+
+  if (!open) return null;
 
   return (
-    <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>{fullName || 'Unknown Customer'}</SheetTitle>
-        </SheetHeader>
+    <>
+      {/* ── Backdrop — dimmed haze, matches approved screenshot ── */}
+      <div
+        className="fixed inset-0 z-40 bg-black/[0.08] backdrop-blur-[2px]"
+        onClick={onClose}
+      />
 
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5">
+      {/* ── Drawer panel — right-edge flush, full height, rounded left corners ── */}
+      <div
+        className="fixed top-0 right-0 bottom-0 z-50 flex flex-col"
+        style={{
+          width: '300px',
+          background: 'rgba(255,255,255,0.95)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          borderRadius: '20px 0 0 20px',
+          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.15)',
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+
+        {/* ── Drawer header — name + close button ── */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-black/[0.06] flex-shrink-0">
+          <h2 className="text-[20px] font-semibold text-[#2B2833] tracking-tight">
+            {fullName || 'Unknown Customer'}
+          </h2>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center rounded-[8px] hover:bg-[#F8F7FB] transition-colors flex-shrink-0"
+          >
+            <X className="w-4 h-4 text-[#76707F]" />
+          </button>
+        </div>
+
+        {/* ── Scrollable content ── */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+
           {/* Contact Information */}
           <div>
-            <h4 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-2">Contact Information</h4>
-            <div className="space-y-0.5">
-              <Field label="Email" value={customer.email} />
-              <Field label="Phone" value={customer.phone} />
-              <Field label="Address" value={customer.address} />
+            <p className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-3">
+              Contact Information
+            </p>
+            <div className="space-y-3">
+              {customer.email && (
+                <div>
+                  <p className="text-[11px] text-[#76707F] mb-0.5">Email</p>
+                  <p className="text-[15px] font-medium text-[#2B2833]">{customer.email}</p>
+                </div>
+              )}
+              {customer.phone && (
+                <div>
+                  <p className="text-[11px] text-[#76707F] mb-0.5">Phone</p>
+                  <p className="text-[15px] font-medium text-[#2B2833]">{customer.phone}</p>
+                </div>
+              )}
+              {customer.address && (
+                <div>
+                  <p className="text-[11px] text-[#76707F] mb-0.5">Address</p>
+                  <p className="text-[15px] font-medium text-[#2B2833]">{customer.address}</p>
+                </div>
+              )}
             </div>
           </div>
 
-          <Separator className="bg-black/[0.04]" />
+          {/* Divider */}
+          <div className="border-t border-black/[0.04]" />
 
           {/* Transaction History */}
           <div>
-            <h4 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-3">Transaction History</h4>
+            <p className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-3">
+              Transaction History
+            </p>
             {loadingHistory ? (
-              <div className="text-center py-4">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#6B5EF9] mx-auto" />
+              <div className="flex justify-center py-4">
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-[#6B5EF9] border-t-transparent" />
               </div>
             ) : batches.length === 0 ? (
-              <p className="text-[14px] text-[#76707F] py-2">No transactions found.</p>
+              <p className="text-[14px] text-[#76707F]">No transactions found.</p>
             ) : (
-              <div className="flex items-center justify-between py-2">
+              <div className="flex items-center justify-between">
                 <span className="text-[14px] text-[#76707F]">{totalItems} items</span>
-                <span className="text-[22px] font-semibold text-[#2B2833]">{fmtCurrency(totalSpent)}</span>
+                <span className="text-[22px] font-semibold text-[#2B2833] tabular-nums">
+                  {fmtCurrency(totalSpent)}
+                </span>
               </div>
             )}
           </div>
 
-          <Separator className="bg-black/[0.04]" />
+          {/* Divider */}
+          <div className="border-t border-black/[0.04]" />
 
           {/* Customer Since */}
           <div>
-            <h4 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-2">Customer Since</h4>
+            <p className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-2">
+              Customer Since
+            </p>
             <p className="text-[15px] font-medium text-[#2B2833]">
-              {new Date(customer.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              {new Date(customer.createdAt).toLocaleDateString('en-US', {
+                month: 'long', day: 'numeric', year: 'numeric',
+              })}
             </p>
           </div>
         </div>
 
-        <SheetFooter>
+        {/* ── Footer action button ── */}
+        <div className="px-6 py-5 border-t border-black/[0.06] flex-shrink-0">
           <button
             onClick={() => onEdit(customer)}
-            className="w-full py-3 bg-[#2B2833] text-white rounded-[10px] text-[15px] font-semibold hover:bg-[#3B3846] transition-all"
-            style={{ boxShadow: '0 10px 15px -3px rgba(0,0,0,0.10)' }}
+            className="w-full btn-primary-dark flex items-center justify-center"
           >
             Edit Customer
           </button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </div>
+
+      </div>
+    </>
   );
 }
