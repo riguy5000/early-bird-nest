@@ -237,15 +237,15 @@ export function AnalyticsModule({ storeId, storeName }: AnalyticsModuleProps) {
         {/* ── SCRAP / REFINERY ── */}
         <TabsContent value="scrap" className="space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <KPI label="Scrap Cost Basis" value={fmt(d.scrapCostBasis)} icon={DollarSign} />
-            <KPI label="Expected Melt Value" value={fmt(d.expectedMeltValue)} icon={Flame} />
-            <KPI label="Lots Sent" value={d.refineryLotsSent.toString()} icon={Package} />
-            <KPI label="Refinery Settlements" value={fmt(d.refinerySettlements)} icon={CheckCircle} />
+            <KPI label="Scrap Cost Basis" value={fmt(d.scrapCostBasis)} iconType="dollar-sign" />
+            <KPI label="Expected Melt Value" value={fmt(d.expectedMeltValue)} iconType="flame" />
+            <KPI label="Lots Sent" value={d.refineryLotsSent.toString()} iconType="package" />
+            <KPI label="Refinery Settlements" value={fmt(d.refinerySettlements)} iconType="check-circle" />
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <KPI label="Refinery Profit" value={fmt(d.realizedRefineryProfit)} icon={TrendingUp} />
-            <KPI label="Avg Variance/Lot" value={fmtFull(d.avgRefineryVariance)} icon={BarChart3} />
-            <KPI label="Scrap Candidate Value" value={fmt(d.scrapValue)} icon={Flame} />
+            <KPI label="Refinery Profit" value={fmt(d.realizedRefineryProfit)} iconType="trending-up" />
+            <KPI label="Avg Variance/Lot" value={fmtFull(d.avgRefineryVariance)} iconType="bar-chart" />
+            <KPI label="Scrap Candidate Value" value={fmt(d.scrapValue)} iconType="flame" />
           </div>
 
           {d.refineryLots.length > 0 ? (
@@ -283,14 +283,14 @@ export function AnalyticsModule({ storeId, storeName }: AnalyticsModuleProps) {
         {/* ── SHOWROOM ── */}
         <TabsContent value="showroom" className="space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <KPI label="Showroom Items" value={d.showroomCount.toString()} icon={ShoppingBag} />
-            <KPI label="Showroom Cost Basis" value={fmt(d.showroomCostBasis)} icon={DollarSign} />
-            <KPI label="Est. Resale Value" value={fmt(d.showroomResaleValue)} icon={TrendingUp} />
-            <KPI label="Items Sold" value={d.itemsSold.toString()} icon={CheckCircle} />
+            <KPI label="Showroom Items" value={d.showroomCount.toString()} iconType="shopping-bag" />
+            <KPI label="Showroom Cost Basis" value={fmt(d.showroomCostBasis)} iconType="dollar-sign" />
+            <KPI label="Est. Resale Value" value={fmt(d.showroomResaleValue)} iconType="trending-up" />
+            <KPI label="Items Sold" value={d.itemsSold.toString()} iconType="check-circle" />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <KPI label="Realized Resale Profit" value={fmt(d.realizedResaleProfit)} icon={TrendingUp} />
-            <KPI label="Showroom Margin" value={d.showroomCostBasis > 0 ? `${(((d.showroomResaleValue - d.showroomCostBasis) / d.showroomCostBasis) * 100).toFixed(1)}%` : '0%'} icon={BarChart3} />
+            <KPI label="Realized Resale Profit" value={fmt(d.realizedResaleProfit)} iconType="trending-up" />
+            <KPI label="Showroom Margin" value={d.showroomCostBasis > 0 ? `${(((d.showroomResaleValue - d.showroomCostBasis) / d.showroomCostBasis) * 100).toFixed(1)}%` : '0%'} iconType="bar-chart" />
           </div>
           {d.showroomCount === 0 && (
             <div className="glass-card p-12 text-center text-[#76707F] text-[14px]">No showroom inventory yet — mark items as Showroom Candidate in Inventory</div>
