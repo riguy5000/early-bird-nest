@@ -49,7 +49,7 @@ function metalSummary(metals: any) {
   if (!arr.length) return '—';
   const first = arr[0];
   if (!first) return '—';
-  const karat = first.karat || first.type || '';
+  const karat = String(first.karat || first.type || '');
   return karat ? `${karat.replace('Gold ', '').replace('k', ' kt')}` : '—';
 }
 
