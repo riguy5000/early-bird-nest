@@ -89,7 +89,7 @@ export function CustomerDetailDrawer({ customer, open, onClose, onEdit }: Props)
       <style>{slideStyle}</style>
       {/* ── Backdrop — dimmed haze, matches approved screenshot ── */}
       <div
-        className="fixed inset-0 z-40 bg-black/[0.18] backdrop-blur-[3px]"
+        className="fixed inset-0 z-40 bg-black/[0.08] backdrop-blur-sm"
         onClick={onClose}
       />
 
@@ -102,11 +102,11 @@ export function CustomerDetailDrawer({ customer, open, onClose, onEdit }: Props)
           right: '16px',
           bottom: '16px',
           width: '300px',
-          background: 'rgba(255,255,255,0.92)',
+          background: 'rgba(255,255,255,0.80)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
           borderRadius: '20px',
-          boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.06)',
           border: '1px solid rgba(255,255,255,0.6)',
         }}
         onClick={e => e.stopPropagation()}

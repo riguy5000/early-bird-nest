@@ -455,7 +455,7 @@ export function CustomerDrawer({
   return (
     <>
       <Sheet open={isOpen} onOpenChange={handleClose}>
-        <SheetContent side="right" className="w-full sm:w-[440px] p-0 flex flex-col">
+        <SheetContent side="right" className="w-full sm:w-[440px] p-0 flex flex-col gap-0">
           <SheetHeader className="px-6 pt-6 pb-4 border-b border-black/[0.06]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">

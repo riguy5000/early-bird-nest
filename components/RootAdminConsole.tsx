@@ -557,7 +557,7 @@ export function RootAdminConsole({ user, onLogout }: RootAdminConsoleProps) {
 
       {/* Store Details Sheet */}
       <Sheet open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <SheetContent className="w-[500px] sm:w-[600px] overflow-y-auto">
+        <SheetContent className="w-full sm:w-[540px] overflow-y-auto">
           <SheetHeader>
             <SheetTitle>Store Details</SheetTitle>
             <SheetDescription>Detailed information about this store</SheetDescription>

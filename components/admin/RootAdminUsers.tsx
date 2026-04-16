@@ -247,7 +247,7 @@ export function RootAdminUsers() {
 
       {/* Detail Drawer */}
       <Sheet open={detailOpen} onOpenChange={setDetailOpen}>
-        <SheetContent className="w-[500px] sm:w-[600px] overflow-y-auto">
+        <SheetContent className="w-full sm:w-[540px] overflow-y-auto">
           <SheetHeader>
             <SheetTitle>User Profile</SheetTitle>
             <SheetDescription>Detailed user information</SheetDescription>

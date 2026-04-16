@@ -1,10 +1,4 @@
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Checkbox } from '../ui/checkbox';
-import { Separator } from '../ui/separator';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { AuthFlow } from '../AuthenticationFlow';
@@ -16,11 +10,7 @@ interface LoginScreenProps {
 }
 
 export function LoginScreen({ onLogin, onNavigate }: LoginScreenProps) {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    rememberMe: false
-  });
+  const [formData, setFormData] = useState({ email: '', password: '', rememberMe: false });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -42,16 +32,12 @@ export function LoginScreen({ onLogin, onNavigate }: LoginScreenProps) {
       setTimeout(() => setShakeAnimation(false), 500);
       return;
     }
-
     setIsLoading(true);
-
     try {
-      // Real Supabase Auth sign in
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
-
       if (authError) {
         setShakeAnimation(true);
         setTimeout(() => setShakeAnimation(false), 500);
@@ -59,88 +45,48 @@ export function LoginScreen({ onLogin, onNavigate }: LoginScreenProps) {
         setIsLoading(false);
         return;
       }
-
       if (!authData.user) {
         toast.error('Login failed. Please try again.');
         setIsLoading(false);
         return;
       }
-
-      // Resolve profile via edge function (checks platform_admins first, then employee_profiles)
       const { data: profileData, error: profileError } = await supabase.functions.invoke('employee-management', {
         body: { action: 'resolve-profile' }
       });
-
       if (profileError || profileData?.error) {
         const errorMsg = profileData?.error || 'Failed to load your profile';
-        if (errorMsg.includes('inactive')) {
-          toast.error('Your account is inactive. Contact your administrator.');
-        } else if (errorMsg.includes('No employee profile')) {
-          toast.error('No profile found. Please contact your administrator.');
-        } else {
-          toast.error(errorMsg);
-        }
+        if (errorMsg.includes('inactive')) toast.error('Your account is inactive. Contact your administrator.');
+        else if (errorMsg.includes('No employee profile')) toast.error('No profile found. Please contact your administrator.');
+        else toast.error(errorMsg);
         await supabase.auth.signOut();
         setIsLoading(false);
         return;
       }
-
-      // Route based on user type
       if (profileData.type === 'platform_admin') {
         const pa = profileData.platformAdmin;
-        const userData = {
-          id: pa.id,
-          authUserId: authData.user.id,
-          email: pa.email,
-          name: pa.full_name,
-          role: pa.role,
-          isPlatformAdmin: true,
-          isActive: pa.is_active,
-        };
+        const userData = { id: pa.id, authUserId: authData.user.id, email: pa.email, name: pa.full_name, role: pa.role, isPlatformAdmin: true, isActive: pa.is_active };
         toast.success(`Welcome back, ${userData.name || 'Admin'}!`);
         onLogin(userData, formData.rememberMe);
       } else {
-        // Store user (store_user type)
         const { profile, store, permissions, visibility } = profileData;
         const userData = {
-          id: profile.id,
-          authUserId: authData.user.id,
-          email: profile.email,
+          id: profile.id, authUserId: authData.user.id, email: profile.email,
           name: `${profile.first_name} ${profile.last_name}`.trim(),
-          firstName: profile.first_name,
-          lastName: profile.last_name,
-          role: profile.role,
-          storeId: profile.store_id,
-          store: store ? {
-            id: store.id,
-            name: store.name,
-            type: store.type,
-            address: store.address,
-            phone: store.phone,
-            email: store.email,
-            timezone: store.timezone,
-          } : null,
+          firstName: profile.first_name, lastName: profile.last_name,
+          role: profile.role, storeId: profile.store_id,
+          store: store ? { id: store.id, name: store.name, type: store.type, address: store.address, phone: store.phone, email: store.email, timezone: store.timezone } : null,
           permissions: permissions ? {
-            accessTakeIn: permissions.can_access_take_in,
-            accessInventory: permissions.can_access_inventory,
-            accessCustomers: permissions.can_access_customers,
-            accessPayouts: permissions.can_access_payouts,
-            accessStatistics: permissions.can_access_statistics,
-            accessSettings: permissions.can_access_settings,
-            accessSavedForLater: permissions.can_access_saved_for_later,
-            canEditRates: permissions.can_edit_rates,
-            canEditFinalPayout: permissions.can_edit_final_payout_amount,
-            canPrintLabels: permissions.can_print_labels,
-            canPrintReceipts: permissions.can_print_receipts,
-            canDeleteItems: permissions.can_delete_items,
-            canCompletePurchase: permissions.can_complete_purchase,
-            canReopenTransactions: permissions.can_reopen_transactions,
+            accessTakeIn: permissions.can_access_take_in, accessInventory: permissions.can_access_inventory,
+            accessCustomers: permissions.can_access_customers, accessPayouts: permissions.can_access_payouts,
+            accessStatistics: permissions.can_access_statistics, accessSettings: permissions.can_access_settings,
+            accessSavedForLater: permissions.can_access_saved_for_later, canEditRates: permissions.can_edit_rates,
+            canEditFinalPayout: permissions.can_edit_final_payout_amount, canPrintLabels: permissions.can_print_labels,
+            canPrintReceipts: permissions.can_print_receipts, canDeleteItems: permissions.can_delete_items,
+            canCompletePurchase: permissions.can_complete_purchase, canReopenTransactions: permissions.can_reopen_transactions,
           } : null,
           visibility: visibility ? {
-            hideProfit: visibility.hide_profit,
-            hidePercentagePaid: visibility.hide_percentage_paid,
-            hideMarketValue: visibility.hide_market_value,
-            hideTotalPayoutBreakdown: visibility.hide_total_payout_breakdown,
+            hideProfit: visibility.hide_profit, hidePercentagePaid: visibility.hide_percentage_paid,
+            hideMarketValue: visibility.hide_market_value, hideTotalPayoutBreakdown: visibility.hide_total_payout_breakdown,
             hideAverageRate: visibility.hide_average_rate,
           } : null,
           isActive: profile.is_active,
@@ -159,105 +105,111 @@ export function LoginScreen({ onLogin, onNavigate }: LoginScreenProps) {
   const isFormValid = formData.email && formData.password;
 
   return (
-    <Card className={`w-full ${shakeAnimation ? 'animate-pulse' : ''}`}>
-      <CardHeader className="space-y-1 text-center">
-        <CardTitle className="text-2xl">Sign in to your store</CardTitle>
-        <CardDescription>
+    /* ── Auth card — matches login-approved.png exactly ── */
+    <div
+      className={`w-full bg-white/90 backdrop-blur-xl rounded-[20px] px-8 py-10 ${shakeAnimation ? 'animate-[shake_0.4s_ease-in-out]' : ''}`}
+      style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.10), 0 4px 16px rgba(0,0,0,0.06)', border: '1px solid rgba(255,255,255,0.7)' }}
+    >
+      {/* Title */}
+      <div className="text-center mb-8">
+        <h1 className="text-[28px] font-semibold tracking-tight title-gradient mb-2">
+          Sign in to your store
+        </h1>
+        <p className="text-[14px] text-[#76707F]">
           Enter your credentials to access your jewelry & pawn management system
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                className="pl-10"
-                autoComplete="email"
-              />
-            </div>
-            {errors.email && <p className="text-rose-500 text-sm">{errors.email}</p>}
-          </div>
+        </p>
+      </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Enter your password"
-                value={formData.password}
-                onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                className="pl-10 pr-10"
-                autoComplete="current-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-            {errors.password && <p className="text-rose-500 text-sm">{errors.password}</p>}
+      <form onSubmit={handleLogin} className="space-y-5">
+        {/* Email */}
+        <div>
+          <label className="text-[13px] font-medium text-[#2B2833] block mb-1.5">Email</label>
+          <div className="relative">
+            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A8A3AE] pointer-events-none" />
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={formData.email}
+              onChange={e => setFormData(p => ({ ...p, email: e.target.value }))}
+              autoComplete="email"
+              className="w-full h-11 pl-10 pr-4 bg-white border border-black/[0.08] rounded-[10px] text-[14px] text-[#2B2833] placeholder:text-[#A8A3AE] focus:outline-none focus:border-[#6B5EF9]/40 focus:ring-4 focus:ring-[#6B5EF9]/10 transition-all"
+            />
           </div>
+          {errors.email && <p className="text-[12px] text-[#F87171] mt-1">{errors.email}</p>}
+        </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="remember"
-                checked={formData.rememberMe}
-                onCheckedChange={(checked) =>
-                  setFormData(prev => ({ ...prev, rememberMe: checked as boolean }))
-                }
-              />
-              <Label htmlFor="remember" className="text-sm font-normal">
-                Remember me for 30 days
-              </Label>
-            </div>
-            <Button
+        {/* Password */}
+        <div>
+          <label className="text-[13px] font-medium text-[#2B2833] block mb-1.5">Password</label>
+          <div className="relative">
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A8A3AE] pointer-events-none" />
+            <input
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Enter your password"
+              value={formData.password}
+              onChange={e => setFormData(p => ({ ...p, password: e.target.value }))}
+              autoComplete="current-password"
+              className="w-full h-11 pl-10 pr-11 bg-white border border-black/[0.08] rounded-[10px] text-[14px] text-[#2B2833] placeholder:text-[#A8A3AE] focus:outline-none focus:border-[#6B5EF9]/40 focus:ring-4 focus:ring-[#6B5EF9]/10 transition-all"
+            />
+            <button
               type="button"
-              variant="link"
-              className="px-0 h-auto text-sm"
-              onClick={() => onNavigate('forgot-password')}
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#A8A3AE] hover:text-[#76707F] transition-colors"
             >
-              Forgot password?
-            </Button>
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
           </div>
-
-          <Button type="submit" className="w-full" disabled={!isFormValid || isLoading}>
-            {isLoading ? 'Signing in...' : 'Sign In'}
-          </Button>
-        </form>
-
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <Separator className="w-full" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">or</span>
-          </div>
+          {errors.password && <p className="text-[12px] text-[#F87171] mt-1">{errors.password}</p>}
         </div>
 
-        <div className="text-center text-sm">
-          <span className="text-muted-foreground">Don't have an account? </span>
-          <Button
+        {/* Remember me + Forgot password */}
+        <div className="flex items-center justify-between">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.rememberMe}
+              onChange={e => setFormData(p => ({ ...p, rememberMe: e.target.checked }))}
+              className="w-4 h-4 rounded border-black/[0.15] text-[#6B5EF9] focus:ring-[#6B5EF9]/20"
+            />
+            <span className="text-[13px] text-[#76707F]">Remember me for 30 days</span>
+          </label>
+          <button
             type="button"
-            variant="link"
-            className="px-0 h-auto"
-            onClick={() => onNavigate('register')}
+            onClick={() => onNavigate('forgot-password')}
+            className="text-[13px] font-medium text-[#6B5EF9] hover:text-[#5848D9] transition-colors"
           >
-            Create your store
-          </Button>
+            Forgot password?
+          </button>
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Sign In button */}
+        <button
+          type="submit"
+          disabled={!isFormValid || isLoading}
+          className="w-full h-11 btn-primary-dark disabled:opacity-50 disabled:pointer-events-none text-[15px]"
+        >
+          {isLoading ? 'Signing in…' : 'Sign In'}
+        </button>
+      </form>
+
+      {/* OR divider */}
+      <div className="flex items-center gap-3 my-5">
+        <div className="flex-1 h-px bg-black/[0.06]" />
+        <span className="text-[12px] text-[#A8A3AE] uppercase tracking-wider">OR</span>
+        <div className="flex-1 h-px bg-black/[0.06]" />
+      </div>
+
+      {/* Footer link */}
+      <p className="text-center text-[13px] text-[#76707F]">
+        Don't have an account?{' '}
+        <button
+          type="button"
+          onClick={() => onNavigate('register')}
+          className="font-semibold title-gradient hover:opacity-80 transition-opacity"
+        >
+          Create your store
+        </button>
+      </p>
+    </div>
   );
 }

@@ -261,33 +261,39 @@ export function RegistrationWizard({ onComplete, onNavigate }: RegistrationWizar
   const progressPercentage = (currentStep / steps.length) * 100;
 
   return (
-    <Card className="w-full">
-      <CardHeader className="space-y-4">
-        <div className="flex items-center gap-2">
+    <div
+      className="w-full bg-white/90 backdrop-blur-xl rounded-[20px] px-8 py-8"
+      style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.10), 0 4px 16px rgba(0,0,0,0.06)', border: '1px solid rgba(255,255,255,0.7)' }}
+    >
+      <div className="space-y-4 mb-6">
+        <div>
           {currentStep > 1 && (
-            <Button
-              variant="ghost"
-              size="sm"
+            <button
               onClick={handleBack}
-              className="p-0 h-auto"
+              className="flex items-center gap-1 text-[13px] text-[#76707F] hover:text-[#2B2833] mb-4 transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
-            </Button>
+            </button>
           )}
-          <div className="flex-1">
-            <CardTitle className="text-xl">Create Your Store</CardTitle>
-            <CardDescription>
-              Set up your jewelry & pawn management system in 3 easy steps
-            </CardDescription>
-          </div>
+          <h1 className="text-[28px] font-semibold tracking-tight title-gradient leading-tight">
+            Create Your Store
+          </h1>
+          <p className="text-[14px] text-[#76707F] mt-1">
+            Set up your jewelry & pawn management system in 3 easy steps
+          </p>
         </div>
 
         {/* Progress Bar */}
         <div className="space-y-2">
-          <Progress value={progressPercentage} className="h-2" />
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>Step {currentStep} of {steps.length}</span>
-            <span>{Math.round(progressPercentage)}% complete</span>
+          <div className="flex justify-between text-[13px] mb-1.5">
+            <span className="text-[#76707F]">Step {currentStep} of {steps.length}</span>
+            <span className="text-[#6B5EF9] font-semibold">{Math.round(progressPercentage)}% complete</span>
+          </div>
+          <div className="w-full h-1.5 bg-black/[0.06] rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${progressPercentage}%`, background: 'linear-gradient(to right, #4889FA, #6B5EF9, #F95DF9)' }}
+            />
           </div>
         </div>
 
@@ -300,18 +306,23 @@ export function RegistrationWizard({ onComplete, onNavigate }: RegistrationWizar
             
             return (
               <div key={step.number} className="flex flex-col items-center space-y-2">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                  isComplete ? 'bg-primary border-primary text-primary-foreground' :
-                  isActive ? 'border-primary text-primary' : 'border-muted-foreground/30 text-muted-foreground'
-                }`}>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                  isComplete
+                    ? 'bg-[#4ADB8A] shadow-md'
+                    : isActive
+                    ? 'shadow-md ring-2 ring-[#6B5EF9]/30'
+                    : 'bg-white/60 border border-black/[0.08]'
+                }`}
+                  style={isActive && !isComplete ? { background: 'linear-gradient(to bottom right, #ECEAFF, #C8DCFF)' } : {}}
+                >
                   {isComplete ? (
-                    <CheckCircle className="h-5 w-5" />
+                    <CheckCircle className="h-5 w-5 text-white" />
                   ) : (
-                    <Icon className="h-5 w-5" />
+                    <Icon className={`h-5 w-5 ${isActive ? 'text-[#6B5EF9]' : 'text-[#A8A3AE]'}`} />
                   )}
                 </div>
-                <span className={`text-xs font-medium ${
-                  isActive ? 'text-foreground' : 'text-muted-foreground'
+                <span className={`text-[12px] font-medium mt-1 ${
+                  isComplete ? 'text-[#4ADB8A]' : isActive ? 'text-[#2B2833]' : 'text-[#A8A3AE]'
                 }`}>
                   {step.title}
                 </span>
@@ -319,9 +330,8 @@ export function RegistrationWizard({ onComplete, onNavigate }: RegistrationWizar
             );
           })}
         </div>
-      </CardHeader>
-
-      <CardContent className="space-y-6">
+      </div>
+      <div className="space-y-6">
         {/* Step 1: Store Details */}
         {currentStep === 1 && (
           <div className="space-y-4">
@@ -334,17 +344,17 @@ export function RegistrationWizard({ onComplete, onNavigate }: RegistrationWizar
                   placeholder="Enter your store name"
                   value={storeDetails.storeName}
                   onChange={(e) => setStoreDetails(prev => ({ ...prev, storeName: e.target.value }))}
-                  className="pl-10"
+                  className="w-full h-11 pl-10 bg-white border border-black/[0.08] rounded-[10px] text-[14px] text-[#2B2833] placeholder:text-[#A8A3AE] focus:outline-none focus:border-[#6B5EF9]/40 focus:ring-4 focus:ring-[#6B5EF9]/10 transition-all"
                   autoFocus
                 />
               </div>
-              {errors.storeName && <p className="text-destructive text-sm">{errors.storeName}</p>}
+              {errors.storeName && <p className="text-[12px] text-[#F87171] mt-1">{errors.storeName}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="storeType">Store Type *</Label>
               <Select value={storeDetails.storeType} onValueChange={(value) => setStoreDetails(prev => ({ ...prev, storeType: value }))}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full h-11 px-4 bg-white border border-black/[0.08] rounded-[10px] text-[14px] text-[#2B2833] focus:ring-4 focus:ring-[#6B5EF9]/10">
                   <SelectValue placeholder="Select your store type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -355,7 +365,7 @@ export function RegistrationWizard({ onComplete, onNavigate }: RegistrationWizar
                   ))}
                 </SelectContent>
               </Select>
-              {errors.storeType && <p className="text-destructive text-sm">{errors.storeType}</p>}
+              {errors.storeType && <p className="text-[12px] text-[#F87171] mt-1">{errors.storeType}</p>}
             </div>
 
             {/* Google Places Autocomplete for Address */}
@@ -383,10 +393,10 @@ export function RegistrationWizard({ onComplete, onNavigate }: RegistrationWizar
                     placeholder="(555) 123-4567"
                     value={storeDetails.phone}
                     onChange={(e) => setStoreDetails(prev => ({ ...prev, phone: e.target.value }))}
-                    className="pl-10"
+                    className="w-full h-11 pl-10 bg-white border border-black/[0.08] rounded-[10px] text-[14px] text-[#2B2833] placeholder:text-[#A8A3AE] focus:outline-none focus:border-[#6B5EF9]/40 focus:ring-4 focus:ring-[#6B5EF9]/10 transition-all"
                   />
                 </div>
-                {errors.phone && <p className="text-destructive text-sm">{errors.phone}</p>}
+                {errors.phone && <p className="text-[12px] text-[#F87171] mt-1">{errors.phone}</p>}
               </div>
 
               <div className="space-y-2">
@@ -398,8 +408,9 @@ export function RegistrationWizard({ onComplete, onNavigate }: RegistrationWizar
                   placeholder="1"
                   value={storeDetails.employeeCount}
                   onChange={(e) => setStoreDetails(prev => ({ ...prev, employeeCount: parseInt(e.target.value) || 1 }))}
+                  className="w-full h-11 px-4 bg-white border border-black/[0.08] rounded-[10px] text-[14px] text-[#2B2833] placeholder:text-[#A8A3AE] focus:outline-none focus:border-[#6B5EF9]/40 focus:ring-4 focus:ring-[#6B5EF9]/10 transition-all"
                 />
-                {errors.employeeCount && <p className="text-destructive text-sm">{errors.employeeCount}</p>}
+                {errors.employeeCount && <p className="text-[12px] text-[#F87171] mt-1">{errors.employeeCount}</p>}
               </div>
             </div>
 
@@ -413,10 +424,10 @@ export function RegistrationWizard({ onComplete, onNavigate }: RegistrationWizar
                   placeholder="store@example.com"
                   value={storeDetails.email}
                   onChange={(e) => setStoreDetails(prev => ({ ...prev, email: e.target.value }))}
-                  className="pl-10"
+                  className="w-full h-11 pl-10 bg-white border border-black/[0.08] rounded-[10px] text-[14px] text-[#2B2833] placeholder:text-[#A8A3AE] focus:outline-none focus:border-[#6B5EF9]/40 focus:ring-4 focus:ring-[#6B5EF9]/10 transition-all"
                 />
               </div>
-              {errors.email && <p className="text-destructive text-sm">{errors.email}</p>}
+              {errors.email && <p className="text-[12px] text-[#F87171] mt-1">{errors.email}</p>}
             </div>
           </div>
         )}
@@ -433,11 +444,11 @@ export function RegistrationWizard({ onComplete, onNavigate }: RegistrationWizar
                   placeholder="Enter your full name"
                   value={ownerAccount.fullName}
                   onChange={(e) => setOwnerAccount(prev => ({ ...prev, fullName: e.target.value }))}
-                  className="pl-10"
+                  className="w-full h-11 pl-10 bg-white border border-black/[0.08] rounded-[10px] text-[14px] text-[#2B2833] placeholder:text-[#A8A3AE] focus:outline-none focus:border-[#6B5EF9]/40 focus:ring-4 focus:ring-[#6B5EF9]/10 transition-all"
                   autoFocus
                 />
               </div>
-              {errors.fullName && <p className="text-destructive text-sm">{errors.fullName}</p>}
+              {errors.fullName && <p className="text-[12px] text-[#F87171] mt-1">{errors.fullName}</p>}
             </div>
 
             <div className="space-y-2">
@@ -450,10 +461,10 @@ export function RegistrationWizard({ onComplete, onNavigate }: RegistrationWizar
                   placeholder="Must match store email"
                   value={ownerAccount.ownerEmail}
                   onChange={(e) => setOwnerAccount(prev => ({ ...prev, ownerEmail: e.target.value }))}
-                  className="pl-10"
+                  className="w-full h-11 pl-10 bg-white border border-black/[0.08] rounded-[10px] text-[14px] text-[#2B2833] placeholder:text-[#A8A3AE] focus:outline-none focus:border-[#6B5EF9]/40 focus:ring-4 focus:ring-[#6B5EF9]/10 transition-all"
                 />
               </div>
-              {errors.ownerEmail && <p className="text-destructive text-sm">{errors.ownerEmail}</p>}
+              {errors.ownerEmail && <p className="text-[12px] text-[#F87171] mt-1">{errors.ownerEmail}</p>}
             </div>
 
             <div className="space-y-2">
@@ -466,7 +477,7 @@ export function RegistrationWizard({ onComplete, onNavigate }: RegistrationWizar
                   placeholder="(555) 123-4567"
                   value={ownerAccount.ownerPhone}
                   onChange={(e) => setOwnerAccount(prev => ({ ...prev, ownerPhone: e.target.value }))}
-                  className="pl-10"
+                  className="w-full h-11 pl-10 bg-white border border-black/[0.08] rounded-[10px] text-[14px] text-[#2B2833] placeholder:text-[#A8A3AE] focus:outline-none focus:border-[#6B5EF9]/40 focus:ring-4 focus:ring-[#6B5EF9]/10 transition-all"
                 />
               </div>
             </div>
@@ -485,7 +496,7 @@ export function RegistrationWizard({ onComplete, onNavigate }: RegistrationWizar
                 <button
                   type="button"
                   onClick={() => setShowPasswords(prev => ({ ...prev, password: !prev.password }))}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#A8A3AE] hover:text-[#76707F] transition-colors"
                 >
                   {showPasswords.password ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -503,7 +514,7 @@ export function RegistrationWizard({ onComplete, onNavigate }: RegistrationWizar
                 </div>
               )}
               
-              {errors.password && <p className="text-destructive text-sm">{errors.password}</p>}
+              {errors.password && <p className="text-[12px] text-[#F87171] mt-1">{errors.password}</p>}
             </div>
 
             <div className="space-y-2">
@@ -520,19 +531,19 @@ export function RegistrationWizard({ onComplete, onNavigate }: RegistrationWizar
                 <button
                   type="button"
                   onClick={() => setShowPasswords(prev => ({ ...prev, confirmPassword: !prev.confirmPassword }))}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#A8A3AE] hover:text-[#76707F] transition-colors"
                 >
                   {showPasswords.confirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              {errors.confirmPassword && <p className="text-destructive text-sm">{errors.confirmPassword}</p>}
+              {errors.confirmPassword && <p className="text-[12px] text-[#F87171] mt-1">{errors.confirmPassword}</p>}
             </div>
 
             <div className="flex items-start space-x-2">
               <Checkbox
                 id="terms"
                 checked={ownerAccount.agreeToTerms}
-                onCheckedChange={(checked) => setOwnerAccount(prev => ({ ...prev, agreeToTerms: checked as boolean }))}
+                onChange={(e) => setOwnerAccount(prev => ({ ...prev, agreeToTerms: e.target.checked }))}
                 className="mt-0.5"
               />
               <div className="text-sm">
@@ -580,7 +591,7 @@ export function RegistrationWizard({ onComplete, onNavigate }: RegistrationWizar
                 </Label>
               </div>
             </div>
-            {errors.agreeToTerms && <p className="text-destructive text-sm">{errors.agreeToTerms}</p>}
+            {errors.agreeToTerms && <p className="text-[12px] text-[#F87171] mt-1">{errors.agreeToTerms}</p>}
           </div>
         )}
 
@@ -595,22 +606,22 @@ export function RegistrationWizard({ onComplete, onNavigate }: RegistrationWizar
             </div>
 
             <div className="space-y-4">
-              <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-                <h4 className="font-medium flex items-center gap-2">
-                  <Store className="h-4 w-4" />
-                  Store Details
-                </h4>
+              <div className="bg-white/70 rounded-[14px] p-5 space-y-3 border border-black/[0.04]">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className="w-8 h-8 rounded-[8px] icon-container flex items-center justify-center"><Store className="h-4 w-4 text-[#6B5EF9]" /></div>
+                  <h4 className="text-[15px] font-semibold text-[#2B2833]">Store Details</h4>
+                </div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
-                    <span className="text-muted-foreground">Name:</span>
+                    <span className="text-[12px] text-[#76707F] mb-0.5">Name</span>
                     <p className="font-medium">{storeDetails.storeName}</p>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Type:</span>
+                    <span className="text-[12px] text-[#76707F]">Type</span>
                     <p className="font-medium">{storeTypes.find(t => t.value === storeDetails.storeType)?.label}</p>
                   </div>
                   <div className="col-span-2">
-                    <span className="text-muted-foreground">Address:</span>
+                    <span className="text-[12px] text-[#76707F]">Address</span>
                     <p className="font-medium">{storeDetails.address}</p>
                     {storeDetails.placeId && (
                       <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
@@ -620,33 +631,33 @@ export function RegistrationWizard({ onComplete, onNavigate }: RegistrationWizar
                     )}
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Phone:</span>
+                    <span className="text-[12px] text-[#76707F]">Phone</span>
                     <p className="font-medium">{storeDetails.phone}</p>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Employees:</span>
+                    <span className="text-[12px] text-[#76707F]">Employees</span>
                     <p className="font-medium">{storeDetails.employeeCount}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-                <h4 className="font-medium flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Owner Account
-                </h4>
+              <div className="bg-white/70 rounded-[14px] p-5 space-y-3 border border-black/[0.04]">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className="w-8 h-8 rounded-[8px] icon-container flex items-center justify-center"><User className="h-4 w-4 text-[#6B5EF9]" /></div>
+                  <h4 className="text-[15px] font-semibold text-[#2B2833]">Owner Account</h4>
+                </div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
-                    <span className="text-muted-foreground">Name:</span>
+                    <span className="text-[12px] text-[#76707F] mb-0.5">Name</span>
                     <p className="font-medium">{ownerAccount.fullName}</p>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Email:</span>
+                    <span className="text-[12px] text-[#76707F]">Email</span>
                     <p className="font-medium">{ownerAccount.ownerEmail}</p>
                   </div>
                   {ownerAccount.ownerPhone && (
                     <div>
-                      <span className="text-muted-foreground">Phone:</span>
+                      <span className="text-[12px] text-[#76707F]">Phone</span>
                       <p className="font-medium">{ownerAccount.ownerPhone}</p>
                     </div>
                   )}
@@ -654,50 +665,63 @@ export function RegistrationWizard({ onComplete, onNavigate }: RegistrationWizar
               </div>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
-              <h4 className="font-medium text-blue-800 mb-2">What happens next?</h4>
-              <ul className="space-y-1 text-blue-700">
-                <li>• Your store account will be created</li>
-                <li>• You'll receive a verification email</li>
-                <li>• Complete onboarding (upload logo, set preferences)</li>
-                <li>• Invite your employees to join</li>
-                <li>• Start processing your first transactions</li>
+            <div className="tip-box">
+              <h4 className="text-[14px] font-semibold text-[#2B2833] mb-3 flex items-center gap-2"><span>🚀</span> What happens next?</h4>
+              <ul className="space-y-1.5">
+                <li className="text-[13px] text-[#5A5463] flex items-start gap-1.5"><span className="text-[#6B5EF9] mt-0.5 flex-shrink-0">·</span> Your store account will be created</li>
+                <li className="text-[13px] text-[#5A5463] flex items-start gap-1.5"><span className="text-[#6B5EF9] mt-0.5 flex-shrink-0">·</span> You'll receive a verification email</li>
+                <li className="text-[13px] text-[#5A5463] flex items-start gap-1.5"><span className="text-[#6B5EF9] mt-0.5 flex-shrink-0">·</span> Complete onboarding (upload logo, set preferences)</li>
+                <li className="text-[13px] text-[#5A5463] flex items-start gap-1.5"><span className="text-[#6B5EF9] mt-0.5 flex-shrink-0">·</span> Invite your employees to join</li>
+                <li className="text-[13px] text-[#5A5463] flex items-start gap-1.5"><span className="text-[#6B5EF9] mt-0.5 flex-shrink-0">·</span> Start processing your first transactions</li>
               </ul>
             </div>
           </div>
         )}
 
-        <div className="flex justify-between pt-4">
+        <div className="flex justify-between pt-5 mt-2">
           {currentStep > 1 && (
-            <Button variant="outline" onClick={handleBack}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
+            <button
+              type="button"
+              onClick={handleBack}
+              className="flex items-center gap-1.5 px-5 py-2.5 rounded-[10px] bg-white/70 border border-black/[0.08] text-[14px] font-medium text-[#76707F] hover:text-[#2B2833] hover:bg-white transition-all"
+            >
+              <ArrowLeft className="h-4 w-4" />
               Back
-            </Button>
+            </button>
           )}
           
           {currentStep < 3 ? (
-            <Button onClick={handleNext} className="ml-auto">
+            <button
+              type="button"
+              onClick={handleNext}
+              className="ml-auto flex items-center gap-1.5 btn-primary-dark"
+            >
               Next
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
+              <ArrowRight className="h-4 w-4" />
+            </button>
           ) : (
-            <Button onClick={handleSubmit} disabled={isLoading} className="ml-auto">
-              {isLoading ? 'Creating Store...' : 'Create Store'}
-            </Button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isLoading}
+              className="ml-auto btn-primary-dark disabled:opacity-50 disabled:pointer-events-none"
+            >
+              {isLoading ? 'Creating Store…' : 'Create Store'}
+            </button>
           )}
         </div>
 
-        <div className="text-center pt-4 border-t">
-          <span className="text-sm text-muted-foreground">Already have an account? </span>
-          <Button
-            variant="link"
-            className="px-0 h-auto text-sm"
+        <div className="text-center pt-4 border-t border-black/[0.06] mt-4">
+          <span className="text-[13px] text-[#76707F]">Already have an account? </span>
+          <button
+            type="button"
             onClick={() => onNavigate('login')}
+            className="text-[13px] font-semibold title-gradient hover:opacity-80 transition-opacity"
           >
             Sign in here
-          </Button>
+          </button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

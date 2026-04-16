@@ -426,7 +426,7 @@ export function AICaptureModal({ open, onClose, onItemsDetected, batchId }: AICa
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && handleClose()}>
-      <SheetContent side="right" className="w-full sm:max-w-md md:max-w-lg p-0 flex flex-col">
+      <SheetContent side="right" className="w-full sm:max-w-[520px] p-0 flex flex-col gap-0">
         <SheetHeader className="px-4 pt-4 pb-2 border-b flex-shrink-0">
           <SheetTitle className="flex items-center gap-2 text-base">
             <Sparkles className="h-4 w-4 text-primary" />
