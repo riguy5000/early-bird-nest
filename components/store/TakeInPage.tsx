@@ -287,8 +287,8 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
   const categories: Item['category'][] = ['Jewelry', 'Watch', 'Bullion', 'Stones', 'Loose Items' as any];
 
   return (
-    /* Full-viewport take-in shell — uses page-gradient, no inner inline bg */
-    <div className="flex flex-col h-full page-gradient">
+    /* Full-viewport take-in shell — transparent so global app gradient shows through */
+    <div className="flex flex-col h-full">
 
       {/* ── Completion success overlay ── */}
       {completionSuccess && (
