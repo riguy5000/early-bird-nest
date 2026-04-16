@@ -16,11 +16,24 @@ app.use('*', cors({
 // Logging
 app.use('*', logger(console.log));
 
-// Initialize Supabase client
+// Initialize Supabase client (service role for admin ops)
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
 );
+
+// Verify a user JWT using getClaims (works with Supabase asymmetric signing keys).
+// Returns a minimal user-shaped object on success, or null on failure.
+async function verifyToken(accessToken: string): Promise<{ id: string; email?: string } | null> {
+  if (!accessToken) return null;
+  try {
+    const { data, error } = await supabase.auth.getClaims(accessToken);
+    if (error || !data?.claims?.sub) return null;
+    return { id: data.claims.sub as string, email: data.claims.email as string | undefined };
+  } catch (_e) {
+    return null;
+  }
+}
 
 // Authentication middleware
 async function requireAuth(c: any, next: any) {
@@ -29,14 +42,15 @@ async function requireAuth(c: any, next: any) {
     return c.json({ error: 'Authorization header required' }, 401);
   }
 
-  const { data: { user }, error } = await supabase.auth.getUser(accessToken);
-  if (error || !user) {
+  const user = await verifyToken(accessToken);
+  if (!user) {
     return c.json({ error: 'Invalid or expired token' }, 401);
   }
 
   c.set('user', user);
   await next();
 }
+
 
 // Auth routes
 app.post('/make-server-62d2b480/auth/signup', async (c) => {
