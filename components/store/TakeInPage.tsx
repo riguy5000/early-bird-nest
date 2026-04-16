@@ -363,10 +363,10 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
               <button
                 key={cat}
                 onClick={() => addNewItem(cat as Item['category'])}
-                className={`px-4 py-1.5 rounded-[10px] text-[14px] font-medium transition-all ${
+                className={`px-5 py-2 rounded-full text-[14px] font-medium transition-all ${
                   isActive
                     ? 'bg-[#2B2833] text-white shadow-sm'
-                    : 'text-[#76707F] hover:text-[#2B2833]'
+                    : 'bg-white text-[#76707F] hover:text-[#2B2833] shadow-sm'
                 }`}
               >
                 {cat}
