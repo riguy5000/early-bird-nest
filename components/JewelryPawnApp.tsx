@@ -96,8 +96,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
       {/* Gradient now applied globally on body via index.css */}
 
       {/* Header — frosted glass */}
-      <header className={`bg-white/60 backdrop-blur-xl border-b border-white/40 sticky top-0 z-50 ${isTakeIn ? 'flex-shrink-0' : ''}`}
-        style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>  {/* shadow-sm from design system */}
+      <header className={`sticky top-0 z-50 ${isTakeIn ? 'flex-shrink-0' : ''}`}>
         <div className="max-w-[1600px] mx-auto px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-6">
             {/* Logo */}
