@@ -76,11 +76,20 @@
 @layer base {
   * { @apply border-border; }
 
-  html, body {
+  :root {
+    --app-gradient: linear-gradient(to right, #FFF3FF, #F5EBFF, #E8E6FF, #C8DCFF);
+  }
+
+  html, body, #root {
     font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     @apply text-foreground antialiased;
     min-height: 100vh;
-    background: linear-gradient(to right, #FFF3FF, #F5EBFF, #E8E6FF, #C8DCFF) fixed;
+    background: transparent;
+  }
+
+  html {
+    background: var(--app-gradient) fixed;
+    background-attachment: fixed;
   }
 
   @keyframes count-up {
@@ -106,9 +115,11 @@
    ───────────────────────────────────────────────────────── */
 @layer components {
 
-  /* PAGE BACKGROUND ─────────────────────────────────────── */
+  /* PAGE BACKGROUND ───────────────────────────────────────
+     Transparent so the single global app gradient (set on html)
+     shows through continuously across every route. */
   .page-gradient {
-    background: linear-gradient(to right, #FFF3FF, #F5EBFF, #E8E6FF, #C8DCFF);
+    background: transparent;
   }
 
   /* TITLE GRADIENT TEXT ─────────────────────────────────── */
