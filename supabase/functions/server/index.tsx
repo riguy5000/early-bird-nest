@@ -16,11 +16,24 @@ app.use('*', cors({
 // Logging
 app.use('*', logger(console.log));
 
-// Initialize Supabase client
+// Initialize Supabase client (service role for admin ops)
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
 );
+
+// Verify a user JWT using getClaims (works with Supabase asymmetric signing keys).
+// Returns a minimal user-shaped object on success, or null on failure.
+async function verifyToken(accessToken: string): Promise<{ id: string; email?: string } | null> {
+  if (!accessToken) return null;
+  try {
+    const { data, error } = await supabase.auth.getClaims(accessToken);
+    if (error || !data?.claims?.sub) return null;
+    return { id: data.claims.sub as string, email: data.claims.email as string | undefined };
+  } catch (_e) {
+    return null;
+  }
+}
 
 // Authentication middleware
 async function requireAuth(c: any, next: any) {
@@ -29,14 +42,15 @@ async function requireAuth(c: any, next: any) {
     return c.json({ error: 'Authorization header required' }, 401);
   }
 
-  const { data: { user }, error } = await supabase.auth.getUser(accessToken);
-  if (error || !user) {
+  const user = await verifyToken(accessToken);
+  if (!user) {
     return c.json({ error: 'Invalid or expired token' }, 401);
   }
 
   c.set('user', user);
   await next();
 }
+
 
 // Auth routes
 app.post('/make-server-62d2b480/auth/signup', async (c) => {
@@ -539,7 +553,7 @@ function generateSmartBatchId(storeId: string): string {
 app.get('/make-server-62d2b480/auth/check-role', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+    const user = await verifyToken(accessToken); const error = user ? null : new Error("Invalid token");
     
     if (!user) {
       return c.json({ isRoot: false });
@@ -559,7 +573,7 @@ app.get('/make-server-62d2b480/auth/check-role', async (c) => {
 app.get('/make-server-62d2b480/admin/stores', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+    const user = await verifyToken(accessToken); const error = user ? null : new Error("Invalid token");
     
     if (!user || !user.email?.includes('admin')) {
       return c.json({ error: 'Unauthorized' }, 401);
@@ -627,7 +641,7 @@ app.get('/make-server-62d2b480/admin/stores', async (c) => {
 app.get('/make-server-62d2b480/admin/api-configs', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+    const user = await verifyToken(accessToken); const error = user ? null : new Error("Invalid token");
     
     if (!user || !user.email?.includes('admin')) {
       return c.json({ error: 'Unauthorized' }, 401);
@@ -654,7 +668,7 @@ app.get('/make-server-62d2b480/admin/api-configs', async (c) => {
 app.post('/make-server-62d2b480/admin/api-configs', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+    const user = await verifyToken(accessToken); const error = user ? null : new Error("Invalid token");
     
     if (!user || !user.email?.includes('admin')) {
       return c.json({ error: 'Unauthorized' }, 401);
@@ -679,7 +693,7 @@ app.post('/make-server-62d2b480/admin/api-configs', async (c) => {
 app.get('/make-server-62d2b480/admin/test-api/:apiName', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+    const user = await verifyToken(accessToken); const error = user ? null : new Error("Invalid token");
     
     if (!user || !user.email?.includes('admin')) {
       return c.json({ error: 'Unauthorized' }, 401);
@@ -865,7 +879,7 @@ app.get('/make-server-62d2b480/admin/test-api/:apiName', async (c) => {
 app.post('/make-server-62d2b480/admin/stores/:storeId/suspend', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+    const user = await verifyToken(accessToken); const error = user ? null : new Error("Invalid token");
     
     if (!user || !user.email?.includes('admin')) {
       return c.json({ error: 'Unauthorized' }, 401);
@@ -887,7 +901,7 @@ app.post('/make-server-62d2b480/admin/stores/:storeId/suspend', async (c) => {
 app.post('/make-server-62d2b480/admin/stores/:storeId/activate', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+    const user = await verifyToken(accessToken); const error = user ? null : new Error("Invalid token");
     
     if (!user || !user.email?.includes('admin')) {
       return c.json({ error: 'Unauthorized' }, 401);
@@ -909,7 +923,7 @@ app.post('/make-server-62d2b480/admin/stores/:storeId/activate', async (c) => {
 app.post('/make-server-62d2b480/admin/themes/apply', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+    const user = await verifyToken(accessToken); const error = user ? null : new Error("Invalid token");
     
     if (!user || !user.email?.includes('admin')) {
       return c.json({ error: 'Unauthorized' }, 401);
@@ -931,7 +945,7 @@ app.post('/make-server-62d2b480/admin/themes/apply', async (c) => {
 app.post('/make-server-62d2b480/admin/banner/toggle', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+    const user = await verifyToken(accessToken); const error = user ? null : new Error("Invalid token");
     
     if (!user || !user.email?.includes('admin')) {
       return c.json({ error: 'Unauthorized' }, 401);
@@ -953,7 +967,7 @@ app.post('/make-server-62d2b480/admin/banner/toggle', async (c) => {
 app.get('/make-server-62d2b480/admin/support/tickets', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+    const user = await verifyToken(accessToken); const error = user ? null : new Error("Invalid token");
     
     if (!user || !user.email?.includes('admin')) {
       return c.json({ error: 'Unauthorized' }, 401);
@@ -1004,7 +1018,7 @@ app.get('/make-server-62d2b480/admin/support/tickets', async (c) => {
 app.get('/make-server-62d2b480/admin/system/logs', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+    const user = await verifyToken(accessToken); const error = user ? null : new Error("Invalid token");
     
     if (!user || !user.email?.includes('admin')) {
       return c.json({ error: 'Unauthorized' }, 401);
