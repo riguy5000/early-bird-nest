@@ -543,7 +543,7 @@ export function RegistrationWizard({ onComplete, onNavigate }: RegistrationWizar
               <Checkbox
                 id="terms"
                 checked={ownerAccount.agreeToTerms}
-                onChange={(e) => setOwnerAccount(prev => ({ ...prev, agreeToTerms: e.target.checked }))}
+                onCheckedChange={(checked) => setOwnerAccount(prev => ({ ...prev, agreeToTerms: checked === true }))}
                 className="mt-0.5"
               />
               <div className="text-sm">
