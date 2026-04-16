@@ -58,8 +58,8 @@ export function MetalPriceTicker() {
         const val = perGramValue(Number(price_usd), metal);
         return (
           <div key={metal} className="flex flex-col">
-            <span className="text-[11px] text-[#A8A3AE]">{metalLabel(metal)}</span>
-            <span className="text-[15px] font-semibold text-[#2B2833] tabular-nums">
+            <span className="text-[11px] text-[#A8A3AE] uppercase tracking-wider">{metalLabel(metal)}</span>
+            <span className="text-[22px] font-semibold text-[#2B2833] tabular-nums tracking-tight">
               ${val.toFixed(2)}
             </span>
           </div>

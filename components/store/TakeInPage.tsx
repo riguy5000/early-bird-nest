@@ -301,51 +301,60 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
         </div>
       )}
 
-      {/* ── Top header bar ── */}
-      <div className="flex-shrink-0 bg-white/60 backdrop-blur-xl border-b border-white/40 px-6 py-4"
-        style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
-        <div className="flex items-center justify-between">
-          {/* Left: Title + batch ID */}
-          <div>
-            <h1 className="text-[36px] font-semibold tracking-tight title-gradient leading-tight">
-              Take-In
-            </h1>
-            {batchId && (
-              <p className="text-[12px] text-[#A8A3AE] mt-0.5 font-mono">#{batchId}</p>
-            )}
+      {/* ── Header card — ONE glass-card: title + batch ID + metal tickers ── */}
+      <div className="flex-shrink-0 px-6 pt-5 pb-0">
+        <div className="bg-white rounded-[16px] px-6 py-5"
+          style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.07)' }}>
+
+          {/* Title row: title left, Close + Save right */}
+          <div className="flex items-start justify-between mb-1">
+            <div>
+              <h1 className="text-[36px] font-semibold tracking-tight title-gradient leading-tight">
+                Take-In
+              </h1>
+              {batchId && (
+                <p className="text-[12px] text-[#A8A3AE] mt-0.5 font-mono">#{batchId}</p>
+              )}
+            </div>
+            <div className="flex items-center gap-3 mt-2">
+              {lastSaved && (
+                <span className="text-[12px] text-[#A8A3AE] flex items-center gap-1.5">
+                  <Clock className="h-3 w-3" />
+                  Saved {lastSaved.toLocaleTimeString()}
+                </span>
+              )}
+              <button
+                onClick={onClose}
+                className="px-4 py-2 text-[14px] font-medium text-[#76707F] hover:text-[#2B2833] transition-colors"
+              >
+                Close
+              </button>
+              <button
+                onClick={handleSaveQuote}
+                className="btn-accent-teal flex items-center gap-2"
+              >
+                Save &amp; {saveTimeLabel}
+              </button>
+            </div>
           </div>
 
-          {/* Right: Close + Save */}
-          <div className="flex items-center gap-3">
-            {lastSaved && (
-              <span className="text-[12px] text-[#A8A3AE] flex items-center gap-1.5">
-                <Clock className="h-3 w-3" />
-                Saved {lastSaved.toLocaleTimeString()}
-              </span>
-            )}
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-[14px] font-medium text-[#76707F] hover:text-[#2B2833] transition-colors"
-            >
-              Close
-            </button>
-            <button
-              onClick={handleSaveQuote}
-              className="btn-accent-teal flex items-center gap-2"
-            >
-              Save &amp; {saveTimeLabel}
-            </button>
+          {/* Metal price ticker + Fast Entry — inside the card */}
+          <div className="pt-3 border-t border-black/[0.04] mt-3 flex items-end justify-between">
+            <MetalPriceTicker />
+            <div className="flex items-center gap-2.5 ml-6 flex-shrink-0">
+              <Label htmlFor="fast-entry" className="text-[12px] font-medium text-[#76707F] cursor-pointer">Fast Entry</Label>
+              <Switch
+                id="fast-entry"
+                checked={viewMode === 'slim'}
+                onCheckedChange={(checked) => setViewMode(checked ? 'slim' : 'balanced')}
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ── Metal price ticker ── */}
-      <div className="flex-shrink-0 bg-white/85 backdrop-blur-sm border-b border-black/[0.04] px-6 py-2.5">
-        <MetalPriceTicker />
-      </div>
-
-      {/* ── Category tabs + controls row ── */}
-      <div className="flex-shrink-0 px-6 py-3 flex items-center justify-between gap-4 bg-white/40 backdrop-blur-sm border-b border-white/40">
+      {/* ── Category tabs — floating below header card, on gradient ── */}
+      <div className="flex-shrink-0 px-6 py-4 flex items-center justify-between gap-3">
         {/* Category pill tabs */}
         <div className="flex items-center gap-2">
           {(['Jewelry', 'Watch', 'Bullion', 'Stones', 'Loose Items'] as string[]).map((cat) => {
@@ -356,8 +365,8 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
                 onClick={() => addNewItem(cat as Item['category'])}
                 className={`px-4 py-1.5 rounded-[10px] text-[14px] font-medium transition-all ${
                   isActive
-                    ? 'bg-[#2B2833] text-white shadow-lg shadow-black/10'
-                    : 'bg-white/60 border border-black/[0.06] text-[#2B2833] hover:bg-white/80'
+                    ? 'bg-[#2B2833] text-white shadow-sm'
+                    : 'text-[#76707F] hover:text-[#2B2833]'
                 }`}
               >
                 {cat}
@@ -365,35 +374,9 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
             );
           })}
 
-          {/* Item count stepper */}
-          <div className="flex items-center gap-1 ml-2 bg-white/60 border border-black/[0.06] rounded-[10px] overflow-hidden">
-            <button
-              className="px-2.5 py-1.5 hover:bg-white/80 transition-colors text-[#76707F]"
-              onClick={() => items.length > 1 && removeItem(items[items.length - 1].id)}
-              disabled={items.length === 0}
-            >
-              <Minus className="h-3.5 w-3.5" />
-            </button>
-            <span className="px-2 text-[13px] font-semibold text-[#2B2833] min-w-[24px] text-center">
-              {items.length}
-            </span>
-            <button
-              className="px-2.5 py-1.5 hover:bg-white/80 transition-colors text-[#76707F]"
-              onClick={() => addNewItem()}
-            >
-              <Plus className="h-3.5 w-3.5" />
-            </button>
-          </div>
 
-          {/* Fast Entry toggle */}
-          <div className="flex items-center gap-2 bg-white/60 border border-black/[0.06] rounded-[10px] px-3 py-1.5 ml-1">
-            <Label htmlFor="fast-entry" className="text-[13px] font-medium text-[#2B2833] cursor-pointer">Fast Entry</Label>
-            <Switch
-              id="fast-entry"
-              checked={viewMode === 'slim'}
-              onCheckedChange={(checked) => setViewMode(checked ? 'slim' : 'balanced')}
-            />
-          </div>
+
+
         </div>
 
         {/* AI Assist */}

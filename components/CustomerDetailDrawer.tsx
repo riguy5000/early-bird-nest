@@ -96,14 +96,12 @@ export function CustomerDetailDrawer({ customer, open, onClose, onEdit }: Props)
       {/* ── Drawer panel — right-edge flush, full height, rounded left corners ── */}
       <div
         className="fixed top-0 right-0 bottom-0 z-50 flex flex-col"
-        style={{ animation: 'slideInRight 0.25s cubic-bezier(0,0,0.2,1)' }}
         style={{
+          animation: 'slideInRight 0.25s cubic-bezier(0,0,0.2,1)',
           width: '300px',
-          background: 'rgba(255,255,255,0.95)',
-          backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          background: 'rgba(255,255,255,1)',
           borderRadius: '20px 0 0 20px',
-          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.15)',
+          boxShadow: '-8px 0 32px rgba(0,0,0,0.12), -1px 0 0 rgba(0,0,0,0.04)',
         }}
         onClick={e => e.stopPropagation()}
       >

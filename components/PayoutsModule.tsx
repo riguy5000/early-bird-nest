@@ -340,7 +340,7 @@ export function PayoutsModule({ currentStore }: PayoutsModuleProps) {
 
       {/* ── Payout detail drawer — uses Sheet (already styled in sheet.tsx) ── */}
       <Sheet open={showDetails} onOpenChange={setShowDetails}>
-        <SheetContent className="overflow-y-auto">
+        <SheetContent className="w-full sm:max-w-[440px] overflow-y-auto">
           <SheetHeader>
             <SheetTitle>Payout Details</SheetTitle>
           </SheetHeader>
