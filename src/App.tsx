@@ -191,7 +191,7 @@ const App = () => {
     return (
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <div className="min-h-screen bg-background">
+          <div className="min-h-screen">
             <AuthenticationFlow onLogin={handleLogin} />
             <Toaster />
             <Sonner />
@@ -208,7 +208,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen">
           {isPlatformAdmin ? (
             <RootAdminConsole user={user} onLogout={handleLogout} />
           ) : (
