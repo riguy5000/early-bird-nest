@@ -73,6 +73,13 @@ export function TakeInBalanced({
 }: TakeInBalancedProps) {
   const { toast } = useToast();
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set());
+
+  // Auto-expand all items when they're added
+  useEffect(() => {
+    if (items.length > 0) {
+      setExpandedAdvanced(new Set(items.map(i => i.id)));
+    }
+  }, [items.map(i => i.id).join(',')]);
   const [batchPhotoOpen, setBatchPhotoOpen] = useState(false);
   const [storeCreditNumber, setStoreCreditNumber] = useState('');
   const [transactionType, setTransactionType] = useState<'Purchase' | 'Consignment' | 'Pawn'>('Purchase');
@@ -230,8 +237,8 @@ export function TakeInBalanced({
                 </div>
               </div>
             ) : (
-              <div className="h-full overflow-auto px-5 py-5 pr-4">
-                <div className="max-w-3xl mx-auto space-y-3">
+              <div className="h-full overflow-auto px-6 py-5">
+                <div className="space-y-3">
                   {Object.entries(itemsByCategory).map(([category, categoryItems]) => (
                     <div key={category} className="glass-card overflow-hidden">
                       {/* Category Header */}

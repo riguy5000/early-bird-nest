@@ -89,19 +89,25 @@ export function CustomerDetailDrawer({ customer, open, onClose, onEdit }: Props)
       <style>{slideStyle}</style>
       {/* ── Backdrop — dimmed haze, matches approved screenshot ── */}
       <div
-        className="fixed inset-0 z-40 bg-black/[0.08] backdrop-blur-[2px]"
+        className="fixed inset-0 z-40 bg-black/[0.18] backdrop-blur-[3px]"
         onClick={onClose}
       />
 
-      {/* ── Drawer panel — right-edge flush, full height, rounded left corners ── */}
+      {/* ── Drawer panel — floating frosted card, gap from all edges ── */}
       <div
-        className="fixed top-0 right-0 bottom-0 z-50 flex flex-col"
+        className="fixed z-50 flex flex-col"
         style={{
           animation: 'slideInRight 0.25s cubic-bezier(0,0,0.2,1)',
+          top: '16px',
+          right: '16px',
+          bottom: '16px',
           width: '300px',
-          background: 'rgba(255,255,255,1)',
-          borderRadius: '20px 0 0 20px',
-          boxShadow: '-8px 0 32px rgba(0,0,0,0.12), -1px 0 0 rgba(0,0,0,0.04)',
+          background: 'rgba(255,255,255,0.92)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          borderRadius: '20px',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
+          border: '1px solid rgba(255,255,255,0.6)',
         }}
         onClick={e => e.stopPropagation()}
       >
