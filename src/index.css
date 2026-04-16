@@ -76,9 +76,11 @@
 @layer base {
   * { @apply border-border; }
 
-  body {
+  html, body {
     font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    @apply bg-background text-foreground antialiased;
+    @apply text-foreground antialiased;
+    min-height: 100vh;
+    background: linear-gradient(to right, #FFF3FF, #F5EBFF, #E8E6FF, #C8DCFF) fixed;
   }
 
   @keyframes count-up {

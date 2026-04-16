@@ -93,8 +93,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
 
   return (
     <div className={`${isTakeIn ? 'h-screen flex flex-col overflow-hidden' : 'min-h-screen'} relative`} style={{ fontFamily: "'DM Sans', sans-serif" }}>
-      {/* Fixed gradient background */}
-      {!isTakeIn && <div className="fixed inset-0 page-gradient -z-10" />}
+      {/* Gradient now applied globally on body via index.css */}
 
       {/* Header — frosted glass */}
       <header className={`bg-white/60 backdrop-blur-xl border-b border-white/40 sticky top-0 z-50 ${isTakeIn ? 'flex-shrink-0' : ''}`}
