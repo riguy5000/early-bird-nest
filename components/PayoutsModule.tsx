@@ -171,7 +171,7 @@ export function PayoutsModule({ currentStore }: PayoutsModuleProps) {
         {/* All Status — funnel icon */}
         <button
           onClick={cycleStatus}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-[13px] font-medium border transition-all flex-shrink-0 ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-[13px] font-medium border transition-all flex-shrink-0 ring-2 ring-white/80 ${
             statusFilter !== 'all'
               ? 'bg-[#2B2833] text-white border-transparent shadow-sm'
               : 'bg-white/85 border-black/[0.06] text-[#2B2833] hover:bg-white'
@@ -185,7 +185,7 @@ export function PayoutsModule({ currentStore }: PayoutsModuleProps) {
         {/* All Methods — no icon */}
         <button
           onClick={cycleMethod}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-[13px] font-medium border transition-all flex-shrink-0 ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-[13px] font-medium border transition-all flex-shrink-0 ring-2 ring-white/80 ${
             methodFilter !== 'all'
               ? 'bg-[#2B2833] text-white border-transparent shadow-sm'
               : 'bg-white/85 border-black/[0.06] text-[#2B2833] hover:bg-white'
@@ -199,7 +199,7 @@ export function PayoutsModule({ currentStore }: PayoutsModuleProps) {
         <Popover>
           <PopoverTrigger asChild>
             <button
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-[13px] font-medium border transition-all flex-shrink-0 ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-[10px] text-[13px] font-medium border transition-all flex-shrink-0 ring-2 ring-white/80 ${
                 dateRange.from
                   ? 'bg-[#2B2833] text-white border-transparent shadow-sm'
                   : 'bg-white/85 border-black/[0.06] text-[#2B2833] hover:bg-white shadow-sm'

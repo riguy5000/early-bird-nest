@@ -179,19 +179,19 @@
   /* TIP / NOTICE BOX ────────────────────────────────────── */
   .tip-box {
     background: linear-gradient(to right, #E8F4FF, #F0E8FF);
-    @apply rounded-[12px] p-4;
+    @apply rounded-[12px] p-4 ring-2 ring-white/80;
     box-shadow: 0 1px 2px rgba(0,0,0,0.02);
   }
 
   .tip-box-success {
     background: linear-gradient(to right, #E8F5E9, #F0FFF4);
-    @apply rounded-[12px] p-4;
+    @apply rounded-[12px] p-4 ring-2 ring-white/80;
     box-shadow: 0 1px 2px rgba(0,0,0,0.02);
   }
 
   .tip-box-warning {
     background: linear-gradient(to right, #FFF9E6, #FFFBF0);
-    @apply rounded-[12px] p-4;
+    @apply rounded-[12px] p-4 ring-2 ring-white/80;
     box-shadow: 0 1px 2px rgba(0,0,0,0.02);
   }
 
@@ -236,17 +236,17 @@
 
   /* BUTTONS ─────────────────────────────────────────────── */
   .btn-primary-dark {
-    @apply px-5 py-2.5 bg-[#2B2833] text-white rounded-[10px] text-[15px] font-semibold hover:bg-[#3B3846] transition-all disabled:opacity-50 disabled:pointer-events-none;
+    @apply px-5 py-2.5 bg-[#2B2833] text-white rounded-[10px] text-[15px] font-semibold hover:bg-[#3B3846] transition-all disabled:opacity-50 disabled:pointer-events-none ring-2 ring-white/80;
     box-shadow: 0 10px 15px -3px rgba(0,0,0,0.10), 0 4px 6px -2px rgba(0,0,0,0.10);
   }
 
   .btn-secondary-light {
-    @apply px-5 py-2.5 bg-white/60 border border-black/[0.06] text-[#2B2833] rounded-[10px] text-[15px] font-medium hover:bg-white/80 transition-all;
+    @apply px-5 py-2.5 bg-white/60 border border-black/[0.06] text-[#2B2833] rounded-[10px] text-[15px] font-medium hover:bg-white/80 transition-all ring-2 ring-white/80;
     box-shadow: 0 1px 2px rgba(0,0,0,0.02);
   }
 
   .btn-accent-teal {
-    @apply px-5 py-3.5 bg-[#2ECCC4] text-white rounded-[12px] text-[15px] font-semibold hover:bg-[#28B8B0] transition-all;
+    @apply px-5 py-3.5 bg-[#2ECCC4] text-white rounded-[12px] text-[15px] font-semibold hover:bg-[#28B8B0] transition-all ring-2 ring-white/80;
     box-shadow: 0 10px 15px -3px rgba(46,204,196,0.20);
   }
 

@@ -135,7 +135,7 @@ export function AnalyticsModule({ storeId, storeName }: AnalyticsModuleProps) {
         {/* Date range pill — single button that cycles, matches screenshot */}
         <button
           onClick={cycleDate}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white/85 backdrop-blur-sm border border-black/[0.06] rounded-[10px] text-[13px] font-medium text-[#2B2833] hover:bg-white transition-all flex-shrink-0 mt-1"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white/85 backdrop-blur-sm border border-black/[0.06] rounded-[10px] text-[13px] font-medium text-[#2B2833] hover:bg-white transition-all flex-shrink-0 mt-1 ring-2 ring-white/80"
           style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
         >
           <Calendar className="w-3.5 h-3.5 text-[#76707F]" />
