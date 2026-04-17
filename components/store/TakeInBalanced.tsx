@@ -763,7 +763,7 @@ export function TakeInBalanced({
                                       </Button>
                                       <Button
                                         size="sm"
-                                        className="btn-accent-teal text-[12px]"
+                                        className="btn-primary-dark text-[12px]"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           setExpandedAdvanced(prev => {

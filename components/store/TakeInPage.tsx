@@ -331,7 +331,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
               </button>
               <button
                 onClick={handleSaveQuote}
-                className="btn-accent-teal flex items-center gap-2"
+                className="btn-primary-dark flex items-center gap-2"
               >
                 Save &amp; {saveTimeLabel}
               </button>
