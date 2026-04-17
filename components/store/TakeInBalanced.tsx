@@ -652,20 +652,23 @@ export function TakeInBalanced({
                                        </div>
                                      </>
                                     ) : (
-                                      /* ---- JEWELRY / DEFAULT SPECS ---- */
+                                      /* ---- JEWELRY / DEFAULT SPECS (refined) ---- */
                                       <>
-                                        {/* Row 1: Type pills + Metal select */}
-                                        <div className="grid grid-cols-2 gap-6">
-                                          <div>
-                                            <label className="text-[13px] font-medium text-[#76707F] block mb-2">Type</label>
-                                            <div className="flex flex-wrap gap-2">
+                                        {/* Section: Item details */}
+                                        <div>
+                                          <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">Item Details</div>
+
+                                          {/* Type pills — full width, wraps cleanly */}
+                                          <div className="mb-4">
+                                            <label className="text-[12px] font-medium text-[#76707F] block mb-2">Type</label>
+                                            <div className="flex flex-wrap gap-1.5">
                                               {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).map(type => {
                                                 const active = (item.itemType || '').toLowerCase() === type.toLowerCase();
                                                 return (
                                                   <button
                                                     key={type}
                                                     onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { itemType: type }); }}
-                                                    className={`px-4 h-9 text-[13px] rounded-[10px] font-medium transition-colors ${active ? 'bg-[#1F1B2E] text-white' : 'bg-white text-[#2B2833] border border-black/[0.08] hover:bg-black/[0.03]'}`}
+                                                    className={`px-3 h-8 text-[12px] rounded-[8px] font-medium transition-all ${active ? 'bg-[#2B2833] text-white shadow-sm' : 'bg-white text-[#76707F] border border-black/[0.08] hover:text-[#2B2833] hover:border-black/[0.15]'}`}
                                                   >
                                                     {type}
                                                   </button>
@@ -673,87 +676,63 @@ export function TakeInBalanced({
                                               })}
                                             </div>
                                           </div>
-                                          <div>
-                                            <label className="text-[13px] font-medium text-[#76707F] block mb-2">Metal</label>
-                                            <Select
-                                              value={(item.metals?.[0]?.type) || 'Gold'}
-                                              onValueChange={(value) => {
-                                                const first = item.metals?.[0];
-                                                if (first) updateMetal(item.id, first.id, { type: value });
-                                              }}
-                                            >
-                                              <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue /></SelectTrigger>
-                                              <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
-                                                <SelectItem value="Gold">Gold</SelectItem>
-                                                <SelectItem value="Silver">Silver</SelectItem>
-                                                <SelectItem value="Platinum">Platinum</SelectItem>
-                                                <SelectItem value="Palladium">Palladium</SelectItem>
-                                              </SelectContent>
-                                            </Select>
+
+                                          {/* Brand · Condition · Size — single 3-col row */}
+                                          <div className="grid grid-cols-3 gap-3">
+                                            <div>
+                                              <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Brand / Maker</label>
+                                              <Input value={item.brand || ''} onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })} placeholder="e.g., Tiffany & Co." className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                            </div>
+                                            <div>
+                                              <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Condition</label>
+                                              <Select value={item.condition || ''} onValueChange={(value) => onItemUpdate(item.id, { condition: value })}>
+                                                <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                                <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
+                                                  <SelectItem value="New">New</SelectItem>
+                                                  <SelectItem value="Excellent">Excellent</SelectItem>
+                                                  <SelectItem value="Good">Good</SelectItem>
+                                                  <SelectItem value="Fair">Fair</SelectItem>
+                                                  <SelectItem value="Poor">Poor</SelectItem>
+                                                </SelectContent>
+                                              </Select>
+                                            </div>
+                                            <div>
+                                              <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Size</label>
+                                              <Input value={item.size || ''} onChange={(e) => onItemUpdate(item.id, { size: e.target.value })} placeholder="e.g., 7, 18in" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                            </div>
                                           </div>
                                         </div>
 
-                                        {/* Row 2: Brand + Condition */}
-                                        <div className="grid grid-cols-2 gap-6">
-                                          <div>
-                                            <label className="text-[13px] font-medium text-[#76707F] block mb-2">Brand/Maker</label>
-                                            <Input value={item.brand || ''} onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })} placeholder="e.g., Tiffany & Co." className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                          </div>
-                                          <div>
-                                            <label className="text-[13px] font-medium text-[#76707F] block mb-2">Condition</label>
-                                            <Select value={item.condition || ''} onValueChange={(value) => onItemUpdate(item.id, { condition: value })}>
-                                              <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
-                                              <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
-                                                <SelectItem value="New">New</SelectItem>
-                                                <SelectItem value="Excellent">Excellent</SelectItem>
-                                                <SelectItem value="Good">Good</SelectItem>
-                                                <SelectItem value="Fair">Fair</SelectItem>
-                                                <SelectItem value="Poor">Poor</SelectItem>
-                                              </SelectContent>
-                                            </Select>
-                                          </div>
-                                        </div>
-
-                                        {/* Row 3: Size full width */}
-                                        <div>
-                                          <label className="text-[13px] font-medium text-[#76707F] block mb-2">Size</label>
-                                          <Input value={item.size || ''} onChange={(e) => onItemUpdate(item.id, { size: e.target.value })} placeholder="e.g., Size 7, 18in" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                        </div>
-
-                                        {/* Metals card */}
+                                        {/* Section: Metals */}
                                         {(item.metals || []).length > 0 && (
                                           <div>
-                                            <label className="text-[13px] font-medium text-[#76707F] block mb-2">Metals</label>
-                                            <div className="bg-white/70 rounded-[14px] border border-black/[0.06] p-4 space-y-3">
-                                              {(item.metals || []).map((metal: any) => (
-                                                <div key={metal.id} className="grid grid-cols-3 gap-4">
-                                                  <div>
-                                                    <div className="text-[11px] font-medium text-[#A8A3AE] mb-1.5">Metal Type</div>
-                                                    <div className="bg-white h-9 rounded-[10px] border border-black/[0.08] flex items-center px-3 text-[13px] text-[#2B2833]">
-                                                      {metal.type} {metal.karat}k
-                                                    </div>
-                                                  </div>
-                                                  <div>
-                                                    <div className="text-[11px] font-medium text-[#A8A3AE] mb-1.5">Weight (g)</div>
-                                                    <div className="bg-white h-9 rounded-[10px] border border-black/[0.08] flex items-center justify-end px-3 text-[13px] text-[#2B2833] tabular-nums">
-                                                      {(metal.weight || 0).toFixed(2)}
-                                                    </div>
-                                                  </div>
-                                                  <div>
-                                                    <div className="text-[11px] font-medium text-[#A8A3AE] mb-1.5">Purity %</div>
-                                                    <div className="bg-white h-9 rounded-[10px] border border-black/[0.08] flex items-center justify-end px-3 text-[13px] text-[#2B2833] tabular-nums">
-                                                      {metal.payoutPercentage ?? 75}%
-                                                    </div>
-                                                  </div>
+                                            <div className="flex items-center justify-between mb-3">
+                                              <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider">Metals</div>
+                                              <div className="text-[11px] text-[#A8A3AE]">{(item.metals || []).length} {((item.metals || []).length === 1 ? 'component' : 'components')}</div>
+                                            </div>
+                                            <div className="bg-white rounded-[12px] border border-black/[0.06] overflow-hidden">
+                                              <div className="grid grid-cols-[1.2fr_1fr_1fr_auto] gap-3 px-4 py-2.5 bg-black/[0.015] border-b border-black/[0.05]">
+                                                <div className="text-[10px] font-semibold text-[#A8A3AE] uppercase tracking-wider">Metal</div>
+                                                <div className="text-[10px] font-semibold text-[#A8A3AE] uppercase tracking-wider text-right">Weight (g)</div>
+                                                <div className="text-[10px] font-semibold text-[#A8A3AE] uppercase tracking-wider text-right">Payout %</div>
+                                                <div className="text-[10px] font-semibold text-[#A8A3AE] uppercase tracking-wider text-right w-16">Value</div>
+                                              </div>
+                                              {(item.metals || []).map((metal: any, mi: number) => (
+                                                <div key={metal.id} className={`grid grid-cols-[1.2fr_1fr_1fr_auto] gap-3 px-4 py-2.5 items-center text-[13px] text-[#2B2833] ${mi > 0 ? 'border-t border-black/[0.04]' : ''}`}>
+                                                  <div>{metal.type} <span className="text-[#76707F]">{metal.karat}K</span></div>
+                                                  <div className="text-right tabular-nums">{(metal.weight || 0).toFixed(2)}</div>
+                                                  <div className="text-right tabular-nums text-[#76707F]">{metal.payoutPercentage ?? 75}%</div>
+                                                  <div className="text-right tabular-nums font-medium w-16">${(metal.payoutAmount || 0).toFixed(2)}</div>
                                                 </div>
                                               ))}
-                                              <div className="flex items-center justify-between pt-3 border-t border-black/[0.06]">
-                                                <span className="text-[13px] text-[#76707F]">Total Metal Value</span>
+                                              <div className="flex items-center justify-between px-4 py-3 border-t border-black/[0.06] bg-black/[0.015]">
+                                                <span className="text-[12px] font-medium text-[#76707F]">Total Metal Value</span>
                                                 <span className="text-[15px] font-semibold text-[#2B2833] tabular-nums">
                                                   ${(item.metals || []).reduce((s: number, m: any) => s + (m.payoutAmount || 0), 0).toFixed(2)}
                                                 </span>
                                               </div>
                                             </div>
+                                            <div className="text-[11px] text-[#A8A3AE] mt-2">Edit weight, karat, and payout % from the row above.</div>
                                           </div>
                                         )}
                                       </>
