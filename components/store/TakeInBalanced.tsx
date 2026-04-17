@@ -548,9 +548,8 @@ export function TakeInBalanced({
                                open={expandedAdvanced.has(item.id)} 
                                onOpenChange={() => toggleAdvanced(item.id)}
                              >
-                               <CollapsibleContent className="px-4 pb-4 animate-accordion-down data-[state=closed]:animate-accordion-up">
-                                 <div className="bg-white/60 rounded-[12px] p-5 space-y-4 border border-black/[0.04]">
-                                   
+                               <CollapsibleContent className="px-3 pb-3 animate-accordion-down data-[state=closed]:animate-accordion-up">
+                                 <div className="bg-[#FAFAFB] rounded-[14px] p-5 space-y-5 border border-black/[0.05]">
                                    {item.category === 'Watch' ? (
                                      /* ---- WATCH SPECS ---- */
                                      <>
