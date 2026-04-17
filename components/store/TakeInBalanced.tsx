@@ -280,11 +280,11 @@ export function TakeInBalanced({
                       </div>
                       
                       {/* Items */}
-                      <div className="p-2 space-y-1.5">
+                      <div className="p-3 space-y-2.5">
                         {(categoryItems as any[]).map((item, index) => (
-                           <div key={item.id} className="bg-white rounded-[16px] shadow-sm hover:shadow-md transition-all duration-150">
+                           <div key={item.id} className="bg-white rounded-[14px] border border-black/[0.08] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:border-black/[0.14] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-150">
                               <div 
-                                className="flex items-start gap-2 px-3 py-2 cursor-pointer"
+                                className="flex items-start gap-3 px-4 py-3 cursor-pointer"
                                 onClick={(e) => {
                                   if ((e.target as HTMLElement).tagName !== 'INPUT' && 
                                       !(e.target as HTMLElement).closest('button') && 
@@ -293,19 +293,19 @@ export function TakeInBalanced({
                                   }
                                 }}
                               >
-                                <div className="w-6 h-6 rounded-[6px] icon-container flex items-center justify-center text-[11px] font-semibold text-[#6B5EF9] mt-0.5 flex-shrink-0">
+                                <div className="w-7 h-7 rounded-[8px] bg-[#F4F3F8] border border-black/[0.05] flex items-center justify-center text-[12px] font-semibold text-[#2B2833] mt-0.5 flex-shrink-0">
                                   {items.findIndex(i => i.id === item.id) + 1}
                                 </div>
 
-                                <div className="flex flex-col gap-1 min-w-[120px] flex-shrink-0">
+                                <div className="flex flex-col gap-1.5 min-w-[140px] flex-shrink-0">
                                   <Input
                                     value={item.itemType || ''}
                                     onChange={(e) => onItemUpdate(item.id, { itemType: e.target.value })}
                                     placeholder={`Type...`}
-                                    className="h-6 text-[11px] bg-transparent border-0 border-b border-black/[0.10] rounded-none px-0 focus:border-[#6B5EF9] focus:ring-0 w-28"
+                                    className="h-7 text-[13px] font-medium bg-transparent border-0 border-b border-black/[0.10] rounded-none px-0 focus:border-[#2B2833] focus:ring-0 w-32"
                                     onClick={(e) => e.stopPropagation()}
                                   />
-                                  <div className="flex flex-wrap gap-0.5">
+                                  <div className="flex flex-wrap gap-1">
                                     {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).slice(0, 4).map(type => (
                                       <button
                                         key={type}
@@ -313,7 +313,7 @@ export function TakeInBalanced({
                                           e.stopPropagation();
                                           onItemUpdate(item.id, { itemType: type });
                                         }}
-                                        className="px-1.5 py-0 text-[10px] bg-white/60 hover:bg-[#6B5EF9]/5 text-[#76707F] hover:text-[#6B5EF9] rounded-[6px] border border-black/[0.06] transition-colors cursor-pointer leading-4"
+                                        className="px-2 py-0.5 text-[11px] bg-[#F4F3F8] hover:bg-[#2B2833] text-[#76707F] hover:text-white rounded-[6px] border border-black/[0.06] transition-colors cursor-pointer leading-4"
                                       >
                                         {type}
                                       </button>
@@ -786,9 +786,8 @@ export function TakeInBalanced({
                                       ) : <span />}
                                       <div className="flex gap-2">
                                       <Button
-                                        variant="outline"
                                         size="sm"
-                                        className="btn-secondary-light text-[12px] px-4 py-1.5"
+                                        className="bg-white text-[#2B2833] border border-black/[0.08] hover:bg-[#F4F3F8] hover:text-[#2B2833] shadow-none rounded-[10px] text-[12px] px-4 py-1.5 font-medium"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           onItemUpdate(item.id, { brand: '', condition: '', size: '', notes: '' });
