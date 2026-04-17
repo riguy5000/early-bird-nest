@@ -14,26 +14,9 @@ const FALLBACK_PRICES = [
   { metal: 'Silver',   price_usd: 24.30,   change_percent: 0, fetched_at: '' },
 ];
 
-/* Per-gram value for the approved ticker display format: "Gold 14K/10g · $250.00" */
-const KARAT_PURITY: Record<string, number> = {
-  Gold:     14 / 24,   // 14K default display
-  Silver:   0.925,     // Sterling
-  Platinum: 0.95,
-  Palladium: 0.95,
-};
-const GRAMS = 10;
-const TROY_OZ_PER_GRAM = 1 / 31.1035;
-
-function perGramValue(pricePerTroyOz: number, metal: string): number {
-  const purity = KARAT_PURITY[metal] ?? 1;
-  return pricePerTroyOz * TROY_OZ_PER_GRAM * purity * GRAMS;
-}
-
+/* Display raw market spot price per troy ounce for each metal */
 function metalLabel(metal: string): string {
-  if (metal === 'Gold')     return 'Gold 14K/10g';
-  if (metal === 'Silver')   return 'Silver 92.5%/10g';
-  if (metal === 'Platinum') return 'Platinum 95%/10g';
-  return `${metal}/10g`;
+  return `${metal} / oz`;
 }
 
 export function MetalPriceTicker() {
@@ -54,17 +37,14 @@ export function MetalPriceTicker() {
 
   return (
     <div className="flex items-center gap-6">
-      {prices.map(({ metal, price_usd }) => {
-        const val = perGramValue(Number(price_usd), metal);
-        return (
-          <div key={metal} className="flex flex-col">
-            <span className="text-[11px] text-[#A8A3AE] uppercase tracking-wider">{metalLabel(metal)}</span>
-            <span className="text-[22px] font-semibold text-[#2B2833] tabular-nums tracking-tight">
-              ${val.toFixed(2)}
-            </span>
-          </div>
-        );
-      })}
+      {prices.map(({ metal, price_usd }) => (
+        <div key={metal} className="flex flex-col">
+          <span className="text-[11px] text-[#A8A3AE] uppercase tracking-wider">{metalLabel(metal)}</span>
+          <span className="text-[22px] font-semibold text-[#2B2833] tabular-nums tracking-tight">
+            ${Number(price_usd).toFixed(2)}
+          </span>
+        </div>
+      ))}
     </div>
   );
 }

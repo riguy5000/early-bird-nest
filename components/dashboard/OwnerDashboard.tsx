@@ -98,17 +98,31 @@ export function OwnerDashboard({ storeId, storeName, onNavigate }: OwnerDashboar
   ];
 
   const plPositive = m.unrealizedPL >= 0;
+  const metalSpots = [
+    { label: 'Gold',      symbol: 'XAU' },
+    { label: 'Silver',    symbol: 'XAG' },
+    { label: 'Platinum',  symbol: 'XPT' },
+    { label: 'Palladium', symbol: 'XPD' },
+  ];
 
   return (
     <div className="space-y-6">
 
       {/* ── Page header ── */}
-      <div className="flex items-start justify-between">
-        <div>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div className="min-w-0">
           <h1 className="text-[36px] font-semibold tracking-tight title-gradient leading-tight">
             Dashboard
           </h1>
           <p className="text-[15px] text-[#76707F] mt-0.5">Owner Summary</p>
+          {m.unrealizedPLPercent > 0 && (
+            <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EAF2FF] border border-[#4889FA]/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#4889FA]" />
+              <span className="text-[12px] text-[#2B2833]">
+                Unrealized profit up <span className="font-semibold">{m.unrealizedPLPercent.toFixed(0)}%</span> this month
+              </span>
+            </div>
+          )}
         </div>
         <button
           onClick={() => onNavigate('analytics')}
@@ -119,25 +133,28 @@ export function OwnerDashboard({ storeId, storeName, onNavigate }: OwnerDashboar
         </button>
       </div>
 
-      {/* ── Quick Tip ── */}
-      {m.unrealizedPLPercent > 0 && (
-        <div className="tip-box flex items-start gap-3">
-          {/* Blue circle badge */}
-          <div className="w-5 h-5 rounded-full bg-[#4889FA] flex items-center justify-center flex-shrink-0 mt-0.5">
-            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-              <path strokeLinecap="round" strokeLinejoin="round"
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <div className="flex-1">
-            <div className="text-[13px] font-medium text-[#2B2833] mb-0.5">Quick Tip</div>
-            <div className="text-[12px] text-[#5A5463] leading-relaxed">
-              Your unrealized profit is up {m.unrealizedPLPercent.toFixed(0)}% this month.
-              Consider reviewing high-value items for potential sales opportunities.
-            </div>
+      {/* ── Metal Spot Prices ── */}
+      <div className="glass-card p-5">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h3 className="text-[14px] font-semibold text-[#2B2833] tracking-tight">Metal Spot Prices</h3>
+            <p className="text-[11px] text-[#76707F]">Live market price per troy ounce (USD)</p>
           </div>
         </div>
-      )}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {metalSpots.map(({ label, symbol }) => {
+            const price = m.metalPrices?.[symbol] ?? 0;
+            return (
+              <div key={symbol} className="flex flex-col p-3 rounded-[12px] bg-white/60 border border-black/[0.04]">
+                <span className="text-[11px] text-[#A8A3AE] uppercase tracking-wider">{label} / oz</span>
+                <span className="text-[22px] font-semibold text-[#2B2833] tabular-nums tracking-tight mt-0.5">
+                  {price > 0 ? `$${price.toFixed(2)}` : '—'}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       {/* ── Primary KPIs — 5 columns ── */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
