@@ -97,6 +97,7 @@ export function OwnerDashboard({ storeId, storeName, onNavigate }: OwnerDashboar
     { label: 'Analytics',       iconType: 'bar-chart',   action: 'analytics' },
   ];
 
+  const plPositive = m.unrealizedPL >= 0;
   const metalSpots = [
     { label: 'Gold',      symbol: 'XAU' },
     { label: 'Silver',    symbol: 'XAG' },
