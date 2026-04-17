@@ -817,8 +817,9 @@ export function TakeInBalanced({
                                   </div>
                                </CollapsibleContent>
                              </Collapsible>
-                          </div>
-                        ))}
+                           </div>
+                          );
+                        })}
                       </div>
                     </div>
                   ))}
