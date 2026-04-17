@@ -738,41 +738,42 @@ export function TakeInBalanced({
                                       </>
                                     )}
 
-                                   <div className="grid grid-cols-2 gap-4">
-                                     <div>
-                                       <label className="text-[13px] font-medium text-[#76707F] block mb-1.5">Notes</label>
-                                       <Textarea 
-                                         value={item.notes || ''} 
-                                         onChange={(e) => onItemUpdate(item.id, { notes: e.target.value })}
-                                         placeholder="Additional details…"
-                                         className="textarea-glass h-20 text-[13px] resize-none"
-                                       />
+                                   {/* Section: Notes & Photos */}
+                                   <div>
+                                     <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">Notes & Photos</div>
+                                     <div className="grid grid-cols-2 gap-3">
+                                       <div>
+                                         <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Notes</label>
+                                         <Textarea
+                                           value={item.notes || ''}
+                                           onChange={(e) => onItemUpdate(item.id, { notes: e.target.value })}
+                                           placeholder="Additional details…"
+                                           className="bg-white border border-black/[0.08] rounded-[10px] h-20 text-[13px] resize-none"
+                                         />
+                                       </div>
+                                       <div>
+                                         <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Photos</label>
+                                         {item.photos?.length > 0 ? (
+                                           <div className="flex gap-2 flex-wrap">
+                                             {item.photos.map((url: string, pi: number) => (
+                                               <div key={pi} className="relative group">
+                                                 <img src={url} alt={`Item photo ${pi + 1}`} className="w-16 h-16 rounded-[8px] object-cover border border-black/[0.06]" />
+                                                 <button
+                                                   className="absolute -top-1 -right-1 bg-[#2B2833] text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
+                                                   onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { photos: item.photos.filter((_: string, j: number) => j !== pi) }); }}
+                                                 >×</button>
+                                               </div>
+                                             ))}
+                                           </div>
+                                         ) : (
+                                           <div className="border border-dashed border-black/[0.12] rounded-[10px] p-3 text-center bg-white hover:bg-black/[0.02] transition-colors cursor-pointer h-20 flex flex-col items-center justify-center">
+                                             <Camera className="h-4 w-4 text-[#76707F] mb-1" />
+                                             <span className="text-[11px] text-[#A8A3AE]">Upload Photos</span>
+                                           </div>
+                                         )}
+                                       </div>
                                      </div>
-                                      <div>
-                                        <label className="text-[13px] font-medium text-[#76707F] block mb-1.5">Photos</label>
-                                        {item.photos?.length > 0 ? (
-                                          <div className="flex gap-2 flex-wrap">
-                                            {item.photos.map((url: string, pi: number) => (
-                                              <div key={pi} className="relative group">
-                                                <img src={url} alt={`Item photo ${pi + 1}`} className="w-16 h-16 rounded-[8px] object-cover border border-black/[0.06]" />
-                                                <button
-                                                  className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
-                                                  onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { photos: item.photos.filter((_: string, j: number) => j !== pi) }); }}
-                                                >×</button>
-                                                {pi === 0 && item.source === 'AI Assist' && (
-                                                  <span className="absolute bottom-0 left-0 right-0 bg-primary/80 text-[8px] text-primary-foreground text-center rounded-b-lg">Crop</span>
-                                                )}
-                                              </div>
-                                            ))}
-                                          </div>
-                                        ) : (
-                                          <div className="border border-dashed border-[#6B5EF9]/20 rounded-[8px] p-3 text-center bg-white/60 hover:bg-white/80 transition-colors cursor-pointer h-16 flex flex-col items-center justify-center">
-                                            <Camera className="h-4 w-4 text-[#6B5EF9] mb-1" />
-                                            <span className="text-[11px] text-[#A8A3AE]">Upload Photos</span>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
+                                   </div>
 
                                     <div className="flex items-center justify-between pt-3 border-t border-black/[0.04] mt-3">
                                       {store.canDeleteItems !== false ? (
