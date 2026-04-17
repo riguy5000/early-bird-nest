@@ -510,15 +510,14 @@ export function CustomerDrawer({
                       </div>
                       <Button 
                         onClick={startDeviceCapture}
-                        className="w-full btn-primary-dark flex items-center gap-2"
+                        className="w-full btn-primary-dark flex items-center justify-center gap-2"
                       >
                         <Camera className="h-4 w-4" />
                         Use This Device Camera
                       </Button>
                       <Button 
-                        variant="outline"
                         onClick={startQrFlow}
-                        className="w-full btn-primary-dark flex items-center gap-2"
+                        className="w-full btn-primary-dark flex items-center justify-center gap-2"
                       >
                         <QrCode className="h-4 w-4" />
                         Scan with Another Device
