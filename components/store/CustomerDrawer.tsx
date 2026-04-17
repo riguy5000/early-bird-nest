@@ -29,6 +29,7 @@ import {
   Smartphone,
   X,
   Search,
+  Info,
   Image as ImageIcon
 } from 'lucide-react';
 
@@ -844,13 +845,23 @@ export function CustomerDrawer({
                 </>
               )}
 
-              {/* Compliance Notice */}
-              <div className="bg-white/60 border border-black/[0.06] p-3.5 rounded-[12px]">
-                <div className="flex items-start gap-2.5">
-                  <CreditCard className="h-3.5 w-3.5 mt-0.5 text-[#A8A3AE]" />
-                  <div className="text-[12px] text-[#76707F]">
-                    <p className="font-medium mb-0.5">Compliance Required</p>
-                    <p>Valid government-issued photo ID required for all transactions.</p>
+              {/* Compliance Notice — gradient card matching Take-In style */}
+              <div
+                className="rounded-[16px] p-4 ring-1 ring-white/80"
+                style={{
+                  background: 'linear-gradient(to right, #E8F4FF, #F0E8FF)',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+                }}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="h-9 w-9 rounded-full bg-[#3B82F6] flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <Info className="h-5 w-5 text-white" strokeWidth={2.5} />
+                  </div>
+                  <div>
+                    <div className="text-[14px] font-semibold text-[#2B2833]">Remember to verify ID</div>
+                    <div className="text-[13px] text-[#5A5463] leading-relaxed mt-0.5">
+                      All purchases require valid government-issued identification.
+                    </div>
                   </div>
                 </div>
               </div>
