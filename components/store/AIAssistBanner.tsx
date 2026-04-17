@@ -21,16 +21,14 @@ export function AIAssistBanner({ onActivate }: AIAssistBannerProps) {
       </div>
       
       <div className="flex items-center gap-2">
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <button 
           onClick={onActivate}
-          className="flex items-center gap-1.5 text-xs rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-700 px-3"
+          className="btn-primary-dark flex items-center gap-1.5 text-xs px-3 h-8"
         >
           <Camera className="h-3 w-3" />
           Try AI Capture
-          <kbd className="ml-1 text-[10px] text-muted-foreground font-mono">⌘J</kbd>
-        </Button>
+          <kbd className="ml-1 text-[10px] text-white/70 font-mono">⌘J</kbd>
+        </button>
         
         <Button 
           variant="ghost" 
