@@ -74,12 +74,7 @@ export function TakeInBalanced({
   const { toast } = useToast();
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set());
 
-  // Auto-expand all items when they're added
-  useEffect(() => {
-    if (items.length > 0) {
-      setExpandedAdvanced(new Set(items.map(i => i.id)));
-    }
-  }, [items.map(i => i.id).join(',')]);
+  // Specs panels stay collapsed by default — user opens them explicitly via the Specs chevron.
   const [batchPhotoOpen, setBatchPhotoOpen] = useState(false);
   const [storeCreditNumber, setStoreCreditNumber] = useState('');
   const [transactionType, setTransactionType] = useState<'Purchase' | 'Consignment' | 'Pawn'>('Purchase');
