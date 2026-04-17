@@ -77,7 +77,7 @@
   * { @apply border-border; }
 
   :root {
-    --app-gradient: linear-gradient(to right, #FFF3FF, #F5EBFF, #E8E6FF, #C8DCFF);
+    --app-gradient: linear-gradient(107.56deg, #FFF8FF 0%, #F2F1FB 48.05%, #DCE7FA 100%);
   }
 
   html, body, #root {
