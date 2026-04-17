@@ -657,52 +657,113 @@ export function TakeInBalanced({
                                          </div>
                                        </div>
                                      </>
-                                   ) : (
-                                     /* ---- JEWELRY / DEFAULT SPECS ---- */
-                                     <>
-                                       <div className="grid grid-cols-3 gap-4">
-                                         <div>
-                                           <label className="text-[13px] font-medium text-[#76707F] block mb-1.5">Brand/Maker</label>
-                                           <Input value={item.brand || ''} onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })} placeholder="e.g., Tiffany & Co" className="input-glass h-9 text-[13px]" />
-                                         </div>
-                                         <div>
-                                           <label className="text-[13px] font-medium text-[#76707F] block mb-1.5">Condition</label>
-                                           <Select value={item.condition || ''} onValueChange={(value) => onItemUpdate(item.id, { condition: value })}>
-                                             <SelectTrigger className="input-glass h-9 text-[13px]"><SelectValue placeholder="Select" /></SelectTrigger>
-                                             <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
-                                               <SelectItem value="New">New</SelectItem>
-                                               <SelectItem value="Excellent">Excellent</SelectItem>
-                                               <SelectItem value="Good">Good</SelectItem>
-                                               <SelectItem value="Fair">Fair</SelectItem>
-                                               <SelectItem value="Poor">Poor</SelectItem>
-                                             </SelectContent>
-                                           </Select>
-                                         </div>
-                                         <div>
-                                           <label className="text-[13px] font-medium text-[#76707F] block mb-1.5">Size</label>
-                                           <Input value={item.size || ''} onChange={(e) => onItemUpdate(item.id, { size: e.target.value })} placeholder="e.g., Size 7, 18in" className="input-glass h-9 text-[13px]" />
-                                         </div>
-                                       </div>
+                                    ) : (
+                                      /* ---- JEWELRY / DEFAULT SPECS ---- */
+                                      <>
+                                        {/* Row 1: Type pills + Metal select */}
+                                        <div className="grid grid-cols-2 gap-6">
+                                          <div>
+                                            <label className="text-[13px] font-medium text-[#76707F] block mb-2">Type</label>
+                                            <div className="flex flex-wrap gap-2">
+                                              {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).map(type => {
+                                                const active = (item.itemType || '').toLowerCase() === type.toLowerCase();
+                                                return (
+                                                  <button
+                                                    key={type}
+                                                    onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { itemType: type }); }}
+                                                    className={`px-4 h-9 text-[13px] rounded-[10px] font-medium transition-colors ${active ? 'bg-[#1F1B2E] text-white' : 'bg-white text-[#2B2833] border border-black/[0.08] hover:bg-black/[0.03]'}`}
+                                                  >
+                                                    {type}
+                                                  </button>
+                                                );
+                                              })}
+                                            </div>
+                                          </div>
+                                          <div>
+                                            <label className="text-[13px] font-medium text-[#76707F] block mb-2">Metal</label>
+                                            <Select
+                                              value={(item.metals?.[0]?.type) || 'Gold'}
+                                              onValueChange={(value) => {
+                                                const first = item.metals?.[0];
+                                                if (first) updateMetal(item.id, first.id, { type: value });
+                                              }}
+                                            >
+                                              <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue /></SelectTrigger>
+                                              <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
+                                                <SelectItem value="Gold">Gold</SelectItem>
+                                                <SelectItem value="Silver">Silver</SelectItem>
+                                                <SelectItem value="Platinum">Platinum</SelectItem>
+                                                <SelectItem value="Palladium">Palladium</SelectItem>
+                                              </SelectContent>
+                                            </Select>
+                                          </div>
+                                        </div>
 
-                                       {(item.metals || []).length > 0 && (
-                                         <div>
-                                           <label className="text-[13px] font-medium text-[#76707F] block mb-1.5">Metals</label>
-                                           <div className="space-y-1">
-                                             {(item.metals || []).map((metal: any) => (
-                                               <div key={metal.id} className="flex items-center gap-2 text-[12px] text-[#76707F] bg-white/80 rounded-[8px] border border-black/[0.06] px-3 py-1.5">
-                                                 <span className="font-medium">{metal.type} {metal.karat}K</span>
-                                                 <span>·</span>
-                                                 <span>{metal.weight || 0}g</span>
-                                                 <span>·</span>
-                                                 <span>{metal.payoutPercentage ?? 75}%</span>
-                                                 <span className="ml-auto font-medium text-green-600">${(metal.payoutAmount || 0).toFixed(2)}</span>
-                                               </div>
-                                             ))}
-                                           </div>
-                                         </div>
-                                       )}
-                                     </>
-                                   )}
+                                        {/* Row 2: Brand + Condition */}
+                                        <div className="grid grid-cols-2 gap-6">
+                                          <div>
+                                            <label className="text-[13px] font-medium text-[#76707F] block mb-2">Brand/Maker</label>
+                                            <Input value={item.brand || ''} onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })} placeholder="e.g., Tiffany & Co." className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                          </div>
+                                          <div>
+                                            <label className="text-[13px] font-medium text-[#76707F] block mb-2">Condition</label>
+                                            <Select value={item.condition || ''} onValueChange={(value) => onItemUpdate(item.id, { condition: value })}>
+                                              <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                              <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
+                                                <SelectItem value="New">New</SelectItem>
+                                                <SelectItem value="Excellent">Excellent</SelectItem>
+                                                <SelectItem value="Good">Good</SelectItem>
+                                                <SelectItem value="Fair">Fair</SelectItem>
+                                                <SelectItem value="Poor">Poor</SelectItem>
+                                              </SelectContent>
+                                            </Select>
+                                          </div>
+                                        </div>
+
+                                        {/* Row 3: Size full width */}
+                                        <div>
+                                          <label className="text-[13px] font-medium text-[#76707F] block mb-2">Size</label>
+                                          <Input value={item.size || ''} onChange={(e) => onItemUpdate(item.id, { size: e.target.value })} placeholder="e.g., Size 7, 18in" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                        </div>
+
+                                        {/* Metals card */}
+                                        {(item.metals || []).length > 0 && (
+                                          <div>
+                                            <label className="text-[13px] font-medium text-[#76707F] block mb-2">Metals</label>
+                                            <div className="bg-white/70 rounded-[14px] border border-black/[0.06] p-4 space-y-3">
+                                              {(item.metals || []).map((metal: any) => (
+                                                <div key={metal.id} className="grid grid-cols-3 gap-4">
+                                                  <div>
+                                                    <div className="text-[11px] font-medium text-[#A8A3AE] mb-1.5">Metal Type</div>
+                                                    <div className="bg-white h-9 rounded-[10px] border border-black/[0.08] flex items-center px-3 text-[13px] text-[#2B2833]">
+                                                      {metal.type} {metal.karat}k
+                                                    </div>
+                                                  </div>
+                                                  <div>
+                                                    <div className="text-[11px] font-medium text-[#A8A3AE] mb-1.5">Weight (g)</div>
+                                                    <div className="bg-white h-9 rounded-[10px] border border-black/[0.08] flex items-center justify-end px-3 text-[13px] text-[#2B2833] tabular-nums">
+                                                      {(metal.weight || 0).toFixed(2)}
+                                                    </div>
+                                                  </div>
+                                                  <div>
+                                                    <div className="text-[11px] font-medium text-[#A8A3AE] mb-1.5">Purity %</div>
+                                                    <div className="bg-white h-9 rounded-[10px] border border-black/[0.08] flex items-center justify-end px-3 text-[13px] text-[#2B2833] tabular-nums">
+                                                      {metal.payoutPercentage ?? 75}%
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              ))}
+                                              <div className="flex items-center justify-between pt-3 border-t border-black/[0.06]">
+                                                <span className="text-[13px] text-[#76707F]">Total Metal Value</span>
+                                                <span className="text-[15px] font-semibold text-[#2B2833] tabular-nums">
+                                                  ${(item.metals || []).reduce((s: number, m: any) => s + (m.payoutAmount || 0), 0).toFixed(2)}
+                                                </span>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        )}
+                                      </>
+                                    )}
 
                                    <div className="grid grid-cols-2 gap-4">
                                      <div>
