@@ -353,82 +353,80 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
         </div>
       </div>
 
-      {/* ── Intake Workspace — wraps category tabs + content as one container ── */}
-      <div className="flex-1 min-h-0 overflow-hidden px-6 py-4">
-        <div
-          className="h-full flex flex-col bg-white rounded-[20px] overflow-hidden"
-          style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}
-        >
-          {/* Workspace header — category tabs + AI Assist */}
-          <div className="flex-shrink-0 px-5 py-3.5 border-b border-black/[0.05] flex items-center justify-between gap-3 bg-[#FBFAFC]">
-            <div className="flex items-center gap-2">
-              {(['Jewelry', 'Watch', 'Bullion', 'Stones', 'Loose Items'] as string[]).map((cat) => {
-                const isActive = items.some(item => item.category === cat);
-                return (
-                  <button
-                    key={cat}
-                    onClick={() => addNewItem(cat as Item['category'])}
-                    className={`px-4 h-10 rounded-[12px] text-[14px] font-medium transition-all ${
-                      isActive
-                        ? 'bg-[#2B2833] text-white shadow-sm'
-                        : 'bg-white text-[#76707F] border border-black/[0.06] hover:text-[#2B2833] hover:border-black/[0.12]'
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                );
-              })}
-            </div>
-
-            {store.enableAiAssist && (
+      {/* ── Category tabs — floating below header card, on gradient ── */}
+      <div className="flex-shrink-0 px-6 py-4 flex items-center justify-between gap-3">
+        {/* Category pill tabs */}
+        <div className="flex items-center gap-2">
+          {(['Jewelry', 'Watch', 'Bullion', 'Stones', 'Loose Items'] as string[]).map((cat) => {
+            const isActive = items.some(item => item.category === cat);
+            return (
               <button
-                onClick={handleAIAssist}
-                className="btn-secondary-light flex items-center gap-2 text-[13px] h-10 px-4 rounded-[12px]"
+                key={cat}
+                onClick={() => addNewItem(cat as Item['category'])}
+                className={`px-4 py-2 rounded-[10px] text-[14px] font-medium transition-all ring-2 ring-white/80 ${
+                  isActive
+                    ? 'bg-[#2B2833] text-white shadow-sm'
+                    : 'bg-white text-[#76707F] hover:text-[#2B2833] shadow-sm'
+                }`}
               >
-                <Zap className="h-3.5 w-3.5 text-[#6B5EF9]" />
-                AI Assist
+                {cat}
               </button>
-            )}
-          </div>
+            );
+          })}
 
-          {showAIAssist && (
-            <AIAssistBanner onActivate={handleAIAssist} />
-          )}
 
-          {/* Workspace content */}
-          <div className="flex-1 overflow-hidden min-h-0">
-            {viewMode === 'balanced' ? (
-              <TakeInBalanced
-                items={items}
-                activeItemId={activeItemId}
-                onItemAdd={addNewItem}
-                onItemUpdate={updateItem}
-                onItemRemove={removeItem}
-                onItemSelect={setActiveItemId}
-                store={store}
-                customer={customer}
-                onCustomerUpdate={setCustomer}
-                onOpenCustomerDrawer={openCustomerDrawer}
-                onCompletePurchase={handleCompletePurchase}
-                onSaveQuote={handleSaveQuote}
-                completing={completing}
-                paymentMethod={paymentMethod}
-                onPaymentMethodChange={(m) => setPaymentMethod(m as any)}
-                checkNumber={checkNumber}
-                onCheckNumberChange={setCheckNumber}
-              />
-            ) : (
-              <TakeInSlim
-                items={items}
-                onItemAdd={addNewItem}
-                onItemUpdate={updateItem}
-                onItemRemove={removeItem}
-                store={store}
-                onSwitchToDetailed={() => setViewMode('balanced')}
-              />
-            )}
-          </div>
+
+
         </div>
+
+        {/* AI Assist */}
+        {store.enableAiAssist && (
+          <button
+            onClick={handleAIAssist}
+            className="btn-secondary-light flex items-center gap-2 text-[13px]"
+          >
+            <Zap className="h-3.5 w-3.5 text-[#6B5EF9]" />
+            AI Assist
+          </button>
+        )}
+      </div>
+
+      {showAIAssist && (
+        <AIAssistBanner onActivate={handleAIAssist} />
+      )}
+
+      {/* ── Main scrollable content ── */}
+      <div className="flex-1 overflow-hidden min-h-0">
+        {viewMode === 'balanced' ? (
+          <TakeInBalanced
+            items={items}
+            activeItemId={activeItemId}
+            onItemAdd={addNewItem}
+            onItemUpdate={updateItem}
+            onItemRemove={removeItem}
+            onItemSelect={setActiveItemId}
+            store={store}
+            customer={customer}
+            onCustomerUpdate={setCustomer}
+            onOpenCustomerDrawer={openCustomerDrawer}
+            onCompletePurchase={handleCompletePurchase}
+            onSaveQuote={handleSaveQuote}
+            completing={completing}
+            paymentMethod={paymentMethod}
+            onPaymentMethodChange={(m) => setPaymentMethod(m as any)}
+            checkNumber={checkNumber}
+            onCheckNumberChange={setCheckNumber}
+          />
+        ) : (
+          <TakeInSlim
+            items={items}
+            onItemAdd={addNewItem}
+            onItemUpdate={updateItem}
+            onItemRemove={removeItem}
+            store={store}
+            onSwitchToDetailed={() => setViewMode('balanced')}
+          />
+        )}
       </div>
 
       {/* Customer Drawer */}
