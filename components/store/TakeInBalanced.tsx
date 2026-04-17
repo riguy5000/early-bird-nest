@@ -949,7 +949,7 @@ export function TakeInBalanced({
           <div className="px-5 py-4 border-t border-black/[0.06] space-y-2">
             {store.canCompletePurchase !== false && (
               <button
-                className="w-full flex items-center justify-center gap-2 btn-accent-teal"
+                className="w-full flex items-center justify-center gap-2 btn-primary-dark"
                 disabled={items.length === 0 || completing}
                 onClick={onCompletePurchase}
               >

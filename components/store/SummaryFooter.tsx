@@ -88,10 +88,9 @@ export function SummaryFooter({
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
             <Button 
-              variant="ghost" 
               onClick={onSave}
               disabled={!hasItems}
-              className="flex items-center gap-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
+              className="btn-secondary-light flex items-center gap-2"
             >
               <Save className="h-4 w-4" />
               Save Quote
@@ -100,7 +99,7 @@ export function SummaryFooter({
             <Button 
               onClick={onSave}
               disabled={!hasItems}
-              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-6"
+              className="btn-primary-dark flex items-center gap-2"
             >
               <DollarSign className="h-4 w-4" />
               Complete Purchase
