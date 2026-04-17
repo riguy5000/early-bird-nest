@@ -119,7 +119,7 @@ export function TakeInSlim({
               <Calculator className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">Quick Entry Ready</h3>
               <p className="text-muted-foreground mb-4">Start entering metal details for instant quotes</p>
-              <Button onClick={addNewLine} className="bg-primary text-white">
+              <Button onClick={addNewLine} className="btn-primary-dark">
                 <Plus className="h-4 w-4 mr-2" />
                 Add First Item
               </Button>

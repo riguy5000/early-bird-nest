@@ -117,7 +117,7 @@ export function ScanUploadPage() {
             </div>
             <button
               onClick={() => frontRef.current?.click()}
-              className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+              className="w-full btn-primary-dark flex items-center justify-center gap-2"
             >
               <Upload className="h-4 w-4" />
               {isItemCapture ? 'Take Photo' : 'Capture Front'}
@@ -141,7 +141,7 @@ export function ScanUploadPage() {
             </div>
             <button
               onClick={() => backRef.current?.click()}
-              className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+              className="w-full btn-primary-dark flex items-center justify-center gap-2"
             >
               <Upload className="h-4 w-4" />
               Capture Back
