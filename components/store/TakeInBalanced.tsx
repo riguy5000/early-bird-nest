@@ -74,12 +74,7 @@ export function TakeInBalanced({
   const { toast } = useToast();
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set());
 
-  // Auto-expand all items when they're added
-  useEffect(() => {
-    if (items.length > 0) {
-      setExpandedAdvanced(new Set(items.map(i => i.id)));
-    }
-  }, [items.map(i => i.id).join(',')]);
+  // Specs panels stay collapsed by default — user opens them explicitly via the Specs chevron.
   const [batchPhotoOpen, setBatchPhotoOpen] = useState(false);
   const [storeCreditNumber, setStoreCreditNumber] = useState('');
   const [transactionType, setTransactionType] = useState<'Purchase' | 'Consignment' | 'Pawn'>('Purchase');
@@ -553,9 +548,8 @@ export function TakeInBalanced({
                                open={expandedAdvanced.has(item.id)} 
                                onOpenChange={() => toggleAdvanced(item.id)}
                              >
-                               <CollapsibleContent className="px-4 pb-4 animate-accordion-down data-[state=closed]:animate-accordion-up">
-                                 <div className="bg-white/60 rounded-[12px] p-5 space-y-4 border border-black/[0.04]">
-                                   
+                               <CollapsibleContent className="px-3 pb-3 animate-accordion-down data-[state=closed]:animate-accordion-up">
+                                 <div className="bg-[#FAFAFB] rounded-[14px] p-5 space-y-5 border border-black/[0.05]">
                                    {item.category === 'Watch' ? (
                                      /* ---- WATCH SPECS ---- */
                                      <>
@@ -658,20 +652,23 @@ export function TakeInBalanced({
                                        </div>
                                      </>
                                     ) : (
-                                      /* ---- JEWELRY / DEFAULT SPECS ---- */
+                                      /* ---- JEWELRY / DEFAULT SPECS (refined) ---- */
                                       <>
-                                        {/* Row 1: Type pills + Metal select */}
-                                        <div className="grid grid-cols-2 gap-6">
-                                          <div>
-                                            <label className="text-[13px] font-medium text-[#76707F] block mb-2">Type</label>
-                                            <div className="flex flex-wrap gap-2">
+                                        {/* Section: Item details */}
+                                        <div>
+                                          <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">Item Details</div>
+
+                                          {/* Type pills — full width, wraps cleanly */}
+                                          <div className="mb-4">
+                                            <label className="text-[12px] font-medium text-[#76707F] block mb-2">Type</label>
+                                            <div className="flex flex-wrap gap-1.5">
                                               {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).map(type => {
                                                 const active = (item.itemType || '').toLowerCase() === type.toLowerCase();
                                                 return (
                                                   <button
                                                     key={type}
                                                     onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { itemType: type }); }}
-                                                    className={`px-4 h-9 text-[13px] rounded-[10px] font-medium transition-colors ${active ? 'bg-[#1F1B2E] text-white' : 'bg-white text-[#2B2833] border border-black/[0.08] hover:bg-black/[0.03]'}`}
+                                                    className={`px-3 h-8 text-[12px] rounded-[8px] font-medium transition-all ${active ? 'bg-[#2B2833] text-white shadow-sm' : 'bg-white text-[#76707F] border border-black/[0.08] hover:text-[#2B2833] hover:border-black/[0.15]'}`}
                                                   >
                                                     {type}
                                                   </button>
@@ -679,127 +676,104 @@ export function TakeInBalanced({
                                               })}
                                             </div>
                                           </div>
-                                          <div>
-                                            <label className="text-[13px] font-medium text-[#76707F] block mb-2">Metal</label>
-                                            <Select
-                                              value={(item.metals?.[0]?.type) || 'Gold'}
-                                              onValueChange={(value) => {
-                                                const first = item.metals?.[0];
-                                                if (first) updateMetal(item.id, first.id, { type: value });
-                                              }}
-                                            >
-                                              <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue /></SelectTrigger>
-                                              <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
-                                                <SelectItem value="Gold">Gold</SelectItem>
-                                                <SelectItem value="Silver">Silver</SelectItem>
-                                                <SelectItem value="Platinum">Platinum</SelectItem>
-                                                <SelectItem value="Palladium">Palladium</SelectItem>
-                                              </SelectContent>
-                                            </Select>
+
+                                          {/* Brand · Condition · Size — single 3-col row */}
+                                          <div className="grid grid-cols-3 gap-3">
+                                            <div>
+                                              <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Brand / Maker</label>
+                                              <Input value={item.brand || ''} onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })} placeholder="e.g., Tiffany & Co." className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                            </div>
+                                            <div>
+                                              <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Condition</label>
+                                              <Select value={item.condition || ''} onValueChange={(value) => onItemUpdate(item.id, { condition: value })}>
+                                                <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                                <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
+                                                  <SelectItem value="New">New</SelectItem>
+                                                  <SelectItem value="Excellent">Excellent</SelectItem>
+                                                  <SelectItem value="Good">Good</SelectItem>
+                                                  <SelectItem value="Fair">Fair</SelectItem>
+                                                  <SelectItem value="Poor">Poor</SelectItem>
+                                                </SelectContent>
+                                              </Select>
+                                            </div>
+                                            <div>
+                                              <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Size</label>
+                                              <Input value={item.size || ''} onChange={(e) => onItemUpdate(item.id, { size: e.target.value })} placeholder="e.g., 7, 18in" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                            </div>
                                           </div>
                                         </div>
 
-                                        {/* Row 2: Brand + Condition */}
-                                        <div className="grid grid-cols-2 gap-6">
-                                          <div>
-                                            <label className="text-[13px] font-medium text-[#76707F] block mb-2">Brand/Maker</label>
-                                            <Input value={item.brand || ''} onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })} placeholder="e.g., Tiffany & Co." className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                          </div>
-                                          <div>
-                                            <label className="text-[13px] font-medium text-[#76707F] block mb-2">Condition</label>
-                                            <Select value={item.condition || ''} onValueChange={(value) => onItemUpdate(item.id, { condition: value })}>
-                                              <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
-                                              <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
-                                                <SelectItem value="New">New</SelectItem>
-                                                <SelectItem value="Excellent">Excellent</SelectItem>
-                                                <SelectItem value="Good">Good</SelectItem>
-                                                <SelectItem value="Fair">Fair</SelectItem>
-                                                <SelectItem value="Poor">Poor</SelectItem>
-                                              </SelectContent>
-                                            </Select>
-                                          </div>
-                                        </div>
-
-                                        {/* Row 3: Size full width */}
-                                        <div>
-                                          <label className="text-[13px] font-medium text-[#76707F] block mb-2">Size</label>
-                                          <Input value={item.size || ''} onChange={(e) => onItemUpdate(item.id, { size: e.target.value })} placeholder="e.g., Size 7, 18in" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                        </div>
-
-                                        {/* Metals card */}
+                                        {/* Section: Metals */}
                                         {(item.metals || []).length > 0 && (
                                           <div>
-                                            <label className="text-[13px] font-medium text-[#76707F] block mb-2">Metals</label>
-                                            <div className="bg-white/70 rounded-[14px] border border-black/[0.06] p-4 space-y-3">
-                                              {(item.metals || []).map((metal: any) => (
-                                                <div key={metal.id} className="grid grid-cols-3 gap-4">
-                                                  <div>
-                                                    <div className="text-[11px] font-medium text-[#A8A3AE] mb-1.5">Metal Type</div>
-                                                    <div className="bg-white h-9 rounded-[10px] border border-black/[0.08] flex items-center px-3 text-[13px] text-[#2B2833]">
-                                                      {metal.type} {metal.karat}k
-                                                    </div>
-                                                  </div>
-                                                  <div>
-                                                    <div className="text-[11px] font-medium text-[#A8A3AE] mb-1.5">Weight (g)</div>
-                                                    <div className="bg-white h-9 rounded-[10px] border border-black/[0.08] flex items-center justify-end px-3 text-[13px] text-[#2B2833] tabular-nums">
-                                                      {(metal.weight || 0).toFixed(2)}
-                                                    </div>
-                                                  </div>
-                                                  <div>
-                                                    <div className="text-[11px] font-medium text-[#A8A3AE] mb-1.5">Purity %</div>
-                                                    <div className="bg-white h-9 rounded-[10px] border border-black/[0.08] flex items-center justify-end px-3 text-[13px] text-[#2B2833] tabular-nums">
-                                                      {metal.payoutPercentage ?? 75}%
-                                                    </div>
-                                                  </div>
+                                            <div className="flex items-center justify-between mb-3">
+                                              <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider">Metals</div>
+                                              <div className="text-[11px] text-[#A8A3AE]">{(item.metals || []).length} {((item.metals || []).length === 1 ? 'component' : 'components')}</div>
+                                            </div>
+                                            <div className="bg-white rounded-[12px] border border-black/[0.06] overflow-hidden">
+                                              <div className="grid grid-cols-[1.2fr_1fr_1fr_auto] gap-3 px-4 py-2.5 bg-black/[0.015] border-b border-black/[0.05]">
+                                                <div className="text-[10px] font-semibold text-[#A8A3AE] uppercase tracking-wider">Metal</div>
+                                                <div className="text-[10px] font-semibold text-[#A8A3AE] uppercase tracking-wider text-right">Weight (g)</div>
+                                                <div className="text-[10px] font-semibold text-[#A8A3AE] uppercase tracking-wider text-right">Payout %</div>
+                                                <div className="text-[10px] font-semibold text-[#A8A3AE] uppercase tracking-wider text-right w-16">Value</div>
+                                              </div>
+                                              {(item.metals || []).map((metal: any, mi: number) => (
+                                                <div key={metal.id} className={`grid grid-cols-[1.2fr_1fr_1fr_auto] gap-3 px-4 py-2.5 items-center text-[13px] text-[#2B2833] ${mi > 0 ? 'border-t border-black/[0.04]' : ''}`}>
+                                                  <div>{metal.type} <span className="text-[#76707F]">{metal.karat}K</span></div>
+                                                  <div className="text-right tabular-nums">{(metal.weight || 0).toFixed(2)}</div>
+                                                  <div className="text-right tabular-nums text-[#76707F]">{metal.payoutPercentage ?? 75}%</div>
+                                                  <div className="text-right tabular-nums font-medium w-16">${(metal.payoutAmount || 0).toFixed(2)}</div>
                                                 </div>
                                               ))}
-                                              <div className="flex items-center justify-between pt-3 border-t border-black/[0.06]">
-                                                <span className="text-[13px] text-[#76707F]">Total Metal Value</span>
+                                              <div className="flex items-center justify-between px-4 py-3 border-t border-black/[0.06] bg-black/[0.015]">
+                                                <span className="text-[12px] font-medium text-[#76707F]">Total Metal Value</span>
                                                 <span className="text-[15px] font-semibold text-[#2B2833] tabular-nums">
                                                   ${(item.metals || []).reduce((s: number, m: any) => s + (m.payoutAmount || 0), 0).toFixed(2)}
                                                 </span>
                                               </div>
                                             </div>
+                                            <div className="text-[11px] text-[#A8A3AE] mt-2">Edit weight, karat, and payout % from the row above.</div>
                                           </div>
                                         )}
                                       </>
                                     )}
 
-                                   <div className="grid grid-cols-2 gap-4">
-                                     <div>
-                                       <label className="text-[13px] font-medium text-[#76707F] block mb-1.5">Notes</label>
-                                       <Textarea 
-                                         value={item.notes || ''} 
-                                         onChange={(e) => onItemUpdate(item.id, { notes: e.target.value })}
-                                         placeholder="Additional details…"
-                                         className="textarea-glass h-20 text-[13px] resize-none"
-                                       />
+                                   {/* Section: Notes & Photos */}
+                                   <div>
+                                     <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">Notes & Photos</div>
+                                     <div className="grid grid-cols-2 gap-3">
+                                       <div>
+                                         <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Notes</label>
+                                         <Textarea
+                                           value={item.notes || ''}
+                                           onChange={(e) => onItemUpdate(item.id, { notes: e.target.value })}
+                                           placeholder="Additional details…"
+                                           className="bg-white border border-black/[0.08] rounded-[10px] h-20 text-[13px] resize-none"
+                                         />
+                                       </div>
+                                       <div>
+                                         <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Photos</label>
+                                         {item.photos?.length > 0 ? (
+                                           <div className="flex gap-2 flex-wrap">
+                                             {item.photos.map((url: string, pi: number) => (
+                                               <div key={pi} className="relative group">
+                                                 <img src={url} alt={`Item photo ${pi + 1}`} className="w-16 h-16 rounded-[8px] object-cover border border-black/[0.06]" />
+                                                 <button
+                                                   className="absolute -top-1 -right-1 bg-[#2B2833] text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
+                                                   onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { photos: item.photos.filter((_: string, j: number) => j !== pi) }); }}
+                                                 >×</button>
+                                               </div>
+                                             ))}
+                                           </div>
+                                         ) : (
+                                           <div className="border border-dashed border-black/[0.12] rounded-[10px] p-3 text-center bg-white hover:bg-black/[0.02] transition-colors cursor-pointer h-20 flex flex-col items-center justify-center">
+                                             <Camera className="h-4 w-4 text-[#76707F] mb-1" />
+                                             <span className="text-[11px] text-[#A8A3AE]">Upload Photos</span>
+                                           </div>
+                                         )}
+                                       </div>
                                      </div>
-                                      <div>
-                                        <label className="text-[13px] font-medium text-[#76707F] block mb-1.5">Photos</label>
-                                        {item.photos?.length > 0 ? (
-                                          <div className="flex gap-2 flex-wrap">
-                                            {item.photos.map((url: string, pi: number) => (
-                                              <div key={pi} className="relative group">
-                                                <img src={url} alt={`Item photo ${pi + 1}`} className="w-16 h-16 rounded-[8px] object-cover border border-black/[0.06]" />
-                                                <button
-                                                  className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
-                                                  onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { photos: item.photos.filter((_: string, j: number) => j !== pi) }); }}
-                                                >×</button>
-                                                {pi === 0 && item.source === 'AI Assist' && (
-                                                  <span className="absolute bottom-0 left-0 right-0 bg-primary/80 text-[8px] text-primary-foreground text-center rounded-b-lg">Crop</span>
-                                                )}
-                                              </div>
-                                            ))}
-                                          </div>
-                                        ) : (
-                                          <div className="border border-dashed border-[#6B5EF9]/20 rounded-[8px] p-3 text-center bg-white/60 hover:bg-white/80 transition-colors cursor-pointer h-16 flex flex-col items-center justify-center">
-                                            <Camera className="h-4 w-4 text-[#6B5EF9] mb-1" />
-                                            <span className="text-[11px] text-[#A8A3AE]">Upload Photos</span>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
+                                   </div>
 
                                     <div className="flex items-center justify-between pt-3 border-t border-black/[0.04] mt-3">
                                       {store.canDeleteItems !== false ? (
