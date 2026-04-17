@@ -77,7 +77,7 @@ export function InventoryDetailDrawer({ item, open, onClose, onPartOut, onArchiv
                   <button
                     key={i}
                     onClick={() => openLightbox(i)}
-                    className="flex-shrink-0 rounded-[10px] overflow-hidden border border-black/[0.06] hover:ring-2 hover:ring-[#6B5EF9]/30 transition-all cursor-pointer"
+                    className="flex-shrink-0 rounded-[10px] overflow-hidden border border-black/[0.06] hover:ring-2 hover:ring-black/10 transition-all cursor-pointer"
                   >
                     <img
                       src={url}
