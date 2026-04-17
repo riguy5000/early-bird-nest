@@ -37,17 +37,14 @@ export function MetalPriceTicker() {
 
   return (
     <div className="flex items-center gap-6">
-      {prices.map(({ metal, price_usd }) => {
-        const val = perGramValue(Number(price_usd), metal);
-        return (
-          <div key={metal} className="flex flex-col">
-            <span className="text-[11px] text-[#A8A3AE] uppercase tracking-wider">{metalLabel(metal)}</span>
-            <span className="text-[22px] font-semibold text-[#2B2833] tabular-nums tracking-tight">
-              ${val.toFixed(2)}
-            </span>
-          </div>
-        );
-      })}
+      {prices.map(({ metal, price_usd }) => (
+        <div key={metal} className="flex flex-col">
+          <span className="text-[11px] text-[#A8A3AE] uppercase tracking-wider">{metalLabel(metal)}</span>
+          <span className="text-[22px] font-semibold text-[#2B2833] tabular-nums tracking-tight">
+            ${Number(price_usd).toFixed(2)}
+          </span>
+        </div>
+      ))}
     </div>
   );
 }
