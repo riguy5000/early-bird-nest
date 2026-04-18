@@ -235,110 +235,113 @@ export function TakeInBalanced({
               <div className="h-full overflow-auto px-6 py-5">
                 <div className="space-y-3">
                   {Object.entries(itemsByCategory).map(([category, categoryItems]) => (
-                    <div key={category} className="glass-card overflow-hidden">
+                    <div key={category} className="bg-[#F5F4F7]/60 rounded-[20px] border border-black/[0.04] overflow-hidden">
                       {/* Category Header */}
-                      <div className="px-5 py-4 border-b border-black/[0.04]">
+                      <div className="px-6 pt-5 pb-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2.5">
                             <div className="w-7 h-7 rounded-[8px] icon-container flex items-center justify-center">
-                              {React.createElement(categoryIcons[category as keyof typeof categoryIcons] || Gem, { 
-                                className: "h-3.5 w-3.5" 
+                              {React.createElement(categoryIcons[category as keyof typeof categoryIcons] || Gem, {
+                                className: "h-3.5 w-3.5"
                               })}
                             </div>
-                            <div className="flex flex-col">
-                              <div className="flex items-center gap-2">
-                                <h3 className="text-[14px] font-semibold text-[#2B2833]">{category}</h3>
-                                <span className="text-[11px] text-[#76707F] bg-black/[0.05] px-1.5 py-0.5 rounded-full">
-                                  {(categoryItems as any[]).length}
-                                </span>
-                              </div>
-                              {(categoryItems as any[]).length > 0 && getTypeBreakdown(categoryItems as any[]) && (
-                                <div className="text-[11px] text-[#A8A3AE]">
-                                  {getTypeBreakdown(categoryItems as any[])}
-                                </div>
-                              )}
-                            </div>
+                            <h3 className="text-[17px] font-semibold text-[#2B2833] tracking-tight">{category}</h3>
+                            <span className="text-[13px] text-[#A8A3AE]">
+                              ({(categoryItems as any[]).length} {(categoryItems as any[]).length === 1 ? 'item' : 'items'})
+                            </span>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <div className="text-right">
-                              <div className="text-[10px] text-[#A8A3AE] uppercase tracking-wider">Total</div>
-                              <div className="text-[15px] font-semibold text-[#2B2833] tabular-nums">
+                          <div className="flex items-center gap-5">
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-[13px] text-[#A8A3AE]">Section Total</span>
+                              <span className="text-[18px] font-bold text-[#2B2833] tabular-nums">
                                 ${(categoryItems as any[]).reduce((s: number, i: any) => s + (i.payoutAmount || 0), 0).toFixed(2)}
-                              </div>
+                              </span>
                             </div>
                             <Button
                               onClick={() => addItemByCategory(category)}
                               size="sm"
                               variant="ghost"
-                              className="h-7 px-2.5 text-[12px] text-[#6B5EF9] hover:bg-[#6B5EF9]/5 rounded-[8px] font-medium"
+                              className="h-9 px-4 text-[13px] text-[#6B5EF9] bg-white border border-[#6B5EF9]/25 hover:bg-[#6B5EF9]/5 hover:border-[#6B5EF9]/40 rounded-[10px] font-medium shadow-sm"
                             >
-                              <Plus className="h-3 w-3 mr-1" />
-                              Add
+                              <Plus className="h-3.5 w-3.5 mr-1" />
+                              Add Item
                             </Button>
                           </div>
                         </div>
                       </div>
                       
-                      {/* Items */}
-                      <div className="p-2 space-y-1.5">
+                      <div className="px-4 pb-4 space-y-2">
                         {(categoryItems as any[]).map((item, index) => (
-                           <div key={item.id} className="bg-white rounded-[16px] shadow-sm hover:shadow-md transition-all duration-150">
-                              <div 
-                                className="flex items-start gap-2 px-3 py-2 cursor-pointer"
+                           <div key={item.id} className="bg-white rounded-[16px] border border-black/[0.04] shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.04)] transition-all duration-150">
+                              <div
+                                className="flex items-center gap-4 px-4 py-3.5 cursor-pointer"
                                 onClick={(e) => {
-                                  if ((e.target as HTMLElement).tagName !== 'INPUT' && 
-                                      !(e.target as HTMLElement).closest('button') && 
+                                  if ((e.target as HTMLElement).tagName !== 'INPUT' &&
+                                      !(e.target as HTMLElement).closest('button') &&
                                       !(e.target as HTMLElement).closest('[role="combobox"]')) {
                                     toggleAdvanced(item.id);
                                   }
                                 }}
                               >
-                                <div className="w-6 h-6 rounded-[6px] icon-container flex items-center justify-center text-[11px] font-semibold text-[#6B5EF9] mt-0.5 flex-shrink-0">
+                                {/* Numbered badge — preserved purple gradient */}
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#8B7EFF] to-[#6B5EF9] flex items-center justify-center text-[13px] font-semibold text-white flex-shrink-0 shadow-sm">
                                   {items.findIndex(i => i.id === item.id) + 1}
                                 </div>
 
-                                <div className="flex flex-col gap-1 min-w-[120px] flex-shrink-0">
+                                {/* LEFT: Description input + type pills */}
+                                <div className="flex flex-col gap-2 flex-1 min-w-0">
                                   <Input
                                     value={item.itemType || ''}
                                     onChange={(e) => onItemUpdate(item.id, { itemType: e.target.value })}
-                                    placeholder={`Type...`}
-                                    className="h-6 text-[11px] bg-transparent border-0 border-b border-black/[0.10] rounded-none px-0 focus:border-[#6B5EF9] focus:ring-0 w-28"
+                                    placeholder="Type item / description..."
+                                    className="h-10 text-[14px] bg-white border border-black/[0.06] rounded-[10px] px-3.5 placeholder:text-[#A8A3AE]"
                                     onClick={(e) => e.stopPropagation()}
                                   />
-                                  <div className="flex flex-wrap gap-0.5">
-                                    {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).slice(0, 4).map(type => (
-                                      <button
-                                        key={type}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          onItemUpdate(item.id, { itemType: type });
-                                        }}
-                                        className="px-1.5 py-0 text-[10px] bg-white/60 hover:bg-[#6B5EF9]/5 text-[#76707F] hover:text-[#6B5EF9] rounded-[6px] border border-black/[0.06] transition-colors cursor-pointer leading-4"
-                                      >
-                                        {type}
-                                      </button>
-                                    ))}
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).slice(0, 6).map(type => {
+                                      const active = item.itemType === type;
+                                      return (
+                                        <button
+                                          key={type}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            onItemUpdate(item.id, { itemType: type });
+                                          }}
+                                          className={`px-3 py-1 text-[12px] rounded-full transition-colors cursor-pointer font-medium ${
+                                            active
+                                              ? 'bg-[#2B2833] text-white'
+                                              : 'bg-[#F1EFF3] text-[#76707F] hover:bg-[#E8E6EC]'
+                                          }`}
+                                        >
+                                          {type}
+                                        </button>
+                                      );
+                                    })}
                                   </div>
                                   {/* AI source + color notes */}
-                                  {item.source === 'AI Assist' && (
-                                    <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-[#E8E6FF] text-[#6B5EF9]">AI</span>
-                                  )}
-                                  {item.colorNotes && (
-                                    <span className="text-[10px] text-[#A8A3AE] italic">{item.colorNotes}</span>
+                                  {(item.source === 'AI Assist' || item.colorNotes) && (
+                                    <div className="flex items-center gap-2">
+                                      {item.source === 'AI Assist' && (
+                                        <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[#E8E6FF] text-[#6B5EF9]">AI</span>
+                                      )}
+                                      {item.colorNotes && (
+                                        <span className="text-[11px] text-[#A8A3AE] italic">{item.colorNotes}</span>
+                                      )}
+                                    </div>
                                   )}
                                 </div>
 
+                                {/* RIGHT: Metal controls + actions */}
                                 {item.category === 'Watch' ? (
-                                  /* ---- WATCH INLINE CONTROLS ---- */
-                                  <div className="flex flex-col gap-1 flex-1 min-w-0">
-                                    <div className="flex items-center gap-1.5">
+                                  <div className="flex flex-col gap-2 flex-shrink-0">
+                                    <div className="flex items-center gap-2">
                                       <Select value={item.watchMaterial || 'Stainless Steel'} onValueChange={(value) => onItemUpdate(item.id, { watchMaterial: value })}>
-                                        <SelectTrigger className="w-[110px] h-6 text-[11px] bg-white/80 border border-black/[0.06] rounded-[8px] hover:bg-white transition-colors">
+                                        <SelectTrigger className="w-[120px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
                                           <SelectValue placeholder="Material" />
                                         </SelectTrigger>
-                                        <SelectContent className="rounded-[12px] max-h-[250px] bg-white/95 backdrop-blur-xl border-white/60 shadow-2xl">
+                                        <SelectContent className="rounded-[12px] max-h-[250px] bg-white border-black/[0.06] shadow-xl">
                                           {watchMaterials.map(m => (
-                                            <SelectItem key={m} value={m} className="text-[12px]">{m}</SelectItem>
+                                            <SelectItem key={m} value={m} className="text-[13px]">{m}</SelectItem>
                                           ))}
                                         </SelectContent>
                                       </Select>
@@ -359,23 +362,40 @@ export function TakeInBalanced({
                                           onItemUpdate(item.id, { watchOffer: numValue, watchOfferRaw: undefined, payoutAmount: numValue });
                                         }}
                                         placeholder="Offer $"
-                                        className="w-20 h-6 text-[11px] bg-white/80 border border-black/[0.06] rounded-[8px] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        className="w-24 h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px] text-right tabular-nums"
                                         onClick={(e) => e.stopPropagation()}
                                       />
 
-                                      <span className="text-[11px] font-medium text-[#4ADB8A] min-w-[45px] text-right tabular-nums">
+                                      <div className="h-10 px-3 flex items-center justify-end min-w-[80px] rounded-[10px] bg-[#E6FBF1] text-[13px] font-semibold text-[#0FB37A] tabular-nums">
                                         ${(item.payoutAmount || 0).toFixed(2)}
-                                      </span>
+                                      </div>
+
+                                      <button
+                                        onClick={(e) => { e.stopPropagation(); toggleAdvanced(item.id); }}
+                                        className="h-10 px-4 flex items-center gap-1 rounded-[10px] bg-[#F1EFF3] text-[#76707F] hover:bg-[#E8E6EC] text-[13px] font-medium transition-colors"
+                                      >
+                                        <ChevronRight className={`h-3.5 w-3.5 transition-transform ${expandedAdvanced.has(item.id) ? 'rotate-90' : ''}`} />
+                                        <span>Specs</span>
+                                      </button>
+
+                                      {store.canDeleteItems !== false && (
+                                        <button
+                                          onClick={(e) => { e.stopPropagation(); onItemRemove(item.id); }}
+                                          className="h-10 w-10 flex items-center justify-center rounded-[10px] text-[#A8A3AE] hover:text-[#F87171] hover:bg-[#F87171]/[0.08] transition-colors"
+                                        >
+                                          <X className="h-4 w-4" />
+                                        </button>
+                                      )}
                                     </div>
 
                                     {/* Precious metal weight row if applicable */}
                                     {isWatchPreciousMaterial(item.watchMaterial || '') && (item.metals || []).map((metal: any) => (
-                                      <div key={metal.id} className="flex items-center gap-1.5">
+                                      <div key={metal.id} className="flex items-center gap-2 justify-end">
                                         <Select value={metal.karat?.toString()} onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}>
-                                          <SelectTrigger className="w-14 h-6 text-[11px] bg-white/80 border border-black/[0.06] rounded-[8px]">
+                                          <SelectTrigger className="w-[72px] h-9 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
                                             <SelectValue />
                                           </SelectTrigger>
-                                          <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
+                                          <SelectContent className="rounded-[12px] bg-white border-black/[0.06] shadow-xl">
                                             <SelectItem value="9">9K</SelectItem>
                                             <SelectItem value="10">10K</SelectItem>
                                             <SelectItem value="14">14K</SelectItem>
@@ -396,152 +416,122 @@ export function TakeInBalanced({
                                           }}
                                           onBlur={(e) => updateMetal(item.id, metal.id, { weight: parseFloat(e.target.value) || 0, weightRaw: undefined })}
                                           placeholder="0.00"
-                                          className="w-16 h-6 text-[11px] bg-white/80 border border-black/[0.06] rounded-[8px]"
+                                          className="w-20 h-9 text-[13px] bg-white border border-black/[0.06] rounded-[10px] text-right tabular-nums"
                                           onClick={(e) => e.stopPropagation()}
                                         />
-                                        <span className="text-[10px] text-[#A8A3AE]">g</span>
+                                        <span className="text-[12px] text-[#A8A3AE]">g</span>
                                       </div>
                                     ))}
                                   </div>
                                 ) : (
                                   /* ---- JEWELRY / DEFAULT INLINE CONTROLS ---- */
-                                  <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-                                  {(item.metals || []).map((metal: any) => (
-                                    <div key={metal.id} className="flex items-center gap-1.5">
-                                      <Select value={metal.type} onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}>
-                                        <SelectTrigger className="w-[72px] h-6 text-[11px] bg-white/80 border border-black/[0.06] rounded-[8px] hover:bg-white transition-colors">
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
-                                          <SelectItem value="Gold">Gold</SelectItem>
-                                          <SelectItem value="Silver">Silver</SelectItem>
-                                          <SelectItem value="Platinum">Platinum</SelectItem>
-                                          <SelectItem value="Palladium">Palladium</SelectItem>
-                                        </SelectContent>
-                                      </Select>
+                                  <div className="flex flex-col gap-2 flex-shrink-0">
+                                    {(item.metals || []).map((metal: any, mIdx: number) => (
+                                      <div key={metal.id} className="flex items-center gap-2">
+                                        <Select value={metal.type} onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}>
+                                          <SelectTrigger className="w-[100px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent className="rounded-[12px] bg-white border-black/[0.06] shadow-xl">
+                                            <SelectItem value="Gold">Gold</SelectItem>
+                                            <SelectItem value="Silver">Silver</SelectItem>
+                                            <SelectItem value="Platinum">Platinum</SelectItem>
+                                            <SelectItem value="Palladium">Palladium</SelectItem>
+                                          </SelectContent>
+                                        </Select>
 
-                                      <Select value={metal.karat?.toString()} onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}>
-                                        <SelectTrigger className="w-14 h-6 text-[11px] bg-white/80 border border-black/[0.06] rounded-[8px]">
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
-                                          <SelectItem value="9">9K</SelectItem>
-                                          <SelectItem value="10">10K</SelectItem>
-                                          <SelectItem value="14">14K</SelectItem>
-                                          <SelectItem value="18">18K</SelectItem>
-                                          <SelectItem value="22">22K</SelectItem>
-                                          <SelectItem value="24">24K</SelectItem>
-                                        </SelectContent>
-                                      </Select>
+                                        <Select value={metal.karat?.toString()} onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}>
+                                          <SelectTrigger className="w-[72px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent className="rounded-[12px] bg-white border-black/[0.06] shadow-xl">
+                                            <SelectItem value="9">9K</SelectItem>
+                                            <SelectItem value="10">10K</SelectItem>
+                                            <SelectItem value="14">14K</SelectItem>
+                                            <SelectItem value="18">18K</SelectItem>
+                                            <SelectItem value="22">22K</SelectItem>
+                                            <SelectItem value="24">24K</SelectItem>
+                                          </SelectContent>
+                                        </Select>
 
-                                      <Input 
-                                        ref={(el) => weightInputRefs.current[`${item.id}_${metal.id}`] = el}
-                                        type="text"
-                                        inputMode="decimal"
-                                        value={metal.weightRaw ?? (metal.weight || '')} 
-                                        onChange={(e) => {
-                                          const value = e.target.value;
-                                          if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
-                                            const numValue = value === '' ? 0 : parseFloat(value) || 0;
-                                            updateMetal(item.id, metal.id, { weight: numValue, weightRaw: value });
-                                          }
-                                        }}
-                                        onBlur={(e) => {
-                                          const numValue = parseFloat(e.target.value) || 0;
-                                          updateMetal(item.id, metal.id, { weight: numValue, weightRaw: undefined });
-                                        }}
-                                        onKeyDown={(e) => handleKeyPress(e, item.id, metal.id)}
-                                        placeholder="0.00"
-                                        className="w-16 h-6 text-[11px] bg-white/80 border border-black/[0.06] rounded-[8px] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                        style={{ MozAppearance: 'textfield' as any }}
-                                        onClick={(e) => e.stopPropagation()}
-                                      />
-                                      <span className="text-[10px] text-[#A8A3AE]">g</span>
-
-                                      {!store.hidePayout && (
-                                        <>
+                                        <div className="flex items-center gap-1.5">
                                           <Input
+                                            ref={(el) => weightInputRefs.current[`${item.id}_${metal.id}`] = el}
                                             type="text"
-                                            value={metal.payoutPercentage ?? 75}
+                                            inputMode="decimal"
+                                            value={metal.weightRaw ?? (metal.weight || '')}
                                             onChange={(e) => {
                                               const value = e.target.value;
-                                              if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                                                const numValue = value === '' ? 75 : Math.min(100, Math.max(0, parseFloat(value) || 75));
-                                                updateMetal(item.id, metal.id, { payoutPercentage: numValue });
+                                              if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+                                                const numValue = value === '' ? 0 : parseFloat(value) || 0;
+                                                updateMetal(item.id, metal.id, { weight: numValue, weightRaw: value });
                                               }
                                             }}
-                                            placeholder="75"
-                                            className="w-10 h-6 text-[11px] bg-white/80 border border-black/[0.06] rounded-[8px] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                            onBlur={(e) => {
+                                              const numValue = parseFloat(e.target.value) || 0;
+                                              updateMetal(item.id, metal.id, { weight: numValue, weightRaw: undefined });
+                                            }}
+                                            onKeyDown={(e) => handleKeyPress(e, item.id, metal.id)}
+                                            placeholder="0.00"
+                                            className="w-20 h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px] text-right tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                             style={{ MozAppearance: 'textfield' as any }}
                                             onClick={(e) => e.stopPropagation()}
                                           />
-                                          <span className="text-[10px] text-[#A8A3AE]">%</span>
-                                        </>
-                                      )}
+                                          <span className="text-[12px] text-[#A8A3AE]">g</span>
+                                        </div>
 
-                                      <span className="text-[11px] font-medium text-[#4ADB8A] min-w-[45px] text-right tabular-nums">
-                                        ${(metal.payoutAmount || 0).toFixed(2)}
-                                      </span>
+                                        <div className="h-10 px-3 flex items-center justify-end min-w-[80px] rounded-[10px] bg-[#E6FBF1] text-[13px] font-semibold text-[#0FB37A] tabular-nums">
+                                          ${(metal.payoutAmount || 0).toFixed(2)}
+                                        </div>
 
-                                      {(item.metals || []).length > 1 && (
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            const updatedMetals = (item.metals || []).filter((m: any) => m.id !== metal.id);
-                                            const totalMarketValue = updatedMetals.reduce((sum: number, m: any) => sum + (m.marketValue || 0), 0);
-                                            const totalPayoutAmount = updatedMetals.reduce((sum: number, m: any) => sum + (m.payoutAmount || 0), 0);
-                                            onItemUpdate(item.id, { metals: updatedMetals, marketValue: totalMarketValue, payoutAmount: totalPayoutAmount });
-                                          }}
-                                          className="h-5 w-5 p-0 hover:text-[#F87171] rounded-[6px]"
-                                        >
-                                          <X className="h-2.5 w-2.5" />
-                                        </Button>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
+                                        {mIdx === 0 ? (
+                                          <button
+                                            onClick={(e) => { e.stopPropagation(); addMetal(item.id); }}
+                                            className="h-10 w-10 flex items-center justify-center rounded-[10px] bg-white border border-black/[0.06] text-[#6B5EF9] hover:bg-[#6B5EF9]/5 hover:border-[#6B5EF9]/30 transition-colors"
+                                            title="Add metal"
+                                          >
+                                            <Plus className="h-4 w-4" />
+                                          </button>
+                                        ) : (
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              const updatedMetals = (item.metals || []).filter((m: any) => m.id !== metal.id);
+                                              const totalMarketValue = updatedMetals.reduce((sum: number, m: any) => sum + (m.marketValue || 0), 0);
+                                              const totalPayoutAmount = updatedMetals.reduce((sum: number, m: any) => sum + (m.payoutAmount || 0), 0);
+                                              onItemUpdate(item.id, { metals: updatedMetals, marketValue: totalMarketValue, payoutAmount: totalPayoutAmount });
+                                            }}
+                                            className="h-10 w-10 flex items-center justify-center rounded-[10px] text-[#A8A3AE] hover:text-[#F87171] hover:bg-[#F87171]/[0.08] transition-colors"
+                                          >
+                                            <X className="h-4 w-4" />
+                                          </button>
+                                        )}
+
+                                        {/* Specs + Delete only on first row */}
+                                        {mIdx === 0 && (
+                                          <>
+                                            <button
+                                              onClick={(e) => { e.stopPropagation(); toggleAdvanced(item.id); }}
+                                              className="h-10 px-4 flex items-center gap-1 rounded-[10px] bg-[#F1EFF3] text-[#76707F] hover:bg-[#E8E6EC] text-[13px] font-medium transition-colors"
+                                            >
+                                              <ChevronRight className={`h-3.5 w-3.5 transition-transform ${expandedAdvanced.has(item.id) ? 'rotate-90' : ''}`} />
+                                              <span>Specs</span>
+                                            </button>
+
+                                            {store.canDeleteItems !== false && (
+                                              <button
+                                                onClick={(e) => { e.stopPropagation(); onItemRemove(item.id); }}
+                                                className="h-10 w-10 flex items-center justify-center rounded-[10px] text-[#A8A3AE] hover:text-[#F87171] hover:bg-[#F87171]/[0.08] transition-colors"
+                                              >
+                                                <X className="h-4 w-4" />
+                                              </button>
+                                            )}
+                                          </>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
                                 )}
-
-                                <div className="flex items-center gap-2 flex-shrink-0 mt-0.5">
-                                  {item.category !== 'Watch' && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      addMetal(item.id);
-                                    }}
-                                    className="h-5 px-1.5 text-[10px] text-[#6B5EF9] hover:bg-[#6B5EF9]/5 rounded-[6px] font-medium"
-                                  >
-                                    <Plus className="h-2.5 w-2.5 mr-0.5" />
-                                    Metal
-                                  </Button>
-                                  )}
-                                  <div className="text-[12px] font-semibold text-[#4ADB8A] min-w-[55px] text-right tabular-nums">
-                                    ${(item.payoutAmount || 0).toFixed(2)}
-                                  </div>
-
-                                  <div className="flex items-center gap-0.5 text-[11px] text-[#76707F] px-2 py-0.5 rounded-[6px] hover:bg-black/[0.04] transition-colors cursor-pointer">
-                                    <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${expandedAdvanced.has(item.id) ? 'rotate-90' : ''}`} />
-                                    <span>Specs</span>
-                                  </div>
-
-                                  {store.canDeleteItems !== false && (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        onItemRemove(item.id);
-                                      }}
-                                      className="h-5 w-5 p-0 hover:bg-[#F87171]/10 hover:text-[#F87171] rounded-[6px]"
-                                    >
-                                      <X className="h-3 w-3" />
-                                    </Button>
-                                  )}
-                                </div>
                               </div>
 
                              <Collapsible 
