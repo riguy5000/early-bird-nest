@@ -235,45 +235,36 @@ export function TakeInBalanced({
               <div className="h-full overflow-auto px-6 py-5">
                 <div className="space-y-3">
                   {Object.entries(itemsByCategory).map(([category, categoryItems]) => (
-                    <div key={category} className="glass-card overflow-hidden">
+                    <div key={category} className="bg-[#F5F4F7]/60 rounded-[20px] border border-black/[0.04] overflow-hidden">
                       {/* Category Header */}
-                      <div className="px-5 py-4 border-b border-black/[0.04]">
+                      <div className="px-6 pt-5 pb-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2.5">
                             <div className="w-7 h-7 rounded-[8px] icon-container flex items-center justify-center">
-                              {React.createElement(categoryIcons[category as keyof typeof categoryIcons] || Gem, { 
-                                className: "h-3.5 w-3.5" 
+                              {React.createElement(categoryIcons[category as keyof typeof categoryIcons] || Gem, {
+                                className: "h-3.5 w-3.5"
                               })}
                             </div>
-                            <div className="flex flex-col">
-                              <div className="flex items-center gap-2">
-                                <h3 className="text-[14px] font-semibold text-[#2B2833]">{category}</h3>
-                                <span className="text-[11px] text-[#76707F] bg-black/[0.05] px-1.5 py-0.5 rounded-full">
-                                  {(categoryItems as any[]).length}
-                                </span>
-                              </div>
-                              {(categoryItems as any[]).length > 0 && getTypeBreakdown(categoryItems as any[]) && (
-                                <div className="text-[11px] text-[#A8A3AE]">
-                                  {getTypeBreakdown(categoryItems as any[])}
-                                </div>
-                              )}
-                            </div>
+                            <h3 className="text-[17px] font-semibold text-[#2B2833] tracking-tight">{category}</h3>
+                            <span className="text-[13px] text-[#A8A3AE]">
+                              ({(categoryItems as any[]).length} {(categoryItems as any[]).length === 1 ? 'item' : 'items'})
+                            </span>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <div className="text-right">
-                              <div className="text-[10px] text-[#A8A3AE] uppercase tracking-wider">Total</div>
-                              <div className="text-[15px] font-semibold text-[#2B2833] tabular-nums">
+                          <div className="flex items-center gap-5">
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-[13px] text-[#A8A3AE]">Section Total</span>
+                              <span className="text-[18px] font-bold text-[#2B2833] tabular-nums">
                                 ${(categoryItems as any[]).reduce((s: number, i: any) => s + (i.payoutAmount || 0), 0).toFixed(2)}
-                              </div>
+                              </span>
                             </div>
                             <Button
                               onClick={() => addItemByCategory(category)}
                               size="sm"
                               variant="ghost"
-                              className="h-7 px-2.5 text-[12px] text-[#6B5EF9] hover:bg-[#6B5EF9]/5 rounded-[8px] font-medium"
+                              className="h-9 px-4 text-[13px] text-[#6B5EF9] bg-white border border-[#6B5EF9]/25 hover:bg-[#6B5EF9]/5 hover:border-[#6B5EF9]/40 rounded-[10px] font-medium shadow-sm"
                             >
-                              <Plus className="h-3 w-3 mr-1" />
-                              Add
+                              <Plus className="h-3.5 w-3.5 mr-1" />
+                              Add Item
                             </Button>
                           </div>
                         </div>
