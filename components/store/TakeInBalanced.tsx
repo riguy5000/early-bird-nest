@@ -267,7 +267,7 @@ export function TakeInBalanced({
                                 className: "h-3.5 w-3.5"
                               })}
                             </div>
-                            <h3 className="text-[17px] font-semibold text-[#2B2833] tracking-tight">{category}</h3>
+                            <h3 className="text-[17px] font-semibold text-[#2B2833] tracking-tight">{categoryLabels[category] || category}</h3>
                             <span className="text-[13px] text-[#A8A3AE]">
                               ({(categoryItems as any[]).length} {(categoryItems as any[]).length === 1 ? 'item' : 'items'})
                             </span>
