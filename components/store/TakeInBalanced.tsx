@@ -157,32 +157,46 @@ export function TakeInBalanced({
   const avgPayout = totalMarket > 0 ? (totalPayout / totalMarket * 100) : 0;
   const profit = totalMarket - totalPayout;
 
-  const categoryIcons = {
+  const categoryIcons: Record<string, any> = {
     Jewelry: Gem,
     Watch: Watch,
     Bullion: Coins,
     Stones: Sparkles,
     Silverware: Utensils,
+    LooseItems: Package,
+  };
+
+  const categoryLabels: Record<string, string> = {
+    Jewelry: 'Jewelry',
+    Watch: 'Watch',
+    Bullion: 'Bullion / Coins',
+    Stones: 'Loose Stones',
+    Silverware: 'Silverware',
+    LooseItems: 'Loose Items',
   };
 
   // categoryColors removed — category header band uses static design-system classes
-  // (bg-white/50 border-b border-black/[0.04] with icon-container tiles)
 
-  const itemTypesByCategory = {
-    Jewelry: ['Ring', 'Pendant', 'Earrings', 'Bracelet', 'Necklace', 'Chain', 'Charm'],
-    Watch: ['Wristwatch', 'Pocket Watch', 'Clock', 'Other Timepiece'],
-    Bullion: ['Coin', 'Bar', 'Round'],
-    Stones: ['Diamond', 'Ruby', 'Sapphire', 'Emerald', 'Other'],
-    Silverware: ['Spoon', 'Fork', 'Knife', 'Serving Piece', 'Decorative']
+  const itemTypesByCategory: Record<string, string[]> = {
+    Jewelry: ['Ring', 'Pendant', 'Earrings', 'Bracelet', 'Necklace', 'Chain', 'Brooch / Pin', 'Charm', 'Anklet', 'Cufflinks', 'Tie Clip', 'Religious Item', 'Other Jewelry'],
+    Watch: ['Wristwatch', 'Pocket Watch', 'Clock', 'Other Timepiece', 'Watch Head Only', 'Watch Parts / For Parts'],
+    Bullion: ['Bullion Bar', 'Bullion Coin', 'Round / Medallion', 'Numismatic / Collectible Coin', 'Silver Coin Lot', 'Gold Coin Lot', 'Platinum / Palladium Bullion', 'Other Bullion'],
+    Stones: ['Diamond', 'Colored Stone', 'Melee Parcel', 'Certified Stone', 'Matching Pair', 'Stone Lot', 'Other Loose Stone'],
+    Silverware: ['Flatware', 'Hollowware', 'Tea / Coffee Set', 'Serving Piece', 'Tray / Plate', 'Candlestick', 'Trophy / Award', 'Decorative Object', 'Mixed Silver Lot', 'Other Silver Object'],
+    LooseItems: ['Broken Jewelry Lot', 'Mixed Precious Metal Lot', 'Dental Gold', 'Findings / Components', 'Unmatched Earrings', 'Scrap Chain Lot', 'Watch Scrap / Parts', 'Unknown Precious Item', 'Mixed Lot'],
   };
 
-  const watchMaterials = [
-    'Stainless Steel', 'Gold', 'Platinum', 'Silver', 'Titanium', 
-    'Base Metal', 'Two-Tone', 'Ceramic', 'Carbon', 'Gold Plated', 
-    'Mixed Materials', 'Other'
-  ];
-  const preciousWatchMaterials = ['Gold', 'Platinum', 'Silver'];
-  const isWatchPreciousMaterial = (material: string) => preciousWatchMaterials.includes(material);
+  const silverTypes = ['Sterling (.925)', 'Coin Silver', '800 Silver', '830 Silver', '835 Silver', '900 Silver', '950 Silver', 'Silver Plate', 'Weighted Sterling', 'Unknown'];
+  const bullionPurities = ['.999 Fine', '.9999 Fine', '.9995 Fine', '24K', '22K', '21K', '18K', '14K', '90% Silver', '40% Silver'];
+  const bullionUnits = ['oz', 'g', 'dwt', 'kg', 'face value'];
+
+  // Helper: update an arbitrary spec field on an item (stored in item.specs jsonb)
+  const updateSpec = (itemId: string, key: string, value: any) => {
+    const item = items.find(i => i.id === itemId);
+    if (!item) return;
+    onItemUpdate(itemId, { specs: { ...(item.specs || {}), [key]: value } });
+  };
+  const getSpec = (item: any, key: string, fallback: any = '') => (item.specs && item.specs[key] !== undefined ? item.specs[key] : fallback);
 
   const itemsByCategory = items.reduce((acc, item) => {
     const category = item.category || 'Jewelry';
