@@ -198,6 +198,14 @@ export function TakeInBalanced({
   };
   const getSpec = (item: any, key: string, fallback: any = '') => (item.specs && item.specs[key] !== undefined ? item.specs[key] : fallback);
 
+  const watchMaterials = [
+    'Stainless Steel', 'Gold', 'Platinum', 'Silver', 'Titanium',
+    'Base Metal', 'Two-Tone', 'Ceramic', 'Carbon', 'Gold Plated',
+    'Mixed Materials', 'Other'
+  ];
+  const preciousWatchMaterials = ['Gold', 'Platinum', 'Silver'];
+  const isWatchPreciousMaterial = (material: string) => preciousWatchMaterials.includes(material);
+
   const itemsByCategory = items.reduce((acc, item) => {
     const category = item.category || 'Jewelry';
     if (!acc[category]) acc[category] = [];
