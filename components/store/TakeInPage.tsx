@@ -23,12 +23,13 @@ import {
 
 interface Item {
   id: string;
-  category: 'Jewelry' | 'Watch' | 'Bullion' | 'Stones' | 'Silverware';
+  category: 'Jewelry' | 'Watch' | 'Bullion' | 'Stones' | 'Silverware' | 'LooseItems';
   subType?: string;
   itemType?: string;
   metals: Metal[];
   stones: Stone[];
   watchInfo?: WatchInfo;
+  specs?: Record<string, any>;
   marketValue: number;
   payoutPercentage: number;
   payoutAmount: number;
@@ -284,7 +285,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
     return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
   })();
 
-  const categories: Item['category'][] = ['Jewelry', 'Watch', 'Bullion', 'Stones', 'Loose Items' as any];
+  const categories: Item['category'][] = ['Jewelry', 'Watch', 'Bullion', 'Stones', 'Silverware', 'LooseItems'];
 
   return (
     /* Full-viewport take-in shell — transparent so global app gradient shows through */
@@ -357,26 +358,29 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
       <div className="flex-shrink-0 px-6 py-4 flex items-center justify-between gap-3">
         {/* Category pill tabs */}
         <div className="flex items-center gap-2">
-          {(['Jewelry', 'Watch', 'Bullion', 'Stones', 'Loose Items'] as string[]).map((cat) => {
-            const isActive = items.some(item => item.category === cat);
+          {([
+            { key: 'Jewelry', label: 'Jewelry' },
+            { key: 'Watch', label: 'Watch' },
+            { key: 'Bullion', label: 'Bullion / Coins' },
+            { key: 'Stones', label: 'Loose Stones' },
+            { key: 'Silverware', label: 'Silverware' },
+            { key: 'LooseItems', label: 'Loose Items' },
+          ] as { key: Item['category']; label: string }[]).map(({ key, label }) => {
+            const isActive = items.some(item => item.category === key);
             return (
               <button
-                key={cat}
-                onClick={() => addNewItem(cat as Item['category'])}
+                key={key}
+                onClick={() => addNewItem(key)}
                 className={`px-4 py-2 rounded-[10px] text-[14px] font-medium transition-all ring-2 ring-white/80 ${
                   isActive
                     ? 'bg-[#2B2833] text-white shadow-sm'
                     : 'bg-white text-[#76707F] hover:text-[#2B2833] shadow-sm'
                 }`}
               >
-                {cat}
+                {label}
               </button>
             );
           })}
-
-
-
-
         </div>
 
         {/* AI Assist hint + button */}
