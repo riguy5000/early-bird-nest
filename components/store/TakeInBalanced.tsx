@@ -238,8 +238,8 @@ export function TakeInBalanced({
                   </div>
                   <h3 className="text-[18px] font-semibold text-[#2B2833] mb-2">Ready to Process Items</h3>
                   <p className="text-[14px] text-[#76707F] mb-6">Select a category above to begin adding items for evaluation</p>
-                  <div className="flex justify-center gap-2">
-                    {Object.entries(categoryIcons).slice(0, 3).map(([category, Icon]) => (
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {Object.entries(categoryIcons).map(([category, Icon]) => (
                       <Button
                         key={category}
                         onClick={() => addItemByCategory(category)}
@@ -247,7 +247,7 @@ export function TakeInBalanced({
                         className="flex items-center gap-2 btn-secondary-light"
                       >
                         <Icon className="h-4 w-4" />
-                        {category}
+                        {categoryLabels[category] || category}
                       </Button>
                     ))}
                   </div>
