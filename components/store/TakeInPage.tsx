@@ -7,7 +7,6 @@ import { TakeInBalanced } from './TakeInBalanced';
 import { TakeInSlim } from './TakeInSlim';
 import { CustomerDrawer } from './CustomerDrawer';
 import { MetalPriceTicker } from './MetalPriceTicker';
-import { AIAssistBanner } from './AIAssistBanner';
 import { AICaptureModal } from './AICaptureModal';
 import { toast } from 'sonner';
 import { syncTakeInToInventory } from '../inventory/syncTakeInToInventory';
@@ -18,7 +17,8 @@ import {
   Plus,
   Minus,
   AlertTriangle,
-  CheckCircle2
+  CheckCircle2,
+  X
 } from 'lucide-react';
 
 interface Item {
@@ -379,21 +379,33 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
 
         </div>
 
-        {/* AI Assist */}
+        {/* AI Assist hint + button */}
         {store.enableAiAssist && (
-          <button
-            onClick={handleAIAssist}
-            className="btn-secondary-light flex items-center gap-2 text-[13px]"
-          >
-            <Zap className="h-3.5 w-3.5 text-[#6B5EF9]" />
-            AI Assist
-          </button>
+          <div className="flex items-center gap-2">
+            {showAIAssist && (
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-blue-50 border border-blue-100 rounded-full pl-3 pr-1.5 py-1">
+                <Zap className="h-3 w-3 text-[#6B5EF9]" />
+                <span>Multiple items detected — try <span className="font-medium text-foreground">AI tray capture</span></span>
+                <span className="text-[#6B5EF9]">→</span>
+                <button
+                  onClick={() => setShowAIAssist(false)}
+                  className="h-5 w-5 rounded-full hover:bg-white/60 flex items-center justify-center text-muted-foreground hover:text-foreground"
+                  aria-label="Dismiss"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+            <button
+              onClick={handleAIAssist}
+              className="btn-secondary-light flex items-center gap-2 text-[13px]"
+            >
+              <Zap className="h-3.5 w-3.5 text-[#6B5EF9]" />
+              AI Assist
+            </button>
+          </div>
         )}
       </div>
-
-      {showAIAssist && (
-        <AIAssistBanner onActivate={handleAIAssist} />
-      )}
 
       {/* ── Main scrollable content ── */}
       <div className="flex-1 overflow-hidden min-h-0">
