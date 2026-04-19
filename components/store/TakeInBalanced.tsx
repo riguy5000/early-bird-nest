@@ -376,6 +376,86 @@ export function TakeInBalanced({
                                         </button>
                                       )}
                                     </div>
+                                  ) : item.category === 'Stones' ? (
+                                    /* ---- LOOSE STONES — weight (carats) + offer + specs ---- */
+                                    <div className="flex items-center gap-2 flex-shrink-0">
+                                      <Input
+                                        type="text"
+                                        inputMode="decimal"
+                                        value={getSpec(item, 'caratWeightRaw', getSpec(item, 'caratWeight', ''))}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+                                            updateSpec(item.id, 'caratWeightRaw', value);
+                                            updateSpec(item.id, 'caratWeight', value === '' ? 0 : parseFloat(value) || 0);
+                                          }
+                                        }}
+                                        onBlur={() => updateSpec(item.id, 'caratWeightRaw', undefined)}
+                                        placeholder="ct"
+                                        className="w-20 h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px] text-right tabular-nums"
+                                        onClick={(e) => e.stopPropagation()}
+                                      />
+                                      <span className="text-[12px] text-[#A8A3AE] -ml-1">ct</span>
+
+                                      <Select
+                                        value={getSpec(item, 'shape', '') || ''}
+                                        onValueChange={(v) => updateSpec(item.id, 'shape', v)}
+                                      >
+                                        <SelectTrigger className="w-[110px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
+                                          <SelectValue placeholder="Shape" />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-[12px] bg-white border-black/[0.06] shadow-xl">
+                                          {['Round', 'Princess', 'Oval', 'Cushion', 'Emerald', 'Pear', 'Marquise', 'Radiant', 'Asscher', 'Heart', 'Other'].map(s => (
+                                            <SelectItem key={s} value={s} className="text-[13px]">{s}</SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+
+                                      <Input
+                                        type="text"
+                                        inputMode="decimal"
+                                        value={getSpec(item, 'offerRaw', item.payoutAmount || '')}
+                                        onChange={(e) => {
+                                          const value = e.target.value;
+                                          if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+                                            const numValue = value === '' ? 0 : parseFloat(value) || 0;
+                                            updateSpec(item.id, 'offerRaw', value);
+                                            onItemUpdate(item.id, { payoutAmount: numValue, marketValue: numValue });
+                                          }
+                                        }}
+                                        onBlur={() => updateSpec(item.id, 'offerRaw', undefined)}
+                                        placeholder="Offer $"
+                                        className="w-24 h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px] text-right tabular-nums"
+                                        onClick={(e) => e.stopPropagation()}
+                                      />
+
+                                      <div className="h-10 px-3 flex items-center justify-end min-w-[80px] rounded-[10px] bg-[#E6FBF1] text-[13px] font-semibold text-[#0FB37A] tabular-nums">
+                                        ${(item.payoutAmount || 0).toFixed(2)}
+                                      </div>
+
+                                      {getSpec(item, 'reportNumber') && (
+                                        <span className="h-6 px-2 inline-flex items-center rounded-full bg-[#E8E6FF] text-[10px] font-medium text-[#6B5EF9]" title="Has certification">
+                                          CERT
+                                        </span>
+                                      )}
+
+                                      <button
+                                        onClick={(e) => { e.stopPropagation(); toggleAdvanced(item.id); }}
+                                        className="h-10 px-4 flex items-center gap-1 rounded-[10px] bg-[#F1EFF3] text-[#76707F] hover:bg-[#E8E6EC] text-[13px] font-medium transition-colors"
+                                      >
+                                        <ChevronRight className={`h-3.5 w-3.5 transition-transform ${expandedAdvanced.has(item.id) ? 'rotate-90' : ''}`} />
+                                        <span>Specs</span>
+                                      </button>
+
+                                      {store.canDeleteItems !== false && (
+                                        <button
+                                          onClick={(e) => { e.stopPropagation(); onItemRemove(item.id); }}
+                                          className="h-10 w-10 flex items-center justify-center rounded-[10px] text-[#A8A3AE] hover:text-[#F87171] hover:bg-[#F87171]/[0.08] transition-colors"
+                                        >
+                                          <X className="h-4 w-4" />
+                                        </button>
+                                      )}
+                                    </div>
                                   ) : (
                                     /* ---- JEWELRY / DEFAULT — first metal inline with description ---- */
                                     (() => {
