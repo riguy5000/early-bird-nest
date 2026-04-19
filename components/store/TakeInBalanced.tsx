@@ -806,34 +806,342 @@ export function TakeInBalanced({
                                          </div>
                                        </div>
                                      </>
-                                    ) : (
-                                      /* ---- JEWELRY / DEFAULT SPECS (refined) ---- */
-                                      <>
-                                        {/* Section: Item details */}
-                                        <div>
-                                          <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">Item Details</div>
+                                     ) : (
+                                       /* ---- JEWELRY / DEFAULT SPECS (refined) ---- */
+                                       <>
+                                         {/* ── Subtype pills (full list) — for ALL non-Watch categories ── */}
+                                         <div>
+                                           <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">Subtype</div>
+                                           <div className="flex flex-wrap gap-1.5 mb-1">
+                                             {(itemTypesByCategory[item.category as keyof typeof itemTypesByCategory] || []).map(type => {
+                                               const active = (item.itemType || '').toLowerCase() === type.toLowerCase();
+                                               return (
+                                                 <button
+                                                   key={type}
+                                                   onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { itemType: type, subType: type }); }}
+                                                   className={`px-3 h-8 text-[12px] rounded-[8px] font-medium transition-all ${active ? 'bg-[#2B2833] text-white shadow-sm' : 'bg-white text-[#76707F] border border-black/[0.08] hover:text-[#2B2833] hover:border-black/[0.15]'}`}
+                                                 >
+                                                   {type}
+                                                 </button>
+                                               );
+                                             })}
+                                           </div>
+                                         </div>
 
-                                          {/* Type pills — full width, wraps cleanly */}
-                                          <div className="mb-4">
-                                            <label className="text-[12px] font-medium text-[#76707F] block mb-2">Type</label>
-                                            <div className="flex flex-wrap gap-1.5">
-                                              {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).map(type => {
-                                                const active = (item.itemType || '').toLowerCase() === type.toLowerCase();
-                                                return (
-                                                  <button
-                                                    key={type}
-                                                    onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { itemType: type }); }}
-                                                    className={`px-3 h-8 text-[12px] rounded-[8px] font-medium transition-all ${active ? 'bg-[#2B2833] text-white shadow-sm' : 'bg-white text-[#76707F] border border-black/[0.08] hover:text-[#2B2833] hover:border-black/[0.15]'}`}
-                                                  >
-                                                    {type}
-                                                  </button>
-                                                );
-                                              })}
-                                            </div>
-                                          </div>
+                                         {/* ── Bullion / Coins specifics ── */}
+                                         {item.category === 'Bullion' && (
+                                           <div>
+                                             <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">Bullion / Coin Details</div>
+                                             <div className="grid grid-cols-4 gap-3">
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Purity</label>
+                                                 <Select value={getSpec(item, 'purity', '')} onValueChange={(v) => updateSpec(item.id, 'purity', v)}>
+                                                   <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                                   <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
+                                                     {bullionPurities.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                                                   </SelectContent>
+                                                 </Select>
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Unit</label>
+                                                 <Select value={getSpec(item, 'unit', 'oz')} onValueChange={(v) => updateSpec(item.id, 'unit', v)}>
+                                                   <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue /></SelectTrigger>
+                                                   <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
+                                                     {bullionUnits.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
+                                                   </SelectContent>
+                                                 </Select>
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Quantity</label>
+                                                 <Input type="number" min="1" value={getSpec(item, 'quantity', 1)} onChange={(e) => updateSpec(item.id, 'quantity', parseInt(e.target.value) || 1)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Mint / Refinery</label>
+                                                 <Input value={getSpec(item, 'mint', '')} onChange={(e) => updateSpec(item.id, 'mint', e.target.value)} placeholder="e.g., PAMP, US Mint" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                             </div>
+                                             <div className="grid grid-cols-4 gap-3 mt-3">
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Product Name</label>
+                                                 <Input value={getSpec(item, 'productName', '')} onChange={(e) => updateSpec(item.id, 'productName', e.target.value)} placeholder="e.g., Gold Eagle 1oz" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Serial #</label>
+                                                 <Input value={getSpec(item, 'serial', '')} onChange={(e) => updateSpec(item.id, 'serial', e.target.value)} placeholder="If bar" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Year</label>
+                                                 <Input value={getSpec(item, 'year', '')} onChange={(e) => updateSpec(item.id, 'year', e.target.value)} placeholder="If coin" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Grade</label>
+                                                 <Input value={getSpec(item, 'grade', '')} onChange={(e) => updateSpec(item.id, 'grade', e.target.value)} placeholder="e.g., MS65" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                             </div>
+                                             <div className="flex items-center gap-4 mt-3">
+                                               <label className="flex items-center gap-2 text-[12px] text-[#76707F]">
+                                                 <input type="checkbox" checked={!!getSpec(item, 'assayCard', false)} onChange={(e) => updateSpec(item.id, 'assayCard', e.target.checked)} />
+                                                 Assay card
+                                               </label>
+                                               <label className="flex items-center gap-2 text-[12px] text-[#76707F]">
+                                                 <input type="checkbox" checked={!!getSpec(item, 'slabbed', false)} onChange={(e) => updateSpec(item.id, 'slabbed', e.target.checked)} />
+                                                 Slabbed
+                                               </label>
+                                               <label className="flex items-center gap-2 text-[12px] text-[#76707F]">
+                                                 <input type="checkbox" checked={!!getSpec(item, 'collectiblePremium', false)} onChange={(e) => updateSpec(item.id, 'collectiblePremium', e.target.checked)} />
+                                                 Collectible premium
+                                               </label>
+                                             </div>
+                                           </div>
+                                         )}
 
-                                          {/* Brand · Condition · Size — single 3-col row */}
-                                          <div className="grid grid-cols-3 gap-3">
+                                         {/* ── Loose Stones specifics ── */}
+                                         {item.category === 'Stones' && (
+                                           <div>
+                                             <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">Stone Details</div>
+                                             <div className="grid grid-cols-4 gap-3">
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Stone Type</label>
+                                                 <Input value={getSpec(item, 'stoneType', '')} onChange={(e) => updateSpec(item.id, 'stoneType', e.target.value)} placeholder="e.g., Diamond" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Color</label>
+                                                 <Input value={getSpec(item, 'color', '')} onChange={(e) => updateSpec(item.id, 'color', e.target.value)} placeholder="e.g., G" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Clarity</label>
+                                                 <Input value={getSpec(item, 'clarity', '')} onChange={(e) => updateSpec(item.id, 'clarity', e.target.value)} placeholder="e.g., VS1" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Cut</label>
+                                                 <Input value={getSpec(item, 'cut', '')} onChange={(e) => updateSpec(item.id, 'cut', e.target.value)} placeholder="e.g., Ideal" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                             </div>
+                                             <div className="grid grid-cols-4 gap-3 mt-3">
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Polish</label>
+                                                 <Input value={getSpec(item, 'polish', '')} onChange={(e) => updateSpec(item.id, 'polish', e.target.value)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Symmetry</label>
+                                                 <Input value={getSpec(item, 'symmetry', '')} onChange={(e) => updateSpec(item.id, 'symmetry', e.target.value)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Fluorescence</label>
+                                                 <Input value={getSpec(item, 'fluorescence', '')} onChange={(e) => updateSpec(item.id, 'fluorescence', e.target.value)} placeholder="None / Faint" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Measurements</label>
+                                                 <Input value={getSpec(item, 'measurements', '')} onChange={(e) => updateSpec(item.id, 'measurements', e.target.value)} placeholder="mm × mm × mm" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                             </div>
+                                             <div className="grid grid-cols-4 gap-3 mt-3">
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Lab</label>
+                                                 <Select value={getSpec(item, 'lab', '')} onValueChange={(v) => updateSpec(item.id, 'lab', v)}>
+                                                   <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                                   <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
+                                                     {['GIA', 'IGI', 'AGS', 'EGL', 'GCAL', 'HRD', 'Other', 'None'].map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                                                   </SelectContent>
+                                                 </Select>
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Report #</label>
+                                                 <Input value={getSpec(item, 'reportNumber', '')} onChange={(e) => updateSpec(item.id, 'reportNumber', e.target.value)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Origin</label>
+                                                 <Select value={getSpec(item, 'origin', 'Unknown')} onValueChange={(v) => updateSpec(item.id, 'origin', v)}>
+                                                   <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue /></SelectTrigger>
+                                                   <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
+                                                     {['Natural', 'Lab', 'Unknown'].map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                                                   </SelectContent>
+                                                 </Select>
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Treatment</label>
+                                                 <Input value={getSpec(item, 'treatment', '')} onChange={(e) => updateSpec(item.id, 'treatment', e.target.value)} placeholder="None / Heat / etc." className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                             </div>
+                                             <div className="grid grid-cols-3 gap-3 mt-3">
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Quantity (parcel)</label>
+                                                 <Input type="number" min="1" value={getSpec(item, 'quantity', 1)} onChange={(e) => updateSpec(item.id, 'quantity', parseInt(e.target.value) || 1)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                               <div className="col-span-2 flex items-end gap-4 pb-1">
+                                                 <label className="flex items-center gap-2 text-[12px] text-[#76707F]">
+                                                   <input type="checkbox" checked={!!getSpec(item, 'mixedTypes', false)} onChange={(e) => updateSpec(item.id, 'mixedTypes', e.target.checked)} />
+                                                   Mixed stone types
+                                                 </label>
+                                                 <label className="flex items-center gap-2 text-[12px] text-[#76707F]">
+                                                   <input type="checkbox" checked={getSpec(item, 'includedInOffer', true) !== false} onChange={(e) => updateSpec(item.id, 'includedInOffer', e.target.checked)} />
+                                                   Included in offer
+                                                 </label>
+                                               </div>
+                                             </div>
+                                           </div>
+                                         )}
+
+                                         {/* ── Silverware specifics ── */}
+                                         {item.category === 'Silverware' && (
+                                           <div>
+                                             <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">Silverware Details</div>
+                                             <div className="grid grid-cols-4 gap-3">
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Silver Type</label>
+                                                 <Select value={getSpec(item, 'silverType', 'Sterling (.925)')} onValueChange={(v) => updateSpec(item.id, 'silverType', v)}>
+                                                   <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue /></SelectTrigger>
+                                                   <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
+                                                     {silverTypes.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                                   </SelectContent>
+                                                 </Select>
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Maker</label>
+                                                 <Input value={getSpec(item, 'maker', '')} onChange={(e) => updateSpec(item.id, 'maker', e.target.value)} placeholder="e.g., Gorham" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Pattern</label>
+                                                 <Input value={getSpec(item, 'pattern', '')} onChange={(e) => updateSpec(item.id, 'pattern', e.target.value)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Piece Count</label>
+                                                 <Input type="number" min="1" value={getSpec(item, 'pieceCount', 1)} onChange={(e) => updateSpec(item.id, 'pieceCount', parseInt(e.target.value) || 1)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                             </div>
+                                             <div className="grid grid-cols-3 gap-3 mt-3">
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Markings / Hallmarks</label>
+                                                 <Input value={getSpec(item, 'hallmarks', '')} onChange={(e) => updateSpec(item.id, 'hallmarks', e.target.value)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Gross Weight (g)</label>
+                                                 <Input type="number" step="0.01" value={getSpec(item, 'grossWeight', '')} onChange={(e) => updateSpec(item.id, 'grossWeight', parseFloat(e.target.value) || 0)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Net Silver Weight (g)</label>
+                                                 <Input type="number" step="0.01" value={getSpec(item, 'netWeight', '')} onChange={(e) => updateSpec(item.id, 'netWeight', parseFloat(e.target.value) || 0)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                             </div>
+                                             <div className="flex items-center gap-4 mt-3">
+                                               <label className="flex items-center gap-2 text-[12px] text-[#76707F]">
+                                                 <input type="checkbox" checked={!!getSpec(item, 'weighted', false)} onChange={(e) => updateSpec(item.id, 'weighted', e.target.checked)} />
+                                                 Weighted
+                                               </label>
+                                               <label className="flex items-center gap-2 text-[12px] text-[#76707F]">
+                                                 <input type="checkbox" checked={!!getSpec(item, 'hollowHandle', false)} onChange={(e) => updateSpec(item.id, 'hollowHandle', e.target.checked)} />
+                                                 Hollow handle
+                                               </label>
+                                               <label className="flex items-center gap-2 text-[12px] text-[#76707F]">
+                                                 <input type="checkbox" checked={!!getSpec(item, 'monogram', false)} onChange={(e) => updateSpec(item.id, 'monogram', e.target.checked)} />
+                                                 Monogram
+                                               </label>
+                                             </div>
+                                           </div>
+                                         )}
+
+                                         {/* ── Loose Items / Scrap specifics ── */}
+                                         {item.category === 'LooseItems' && (
+                                           <div>
+                                             <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">Lot Details</div>
+                                             <div className="grid grid-cols-4 gap-3">
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Quantity of Pieces</label>
+                                                 <Input type="number" min="1" value={getSpec(item, 'pieceCount', 1)} onChange={(e) => updateSpec(item.id, 'pieceCount', parseInt(e.target.value) || 1)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Tested By</label>
+                                                 <Select value={getSpec(item, 'testMethod', '')} onValueChange={(v) => updateSpec(item.id, 'testMethod', v)}>
+                                                   <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Method" /></SelectTrigger>
+                                                   <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
+                                                     {['Loop', 'Acid', 'XRF', 'Melt'].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                                                   </SelectContent>
+                                                 </Select>
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Hallmarks</label>
+                                                 <Input value={getSpec(item, 'hallmarks', '')} onChange={(e) => updateSpec(item.id, 'hallmarks', e.target.value)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Description</label>
+                                                 <Input value={getSpec(item, 'description', '')} onChange={(e) => updateSpec(item.id, 'description', e.target.value)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                             </div>
+                                             <div className="flex items-center gap-4 mt-3">
+                                               <label className="flex items-center gap-2 text-[12px] text-[#76707F]">
+                                                 <input type="checkbox" checked={!!getSpec(item, 'mixedMetals', false)} onChange={(e) => updateSpec(item.id, 'mixedMetals', e.target.checked)} />
+                                                 Mixed metals
+                                               </label>
+                                               <label className="flex items-center gap-2 text-[12px] text-[#76707F]">
+                                                 <input type="checkbox" checked={!!getSpec(item, 'hasStones', false)} onChange={(e) => updateSpec(item.id, 'hasStones', e.target.checked)} />
+                                                 Stones present
+                                               </label>
+                                             </div>
+                                           </div>
+                                         )}
+
+                                         {/* ── Existing Jewelry detail block — shown for Jewelry only ── */}
+                                         {item.category === 'Jewelry' && (
+                                         /* Section: Item details */
+                                         <div>
+                                           <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">Item Details</div>
+
+                                           {/* Conditional subtype-specific fields */}
+                                           {item.itemType === 'Ring' && (
+                                             <div className="grid grid-cols-3 gap-3 mb-3">
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Ring Size</label>
+                                                 <Input value={getSpec(item, 'ringSize', '')} onChange={(e) => updateSpec(item.id, 'ringSize', e.target.value)} placeholder="e.g., 7" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                             </div>
+                                           )}
+                                           {(item.itemType === 'Chain' || item.itemType === 'Necklace' || item.itemType === 'Bracelet' || item.itemType === 'Anklet') && (
+                                             <div className="grid grid-cols-3 gap-3 mb-3">
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Length</label>
+                                                 <Input value={getSpec(item, 'length', '')} onChange={(e) => updateSpec(item.id, 'length', e.target.value)} placeholder="e.g., 18in" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                               </div>
+                                             </div>
+                                           )}
+                                           {item.itemType === 'Earrings' && (
+                                             <div className="grid grid-cols-3 gap-3 mb-3">
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Pair / Single</label>
+                                                 <Select value={getSpec(item, 'pairStatus', 'Pair')} onValueChange={(v) => updateSpec(item.id, 'pairStatus', v)}>
+                                                   <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue /></SelectTrigger>
+                                                   <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
+                                                     <SelectItem value="Pair">Pair</SelectItem>
+                                                     <SelectItem value="Single">Single</SelectItem>
+                                                   </SelectContent>
+                                                 </Select>
+                                               </div>
+                                             </div>
+                                           )}
+                                           <div className="grid grid-cols-3 gap-3">
+                                             <div>
+                                               <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Hallmark / Stamp</label>
+                                               <Input value={getSpec(item, 'hallmark', '')} onChange={(e) => updateSpec(item.id, 'hallmark', e.target.value)} placeholder="e.g., 14K, 750" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                             </div>
+                                             <div>
+                                               <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Test Method</label>
+                                               <Select value={getSpec(item, 'testMethod', '')} onValueChange={(v) => updateSpec(item.id, 'testMethod', v)}>
+                                                 <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                                 <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
+                                                   {['Loop', 'Acid', 'XRF', 'Melt'].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                                                 </SelectContent>
+                                               </Select>
+                                             </div>
+                                             <div>
+                                               <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Style / Description</label>
+                                               <Input value={getSpec(item, 'style', '')} onChange={(e) => updateSpec(item.id, 'style', e.target.value)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                             </div>
+                                           </div>
+                                         </div>
+                                         )}
+
+                                         {/* ── Brand / Condition / Size — shown for ALL non-Watch ── */}
+                                         <div>
+                                           <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">General</div>
                                             <div>
                                               <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Brand / Maker</label>
                                               <Input value={item.brand || ''} onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })} placeholder="e.g., Tiffany & Co." className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
