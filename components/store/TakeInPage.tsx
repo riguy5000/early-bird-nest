@@ -7,7 +7,6 @@ import { TakeInBalanced } from './TakeInBalanced';
 import { TakeInSlim } from './TakeInSlim';
 import { CustomerDrawer } from './CustomerDrawer';
 import { MetalPriceTicker } from './MetalPriceTicker';
-import { AIAssistBanner } from './AIAssistBanner';
 import { AICaptureModal } from './AICaptureModal';
 import { toast } from 'sonner';
 import { syncTakeInToInventory } from '../inventory/syncTakeInToInventory';
@@ -18,7 +17,8 @@ import {
   Plus,
   Minus,
   AlertTriangle,
-  CheckCircle2
+  CheckCircle2,
+  X
 } from 'lucide-react';
 
 interface Item {
