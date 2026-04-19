@@ -255,9 +255,11 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
     const newItems: Item[] = [];
     for (const detected of detectedItems) {
       for (let i = 0; i < detected.count; i++) {
-        const category = ['Watch'].includes(detected.type) ? 'Watch'
-          : ['Coin', 'Bar', 'Round'].includes(detected.type) ? 'Bullion'
-          : ['Spoon', 'Fork', 'Knife'].includes(detected.type) ? 'Silverware'
+        const category: Item['category'] = ['Watch', 'Wristwatch', 'Pocket Watch', 'Clock'].includes(detected.type) ? 'Watch'
+          : ['Coin', 'Bar', 'Round', 'Bullion'].includes(detected.type) ? 'Bullion'
+          : ['Spoon', 'Fork', 'Knife', 'Flatware', 'Hollowware'].includes(detected.type) ? 'Silverware'
+          : ['Diamond', 'Ruby', 'Sapphire', 'Emerald', 'Loose Stone'].includes(detected.type) ? 'Stones'
+          : ['Scrap', 'Mixed Lot', 'Broken'].includes(detected.type) ? 'LooseItems'
           : 'Jewelry';
         const photos: string[] = [];
         if (detected.cropUrl) photos.push(detected.cropUrl);
