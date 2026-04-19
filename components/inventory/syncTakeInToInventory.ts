@@ -64,7 +64,9 @@ export async function syncTakeInToInventory(transactionData: {
       processing_status: 'In Stock',
       metals: item.metals || [],
       stones: item.stones || [],
-      watch_info: item.watchInfo || {},
+      // Pack category-specific specs into watch_info jsonb (no migration needed).
+      // For Watch items, preserve existing watchInfo and merge category specs alongside.
+      watch_info: { ...(item.watchInfo || {}), specs: item.specs || {}, itemType: item.itemType || '' },
       test_method: item.testMethod || '',
       weight: (item.metals || []).reduce((s: number, m: any) => s + (parseFloat(m.weight) || 0), 0),
       market_value_at_intake: item.marketValue || 0,
