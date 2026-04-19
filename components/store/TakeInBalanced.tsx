@@ -1142,7 +1142,8 @@ export function TakeInBalanced({
                                          {/* ── Brand / Condition / Size — shown for ALL non-Watch ── */}
                                          <div>
                                            <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">General</div>
-                                            <div>
+                                           <div className="grid grid-cols-3 gap-3">
+                                             <div>
                                               <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Brand / Maker</label>
                                               <Input value={item.brand || ''} onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })} placeholder="e.g., Tiffany & Co." className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
                                             </div>
