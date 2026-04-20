@@ -33,6 +33,7 @@ import {
 import { CustomerSummaryCard } from './CustomerSummaryCard';
 import { useMetalPrices } from '@/hooks/useMetalPrices';
 import { computeMetalRow, roundCurrency } from '@/lib/pricing';
+import { MetalPuritySelect, getDefaultPurityForMetal } from './MetalPuritySelect';
 
 interface TakeInBalancedProps {
   items: any[];
@@ -122,6 +123,10 @@ export function TakeInBalanced({
     const updatedMetals = item.metals.map((m: any) => {
       if (m.id !== metalId) return m;
       const updated = { ...m, ...updates };
+      // If the metal type changed, reset purity to a sensible default for that metal
+      if (updates.type && updates.type !== m.type) {
+        updated.karat = getDefaultPurityForMetal(updates.type);
+      }
       const result = computeMetalRow(
         { type: updated.type, karat: updated.karat, weight: updated.weight, payoutPercentage: updated.payoutPercentage },
         spotPrices,
@@ -519,19 +524,12 @@ export function TakeInBalanced({
                                             </SelectContent>
                                           </Select>
 
-                                          <Select value={firstMetal.karat?.toString()} onValueChange={(value) => updateMetal(item.id, firstMetal.id, { karat: parseInt(value) })}>
-                                            <SelectTrigger className="w-[72px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
-                                              <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent className="rounded-[12px] bg-white border-black/[0.06] shadow-xl">
-                                              <SelectItem value="9">9K</SelectItem>
-                                              <SelectItem value="10">10K</SelectItem>
-                                              <SelectItem value="14">14K</SelectItem>
-                                              <SelectItem value="18">18K</SelectItem>
-                                              <SelectItem value="22">22K</SelectItem>
-                                              <SelectItem value="24">24K</SelectItem>
-                                            </SelectContent>
-                                          </Select>
+                                          <MetalPuritySelect
+                                            metal={firstMetal.type}
+                                            value={firstMetal.karat}
+                                            onChange={(v) => updateMetal(item.id, firstMetal.id, { karat: v })}
+                                            triggerClassName="w-[96px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]"
+                                          />
 
                                           <div className="flex items-center gap-1.5">
                                             <Input
@@ -644,19 +642,12 @@ export function TakeInBalanced({
                                             <SelectItem value="Palladium">Palladium</SelectItem>
                                           </SelectContent>
                                         </Select>
-                                        <Select value={metal.karat?.toString()} onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}>
-                                          <SelectTrigger className="w-[72px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
-                                            <SelectValue />
-                                          </SelectTrigger>
-                                          <SelectContent className="rounded-[12px] bg-white border-black/[0.06] shadow-xl">
-                                            <SelectItem value="9">9K</SelectItem>
-                                            <SelectItem value="10">10K</SelectItem>
-                                            <SelectItem value="14">14K</SelectItem>
-                                            <SelectItem value="18">18K</SelectItem>
-                                            <SelectItem value="22">22K</SelectItem>
-                                            <SelectItem value="24">24K</SelectItem>
-                                          </SelectContent>
-                                        </Select>
+                                        <MetalPuritySelect
+                                          metal={metal.type}
+                                          value={metal.karat}
+                                          onChange={(v) => updateMetal(item.id, metal.id, { karat: v })}
+                                          triggerClassName="w-[96px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]"
+                                        />
                                         <div className="flex items-center gap-1.5">
                                           <Input
                                             ref={(el) => weightInputRefs.current[`${item.id}_${metal.id}`] = el}
@@ -707,19 +698,12 @@ export function TakeInBalanced({
                                   <div className="mt-2 pl-11 space-y-2">
                                     {(item.metals || []).map((metal: any) => (
                                       <div key={metal.id} className="flex items-center gap-2 justify-end">
-                                        <Select value={metal.karat?.toString()} onValueChange={(value) => updateMetal(item.id, metal.id, { karat: parseInt(value) })}>
-                                          <SelectTrigger className="w-[72px] h-9 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
-                                            <SelectValue />
-                                          </SelectTrigger>
-                                          <SelectContent className="rounded-[12px] bg-white border-black/[0.06] shadow-xl">
-                                            <SelectItem value="9">9K</SelectItem>
-                                            <SelectItem value="10">10K</SelectItem>
-                                            <SelectItem value="14">14K</SelectItem>
-                                            <SelectItem value="18">18K</SelectItem>
-                                            <SelectItem value="22">22K</SelectItem>
-                                            <SelectItem value="24">24K</SelectItem>
-                                          </SelectContent>
-                                        </Select>
+                                        <MetalPuritySelect
+                                          metal={metal.type || 'Gold'}
+                                          value={metal.karat}
+                                          onChange={(v) => updateMetal(item.id, metal.id, { karat: v })}
+                                          triggerClassName="w-[96px] h-9 text-[13px] bg-white border border-black/[0.06] rounded-[10px]"
+                                        />
                                         <Input
                                           type="text"
                                           inputMode="decimal"
