@@ -178,8 +178,6 @@ export function TakeInSlim({
                     </Select>
                   </div>
 
-                  {/* Karat */}
-                  <div>
                   {/* Purity (metal-aware) */}
                   <div>
                     <MetalPuritySelect
