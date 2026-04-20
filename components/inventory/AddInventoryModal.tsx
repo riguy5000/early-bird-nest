@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,7 +34,6 @@ export function AddInventoryModal({ open, onClose, storeId, employeeId, onCreate
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Create batch if not derived
       let batchId: string | null = null;
       if (!parentItemId) {
         const { data: batch, error: batchErr } = await supabase.from('inventory_batches').insert({
@@ -86,12 +85,16 @@ export function AddInventoryModal({ open, onClose, storeId, employeeId, onCreate
   };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>{parentItemId ? 'Add Derived Component' : 'Add Inventory Item'}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 mt-2">
+    <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
+      <SheetContent side="right" className="p-0 flex flex-col">
+        <SheetHeader>
+          <SheetTitle>{parentItemId ? 'Add Derived Component' : 'Add Inventory Item'}</SheetTitle>
+          <SheetDescription>
+            {parentItemId ? 'Create a child component from this item.' : 'Manually add a new item to inventory.'}
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-xs">Category</Label>
@@ -171,17 +174,19 @@ export function AddInventoryModal({ open, onClose, storeId, employeeId, onCreate
 
           <div>
             <Label className="text-xs">Notes</Label>
-            <Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} />
+            <Textarea value={notes} onChange={e => setNotes(e.target.value)} rows={3} />
           </div>
+        </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+        <SheetFooter>
+          <div className="flex justify-end gap-2 w-full">
             <Button variant="outline" onClick={onClose}>Cancel</Button>
             <Button onClick={handleSave} disabled={saving}>
               {saving ? 'Saving...' : 'Add Item'}
             </Button>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }

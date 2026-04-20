@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from './ui/sheet';
 import { CustomerForm } from './CustomerForm';
 import { CustomerDetailDrawer } from './CustomerDetailDrawer';
 import { toast } from 'sonner';
@@ -105,21 +105,23 @@ export function CustomerModule({ user }: CustomerModuleProps) {
           </h1>
           <p className="text-[15px] text-[#76707F] mt-0.5">{user?.store?.name || 'Your Store'}</p>
         </div>
-        <Dialog open={showAddCustomer} onOpenChange={setShowAddCustomer}>
-          <DialogTrigger asChild>
+        <Sheet open={showAddCustomer} onOpenChange={setShowAddCustomer}>
+          <SheetTrigger asChild>
             <button className="btn-primary-dark flex items-center gap-2 mt-1">
               <Plus className="w-4 h-4" />
               Add Customer
             </button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto bg-white/90 backdrop-blur-xl rounded-[20px] border border-white/60 shadow-2xl">
-            <DialogHeader>
-              <DialogTitle className="text-[22px] font-semibold text-[#2B2833]">Add New Customer</DialogTitle>
-              <DialogDescription className="text-[14px] text-[#76707F]">Add a new customer to your database.</DialogDescription>
-            </DialogHeader>
-            <CustomerForm onSave={handleAddCustomer} onCancel={() => setShowAddCustomer(false)} />
-          </DialogContent>
-        </Dialog>
+          </SheetTrigger>
+          <SheetContent side="right" className="p-0 flex flex-col">
+            <SheetHeader>
+              <SheetTitle>Add New Customer</SheetTitle>
+              <SheetDescription>Add a new customer to your database.</SheetDescription>
+            </SheetHeader>
+            <div className="flex-1 overflow-y-auto px-6 py-5">
+              <CustomerForm onSave={handleAddCustomer} onCancel={() => setShowAddCustomer(false)} />
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
 
       {/* ── Search — standalone full-width input, no card wrapper ── */}
@@ -240,22 +242,24 @@ export function CustomerModule({ user }: CustomerModuleProps) {
       </div>
 
       {/* ── Edit dialog ── */}
-      <Dialog open={showEditCustomer} onOpenChange={setShowEditCustomer}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto bg-white/90 backdrop-blur-xl rounded-[20px] border border-white/60 shadow-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-[22px] font-semibold text-[#2B2833]">Edit Customer</DialogTitle>
-            <DialogDescription className="text-[14px] text-[#76707F]">Update customer information.</DialogDescription>
-          </DialogHeader>
-          {selectedCustomer && (
-            <CustomerForm
-              customer={selectedCustomer}
-              isEditing={true}
-              onSave={handleEditCustomer}
-              onCancel={() => { setShowEditCustomer(false); setSelectedCustomer(null); }}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      <Sheet open={showEditCustomer} onOpenChange={setShowEditCustomer}>
+        <SheetContent side="right" className="p-0 flex flex-col">
+          <SheetHeader>
+            <SheetTitle>Edit Customer</SheetTitle>
+            <SheetDescription>Update customer information.</SheetDescription>
+          </SheetHeader>
+          <div className="flex-1 overflow-y-auto px-6 py-5">
+            {selectedCustomer && (
+              <CustomerForm
+                customer={selectedCustomer}
+                isEditing={true}
+                onSave={handleEditCustomer}
+                onCancel={() => { setShowEditCustomer(false); setSelectedCustomer(null); }}
+              />
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* ── Detail drawer ── */}
       <CustomerDetailDrawer

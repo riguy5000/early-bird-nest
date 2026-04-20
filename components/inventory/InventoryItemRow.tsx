@@ -4,7 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { MoreHorizontal, Eye, Edit, Scissors, Archive, Gem, Watch, Coins, Diamond } from 'lucide-react';
 import type { InventoryItemRecord } from './types';
 import { DISPOSITIONS } from './types';
-import { formatPurityLabel } from '@/components/store/MetalPuritySelect';
+import { formatPurityLabel } from '../store/MetalPuritySelect';
 
 interface Props {
   item: InventoryItemRecord;
