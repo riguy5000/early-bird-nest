@@ -10,6 +10,7 @@ import { MetalPriceTicker } from './MetalPriceTicker';
 import { AICaptureModal } from './AICaptureModal';
 import { toast } from 'sonner';
 import { syncTakeInToInventory } from '../inventory/syncTakeInToInventory';
+import { buildDemoItems } from './demoTakeInData';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Zap,
@@ -250,6 +251,13 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
 
   const handleAIAssist = useCallback(() => { setShowAICaptureModal(true); }, []);
 
+  const handleLoadDemoData = useCallback(() => {
+    const demoItems = buildDemoItems(store.defaultPayoutPercentage) as unknown as Item[];
+    setItems(prev => [...prev, ...demoItems]);
+    if (demoItems.length > 0) setActiveItemId(demoItems[0].id);
+    toast.success(`Loaded ${demoItems.length} demo items across all categories`);
+  }, [store.defaultPayoutPercentage]);
+
   const handleItemsDetected = useCallback((detectedItems: Array<{ type: string; count: number; notes?: string; color_notes?: string; cropUrl?: string }>, batchPhotoUrlArg: string) => {
     if (batchPhotoUrlArg) setBatchPhotoUrl(batchPhotoUrlArg);
     const newItems: Item[] = [];
@@ -331,6 +339,13 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
                 className="px-4 py-2 text-[14px] font-medium text-[#76707F] hover:text-[#2B2833] transition-colors"
               >
                 Close
+              </button>
+              <button
+                onClick={handleLoadDemoData}
+                className="btn-secondary-light flex items-center gap-2 text-[13px]"
+                title="Seed sample items across every category for testing"
+              >
+                Load Demo Data
               </button>
               <button
                 onClick={handleSaveQuote}
