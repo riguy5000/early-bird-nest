@@ -251,6 +251,13 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
 
   const handleAIAssist = useCallback(() => { setShowAICaptureModal(true); }, []);
 
+  const handleLoadDemoData = useCallback(() => {
+    const demoItems = buildDemoItems(store.defaultPayoutPercentage) as unknown as Item[];
+    setItems(prev => [...prev, ...demoItems]);
+    if (demoItems.length > 0) setActiveItemId(demoItems[0].id);
+    toast.success(`Loaded ${demoItems.length} demo items across all categories`);
+  }, [store.defaultPayoutPercentage]);
+
   const handleItemsDetected = useCallback((detectedItems: Array<{ type: string; count: number; notes?: string; color_notes?: string; cropUrl?: string }>, batchPhotoUrlArg: string) => {
     if (batchPhotoUrlArg) setBatchPhotoUrl(batchPhotoUrlArg);
     const newItems: Item[] = [];
