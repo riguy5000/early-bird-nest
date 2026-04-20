@@ -200,7 +200,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
     if (store.canCompletePurchase === false) errors.push('You do not have permission to complete purchases');
     if (paymentMethod === 'Check' && !checkNumber.trim()) errors.push('Check number is required for check payments');
     // Categories that legitimately may carry no metal weight (priced by carat, lot, piece, etc.)
-    const noWeightExemptCategories = new Set(['Watch', 'Loose Stones', 'Loose Items', 'Bullion / Coins']);
+    const noWeightExemptCategories = new Set(['Watch', 'Stones', 'LooseItems', 'Bullion']);
     const zeroWeightItems = items.filter(item => {
       if (noWeightExemptCategories.has(item.category)) return false;
       const totalWeight = (item.metals || []).reduce((s: number, m: any) => s + (parseFloat(m.weight) || 0), 0);
