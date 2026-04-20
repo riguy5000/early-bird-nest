@@ -94,7 +94,7 @@ export interface InventoryFilters {
   date_to: string;
 }
 
-export const CATEGORIES = ['Jewelry', 'Watch', 'Bullion', 'Stones', 'Silverware', 'Components'];
+export const CATEGORIES = ['Jewelry', 'Watch', 'Bullion', 'Stones', 'Silverware', 'LooseItems', 'Components'];
 export const DISPOSITIONS = ['Undecided', 'Scrap Candidate', 'Showroom Candidate', 'Part-Out Candidate'];
 export const PROCESSING_STATUSES = [
   'In Stock', 'Under Review', 'Tagged', 'Ready for Scrap', 'Sent to Refinery',
