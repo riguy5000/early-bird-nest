@@ -52,6 +52,40 @@ export function getDefaultPurityForMetal(metal: string) {
   return DEFAULT_PURITY_FOR_METAL[metal] ?? 14;
 }
 
+/**
+ * Full, metal-correct purity label (e.g. "14K", "925 Sterling", "950 Platinum").
+ * Use in detail views, inventory tables, drawers.
+ */
+export function formatPurityLabel(metal: string, value: number | string | undefined | null): string {
+  if (value === undefined || value === null || value === '') return '—';
+  const num = Number(value);
+  if (!Number.isFinite(num) || num <= 0) return '—';
+  const opts = PURITY_OPTIONS_BY_METAL[metal];
+  const match = opts?.find(o => o.value === num);
+  if (match) return match.label;
+  // Fallback when value isn't a known preset
+  if (metal === 'Gold') return `${num}K`;
+  if (metal === 'Platinum') return `${num} Platinum`;
+  if (metal === 'Palladium') return `${num} Palladium`;
+  if (metal === 'Silver') return `${num}`;
+  return String(num);
+}
+
+/**
+ * Compact purity label suited for tight rows (e.g. "14K", "925", "950 Pt").
+ * Strips the long " Sterling" / " Fine" suffixes for Silver to keep it tight.
+ */
+export function formatPurityCompact(metal: string, value: number | string | undefined | null): string {
+  if (value === undefined || value === null || value === '') return '—';
+  const num = Number(value);
+  if (!Number.isFinite(num) || num <= 0) return '—';
+  if (metal === 'Gold') return `${num}K`;
+  if (metal === 'Silver') return `${num}`;
+  if (metal === 'Platinum') return `${num} Pt`;
+  if (metal === 'Palladium') return `${num} Pd`;
+  return String(num);
+}
+
 interface MetalPuritySelectProps {
   metal: string;
   value: number | undefined;
@@ -71,11 +105,12 @@ export function MetalPuritySelect({ metal, value, onChange, triggerClassName }: 
   // If current value is not in the options for this metal (e.g., metal just changed),
   // display nothing selected — the parent should reset the value when metal changes.
   const isValid = options.some(o => o.value === Number(current));
+  const compact = isValid ? formatPurityCompact(metal, value) : '';
 
   return (
     <Select value={isValid ? current : undefined} onValueChange={(v) => onChange(parseInt(v, 10))}>
       <SelectTrigger className={triggerClassName || 'w-[88px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]'}>
-        <SelectValue placeholder="—" />
+        <SelectValue placeholder="—">{compact || '—'}</SelectValue>
       </SelectTrigger>
       <SelectContent className="rounded-[12px] bg-white border-black/[0.06] shadow-xl">
         {options.map(opt => (

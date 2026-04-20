@@ -4,6 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { MoreHorizontal, Eye, Edit, Scissors, Archive, Gem, Watch, Coins, Diamond } from 'lucide-react';
 import type { InventoryItemRecord } from './types';
 import { DISPOSITIONS } from './types';
+import { formatPurityLabel } from '@/components/store/MetalPuritySelect';
 
 interface Props {
   item: InventoryItemRecord;
@@ -44,14 +45,23 @@ function fmt(n: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 }
 
-function metalSummary(metals: any): string {
-  if (!metals) return '—';
+function firstMetal(metals: any): { type: string; karat: any } | null {
+  if (!metals) return null;
   const arr = Array.isArray(metals) ? metals : [];
-  if (!arr.length) return '—';
-  const first = arr[0];
-  if (!first) return '—';
-  const karat = String(first.karat || first.type || '');
-  return karat ? `${karat.replace('Gold ', '').replace('k', ' kt')}` : '—';
+  const m = arr[0];
+  if (!m) return null;
+  return { type: String(m.type || m.metal || ''), karat: m.karat };
+}
+
+function metalTypeOnly(metals: any): string {
+  const m = firstMetal(metals);
+  return m?.type || '—';
+}
+
+function purityOnly(metals: any): string {
+  const m = firstMetal(metals);
+  if (!m || !m.type) return '—';
+  return formatPurityLabel(m.type, m.karat);
 }
 
 // ── Category icon + tile color — matches approved screenshot ──
@@ -100,17 +110,24 @@ export function InventoryItemRow({
         {item.id.slice(0, 7)}
       </td>
 
-      {/* ── Description + category sub-label ── */}
+      {/* ── Description + subtype sub-label ── */}
       <td className="px-4 py-4">
         <div className="text-[14px] font-medium text-[#2B2833] leading-tight">
-          {item.description || `${item.category} - ${item.subcategory}`}
+          {item.description || `${item.category}${item.subcategory ? ' - ' + item.subcategory : ''}`}
         </div>
-        <div className="text-[12px] text-[#A8A3AE] mt-0.5">{item.category}</div>
+        <div className="text-[12px] text-[#A8A3AE] mt-0.5">
+          {item.subcategory && item.subcategory !== item.category ? item.subcategory : item.category}
+        </div>
       </td>
 
-      {/* ── Metal karat ── */}
+      {/* ── Metal type only ── */}
       <td className="px-4 py-4 text-[14px] text-[#2B2833] whitespace-nowrap">
-        {metalSummary(item.metals)}
+        {metalTypeOnly(item.metals)}
+      </td>
+
+      {/* ── Karat / Purity ── */}
+      <td className="px-4 py-4 text-[14px] text-[#2B2833] whitespace-nowrap tabular-nums">
+        {purityOnly(item.metals)}
       </td>
 
       {/* ── Department / disposition pill ── */}

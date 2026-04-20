@@ -58,6 +58,7 @@ export function InventoryItemTable({
               <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">ID</th>
               <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Description</th>
               <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Metal</th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Karat / Purity</th>
               <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Department</th>
               <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Status</th>
               <th className="px-4 py-3 text-left text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Location</th>
