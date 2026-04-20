@@ -146,7 +146,9 @@ export function TakeInBalanced({
     onItemUpdate(itemId, { metals: updatedMetals, marketValue: totalMarketValue, payoutAmount: totalPayoutAmount });
   };
 
-  // Recompute all metal rows whenever live spot prices change so offers stay current.
+  // Recompute all metal rows whenever live spot prices change OR new items appear
+  // (e.g. demo data loaded after spotPrices already resolved). Without items.length in
+  // deps, freshly-seeded items keep stale $0 marketValue/payoutAmount.
   useEffect(() => {
     const globalPct = store?.defaultPayoutPercentage ?? 75;
     items.forEach((item: any) => {
@@ -174,7 +176,7 @@ export function TakeInBalanced({
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [spotPrices]);
+  }, [spotPrices, items.length]);
 
   const handleKeyPress = (e: React.KeyboardEvent, itemId: string, metalId: string) => {
     if (e.key === 'Enter' || e.key === 'Tab') {
