@@ -186,7 +186,7 @@ export function StoreSettingsModule({ currentStore, onStoreUpdate, onSettingsSav
 
   const [rateDefaults, setRateDefaults] = useState({
     gold: 78, silver: 75, platinum: 80, palladium: 75,
-    stones: 65, watches: 70, bullion: 85,
+    bullion: 85, silverware: 70, stones: 65,
   });
 
   // ── Customer & Compliance ──

@@ -184,9 +184,9 @@ export function useStoreSettings(storeId: string, employeeId?: string) {
         silver: rd?.silver ?? 75,
         platinum: rd?.platinum ?? 80,
         palladium: rd?.palladium ?? 75,
-        stones: rd?.stones ?? 65,
-        watches: rd?.watches ?? 70,
         bullion: rd?.bullion ?? 85,
+        silverware: rd?.silverware ?? 70,
+        stones: rd?.stones ?? 65,
       },
     };
   }, [settings, resolveVisibility]);
