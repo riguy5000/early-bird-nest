@@ -341,6 +341,13 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
                 Close
               </button>
               <button
+                onClick={handleLoadDemoData}
+                className="btn-secondary-light flex items-center gap-2 text-[13px]"
+                title="Seed sample items across every category for testing"
+              >
+                Load Demo Data
+              </button>
+              <button
                 onClick={handleSaveQuote}
                 className="btn-primary-dark flex items-center gap-2"
               >
