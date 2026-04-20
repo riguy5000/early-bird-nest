@@ -1481,32 +1481,32 @@ export function TakeInBalanced({
                                               e.target.value = '';
                                             }}
                                           />
-                                          <div className="flex gap-2 flex-wrap items-start">
-                                            {(item.photos || []).map((url: string, pi: number) => (
-                                              <div key={pi} className="relative group">
-                                                <img src={url} alt={`Item photo ${pi + 1}`} className="w-16 h-16 rounded-[8px] object-cover border border-black/[0.06]" />
-                                                <button
-                                                  type="button"
-                                                  className="absolute -top-1 -right-1 bg-[#2B2833] text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
-                                                  onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { photos: (item.photos || []).filter((_: string, j: number) => j !== pi) }); }}
-                                                >×</button>
-                                              </div>
-                                            ))}
-                                            <label
-                                              htmlFor={`photo-upload-${item.id}`}
-                                              onClick={(e) => e.stopPropagation()}
-                                              className="border border-dashed border-black/[0.12] rounded-[10px] w-16 h-16 flex flex-col items-center justify-center bg-white hover:bg-black/[0.02] cursor-pointer transition-colors"
-                                            >
-                                              {uploadingPhotos.has(item.id) ? (
-                                                <Loader2 className="h-4 w-4 text-[#76707F] animate-spin" />
-                                              ) : (
-                                                <>
-                                                  <Camera className="h-4 w-4 text-[#76707F]" />
-                                                  <span className="text-[10px] text-[#A8A3AE] mt-0.5">Add</span>
-                                                </>
-                                              )}
-                                            </label>
-                                          </div>
+                                           <div className="flex gap-2 flex-wrap items-start">
+                                             {(item.photos || []).map((url: string, pi: number) => (
+                                               <div key={pi} className="relative group">
+                                                 <img src={url} alt={`Item photo ${pi + 1}`} className="w-20 h-20 rounded-[10px] object-cover border border-black/[0.06]" />
+                                                 <button
+                                                   type="button"
+                                                   className="absolute -top-1 -right-1 bg-[#2B2833] text-white rounded-full w-5 h-5 flex items-center justify-center text-[11px] opacity-0 group-hover:opacity-100 transition-opacity"
+                                                   onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { photos: (item.photos || []).filter((_: string, j: number) => j !== pi) }); }}
+                                                 >×</button>
+                                               </div>
+                                             ))}
+                                             <label
+                                               htmlFor={`photo-upload-${item.id}`}
+                                               onClick={(e) => e.stopPropagation()}
+                                               className="border-2 border-dashed border-[#6B5EF9]/30 rounded-[12px] w-20 h-20 flex flex-col items-center justify-center bg-[#6B5EF9]/[0.04] hover:bg-[#6B5EF9]/[0.08] hover:border-[#6B5EF9]/50 cursor-pointer transition-colors"
+                                             >
+                                               {uploadingPhotos.has(item.id) ? (
+                                                 <Loader2 className="h-6 w-6 text-[#6B5EF9] animate-spin" />
+                                               ) : (
+                                                 <>
+                                                   <Camera className="h-6 w-6 text-[#6B5EF9]" strokeWidth={1.75} />
+                                                   <span className="text-[10px] font-medium text-[#6B5EF9] mt-1">Add Photo</span>
+                                                 </>
+                                               )}
+                                             </label>
+                                           </div>
                                         </div>
                                      </div>
                                    </div>
