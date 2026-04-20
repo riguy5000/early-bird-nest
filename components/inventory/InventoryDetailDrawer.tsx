@@ -116,32 +116,92 @@ export function InventoryDetailDrawer({ item, open, onClose, onPartOut, onArchiv
 
             <div className="border-t border-black/[0.04]" />
 
+            {/* Category-specific specs from Take-In (stored in watch_info.specs) */}
+            {(() => {
+              const wi = item.watch_info || {};
+              const specs = wi.specs || {};
+              const itemType = wi.itemType || '';
+              const hasItemType = !!itemType;
+              const specEntries = Object.entries(specs).filter(([, v]) => v !== '' && v !== null && v !== undefined && !(Array.isArray(v) && v.length === 0));
+              if (!hasItemType && specEntries.length === 0 && !wi.brand && !wi.model) return null;
+              return (
+                <div className="bg-white/60 rounded-[12px] p-4 ring-1 ring-white/50">
+                  <h4 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-2">
+                    {item.category} Details
+                  </h4>
+                  <Field label="Item Type" value={itemType} />
+                  {/* Watch top-level fields (legacy watchInfo) */}
+                  <Field label="Brand" value={wi.brand} />
+                  <Field label="Model" value={wi.model} />
+                  <Field label="Reference #" value={wi.reference} />
+                  <Field label="Serial #" value={wi.serial} />
+                  <Field label="Movement" value={wi.movement} />
+                  <Field label="Dial Color" value={wi.dialColor} />
+                  <Field label="Case Size" value={wi.caseSize} />
+                  <Field label="Band" value={wi.band} />
+                  <Field label="Condition" value={wi.condition} />
+                  {wi.working !== undefined && <Field label="Working" value={wi.working ? 'Yes' : 'No'} />}
+                  {wi.box !== undefined && <Field label="Box" value={wi.box ? 'Yes' : 'No'} />}
+                  {wi.papers !== undefined && <Field label="Papers" value={wi.papers ? 'Yes' : 'No'} />}
+                  {/* All category-specific spec fields */}
+                  {specEntries.map(([k, v]) => {
+                    const label = k.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase()).trim();
+                    const display = typeof v === 'boolean' ? (v ? 'Yes' : 'No') : Array.isArray(v) ? v.join(', ') : String(v);
+                    return <Field key={k} label={label} value={display} />;
+                  })}
+                </div>
+              );
+            })()}
+
             {item.metals?.length > 0 && (
-              <div>
+              <div className="bg-white/60 rounded-[12px] p-4 ring-1 ring-white/50">
                 <h4 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-2">Metals</h4>
                 {item.metals.map((m: any, i: number) => (
-                  <div key={i} className="text-[13px] text-[#2B2833] py-1">
-                    {m.type} {m.karat}K — {m.weight}g
+                  <div key={i} className="py-2 border-b border-black/[0.04] last:border-0">
+                    <div className="text-[13px] font-medium text-[#2B2833]">
+                      {m.type || '—'} {m.karat ? `${m.karat}K` : ''} {m.weight ? `— ${m.weight}g` : ''}
+                    </div>
+                    <div className="text-[12px] text-[#76707F] mt-0.5 space-x-2">
+                      {m.color && <span>Color: {m.color}</span>}
+                      {m.hallmark && <span>Hallmark: {m.hallmark}</span>}
+                      {m.testMethod && <span>Test: {m.testMethod}</span>}
+                      {m.payoutPercentage !== undefined && <span>{m.payoutPercentage}%</span>}
+                      {m.payoutAmount !== undefined && <span>{fmt(m.payoutAmount)}</span>}
+                    </div>
                   </div>
                 ))}
               </div>
             )}
 
             {item.stones?.length > 0 && (
-              <div>
+              <div className="bg-white/60 rounded-[12px] p-4 ring-1 ring-white/50">
                 <h4 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-2">Stones</h4>
                 {item.stones.map((s: any, i: number) => (
-                  <div key={i} className="text-[13px] text-[#2B2833] py-1">
-                    {s.type} {s.color} {s.size ? `${s.size}ct` : ''} {s.labCert || ''}
+                  <div key={i} className="py-2 border-b border-black/[0.04] last:border-0">
+                    <div className="text-[13px] font-medium text-[#2B2833]">
+                      {s.type || 'Stone'} {s.shape ? `· ${s.shape}` : ''} {s.size ? `· ${s.size}ct` : ''} {s.quantity > 1 ? `· qty ${s.quantity}` : ''}
+                    </div>
+                    <div className="text-[12px] text-[#76707F] mt-0.5 space-x-2">
+                      {s.color && <span>Color: {s.color}</span>}
+                      {s.clarity && <span>Clarity: {s.clarity}</span>}
+                      {s.cut && <span>Cut: {s.cut}</span>}
+                      {s.origin && <span>Origin: {s.origin}</span>}
+                      {s.treatment && <span>Treatment: {s.treatment}</span>}
+                      {s.naturalLab && <span>{s.naturalLab}</span>}
+                      {s.measurements && <span>{s.measurements}</span>}
+                      {s.lab && <span>Lab: {s.lab}</span>}
+                      {(s.labCert || s.reportNumber) && <span>Cert #: {s.labCert || s.reportNumber}</span>}
+                      {s.includedInOffer !== undefined && <span>{s.includedInOffer ? 'In offer' : 'Not in offer'}</span>}
+                    </div>
                   </div>
                 ))}
               </div>
             )}
 
             {item.notes && (
-              <div>
+              <div className="bg-white/60 rounded-[12px] p-4 ring-1 ring-white/50">
                 <h4 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-2">Notes</h4>
-                <p className="text-[13px] text-[#76707F] leading-relaxed">{item.notes}</p>
+                <p className="text-[13px] text-[#2B2833] leading-relaxed whitespace-pre-wrap">{item.notes}</p>
               </div>
             )}
 
