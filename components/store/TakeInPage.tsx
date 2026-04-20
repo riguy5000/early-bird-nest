@@ -199,9 +199,14 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
     else if (store.requireIdScan && customer && customer.source !== 'scan' && !store.allowManualEntry) errors.push('A scanned government ID is required — manual entry is not allowed');
     if (store.canCompletePurchase === false) errors.push('You do not have permission to complete purchases');
     if (paymentMethod === 'Check' && !checkNumber.trim()) errors.push('Check number is required for check payments');
+    // Categories that legitimately may carry no metal weight (priced by carat, lot, piece, etc.)
+    const noWeightExemptCategories = new Set(['Watch', 'Stones', 'LooseItems', 'Bullion']);
     const zeroWeightItems = items.filter(item => {
+      if (noWeightExemptCategories.has(item.category)) return false;
       const totalWeight = (item.metals || []).reduce((s: number, m: any) => s + (parseFloat(m.weight) || 0), 0);
-      return totalWeight === 0 && item.category !== 'Watch';
+      // For Silverware allow non-metal-weighted entries when a gross weight spec is present
+      if (item.category === 'Silverware' && (item.specs?.grossWeight || item.specs?.netSilverWeight)) return false;
+      return totalWeight === 0;
     });
     if (zeroWeightItems.length > 0) errors.push(`${zeroWeightItems.length} item(s) have zero weight — add weight before completing`);
     return errors;
