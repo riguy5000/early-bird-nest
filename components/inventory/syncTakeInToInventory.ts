@@ -54,35 +54,38 @@ export async function syncTakeInToInventory(transactionData: {
     const batchId = (batch as any).id;
 
     // Create inventory items
-    const inventoryItems = transactionData.items.map((item: any) => ({
-      store_id: transactionData.storeId,
-      batch_id: batchId,
-      category: item.category || 'Jewelry',
-      subcategory: item.subType || '',
-      description: `${item.category}${item.subType ? ' - ' + item.subType : ''}`,
-      disposition: 'Undecided',
-      processing_status: 'In Stock',
-      metals: item.metals || [],
-      stones: item.stones || [],
-      // Pack category-specific specs into watch_info jsonb (no migration needed).
-      // For Watch items, preserve existing watchInfo and merge category specs alongside.
-      watch_info: { ...(item.watchInfo || {}), specs: item.specs || {}, itemType: item.itemType || '' },
-      test_method: item.testMethod || '',
-      weight: (item.metals || []).reduce((s: number, m: any) => s + (parseFloat(m.weight) || 0), 0),
-      market_value_at_intake: item.marketValue || 0,
-      payout_amount: item.payoutAmount || 0,
-      payout_percentage: item.payoutPercentage || 0,
-      photos: item.photos || [],
-      notes: item.notes || '',
-      source: 'take-in',
-      take_in_item_ref: item.id || '',
-      customer_id: customerId,
-      employee_id: employeeProfileId,
-      location: 'safe',
-      is_scrap_eligible: true,
-      is_part_out_eligible: item.category === 'Jewelry',
-      is_resellable: false,
-    }));
+    const inventoryItems = transactionData.items.map((item: any) => {
+      const subType = item.itemType || item.subType || '';
+      return {
+        store_id: transactionData.storeId,
+        batch_id: batchId,
+        category: item.category || 'Jewelry',
+        subcategory: subType,
+        description: subType ? `${item.category} - ${subType}` : (item.category || 'Item'),
+        disposition: 'Undecided',
+        processing_status: 'In Stock',
+        metals: item.metals || [],
+        stones: item.stones || [],
+        // Pack category-specific specs into watch_info jsonb (no migration needed).
+        // For Watch items, preserve existing watchInfo and merge category specs alongside.
+        watch_info: { ...(item.watchInfo || {}), specs: item.specs || {}, itemType: subType },
+        test_method: item.testMethod || '',
+        weight: (item.metals || []).reduce((s: number, m: any) => s + (parseFloat(m.weight) || 0), 0),
+        market_value_at_intake: item.marketValue || 0,
+        payout_amount: item.payoutAmount || 0,
+        payout_percentage: item.payoutPercentage || 0,
+        photos: item.photos || [],
+        notes: item.notes || '',
+        source: 'take-in',
+        take_in_item_ref: item.id || '',
+        customer_id: customerId,
+        employee_id: employeeProfileId,
+        location: 'safe',
+        is_scrap_eligible: true,
+        is_part_out_eligible: item.category === 'Jewelry',
+        is_resellable: false,
+      };
+    });
 
     const { error: itemsErr } = await supabase.from('inventory_items').insert(inventoryItems as any);
     if (itemsErr) throw itemsErr;
