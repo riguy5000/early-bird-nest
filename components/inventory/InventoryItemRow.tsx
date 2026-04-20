@@ -110,17 +110,24 @@ export function InventoryItemRow({
         {item.id.slice(0, 7)}
       </td>
 
-      {/* ── Description + category sub-label ── */}
+      {/* ── Description + subtype sub-label ── */}
       <td className="px-4 py-4">
         <div className="text-[14px] font-medium text-[#2B2833] leading-tight">
-          {item.description || `${item.category} - ${item.subcategory}`}
+          {item.description || `${item.category}${item.subcategory ? ' - ' + item.subcategory : ''}`}
         </div>
-        <div className="text-[12px] text-[#A8A3AE] mt-0.5">{item.category}</div>
+        <div className="text-[12px] text-[#A8A3AE] mt-0.5">
+          {item.subcategory && item.subcategory !== item.category ? item.subcategory : item.category}
+        </div>
       </td>
 
-      {/* ── Metal karat ── */}
+      {/* ── Metal type only ── */}
       <td className="px-4 py-4 text-[14px] text-[#2B2833] whitespace-nowrap">
-        {metalSummary(item.metals)}
+        {metalTypeOnly(item.metals)}
+      </td>
+
+      {/* ── Karat / Purity ── */}
+      <td className="px-4 py-4 text-[14px] text-[#2B2833] whitespace-nowrap tabular-nums">
+        {purityOnly(item.metals)}
       </td>
 
       {/* ── Department / disposition pill ── */}
