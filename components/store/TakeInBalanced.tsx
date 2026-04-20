@@ -34,6 +34,7 @@ import { CustomerSummaryCard } from './CustomerSummaryCard';
 import { useMetalPrices } from '@/hooks/useMetalPrices';
 import { computeMetalRow, roundCurrency } from '@/lib/pricing';
 import { MetalPuritySelect, getDefaultPurityForMetal } from './MetalPuritySelect';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TakeInBalancedProps {
   items: any[];
@@ -77,6 +78,37 @@ export function TakeInBalanced({
   const { toast } = useToast();
   const spotPrices = useMetalPrices();
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set());
+  const [uploadingPhotos, setUploadingPhotos] = useState<Set<string>>(new Set());
+
+  // Shared photo upload handler — works across ALL categories (Jewelry, Watch, Bullion, Stones, Silverware, LooseItems)
+  const handlePhotoUpload = async (itemId: string, files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setUploadingPhotos(prev => new Set(prev).add(itemId));
+    try {
+      const storeIdForPath = store?.id || 'unknown-store';
+      const uploaded: string[] = [];
+      for (const file of Array.from(files)) {
+        const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+        const path = `${storeIdForPath}/take-in/${itemId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error } = await supabase.storage.from('batch-photos').upload(path, file, { upsert: false, contentType: file.type || 'image/jpeg' });
+        if (error) throw error;
+        const { data: urlData } = supabase.storage.from('batch-photos').getPublicUrl(path);
+        if (urlData?.publicUrl) uploaded.push(urlData.publicUrl);
+      }
+      const current = items.find(i => i.id === itemId);
+      const existing = current?.photos || [];
+      onItemUpdate(itemId, { photos: [...existing, ...uploaded] });
+      toast({ title: `${uploaded.length} photo${uploaded.length > 1 ? 's' : ''} uploaded` });
+    } catch (err: any) {
+      toast({ title: 'Upload failed', description: err?.message || 'Could not upload photo', variant: 'destructive' });
+    } finally {
+      setUploadingPhotos(prev => {
+        const next = new Set(prev);
+        next.delete(itemId);
+        return next;
+      });
+    }
+  };
 
   // Specs panels stay collapsed by default — user opens them explicitly via the Specs chevron.
   const [batchPhotoOpen, setBatchPhotoOpen] = useState(false);
@@ -1109,92 +1141,284 @@ export function TakeInBalanced({
                                            </div>
                                          )}
 
-                                         {/* ── Existing Jewelry detail block — shown for Jewelry only ── */}
-                                         {item.category === 'Jewelry' && (
-                                         /* Section: Item details */
-                                         <div>
-                                           <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">Item Details</div>
-
-                                           {/* Conditional subtype-specific fields */}
-                                           {item.itemType === 'Ring' && (
-                                             <div className="grid grid-cols-3 gap-3 mb-3">
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Ring Size</label>
-                                                 <Input value={getSpec(item, 'ringSize', '')} onChange={(e) => updateSpec(item.id, 'ringSize', e.target.value)} placeholder="e.g., 7" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                               </div>
-                                             </div>
-                                           )}
-                                           {(item.itemType === 'Chain' || item.itemType === 'Necklace' || item.itemType === 'Bracelet' || item.itemType === 'Anklet') && (
-                                             <div className="grid grid-cols-3 gap-3 mb-3">
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Length</label>
-                                                 <Input value={getSpec(item, 'length', '')} onChange={(e) => updateSpec(item.id, 'length', e.target.value)} placeholder="e.g., 18in" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                               </div>
-                                             </div>
-                                           )}
-                                           {item.itemType === 'Earrings' && (
-                                             <div className="grid grid-cols-3 gap-3 mb-3">
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Pair / Single</label>
-                                                 <Select value={getSpec(item, 'pairStatus', 'Pair')} onValueChange={(v) => updateSpec(item.id, 'pairStatus', v)}>
-                                                   <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue /></SelectTrigger>
-                                                   <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
-                                                     <SelectItem value="Pair">Pair</SelectItem>
-                                                     <SelectItem value="Single">Single</SelectItem>
-                                                   </SelectContent>
-                                                 </Select>
-                                               </div>
-                                             </div>
-                                           )}
-                                           <div className="grid grid-cols-3 gap-3">
-                                             <div>
-                                               <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Hallmark / Stamp</label>
-                                               <Input value={getSpec(item, 'hallmark', '')} onChange={(e) => updateSpec(item.id, 'hallmark', e.target.value)} placeholder="e.g., 14K, 750" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                             </div>
-                                             <div>
-                                               <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Test Method</label>
-                                               <Select value={getSpec(item, 'testMethod', '')} onValueChange={(v) => updateSpec(item.id, 'testMethod', v)}>
-                                                 <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
-                                                 <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
-                                                   {['Loop', 'Acid', 'XRF', 'Melt'].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                                                 </SelectContent>
-                                               </Select>
-                                             </div>
-                                             <div>
-                                               <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Style / Description</label>
-                                               <Input value={getSpec(item, 'style', '')} onChange={(e) => updateSpec(item.id, 'style', e.target.value)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                             </div>
-                                           </div>
-                                         </div>
-                                         )}
-
-                                         {/* ── Brand / Condition / Size — shown for ALL non-Watch ── */}
-                                         <div>
-                                           <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">General</div>
-                                           <div className="grid grid-cols-3 gap-3">
-                                             <div>
-                                              <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Brand / Maker</label>
-                                              <Input value={item.brand || ''} onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })} placeholder="e.g., Tiffany & Co." className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                            </div>
-                                            <div>
-                                              <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Condition</label>
-                                              <Select value={item.condition || ''} onValueChange={(value) => onItemUpdate(item.id, { condition: value })}>
-                                                <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
-                                                <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
-                                                  <SelectItem value="New">New</SelectItem>
-                                                  <SelectItem value="Excellent">Excellent</SelectItem>
-                                                  <SelectItem value="Good">Good</SelectItem>
-                                                  <SelectItem value="Fair">Fair</SelectItem>
-                                                  <SelectItem value="Poor">Poor</SelectItem>
-                                                </SelectContent>
-                                              </Select>
-                                            </div>
-                                            <div>
-                                              <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Size</label>
-                                              <Input value={item.size || ''} onChange={(e) => onItemUpdate(item.id, { size: e.target.value })} placeholder="e.g., 7, 18in" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                          {/* ── A. GENERAL — Brand / Condition / Size (all non-Watch categories) ── */}
+                                          <div>
+                                            <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">General</div>
+                                            <div className="grid grid-cols-3 gap-3">
+                                              <div>
+                                                <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Brand / Maker</label>
+                                                <Input value={item.brand || ''} onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })} placeholder="e.g., Tiffany & Co." className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                              </div>
+                                              <div>
+                                                <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Condition</label>
+                                                <Select value={item.condition || ''} onValueChange={(value) => onItemUpdate(item.id, { condition: value })}>
+                                                  <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                                  <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
+                                                    <SelectItem value="New">New</SelectItem>
+                                                    <SelectItem value="Excellent">Excellent</SelectItem>
+                                                    <SelectItem value="Good">Good</SelectItem>
+                                                    <SelectItem value="Fair">Fair</SelectItem>
+                                                    <SelectItem value="Poor">Poor</SelectItem>
+                                                  </SelectContent>
+                                                </Select>
+                                              </div>
+                                              <div>
+                                                <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Size</label>
+                                                <Input
+                                                  value={item.size || ''}
+                                                  onChange={(e) => onItemUpdate(item.id, { size: e.target.value })}
+                                                  placeholder={
+                                                    item.category === 'Jewelry'
+                                                      ? (item.itemType === 'Ring' ? 'e.g., 7'
+                                                          : (item.itemType === 'Chain' || item.itemType === 'Necklace' || item.itemType === 'Bracelet' || item.itemType === 'Anklet') ? 'e.g., 18in'
+                                                          : 'e.g., 12mm, Small, 1.5in')
+                                                      : 'e.g., 7, 18in'
+                                                  }
+                                                  className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"
+                                                />
+                                              </div>
                                             </div>
                                           </div>
-                                        </div>
+
+                                          {/* ── B. HALLMARK / TESTING / DESCRIPTION (Jewelry only) ── */}
+                                          {item.category === 'Jewelry' && (
+                                            <div>
+                                              <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">Hallmark / Testing / Description</div>
+                                              <div className="grid grid-cols-3 gap-3">
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Hallmark / Stamp</label>
+                                                  <Input value={getSpec(item, 'hallmark', '')} onChange={(e) => updateSpec(item.id, 'hallmark', e.target.value)} placeholder="e.g., 14K, 750" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                                </div>
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Test Method</label>
+                                                  <Select value={getSpec(item, 'testMethod', '')} onValueChange={(v) => updateSpec(item.id, 'testMethod', v)}>
+                                                    <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                                    <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
+                                                      {['Loop', 'Acid', 'XRF', 'Melt'].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                                                    </SelectContent>
+                                                  </Select>
+                                                </div>
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Style / Description</label>
+                                                  <Input value={getSpec(item, 'style', '')} onChange={(e) => updateSpec(item.id, 'style', e.target.value)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                                </div>
+                                              </div>
+                                              {item.itemType === 'Earrings' && (
+                                                <div className="grid grid-cols-3 gap-3 mt-3">
+                                                  <div>
+                                                    <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Pair / Single</label>
+                                                    <Select value={getSpec(item, 'pairStatus', 'Pair')} onValueChange={(v) => updateSpec(item.id, 'pairStatus', v)}>
+                                                      <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue /></SelectTrigger>
+                                                      <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
+                                                        <SelectItem value="Pair">Pair</SelectItem>
+                                                        <SelectItem value="Single">Single</SelectItem>
+                                                      </SelectContent>
+                                                    </Select>
+                                                  </div>
+                                                </div>
+                                              )}
+                                            </div>
+                                          )}
+
+                                          {/* ── C. STONES (Jewelry only) — multiple rows ── */}
+                                          {item.category === 'Jewelry' && (
+                                            <div>
+                                              <div className="flex items-center justify-between mb-3">
+                                                <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider">Stones</div>
+                                                <button
+                                                  type="button"
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    const next = [...(item.stones || []), {
+                                                      id: `stone-${Date.now()}`,
+                                                      stoneType: 'Diamond',
+                                                      quantity: 1,
+                                                      shape: '',
+                                                      sizeMm: '',
+                                                      caratWeight: '',
+                                                      origin: 'Unknown',
+                                                      color: '',
+                                                      clarity: '',
+                                                      certNumber: '',
+                                                      includedInOffer: false,
+                                                    }];
+                                                    onItemUpdate(item.id, { stones: next });
+                                                  }}
+                                                  className="text-[12px] font-medium text-[#6B5EF9] hover:text-[#5747E0] flex items-center gap-1"
+                                                >
+                                                  <Plus className="h-3 w-3" /> Add Stone
+                                                </button>
+                                              </div>
+                                              {(item.stones || []).length === 0 ? (
+                                                <div className="border border-dashed border-black/[0.12] rounded-[10px] p-4 text-center bg-white">
+                                                  <span className="text-[12px] text-[#A8A3AE]">No stones added. Click "Add Stone" if this item has stones.</span>
+                                                </div>
+                                              ) : (
+                                                <div className="space-y-2">
+                                                  {(item.stones || []).map((stone: any, si: number) => (
+                                                    <div key={stone.id || si} className="bg-white rounded-[12px] border border-black/[0.06] p-3">
+                                                      <div className="flex items-center justify-between mb-2">
+                                                        <span className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider">Stone {si + 1}</span>
+                                                        <button
+                                                          type="button"
+                                                          onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            const next = (item.stones || []).filter((_: any, j: number) => j !== si);
+                                                            onItemUpdate(item.id, { stones: next });
+                                                          }}
+                                                          className="text-[11px] text-[#F87171] hover:text-[#EF4444] flex items-center gap-1"
+                                                        >
+                                                          <Minus className="h-3 w-3" /> Remove
+                                                        </button>
+                                                      </div>
+                                                      <div className="grid grid-cols-4 gap-2">
+                                                        <div>
+                                                          <label className="text-[11px] font-medium text-[#76707F] block mb-1">Type</label>
+                                                          <Select
+                                                            value={stone.stoneType || 'Diamond'}
+                                                            onValueChange={(v) => {
+                                                              const next = [...(item.stones || [])];
+                                                              next[si] = { ...next[si], stoneType: v };
+                                                              onItemUpdate(item.id, { stones: next });
+                                                            }}
+                                                          >
+                                                            <SelectTrigger className="bg-white h-8 text-[12px] rounded-[8px] border border-black/[0.08]"><SelectValue /></SelectTrigger>
+                                                            <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
+                                                              {['Diamond', 'Sapphire', 'Ruby', 'Emerald', 'Moissanite', 'CZ', 'Pearl', 'Opal', 'Other'].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                                                            </SelectContent>
+                                                          </Select>
+                                                        </div>
+                                                        <div>
+                                                          <label className="text-[11px] font-medium text-[#76707F] block mb-1">Qty</label>
+                                                          <Input
+                                                            type="number"
+                                                            min="1"
+                                                            value={stone.quantity ?? 1}
+                                                            onChange={(e) => {
+                                                              const next = [...(item.stones || [])];
+                                                              next[si] = { ...next[si], quantity: parseInt(e.target.value) || 1 };
+                                                              onItemUpdate(item.id, { stones: next });
+                                                            }}
+                                                            className="bg-white h-8 text-[12px] rounded-[8px] border border-black/[0.08]"
+                                                          />
+                                                        </div>
+                                                        <div>
+                                                          <label className="text-[11px] font-medium text-[#76707F] block mb-1">Shape</label>
+                                                          <Input
+                                                            value={stone.shape || ''}
+                                                            onChange={(e) => {
+                                                              const next = [...(item.stones || [])];
+                                                              next[si] = { ...next[si], shape: e.target.value };
+                                                              onItemUpdate(item.id, { stones: next });
+                                                            }}
+                                                            placeholder="Round, Oval…"
+                                                            className="bg-white h-8 text-[12px] rounded-[8px] border border-black/[0.08]"
+                                                          />
+                                                        </div>
+                                                        <div>
+                                                          <label className="text-[11px] font-medium text-[#76707F] block mb-1">Size (mm)</label>
+                                                          <Input
+                                                            value={stone.sizeMm || ''}
+                                                            onChange={(e) => {
+                                                              const next = [...(item.stones || [])];
+                                                              next[si] = { ...next[si], sizeMm: e.target.value };
+                                                              onItemUpdate(item.id, { stones: next });
+                                                            }}
+                                                            placeholder="6.5×4.5"
+                                                            className="bg-white h-8 text-[12px] rounded-[8px] border border-black/[0.08]"
+                                                          />
+                                                        </div>
+                                                      </div>
+                                                      <div className="grid grid-cols-4 gap-2 mt-2">
+                                                        <div>
+                                                          <label className="text-[11px] font-medium text-[#76707F] block mb-1">Carat Wt</label>
+                                                          <Input
+                                                            value={stone.caratWeight || ''}
+                                                            onChange={(e) => {
+                                                              const next = [...(item.stones || [])];
+                                                              next[si] = { ...next[si], caratWeight: e.target.value };
+                                                              onItemUpdate(item.id, { stones: next });
+                                                            }}
+                                                            placeholder="0.75"
+                                                            className="bg-white h-8 text-[12px] rounded-[8px] border border-black/[0.08]"
+                                                          />
+                                                        </div>
+                                                        <div>
+                                                          <label className="text-[11px] font-medium text-[#76707F] block mb-1">Origin</label>
+                                                          <Select
+                                                            value={stone.origin || 'Unknown'}
+                                                            onValueChange={(v) => {
+                                                              const next = [...(item.stones || [])];
+                                                              next[si] = { ...next[si], origin: v };
+                                                              onItemUpdate(item.id, { stones: next });
+                                                            }}
+                                                          >
+                                                            <SelectTrigger className="bg-white h-8 text-[12px] rounded-[8px] border border-black/[0.08]"><SelectValue /></SelectTrigger>
+                                                            <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
+                                                              {['Natural', 'Lab', 'Unknown'].map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                                                            </SelectContent>
+                                                          </Select>
+                                                        </div>
+                                                        <div>
+                                                          <label className="text-[11px] font-medium text-[#76707F] block mb-1">Color</label>
+                                                          <Input
+                                                            value={stone.color || ''}
+                                                            onChange={(e) => {
+                                                              const next = [...(item.stones || [])];
+                                                              next[si] = { ...next[si], color: e.target.value };
+                                                              onItemUpdate(item.id, { stones: next });
+                                                            }}
+                                                            placeholder="G"
+                                                            className="bg-white h-8 text-[12px] rounded-[8px] border border-black/[0.08]"
+                                                          />
+                                                        </div>
+                                                        <div>
+                                                          <label className="text-[11px] font-medium text-[#76707F] block mb-1">Clarity</label>
+                                                          <Input
+                                                            value={stone.clarity || ''}
+                                                            onChange={(e) => {
+                                                              const next = [...(item.stones || [])];
+                                                              next[si] = { ...next[si], clarity: e.target.value };
+                                                              onItemUpdate(item.id, { stones: next });
+                                                            }}
+                                                            placeholder="VS1"
+                                                            className="bg-white h-8 text-[12px] rounded-[8px] border border-black/[0.08]"
+                                                          />
+                                                        </div>
+                                                      </div>
+                                                      <div className="grid grid-cols-[2fr_1fr] gap-2 mt-2 items-end">
+                                                        <div>
+                                                          <label className="text-[11px] font-medium text-[#76707F] block mb-1">Lab / Cert #</label>
+                                                          <Input
+                                                            value={stone.certNumber || ''}
+                                                            onChange={(e) => {
+                                                              const next = [...(item.stones || [])];
+                                                              next[si] = { ...next[si], certNumber: e.target.value };
+                                                              onItemUpdate(item.id, { stones: next });
+                                                            }}
+                                                            placeholder="GIA 1234567890"
+                                                            className="bg-white h-8 text-[12px] rounded-[8px] border border-black/[0.08]"
+                                                          />
+                                                        </div>
+                                                        <label className="flex items-center gap-2 text-[12px] text-[#76707F] pb-2">
+                                                          <input
+                                                            type="checkbox"
+                                                            checked={!!stone.includedInOffer}
+                                                            onChange={(e) => {
+                                                              const next = [...(item.stones || [])];
+                                                              next[si] = { ...next[si], includedInOffer: e.target.checked };
+                                                              onItemUpdate(item.id, { stones: next });
+                                                            }}
+                                                          />
+                                                          Included in offer
+                                                        </label>
+                                                      </div>
+                                                    </div>
+                                                  ))}
+                                                </div>
+                                              )}
+                                            </div>
+                                          )}
 
                                         {/* Section: Metals */}
                                         {(item.metals || []).length > 0 && (
@@ -1244,27 +1468,46 @@ export function TakeInBalanced({
                                            className="bg-white border border-black/[0.08] rounded-[10px] h-20 text-[13px] resize-none"
                                          />
                                        </div>
-                                       <div>
-                                         <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Photos</label>
-                                         {item.photos?.length > 0 ? (
-                                           <div className="flex gap-2 flex-wrap">
-                                             {item.photos.map((url: string, pi: number) => (
-                                               <div key={pi} className="relative group">
-                                                 <img src={url} alt={`Item photo ${pi + 1}`} className="w-16 h-16 rounded-[8px] object-cover border border-black/[0.06]" />
-                                                 <button
-                                                   className="absolute -top-1 -right-1 bg-[#2B2833] text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
-                                                   onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { photos: item.photos.filter((_: string, j: number) => j !== pi) }); }}
-                                                 >×</button>
-                                               </div>
-                                             ))}
-                                           </div>
-                                         ) : (
-                                           <div className="border border-dashed border-black/[0.12] rounded-[10px] p-3 text-center bg-white hover:bg-black/[0.02] transition-colors cursor-pointer h-20 flex flex-col items-center justify-center">
-                                             <Camera className="h-4 w-4 text-[#76707F] mb-1" />
-                                             <span className="text-[11px] text-[#A8A3AE]">Upload Photos</span>
-                                           </div>
-                                         )}
-                                       </div>
+                                        <div>
+                                          <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Photos</label>
+                                          <input
+                                            id={`photo-upload-${item.id}`}
+                                            type="file"
+                                            accept="image/*"
+                                            multiple
+                                            className="hidden"
+                                            onChange={(e) => {
+                                              handlePhotoUpload(item.id, e.target.files);
+                                              e.target.value = '';
+                                            }}
+                                          />
+                                          <div className="flex gap-2 flex-wrap items-start">
+                                            {(item.photos || []).map((url: string, pi: number) => (
+                                              <div key={pi} className="relative group">
+                                                <img src={url} alt={`Item photo ${pi + 1}`} className="w-16 h-16 rounded-[8px] object-cover border border-black/[0.06]" />
+                                                <button
+                                                  type="button"
+                                                  className="absolute -top-1 -right-1 bg-[#2B2833] text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
+                                                  onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { photos: (item.photos || []).filter((_: string, j: number) => j !== pi) }); }}
+                                                >×</button>
+                                              </div>
+                                            ))}
+                                            <label
+                                              htmlFor={`photo-upload-${item.id}`}
+                                              onClick={(e) => e.stopPropagation()}
+                                              className="border border-dashed border-black/[0.12] rounded-[10px] w-16 h-16 flex flex-col items-center justify-center bg-white hover:bg-black/[0.02] cursor-pointer transition-colors"
+                                            >
+                                              {uploadingPhotos.has(item.id) ? (
+                                                <Loader2 className="h-4 w-4 text-[#76707F] animate-spin" />
+                                              ) : (
+                                                <>
+                                                  <Camera className="h-4 w-4 text-[#76707F]" />
+                                                  <span className="text-[10px] text-[#A8A3AE] mt-0.5">Add</span>
+                                                </>
+                                              )}
+                                            </label>
+                                          </div>
+                                        </div>
                                      </div>
                                    </div>
 
