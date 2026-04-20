@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useMetalPrices } from '@/hooks/useMetalPrices';
 import { computeMetalRow, roundCurrency } from '@/lib/pricing';
+import { MetalPuritySelect, getDefaultPurityForMetal } from './MetalPuritySelect';
 
 interface TakeInSlimProps {
   items: any[];
@@ -44,7 +45,13 @@ export function TakeInSlim({
     if (!item || !item.metals[metalIndex]) return;
 
     const updatedMetals = [...item.metals];
-    updatedMetals[metalIndex] = { ...updatedMetals[metalIndex], [field]: value };
+    const prev = updatedMetals[metalIndex];
+    const next = { ...prev, [field]: value };
+    // Reset purity when metal type changes
+    if (field === 'type' && value !== prev.type) {
+      next.karat = getDefaultPurityForMetal(value);
+    }
+    updatedMetals[metalIndex] = next;
 
     const globalPct = store?.defaultPayoutPercentage ?? item.payoutPercentage ?? 75;
     // Recompute every row with real spot/purity math
@@ -171,24 +178,14 @@ export function TakeInSlim({
                     </Select>
                   </div>
 
-                  {/* Karat */}
+                  {/* Purity (metal-aware) */}
                   <div>
-                    <Select 
-                      value={metal.karat?.toString()} 
-                      onValueChange={(value) => updateMetalInItem(item.id, metalIndex, 'karat', parseInt(value))}
-                    >
-                      <SelectTrigger className="h-8 border-0 bg-transparent hover:bg-slate-50">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="8">8K</SelectItem>
-                        <SelectItem value="10">10K</SelectItem>
-                        <SelectItem value="14">14K</SelectItem>
-                        <SelectItem value="18">18K</SelectItem>
-                        <SelectItem value="22">22K</SelectItem>
-                        <SelectItem value="24">24K</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <MetalPuritySelect
+                      metal={metal.type || 'Gold'}
+                      value={metal.karat}
+                      onChange={(v) => updateMetalInItem(item.id, metalIndex, 'karat', v)}
+                      triggerClassName="h-8 border-0 bg-transparent hover:bg-slate-50 w-full"
+                    />
                   </div>
 
                   {/* Weight - Auto-focus on last item */}
