@@ -480,7 +480,7 @@ export function buildDemoItems(defaultPayoutPercentage = 75): DemoItem[] {
       stones: [],
       specs: {
         silverType: 'Silver Plate', maker: 'Reed & Barton',
-        pieceCount: 1, condition: 'Good',
+        pieceCount: 1, grossWeight: 380, condition: 'Good',
       },
       marketValue: 25, payoutPercentage: 50, payoutAmount: 12.5,
       photos: [PLACEHOLDER('Silver Plate Tray')],
