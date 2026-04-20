@@ -12,6 +12,8 @@ import {
   Zap,
   Calculator
 } from 'lucide-react';
+import { useMetalPrices } from '@/hooks/useMetalPrices';
+import { computeMetalRow, roundCurrency } from '@/lib/pricing';
 
 interface TakeInSlimProps {
   items: any[];
@@ -31,6 +33,7 @@ export function TakeInSlim({
   onSwitchToDetailed
 }: TakeInSlimProps) {
   const [focusedRow, setFocusedRow] = useState<string | null>(null);
+  const spotPrices = useMetalPrices();
 
   const addNewLine = () => {
     onItemAdd();
@@ -43,13 +46,23 @@ export function TakeInSlim({
     const updatedMetals = [...item.metals];
     updatedMetals[metalIndex] = { ...updatedMetals[metalIndex], [field]: value };
 
-    // Recalculate pricing
-    const totalWeight = updatedMetals.reduce((sum: number, m: any) => sum + (m.weight || 0), 0);
-    const marketValue = totalWeight * 50; // Mock pricing
-    const payoutAmount = marketValue * (item.payoutPercentage / 100);
+    const globalPct = store?.defaultPayoutPercentage ?? item.payoutPercentage ?? 75;
+    // Recompute every row with real spot/purity math
+    const computedMetals = updatedMetals.map((m: any) => {
+      const r = computeMetalRow(
+        { type: m.type, karat: m.karat, weight: m.weight, payoutPercentage: m.payoutPercentage ?? item.payoutPercentage },
+        spotPrices,
+        store?.rateDefaults,
+        globalPct
+      );
+      return { ...m, marketValue: roundCurrency(r.marketValue), payoutAmount: roundCurrency(r.payoutAmount) };
+    });
+
+    const marketValue = roundCurrency(computedMetals.reduce((s: number, m: any) => s + (m.marketValue || 0), 0));
+    const payoutAmount = roundCurrency(computedMetals.reduce((s: number, m: any) => s + (m.payoutAmount || 0), 0));
 
     onItemUpdate(itemId, {
-      metals: updatedMetals,
+      metals: computedMetals,
       marketValue,
       payoutAmount
     });
@@ -193,11 +206,11 @@ export function TakeInSlim({
                     />
                   </div>
 
-                  {/* Payout - Number count animation */}
+                  {/* Payout - real spot/purity/payout math */}
                   <div className="flex items-center">
                     {!store.hidePayout && (
                       <div className="font-semibold text-primary text-sm">
-                        ${((metal.weight || 0) * 50 * (item.payoutPercentage / 100)).toFixed(2)}
+                        ${(metal.payoutAmount || 0).toFixed(2)}
                       </div>
                     )}
                   </div>

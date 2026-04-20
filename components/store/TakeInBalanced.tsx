@@ -31,6 +31,8 @@ import {
   Loader2
 } from 'lucide-react';
 import { CustomerSummaryCard } from './CustomerSummaryCard';
+import { useMetalPrices } from '@/hooks/useMetalPrices';
+import { computeMetalRow, roundCurrency } from '@/lib/pricing';
 
 interface TakeInBalancedProps {
   items: any[];
@@ -72,6 +74,7 @@ export function TakeInBalanced({
   onCheckNumberChange
 }: TakeInBalancedProps) {
   const { toast } = useToast();
+  const spotPrices = useMetalPrices();
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set());
 
   // Specs panels stay collapsed by default — user opens them explicitly via the Specs chevron.
@@ -107,26 +110,66 @@ export function TakeInBalanced({
   const addMetal = (itemId: string) => {
     const item = items.find(i => i.id === itemId);
     if (!item) return;
-    const newMetal = { id: `metal_${Date.now()}`, type: 'Gold', karat: 14, weight: 0, payoutPercentage: 75, marketValue: 0, payoutAmount: 0 };
+    const defaultPct = store?.rateDefaults?.gold ?? store?.defaultPayoutPercentage ?? 75;
+    const newMetal = { id: `metal_${Date.now()}`, type: 'Gold', karat: 14, weight: 0, payoutPercentage: defaultPct, marketValue: 0, payoutAmount: 0 };
     onItemUpdate(itemId, { metals: [...item.metals, newMetal] });
   };
 
   const updateMetal = (itemId: string, metalId: string, updates: any) => {
     const item = items.find(i => i.id === itemId);
     if (!item) return;
+    const globalPct = store?.defaultPayoutPercentage ?? 75;
     const updatedMetals = item.metals.map((m: any) => {
       if (m.id !== metalId) return m;
       const updated = { ...m, ...updates };
-      const metalMarket = (updated.weight || 0) * 50;
-      const pct = updated.payoutPercentage ?? 75;
-      updated.marketValue = metalMarket;
-      updated.payoutAmount = metalMarket * (pct / 100);
+      const result = computeMetalRow(
+        { type: updated.type, karat: updated.karat, weight: updated.weight, payoutPercentage: updated.payoutPercentage },
+        spotPrices,
+        store?.rateDefaults,
+        globalPct
+      );
+      updated.marketValue = roundCurrency(result.marketValue);
+      updated.payoutAmount = roundCurrency(result.payoutAmount);
+      // keep effective payout % visible on the row when not explicitly set
+      if (updated.payoutPercentage === undefined || updated.payoutPercentage === null) {
+        updated.payoutPercentage = result.payoutPercent;
+      }
       return updated;
     });
-    const totalMarketValue = updatedMetals.reduce((sum: number, m: any) => sum + (m.marketValue || 0), 0);
-    const totalPayoutAmount = updatedMetals.reduce((sum: number, m: any) => sum + (m.payoutAmount || 0), 0);
+    const totalMarketValue = roundCurrency(updatedMetals.reduce((sum: number, m: any) => sum + (m.marketValue || 0), 0));
+    const totalPayoutAmount = roundCurrency(updatedMetals.reduce((sum: number, m: any) => sum + (m.payoutAmount || 0), 0));
     onItemUpdate(itemId, { metals: updatedMetals, marketValue: totalMarketValue, payoutAmount: totalPayoutAmount });
   };
+
+  // Recompute all metal rows whenever live spot prices change so offers stay current.
+  useEffect(() => {
+    const globalPct = store?.defaultPayoutPercentage ?? 75;
+    items.forEach((item: any) => {
+      if (!item?.metals?.length) return;
+      let changed = false;
+      const recomputed = item.metals.map((m: any) => {
+        const result = computeMetalRow(
+          { type: m.type, karat: m.karat, weight: m.weight, payoutPercentage: m.payoutPercentage },
+          spotPrices,
+          store?.rateDefaults,
+          globalPct
+        );
+        const newMarket = roundCurrency(result.marketValue);
+        const newPayout = roundCurrency(result.payoutAmount);
+        if (newMarket !== (m.marketValue || 0) || newPayout !== (m.payoutAmount || 0)) {
+          changed = true;
+          return { ...m, marketValue: newMarket, payoutAmount: newPayout };
+        }
+        return m;
+      });
+      if (changed) {
+        const totalMarket = roundCurrency(recomputed.reduce((s: number, m: any) => s + (m.marketValue || 0), 0));
+        const totalPayout = roundCurrency(recomputed.reduce((s: number, m: any) => s + (m.payoutAmount || 0), 0));
+        onItemUpdate(item.id, { metals: recomputed, marketValue: totalMarket, payoutAmount: totalPayout });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [spotPrices]);
 
   const handleKeyPress = (e: React.KeyboardEvent, itemId: string, metalId: string) => {
     if (e.key === 'Enter' || e.key === 'Tab') {
