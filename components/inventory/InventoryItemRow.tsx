@@ -4,6 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { MoreHorizontal, Eye, Edit, Scissors, Archive, Gem, Watch, Coins, Diamond } from 'lucide-react';
 import type { InventoryItemRecord } from './types';
 import { DISPOSITIONS } from './types';
+import { formatPurityLabel } from '@/components/store/MetalPuritySelect';
 
 interface Props {
   item: InventoryItemRecord;
@@ -44,14 +45,23 @@ function fmt(n: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
 }
 
-function metalSummary(metals: any): string {
-  if (!metals) return '—';
+function firstMetal(metals: any): { type: string; karat: any } | null {
+  if (!metals) return null;
   const arr = Array.isArray(metals) ? metals : [];
-  if (!arr.length) return '—';
-  const first = arr[0];
-  if (!first) return '—';
-  const karat = String(first.karat || first.type || '');
-  return karat ? `${karat.replace('Gold ', '').replace('k', ' kt')}` : '—';
+  const m = arr[0];
+  if (!m) return null;
+  return { type: String(m.type || m.metal || ''), karat: m.karat };
+}
+
+function metalTypeOnly(metals: any): string {
+  const m = firstMetal(metals);
+  return m?.type || '—';
+}
+
+function purityOnly(metals: any): string {
+  const m = firstMetal(metals);
+  if (!m || !m.type) return '—';
+  return formatPurityLabel(m.type, m.karat);
 }
 
 // ── Category icon + tile color — matches approved screenshot ──
