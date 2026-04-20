@@ -34,6 +34,7 @@ import { CustomerSummaryCard } from './CustomerSummaryCard';
 import { useMetalPrices } from '@/hooks/useMetalPrices';
 import { computeMetalRow, roundCurrency } from '@/lib/pricing';
 import { MetalPuritySelect, getDefaultPurityForMetal } from './MetalPuritySelect';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TakeInBalancedProps {
   items: any[];
@@ -77,6 +78,37 @@ export function TakeInBalanced({
   const { toast } = useToast();
   const spotPrices = useMetalPrices();
   const [expandedAdvanced, setExpandedAdvanced] = useState<Set<string>>(new Set());
+  const [uploadingPhotos, setUploadingPhotos] = useState<Set<string>>(new Set());
+
+  // Shared photo upload handler — works across ALL categories (Jewelry, Watch, Bullion, Stones, Silverware, LooseItems)
+  const handlePhotoUpload = async (itemId: string, files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setUploadingPhotos(prev => new Set(prev).add(itemId));
+    try {
+      const storeIdForPath = store?.id || 'unknown-store';
+      const uploaded: string[] = [];
+      for (const file of Array.from(files)) {
+        const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+        const path = `${storeIdForPath}/take-in/${itemId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error } = await supabase.storage.from('batch-photos').upload(path, file, { upsert: false, contentType: file.type || 'image/jpeg' });
+        if (error) throw error;
+        const { data: urlData } = supabase.storage.from('batch-photos').getPublicUrl(path);
+        if (urlData?.publicUrl) uploaded.push(urlData.publicUrl);
+      }
+      const current = items.find(i => i.id === itemId);
+      const existing = current?.photos || [];
+      onItemUpdate(itemId, { photos: [...existing, ...uploaded] });
+      toast({ title: `${uploaded.length} photo${uploaded.length > 1 ? 's' : ''} uploaded` });
+    } catch (err: any) {
+      toast({ title: 'Upload failed', description: err?.message || 'Could not upload photo', variant: 'destructive' });
+    } finally {
+      setUploadingPhotos(prev => {
+        const next = new Set(prev);
+        next.delete(itemId);
+        return next;
+      });
+    }
+  };
 
   // Specs panels stay collapsed by default — user opens them explicitly via the Specs chevron.
   const [batchPhotoOpen, setBatchPhotoOpen] = useState(false);
@@ -1436,27 +1468,46 @@ export function TakeInBalanced({
                                            className="bg-white border border-black/[0.08] rounded-[10px] h-20 text-[13px] resize-none"
                                          />
                                        </div>
-                                       <div>
-                                         <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Photos</label>
-                                         {item.photos?.length > 0 ? (
-                                           <div className="flex gap-2 flex-wrap">
-                                             {item.photos.map((url: string, pi: number) => (
-                                               <div key={pi} className="relative group">
-                                                 <img src={url} alt={`Item photo ${pi + 1}`} className="w-16 h-16 rounded-[8px] object-cover border border-black/[0.06]" />
-                                                 <button
-                                                   className="absolute -top-1 -right-1 bg-[#2B2833] text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
-                                                   onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { photos: item.photos.filter((_: string, j: number) => j !== pi) }); }}
-                                                 >×</button>
-                                               </div>
-                                             ))}
-                                           </div>
-                                         ) : (
-                                           <div className="border border-dashed border-black/[0.12] rounded-[10px] p-3 text-center bg-white hover:bg-black/[0.02] transition-colors cursor-pointer h-20 flex flex-col items-center justify-center">
-                                             <Camera className="h-4 w-4 text-[#76707F] mb-1" />
-                                             <span className="text-[11px] text-[#A8A3AE]">Upload Photos</span>
-                                           </div>
-                                         )}
-                                       </div>
+                                        <div>
+                                          <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Photos</label>
+                                          <input
+                                            id={`photo-upload-${item.id}`}
+                                            type="file"
+                                            accept="image/*"
+                                            multiple
+                                            className="hidden"
+                                            onChange={(e) => {
+                                              handlePhotoUpload(item.id, e.target.files);
+                                              e.target.value = '';
+                                            }}
+                                          />
+                                          <div className="flex gap-2 flex-wrap items-start">
+                                            {(item.photos || []).map((url: string, pi: number) => (
+                                              <div key={pi} className="relative group">
+                                                <img src={url} alt={`Item photo ${pi + 1}`} className="w-16 h-16 rounded-[8px] object-cover border border-black/[0.06]" />
+                                                <button
+                                                  type="button"
+                                                  className="absolute -top-1 -right-1 bg-[#2B2833] text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
+                                                  onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { photos: (item.photos || []).filter((_: string, j: number) => j !== pi) }); }}
+                                                >×</button>
+                                              </div>
+                                            ))}
+                                            <label
+                                              htmlFor={`photo-upload-${item.id}`}
+                                              onClick={(e) => e.stopPropagation()}
+                                              className="border border-dashed border-black/[0.12] rounded-[10px] w-16 h-16 flex flex-col items-center justify-center bg-white hover:bg-black/[0.02] cursor-pointer transition-colors"
+                                            >
+                                              {uploadingPhotos.has(item.id) ? (
+                                                <Loader2 className="h-4 w-4 text-[#76707F] animate-spin" />
+                                              ) : (
+                                                <>
+                                                  <Camera className="h-4 w-4 text-[#76707F]" />
+                                                  <span className="text-[10px] text-[#A8A3AE] mt-0.5">Add</span>
+                                                </>
+                                              )}
+                                            </label>
+                                          </div>
+                                        </div>
                                      </div>
                                    </div>
 
