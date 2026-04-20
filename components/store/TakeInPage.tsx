@@ -10,6 +10,7 @@ import { MetalPriceTicker } from './MetalPriceTicker';
 import { AICaptureModal } from './AICaptureModal';
 import { toast } from 'sonner';
 import { syncTakeInToInventory } from '../inventory/syncTakeInToInventory';
+import { buildDemoItems } from './demoTakeInData';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Zap,
