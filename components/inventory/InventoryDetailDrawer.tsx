@@ -156,45 +156,71 @@ export function InventoryDetailDrawer({ item, open, onClose, onPartOut, onArchiv
             {item.metals?.length > 0 && (
               <div className="bg-white/60 rounded-[12px] p-4 ring-1 ring-white/50">
                 <h4 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-2">Metals</h4>
-                {item.metals.map((m: any, i: number) => (
-                  <div key={i} className="py-2 border-b border-black/[0.04] last:border-0">
-                    <div className="text-[13px] font-medium text-[#2B2833]">
-                      {m.type || '—'} {m.karat ? `${m.karat}K` : ''} {m.weight ? `— ${m.weight}g` : ''}
+                {item.metals.map((m: any, i: number) => {
+                  const metalType = m.type || '—';
+                  const purityLabel = (() => {
+                    const v = m.karat;
+                    if (v === undefined || v === null || v === '') return '';
+                    const n = Number(v);
+                    if (!Number.isFinite(n) || n <= 0) return '';
+                    if (metalType === 'Gold') return `${n}K`;
+                    if (metalType === 'Silver') {
+                      if (n === 925) return '925 Sterling';
+                      if (n === 999) return '999 Fine';
+                      return String(n);
+                    }
+                    if (metalType === 'Platinum') return `${n} Platinum`;
+                    if (metalType === 'Palladium') return `${n} Palladium`;
+                    return String(n);
+                  })();
+                  return (
+                    <div key={i} className="py-2 border-b border-black/[0.04] last:border-0">
+                      <div className="text-[13px] font-medium text-[#2B2833]">
+                        {metalType} {purityLabel} {m.weight ? `— ${m.weight}g` : ''}
+                      </div>
+                      <div className="text-[12px] text-[#76707F] mt-0.5 space-x-2">
+                        {m.color && <span>Color: {m.color}</span>}
+                        {m.hallmark && <span>Hallmark: {m.hallmark}</span>}
+                        {m.testMethod && <span>Test: {m.testMethod}</span>}
+                        {m.payoutPercentage !== undefined && <span>{m.payoutPercentage}%</span>}
+                        {m.payoutAmount !== undefined && <span>{fmt(m.payoutAmount)}</span>}
+                      </div>
                     </div>
-                    <div className="text-[12px] text-[#76707F] mt-0.5 space-x-2">
-                      {m.color && <span>Color: {m.color}</span>}
-                      {m.hallmark && <span>Hallmark: {m.hallmark}</span>}
-                      {m.testMethod && <span>Test: {m.testMethod}</span>}
-                      {m.payoutPercentage !== undefined && <span>{m.payoutPercentage}%</span>}
-                      {m.payoutAmount !== undefined && <span>{fmt(m.payoutAmount)}</span>}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
             {item.stones?.length > 0 && (
               <div className="bg-white/60 rounded-[12px] p-4 ring-1 ring-white/50">
                 <h4 className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-2">Stones</h4>
-                {item.stones.map((s: any, i: number) => (
-                  <div key={i} className="py-2 border-b border-black/[0.04] last:border-0">
-                    <div className="text-[13px] font-medium text-[#2B2833]">
-                      {s.type || 'Stone'} {s.shape ? `· ${s.shape}` : ''} {s.size ? `· ${s.size}ct` : ''} {s.quantity > 1 ? `· qty ${s.quantity}` : ''}
+                {item.stones.map((s: any, i: number) => {
+                  const type = s.stoneType || s.type || 'Stone';
+                  const carat = s.caratWeight || s.size || '';
+                  const sizeMm = s.sizeMm || s.measurements || '';
+                  const cert = s.certNumber || s.labCert || s.reportNumber || '';
+                  const origin = s.origin || s.naturalLab || '';
+                  return (
+                    <div key={i} className="py-2 border-b border-black/[0.04] last:border-0">
+                      <div className="text-[13px] font-medium text-[#2B2833]">
+                        {type}
+                        {s.shape ? ` · ${s.shape}` : ''}
+                        {carat ? ` · ${carat}ct` : ''}
+                        {s.quantity > 1 ? ` · qty ${s.quantity}` : ''}
+                      </div>
+                      <div className="text-[12px] text-[#76707F] mt-0.5 space-x-2">
+                        {sizeMm && <span>Size: {sizeMm}mm</span>}
+                        {s.color && <span>Color: {s.color}</span>}
+                        {s.clarity && <span>Clarity: {s.clarity}</span>}
+                        {s.cut && <span>Cut: {s.cut}</span>}
+                        {origin && <span>{origin}</span>}
+                        {s.treatment && <span>Treatment: {s.treatment}</span>}
+                        {cert && <span>Cert #: {cert}</span>}
+                        {s.includedInOffer !== undefined && <span>{s.includedInOffer ? 'In offer' : 'Not in offer'}</span>}
+                      </div>
                     </div>
-                    <div className="text-[12px] text-[#76707F] mt-0.5 space-x-2">
-                      {s.color && <span>Color: {s.color}</span>}
-                      {s.clarity && <span>Clarity: {s.clarity}</span>}
-                      {s.cut && <span>Cut: {s.cut}</span>}
-                      {s.origin && <span>Origin: {s.origin}</span>}
-                      {s.treatment && <span>Treatment: {s.treatment}</span>}
-                      {s.naturalLab && <span>{s.naturalLab}</span>}
-                      {s.measurements && <span>{s.measurements}</span>}
-                      {s.lab && <span>Lab: {s.lab}</span>}
-                      {(s.labCert || s.reportNumber) && <span>Cert #: {s.labCert || s.reportNumber}</span>}
-                      {s.includedInOffer !== undefined && <span>{s.includedInOffer ? 'In offer' : 'Not in offer'}</span>}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
