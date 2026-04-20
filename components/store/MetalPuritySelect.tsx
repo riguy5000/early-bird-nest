@@ -105,11 +105,12 @@ export function MetalPuritySelect({ metal, value, onChange, triggerClassName }: 
   // If current value is not in the options for this metal (e.g., metal just changed),
   // display nothing selected — the parent should reset the value when metal changes.
   const isValid = options.some(o => o.value === Number(current));
+  const compact = isValid ? formatPurityCompact(metal, value) : '';
 
   return (
     <Select value={isValid ? current : undefined} onValueChange={(v) => onChange(parseInt(v, 10))}>
       <SelectTrigger className={triggerClassName || 'w-[88px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]'}>
-        <SelectValue placeholder="—" />
+        <SelectValue placeholder="—">{compact || '—'}</SelectValue>
       </SelectTrigger>
       <SelectContent className="rounded-[12px] bg-white border-black/[0.06] shadow-xl">
         {options.map(opt => (
