@@ -52,6 +52,40 @@ export function getDefaultPurityForMetal(metal: string) {
   return DEFAULT_PURITY_FOR_METAL[metal] ?? 14;
 }
 
+/**
+ * Full, metal-correct purity label (e.g. "14K", "925 Sterling", "950 Platinum").
+ * Use in detail views, inventory tables, drawers.
+ */
+export function formatPurityLabel(metal: string, value: number | string | undefined | null): string {
+  if (value === undefined || value === null || value === '') return '—';
+  const num = Number(value);
+  if (!Number.isFinite(num) || num <= 0) return '—';
+  const opts = PURITY_OPTIONS_BY_METAL[metal];
+  const match = opts?.find(o => o.value === num);
+  if (match) return match.label;
+  // Fallback when value isn't a known preset
+  if (metal === 'Gold') return `${num}K`;
+  if (metal === 'Platinum') return `${num} Platinum`;
+  if (metal === 'Palladium') return `${num} Palladium`;
+  if (metal === 'Silver') return `${num}`;
+  return String(num);
+}
+
+/**
+ * Compact purity label suited for tight rows (e.g. "14K", "925", "950 Pt").
+ * Strips the long " Sterling" / " Fine" suffixes for Silver to keep it tight.
+ */
+export function formatPurityCompact(metal: string, value: number | string | undefined | null): string {
+  if (value === undefined || value === null || value === '') return '—';
+  const num = Number(value);
+  if (!Number.isFinite(num) || num <= 0) return '—';
+  if (metal === 'Gold') return `${num}K`;
+  if (metal === 'Silver') return `${num}`;
+  if (metal === 'Platinum') return `${num} Pt`;
+  if (metal === 'Palladium') return `${num} Pd`;
+  return String(num);
+}
+
 interface MetalPuritySelectProps {
   metal: string;
   value: number | undefined;

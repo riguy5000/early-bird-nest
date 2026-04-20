@@ -33,7 +33,7 @@ import {
 import { CustomerSummaryCard } from './CustomerSummaryCard';
 import { useMetalPrices } from '@/hooks/useMetalPrices';
 import { computeMetalRow, roundCurrency } from '@/lib/pricing';
-import { MetalPuritySelect, getDefaultPurityForMetal } from './MetalPuritySelect';
+import { MetalPuritySelect, getDefaultPurityForMetal, formatPurityLabel, formatPurityCompact } from './MetalPuritySelect';
 import { supabase } from '@/integrations/supabase/client';
 
 interface TakeInBalancedProps {
@@ -1240,7 +1240,7 @@ export function TakeInBalanced({
                                                       color: '',
                                                       clarity: '',
                                                       certNumber: '',
-                                                      includedInOffer: false,
+                                                       includedInOffer: true,
                                                     }];
                                                     onItemUpdate(item.id, { stones: next });
                                                   }}
@@ -1436,7 +1436,7 @@ export function TakeInBalanced({
                                               </div>
                                               {(item.metals || []).map((metal: any, mi: number) => (
                                                 <div key={metal.id} className={`grid grid-cols-[1.2fr_1fr_1fr_auto] gap-3 px-4 py-2.5 items-center text-[13px] text-[#2B2833] ${mi > 0 ? 'border-t border-black/[0.04]' : ''}`}>
-                                                  <div>{metal.type} <span className="text-[#76707F]">{metal.karat}K</span></div>
+                                                  <div>{metal.type} <span className="text-[#76707F]">{formatPurityLabel(metal.type, metal.karat)}</span></div>
                                                   <div className="text-right tabular-nums">{(metal.weight || 0).toFixed(2)}</div>
                                                   <div className="text-right tabular-nums text-[#76707F]">{metal.payoutPercentage ?? 75}%</div>
                                                   <div className="text-right tabular-nums font-medium w-16">${(metal.payoutAmount || 0).toFixed(2)}</div>
