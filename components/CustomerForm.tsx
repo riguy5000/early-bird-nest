@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+// Card wrapper removed — this form is rendered inside a right-side Sheet drawer
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -177,22 +177,7 @@ export function CustomerForm({ customer, isEditing = false, onSave, onCancel }: 
   };
 
   return (
-    <Card className="w-full max-w-4xl">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <User className="h-5 w-5" />
-          {isEditing ? 'Edit Customer' : 'Add New Customer'}
-        </CardTitle>
-        <CardDescription>
-          {isEditing 
-            ? 'Update customer information and contact details'
-            : 'Enter customer information for transactions and record keeping'
-          }
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
           {/* Personal Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium flex items-center gap-2">
@@ -471,8 +456,6 @@ export function CustomerForm({ customer, isEditing = false, onSave, onCancel }: 
               )}
             </Button>
           </div>
-        </form>
-      </CardContent>
-    </Card>
+    </form>
   );
 }
