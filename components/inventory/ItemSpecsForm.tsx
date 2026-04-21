@@ -159,7 +159,7 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
 
       {/* WATCH-specific specs */}
       {value.category === 'Watch' && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Watch Details</div>
           <div className="grid grid-cols-3 gap-3">
             <div>
@@ -243,7 +243,7 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
 
       {/* GENERAL (non-Watch) */}
       {value.category !== 'Watch' && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">General</div>
           <div className="grid grid-cols-3 gap-3">
             <div>
@@ -282,7 +282,7 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
 
       {/* JEWELRY: Hallmark / Testing / Description */}
       {value.category === 'Jewelry' && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Hallmark / Testing / Description</div>
           <div className="grid grid-cols-3 gap-3">
             <div>
@@ -308,7 +308,7 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
 
       {/* BULLION / COINS specifics */}
       {value.category === 'Bullion' && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Bullion / Coin Details</div>
           <div className="grid grid-cols-4 gap-3">
             <div>
