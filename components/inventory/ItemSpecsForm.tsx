@@ -371,7 +371,7 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
 
       {/* STONES (loose stones category) */}
       {value.category === 'Stones' && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Stone Details</div>
           <div className="grid grid-cols-4 gap-3">
             <div>
