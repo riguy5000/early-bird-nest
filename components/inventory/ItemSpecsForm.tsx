@@ -125,9 +125,9 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
     onChange({ stones: (value.stones || []).filter((_, i) => i !== idx) });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* CATEGORY + SUBTYPE */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Item</div>
         <div className="grid grid-cols-2 gap-3">
           <div>
