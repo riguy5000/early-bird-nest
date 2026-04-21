@@ -125,9 +125,9 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
     onChange({ stones: (value.stones || []).filter((_, i) => i !== idx) });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* CATEGORY + SUBTYPE */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Item</div>
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -159,7 +159,7 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
 
       {/* WATCH-specific specs */}
       {value.category === 'Watch' && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Watch Details</div>
           <div className="grid grid-cols-3 gap-3">
             <div>
@@ -243,7 +243,7 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
 
       {/* GENERAL (non-Watch) */}
       {value.category !== 'Watch' && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">General</div>
           <div className="grid grid-cols-3 gap-3">
             <div>
@@ -282,7 +282,7 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
 
       {/* JEWELRY: Hallmark / Testing / Description */}
       {value.category === 'Jewelry' && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Hallmark / Testing / Description</div>
           <div className="grid grid-cols-3 gap-3">
             <div>
@@ -308,7 +308,7 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
 
       {/* BULLION / COINS specifics */}
       {value.category === 'Bullion' && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Bullion / Coin Details</div>
           <div className="grid grid-cols-4 gap-3">
             <div>
@@ -371,7 +371,7 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
 
       {/* STONES (loose stones category) */}
       {value.category === 'Stones' && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Stone Details</div>
           <div className="grid grid-cols-4 gap-3">
             <div>
@@ -452,7 +452,7 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
 
       {/* SILVERWARE specifics */}
       {value.category === 'Silverware' && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Silverware Details</div>
           <div className="grid grid-cols-4 gap-3">
             <div>
@@ -510,7 +510,7 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
 
       {/* LOOSE ITEMS */}
       {value.category === 'LooseItems' && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Lot Details</div>
           <div className="grid grid-cols-4 gap-3">
             <div>
@@ -550,7 +550,7 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
 
       {/* METALS — for any category that has metal content */}
       {value.category !== 'Stones' && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="flex items-center justify-between min-h-[20px]">
             <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Metals</div>
             <button type="button" onClick={addMetal} className="text-xs font-medium text-primary hover:underline inline-flex items-center gap-1">
@@ -609,7 +609,7 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
 
       {/* STONES (Jewelry) — multiple rows */}
       {value.category === 'Jewelry' && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="flex items-center justify-between min-h-[20px]">
             <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Stones</div>
             <button type="button" onClick={addStone} className="text-xs font-medium text-primary hover:underline inline-flex items-center gap-1">
@@ -694,7 +694,7 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
       )}
 
       {/* NOTES & PHOTOS */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Notes & Photos</div>
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Notes</label>

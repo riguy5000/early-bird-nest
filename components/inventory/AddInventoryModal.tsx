@@ -159,9 +159,9 @@ export function AddInventoryModal({ open, onClose, storeId, employeeId, onCreate
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
       <SheetContent side="right" className="p-0 flex flex-col w-[640px] max-w-[95vw] sm:max-w-none">
-        <SheetHeader className="pr-14">
-          <SheetTitle>{parentItemId ? 'Add Derived Component' : 'Add Inventory Item'}</SheetTitle>
-          <SheetDescription>
+        <SheetHeader className="px-6 pt-6 pb-4 border-b">
+          <SheetTitle className="text-lg">{parentItemId ? 'Add Derived Component' : 'Add Inventory Item'}</SheetTitle>
+          <SheetDescription className="text-sm mt-1">
             {parentItemId
               ? 'Create a child component derived from this item.'
               : 'Manually add a new item to inventory with full intake details.'}
@@ -228,9 +228,9 @@ export function AddInventoryModal({ open, onClose, storeId, employeeId, onCreate
           </div>
         </div>
 
-        <SheetFooter className="flex-row justify-end gap-2 sm:justify-end">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSave} disabled={saving}>
+        <SheetFooter className="px-6 py-4 border-t flex-row justify-end gap-3 sm:justify-end">
+          <Button variant="outline" onClick={onClose} className="h-9 px-4">Cancel</Button>
+          <Button onClick={handleSave} disabled={saving} className="h-9 px-4">
             {saving ? 'Saving...' : 'Add Item'}
           </Button>
         </SheetFooter>
