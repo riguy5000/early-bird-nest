@@ -159,7 +159,7 @@ export function AddInventoryModal({ open, onClose, storeId, employeeId, onCreate
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
       <SheetContent side="right" className="p-0 flex flex-col w-[640px] max-w-[95vw] sm:max-w-none">
-        <SheetHeader>
+        <SheetHeader className="pr-14">
           <SheetTitle>{parentItemId ? 'Add Derived Component' : 'Add Inventory Item'}</SheetTitle>
           <SheetDescription>
             {parentItemId
@@ -168,7 +168,7 @@ export function AddInventoryModal({ open, onClose, storeId, employeeId, onCreate
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto px-6 py-5">
+        <div className="flex-1 overflow-y-auto px-6 py-6">
           <ItemSpecsForm
             value={draft}
             onChange={patchDraft}
@@ -177,35 +177,37 @@ export function AddInventoryModal({ open, onClose, storeId, employeeId, onCreate
           />
 
           {/* Acquisition / Inventory placement */}
-          <div className="mt-6 pt-6 border-t space-y-3">
+          <div className="mt-8 pt-6 border-t space-y-3">
             <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
               Acquisition & Placement
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs">Cost / Acquisition</Label>
+                <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">Cost / Acquisition</Label>
                 <Input
                   type="number"
                   step="0.01"
                   value={costBasis}
                   onChange={(e) => setCostBasis(e.target.value)}
                   placeholder="0.00"
+                  className="h-9"
                 />
               </div>
               <div>
-                <Label className="text-xs">Estimated Market Value</Label>
+                <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">Estimated Market Value</Label>
                 <Input
                   type="number"
                   step="0.01"
                   value={estimatedValue}
                   onChange={(e) => setEstimatedValue(e.target.value)}
                   placeholder="0.00"
+                  className="h-9"
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs">Disposition</Label>
+                <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">Disposition</Label>
                 <Select value={disposition} onValueChange={setDisposition}>
                   <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -214,7 +216,7 @@ export function AddInventoryModal({ open, onClose, storeId, employeeId, onCreate
                 </Select>
               </div>
               <div>
-                <Label className="text-xs">Location</Label>
+                <Label className="text-xs font-medium text-muted-foreground mb-1.5 block">Location</Label>
                 <Select value={location} onValueChange={setLocation}>
                   <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -226,13 +228,11 @@ export function AddInventoryModal({ open, onClose, storeId, employeeId, onCreate
           </div>
         </div>
 
-        <SheetFooter>
-          <div className="flex justify-end gap-2 w-full">
-            <Button variant="outline" onClick={onClose}>Cancel</Button>
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? 'Saving...' : 'Add Item'}
-            </Button>
-          </div>
+        <SheetFooter className="flex-row justify-end gap-2 sm:justify-end">
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? 'Saving...' : 'Add Item'}
+          </Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>
