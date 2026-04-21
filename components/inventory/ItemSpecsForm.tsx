@@ -548,12 +548,71 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
         </div>
       )}
 
+      {/* METALS — for any category that has metal content */}
+      {value.category !== 'Stones' && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between min-h-[20px]">
+            <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Metals</div>
+            <button type="button" onClick={addMetal} className="text-xs font-medium text-primary hover:underline inline-flex items-center gap-1">
+              <Plus className="h-3 w-3" /> Add Metal
+            </button>
+          </div>
+          {(value.metals || []).length === 0 ? (
+            <div className="border border-dashed rounded-md p-4 text-center text-xs text-muted-foreground">
+              No metals added. Click "Add Metal" to add a metal component.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {value.metals.map((metal) => {
+                const purityOpts = PURITY_OPTIONS_BY_METAL[metal.type] || PURITY_OPTIONS_BY_METAL.Gold;
+                return (
+                  <div key={metal.id} className="grid grid-cols-[1.2fr_1fr_1fr_auto] gap-2 items-end rounded-md border bg-card p-3">
+                    <div>
+                      <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Metal</label>
+                      <Select value={metal.type} onValueChange={(v) => updateMetal(metal.id, { type: v })}>
+                        <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {['Gold', 'Silver', 'Platinum', 'Palladium'].map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Karat / Purity</label>
+                      <Select value={String(metal.karat)} onValueChange={(v) => updateMetal(metal.id, { karat: parseInt(v, 10) })}>
+                        <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {purityOpts.map((opt) => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Weight (g)</label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={metal.weight || ''}
+                        onChange={(e) => updateMetal(metal.id, { weight: parseFloat(e.target.value) || 0 })}
+                        placeholder="0.00"
+                        className="h-9 text-sm"
+                      />
+                    </div>
+                    <Button type="button" variant="ghost" size="icon" onClick={() => removeMetal(metal.id)} className="h-9 w-9 text-muted-foreground hover:text-destructive">
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* STONES (Jewelry) — multiple rows */}
       {value.category === 'Jewelry' && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between min-h-[20px]">
             <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Stones</div>
-            <button type="button" onClick={addStone} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
+            <button type="button" onClick={addStone} className="text-xs font-medium text-primary hover:underline inline-flex items-center gap-1">
               <Plus className="h-3 w-3" /> Add Stone
             </button>
           </div>
@@ -567,7 +626,7 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
                 <div key={stone.id || si} className="rounded-md border bg-card p-3">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Stone {si + 1}</span>
-                    <button type="button" onClick={() => removeStone(si)} className="text-xs text-destructive hover:underline flex items-center gap-1">
+                    <button type="button" onClick={() => removeStone(si)} className="text-xs text-destructive hover:underline inline-flex items-center gap-1">
                       <Minus className="h-3 w-3" /> Remove
                     </button>
                   </div>
@@ -629,65 +688,6 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
                   </div>
                 </div>
               ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* METALS — for any category that has metal content */}
-      {value.category !== 'Stones' && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Metals</div>
-            <button type="button" onClick={addMetal} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
-              <Plus className="h-3 w-3" /> Add Metal
-            </button>
-          </div>
-          {(value.metals || []).length === 0 ? (
-            <div className="border border-dashed rounded-md p-4 text-center text-xs text-muted-foreground">
-              No metals added. Click "Add Metal" to add a metal component.
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {value.metals.map((metal) => {
-                const purityOpts = PURITY_OPTIONS_BY_METAL[metal.type] || PURITY_OPTIONS_BY_METAL.Gold;
-                return (
-                  <div key={metal.id} className="grid grid-cols-[1.2fr_1fr_1fr_auto] gap-2 items-end rounded-md border bg-card p-3">
-                    <div>
-                      <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Metal</label>
-                      <Select value={metal.type} onValueChange={(v) => updateMetal(metal.id, { type: v })}>
-                        <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {['Gold', 'Silver', 'Platinum', 'Palladium'].map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Karat / Purity</label>
-                      <Select value={String(metal.karat)} onValueChange={(v) => updateMetal(metal.id, { karat: parseInt(v, 10) })}>
-                        <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {purityOpts.map((opt) => <SelectItem key={opt.value} value={String(opt.value)}>{opt.label}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Weight (g)</label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={metal.weight || ''}
-                        onChange={(e) => updateMetal(metal.id, { weight: parseFloat(e.target.value) || 0 })}
-                        placeholder="0.00"
-                        className="h-9 text-sm"
-                      />
-                    </div>
-                    <Button type="button" variant="ghost" size="icon" onClick={() => removeMetal(metal.id)} className="h-9 w-9 text-muted-foreground hover:text-destructive">
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                );
-              })}
             </div>
           )}
         </div>
