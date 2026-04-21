@@ -1,7 +1,7 @@
-// Google Places proxy edge function.
-// Keeps the Google Maps API key server-side. Two actions:
-//   - autocomplete: { input: string, sessionToken?: string } -> predictions
-//   - details:      { placeId: string, sessionToken?: string } -> structured place
+// Google Places (New) proxy edge function.
+// Uses the Places API (New) endpoints:
+//   - autocomplete: POST https://places.googleapis.com/v1/places:autocomplete
+//   - details:      GET  https://places.googleapis.com/v1/places/{placeId}
 //
 // CORS-enabled, no JWT required (public address autocomplete).
 
@@ -56,70 +56,92 @@ Deno.serve(async (req) => {
       if (input.length < 2) {
         return json(200, { predictions: [] });
       }
-      const params = new URLSearchParams({
-        input,
-        key: apiKey,
-        types: 'address',
-        components: `country:${body.country || 'us'}`,
-      });
-      if (body.sessionToken) params.set('sessiontoken', body.sessionToken);
 
-      const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?${params}`;
-      const res = await fetch(url);
+      const reqBody: Record<string, unknown> = {
+        input,
+        includedPrimaryTypes: ['street_address', 'premise', 'subpremise', 'route'],
+        regionCode: (body.country || 'us').toUpperCase(),
+      };
+      if (body.sessionToken) reqBody.sessionToken = body.sessionToken;
+
+      const res = await fetch(
+        'https://places.googleapis.com/v1/places:autocomplete',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': apiKey,
+          },
+          body: JSON.stringify(reqBody),
+        },
+      );
       const data = await res.json();
-      if (data.status && data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-        console.error('Google autocomplete error', data.status, data.error_message);
-        return json(502, { error: data.error_message || data.status });
+      if (!res.ok) {
+        console.error('Google autocomplete error', res.status, data);
+        return json(502, {
+          error: data?.error?.message || `HTTP ${res.status}`,
+        });
       }
-      const predictions = (data.predictions || []).map((p: any) => ({
-        placeId: p.place_id,
-        description: p.description,
-        mainText: p.structured_formatting?.main_text || p.description,
-        secondaryText: p.structured_formatting?.secondary_text || '',
-        types: p.types || [],
-      }));
+
+      const predictions = (data.suggestions || [])
+        .filter((s: any) => s.placePrediction)
+        .map((s: any) => {
+          const p = s.placePrediction;
+          return {
+            placeId: p.placeId,
+            description: p.text?.text || '',
+            mainText: p.structuredFormat?.mainText?.text || p.text?.text || '',
+            secondaryText: p.structuredFormat?.secondaryText?.text || '',
+            types: p.types || [],
+          };
+        });
       return json(200, { predictions });
     }
 
     if (body.action === 'details') {
       if (!body.placeId) return json(400, { error: 'placeId required' });
-      const params = new URLSearchParams({
-        place_id: body.placeId,
-        key: apiKey,
-        fields: 'address_component,formatted_address,geometry,name,types',
-      });
-      if (body.sessionToken) params.set('sessiontoken', body.sessionToken);
 
-      const url = `https://maps.googleapis.com/maps/api/place/details/json?${params}`;
-      const res = await fetch(url);
+      const url = `https://places.googleapis.com/v1/places/${encodeURIComponent(
+        body.placeId,
+      )}${body.sessionToken ? `?sessionToken=${encodeURIComponent(body.sessionToken)}` : ''}`;
+
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'X-Goog-Api-Key': apiKey,
+          'X-Goog-FieldMask':
+            'id,formattedAddress,addressComponents,location,displayName,types',
+        },
+      });
       const data = await res.json();
-      if (data.status !== 'OK') {
-        console.error('Google details error', data.status, data.error_message);
-        return json(502, { error: data.error_message || data.status });
+      if (!res.ok) {
+        console.error('Google details error', res.status, data);
+        return json(502, {
+          error: data?.error?.message || `HTTP ${res.status}`,
+        });
       }
 
-      const result = data.result || {};
-      const components: any[] = result.address_components || [];
+      const components: any[] = data.addressComponents || [];
       const get = (type: string) =>
         components.find((c: any) => c.types?.includes(type));
 
-      const streetNumber = get('street_number')?.long_name || '';
-      const route = get('route')?.long_name || '';
+      const streetNumber = get('street_number')?.longText || '';
+      const route = get('route')?.longText || '';
       const city =
-        get('locality')?.long_name ||
-        get('postal_town')?.long_name ||
-        get('sublocality')?.long_name ||
-        get('administrative_area_level_2')?.long_name ||
+        get('locality')?.longText ||
+        get('postal_town')?.longText ||
+        get('sublocality')?.longText ||
+        get('administrative_area_level_2')?.longText ||
         '';
-      const state = get('administrative_area_level_1')?.short_name || '';
-      const postalCode = get('postal_code')?.long_name || '';
-      const country = get('country')?.short_name || '';
+      const state = get('administrative_area_level_1')?.shortText || '';
+      const postalCode = get('postal_code')?.longText || '';
+      const country = get('country')?.shortText || '';
       const streetAddress = [streetNumber, route].filter(Boolean).join(' ');
 
       return json(200, {
         place: {
-          placeId: body.placeId,
-          formattedAddress: result.formatted_address || '',
+          placeId: data.id || body.placeId,
+          formattedAddress: data.formattedAddress || '',
           streetAddress,
           streetNumber,
           streetName: route,
@@ -127,8 +149,10 @@ Deno.serve(async (req) => {
           state,
           postalCode,
           country,
-          geometry: result.geometry?.location || null,
-          types: result.types || [],
+          geometry: data.location
+            ? { lat: data.location.latitude, lng: data.location.longitude }
+            : null,
+          types: data.types || [],
         },
       });
     }
