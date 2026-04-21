@@ -7,7 +7,7 @@ import { Plus, Minus, Camera, Loader2 } from 'lucide-react';
 import {
   PURITY_OPTIONS_BY_METAL,
   getDefaultPurityForMetal,
-} from '@/components/store/MetalPuritySelect';
+} from '../store/MetalPuritySelect';
 
 /**
  * Shared spec form used by manual inventory entry. Mirrors the per-category
