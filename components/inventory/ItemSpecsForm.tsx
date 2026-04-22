@@ -245,11 +245,13 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
       {value.category !== 'Watch' && (
         <div className="space-y-4">
           <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">General</div>
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Brand / Maker</label>
-              <Input value={value.brand} onChange={(e) => onChange({ brand: e.target.value })} placeholder="e.g., Tiffany & Co." className="h-9" />
-            </div>
+          <div className={`grid gap-3 ${value.category === 'Silverware' ? 'grid-cols-2' : 'grid-cols-3'}`}>
+            {value.category !== 'Silverware' && (
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Brand / Maker</label>
+                <Input value={value.brand} onChange={(e) => onChange({ brand: e.target.value })} placeholder="e.g., Tiffany & Co." className="h-9" />
+              </div>
+            )}
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Condition</label>
               <Select value={value.condition} onValueChange={(v) => onChange({ condition: v })}>
@@ -259,23 +261,35 @@ export function ItemSpecsForm({ value, onChange, onPhotoUpload, uploadingPhoto }
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Size</label>
-              <Input
-                value={value.size}
-                onChange={(e) => onChange({ size: e.target.value })}
-                placeholder={
-                  value.category === 'Jewelry'
-                    ? value.subcategory === 'Ring'
-                      ? 'e.g., 7'
-                      : ['Necklace', 'Chain', 'Bracelet', 'Anklet'].includes(value.subcategory)
-                        ? 'e.g., 18in'
-                        : 'e.g., 12mm, Small'
-                    : 'e.g., 7, 18in'
-                }
-                className="h-9"
-              />
-            </div>
+            {value.category === 'Silverware' ? (
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Length (in)</label>
+                <Input
+                  value={getSpec(value.specs, 'length')}
+                  onChange={(e) => updateSpec('length', e.target.value)}
+                  placeholder="e.g., 7in, 12in"
+                  className="h-9"
+                />
+              </div>
+            ) : (
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Size</label>
+                <Input
+                  value={value.size}
+                  onChange={(e) => onChange({ size: e.target.value })}
+                  placeholder={
+                    value.category === 'Jewelry'
+                      ? value.subcategory === 'Ring'
+                        ? 'e.g., 7'
+                        : ['Necklace', 'Chain', 'Bracelet', 'Anklet'].includes(value.subcategory)
+                          ? 'e.g., 18in'
+                          : 'e.g., 12mm, Small'
+                      : 'e.g., 7, 18in'
+                  }
+                  className="h-9"
+                />
+              </div>
+            )}
           </div>
         </div>
       )}

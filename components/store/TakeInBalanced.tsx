@@ -1144,11 +1144,13 @@ export function TakeInBalanced({
                                           {/* ── A. GENERAL — Brand / Condition / Size (all non-Watch categories) ── */}
                                           <div>
                                             <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">General</div>
-                                            <div className="grid grid-cols-3 gap-3">
-                                              <div>
-                                                <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Brand / Maker</label>
-                                                <Input value={item.brand || ''} onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })} placeholder="e.g., Tiffany & Co." className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                              </div>
+                                            <div className={`grid gap-3 ${item.category === 'Silverware' ? 'grid-cols-2' : 'grid-cols-3'}`}>
+                                              {item.category !== 'Silverware' && (
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Brand / Maker</label>
+                                                  <Input value={item.brand || ''} onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })} placeholder="e.g., Tiffany & Co." className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                                </div>
+                                              )}
                                               <div>
                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Condition</label>
                                                 <Select value={item.condition || ''} onValueChange={(value) => onItemUpdate(item.id, { condition: value })}>
@@ -1162,21 +1164,33 @@ export function TakeInBalanced({
                                                   </SelectContent>
                                                 </Select>
                                               </div>
-                                              <div>
-                                                <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Size</label>
-                                                <Input
-                                                  value={item.size || ''}
-                                                  onChange={(e) => onItemUpdate(item.id, { size: e.target.value })}
-                                                  placeholder={
-                                                    item.category === 'Jewelry'
-                                                      ? (item.itemType === 'Ring' ? 'e.g., 7'
-                                                          : (item.itemType === 'Chain' || item.itemType === 'Necklace' || item.itemType === 'Bracelet' || item.itemType === 'Anklet') ? 'e.g., 18in'
-                                                          : 'e.g., 12mm, Small, 1.5in')
-                                                      : 'e.g., 7, 18in'
-                                                  }
-                                                  className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"
-                                                />
-                                              </div>
+                                              {item.category === 'Silverware' ? (
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Length (in)</label>
+                                                  <Input
+                                                    value={getSpec(item, 'length', '')}
+                                                    onChange={(e) => updateSpec(item.id, 'length', e.target.value)}
+                                                    placeholder="e.g., 7in, 12in"
+                                                    className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"
+                                                  />
+                                                </div>
+                                              ) : (
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Size</label>
+                                                  <Input
+                                                    value={item.size || ''}
+                                                    onChange={(e) => onItemUpdate(item.id, { size: e.target.value })}
+                                                    placeholder={
+                                                      item.category === 'Jewelry'
+                                                        ? (item.itemType === 'Ring' ? 'e.g., 7'
+                                                            : (item.itemType === 'Chain' || item.itemType === 'Necklace' || item.itemType === 'Bracelet' || item.itemType === 'Anklet') ? 'e.g., 18in'
+                                                            : 'e.g., 12mm, Small, 1.5in')
+                                                        : 'e.g., 7, 18in'
+                                                    }
+                                                    className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"
+                                                  />
+                                                </div>
+                                              )}
                                             </div>
                                           </div>
 
