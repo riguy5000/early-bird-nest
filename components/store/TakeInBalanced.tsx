@@ -1029,16 +1029,12 @@ export function TakeInBalanced({
                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Quantity (parcel)</label>
                                                  <Input type="number" min="1" value={getSpec(item, 'quantity', 1)} onChange={(e) => updateSpec(item.id, 'quantity', parseInt(e.target.value) || 1)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
                                                </div>
-                                               <div className="col-span-2 flex items-end gap-4 pb-1">
-                                                 <label className="flex items-center gap-2 text-[12px] text-[#76707F]">
-                                                   <input type="checkbox" checked={!!getSpec(item, 'mixedTypes', false)} onChange={(e) => updateSpec(item.id, 'mixedTypes', e.target.checked)} />
-                                                   Mixed stone types
-                                                 </label>
-                                                 <label className="flex items-center gap-2 text-[12px] text-[#76707F]">
-                                                   <input type="checkbox" checked={getSpec(item, 'includedInOffer', true) !== false} onChange={(e) => updateSpec(item.id, 'includedInOffer', e.target.checked)} />
-                                                   Included in offer
-                                                 </label>
-                                               </div>
+                                                <div className="col-span-2 flex items-end gap-4 pb-1">
+                                                  <label className="flex items-center gap-2 text-[12px] text-[#76707F]">
+                                                    <input type="checkbox" checked={!!getSpec(item, 'mixedTypes', false)} onChange={(e) => updateSpec(item.id, 'mixedTypes', e.target.checked)} />
+                                                    Mixed stone types
+                                                  </label>
+                                                </div>
                                              </div>
                                            </div>
                                          )}
