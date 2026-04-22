@@ -480,14 +480,14 @@ export function TakeInBalanced({
                                       <span className="text-[12px] text-[#A8A3AE] -ml-1">ct</span>
 
                                       <Select
-                                        value={getSpec(item, 'shape', '') || ''}
-                                        onValueChange={(v) => updateSpec(item.id, 'shape', v)}
+                                        value={getSpec(item, 'stoneType', '') || ''}
+                                        onValueChange={(v) => updateSpec(item.id, 'stoneType', v)}
                                       >
-                                        <SelectTrigger className="w-[110px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
-                                          <SelectValue placeholder="Shape" />
+                                        <SelectTrigger className="w-[130px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
+                                          <SelectValue placeholder="Stone" />
                                         </SelectTrigger>
                                         <SelectContent className="rounded-[12px] bg-white border-black/[0.06] shadow-xl">
-                                          {['Round', 'Princess', 'Oval', 'Cushion', 'Emerald', 'Pear', 'Marquise', 'Radiant', 'Asscher', 'Heart', 'Other'].map(s => (
+                                          {['Diamond', 'Sapphire', 'Ruby', 'Emerald', 'Opal', 'Topaz', 'Amethyst', 'Aquamarine', 'Tanzanite', 'Tourmaline', 'Garnet', 'Pearl', 'Other'].map(s => (
                                             <SelectItem key={s} value={s} className="text-[13px]">{s}</SelectItem>
                                           ))}
                                         </SelectContent>
@@ -993,7 +993,7 @@ export function TakeInBalanced({
                                                </div>
                                                <div>
                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Measurements</label>
-                                                 <Input value={getSpec(item, 'measurements', '')} onChange={(e) => updateSpec(item.id, 'measurements', e.target.value)} placeholder="mm × mm × mm" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                                 <Input value={getSpec(item, 'measurements', '')} onChange={(e) => updateSpec(item.id, 'measurements', e.target.value)} placeholder="e.g., 1mm or 1–3mm" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
                                                </div>
                                              </div>
                                              <div className="grid grid-cols-4 gap-3 mt-3">
@@ -1029,16 +1029,12 @@ export function TakeInBalanced({
                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Quantity (parcel)</label>
                                                  <Input type="number" min="1" value={getSpec(item, 'quantity', 1)} onChange={(e) => updateSpec(item.id, 'quantity', parseInt(e.target.value) || 1)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
                                                </div>
-                                               <div className="col-span-2 flex items-end gap-4 pb-1">
-                                                 <label className="flex items-center gap-2 text-[12px] text-[#76707F]">
-                                                   <input type="checkbox" checked={!!getSpec(item, 'mixedTypes', false)} onChange={(e) => updateSpec(item.id, 'mixedTypes', e.target.checked)} />
-                                                   Mixed stone types
-                                                 </label>
-                                                 <label className="flex items-center gap-2 text-[12px] text-[#76707F]">
-                                                   <input type="checkbox" checked={getSpec(item, 'includedInOffer', true) !== false} onChange={(e) => updateSpec(item.id, 'includedInOffer', e.target.checked)} />
-                                                   Included in offer
-                                                 </label>
-                                               </div>
+                                                <div className="col-span-2 flex items-end gap-4 pb-1">
+                                                  <label className="flex items-center gap-2 text-[12px] text-[#76707F]">
+                                                    <input type="checkbox" checked={!!getSpec(item, 'mixedTypes', false)} onChange={(e) => updateSpec(item.id, 'mixedTypes', e.target.checked)} />
+                                                    Mixed stone types
+                                                  </label>
+                                                </div>
                                              </div>
                                            </div>
                                          )}
@@ -1141,7 +1137,8 @@ export function TakeInBalanced({
                                            </div>
                                          )}
 
-                                          {/* ── A. GENERAL — Brand / Condition / Size (all non-Watch categories) ── */}
+                                          {/* ── A. GENERAL — Brand / Condition / Size (all non-Watch, non-Stones categories) ── */}
+                                          {item.category !== 'Stones' && (
                                           <div>
                                             <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">General</div>
                                             <div className={`grid gap-3 ${item.category === 'Silverware' ? 'grid-cols-2' : 'grid-cols-3'}`}>
@@ -1193,6 +1190,7 @@ export function TakeInBalanced({
                                               )}
                                             </div>
                                           </div>
+                                          )}
 
                                           {/* ── B. HALLMARK / TESTING / DESCRIPTION (Jewelry only) ── */}
                                           {item.category === 'Jewelry' && (
