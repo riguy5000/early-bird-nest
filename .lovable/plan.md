@@ -1,48 +1,39 @@
 
 
-## Goal
-Make every right-side drawer/panel across the app match the approved frosted, floating, rounded design (the one already used by `AppDrawer` and `CustomerDetailDrawer`).
+## Reorganize Silverware Item Specs (Take-In)
 
-## What's inconsistent today
-The approved look (frosted glass, 16px inset from edges, `rounded-[20px]`, soft shadow, light backdrop) is only applied in two custom components. Every other side panel uses the default Radix `Sheet`, which renders edge-to-edge, full-height, square corners, opaque background, and a heavy `bg-black/80` overlay.
+### Problem
+When opening Item Specs for a Silverware item in Take-In, two issues appear:
+1. **"Maker" duplicates** — the generic "General" section shows **Brand / Maker**, and the Silverware-specific section shows **Maker** again.
+2. **"Size"** field in the General section is irrelevant for silverware (intended for ring sizes / chain lengths).
 
-Drawers currently using the unstyled `Sheet`:
-- `components/inventory/InventoryDetailDrawer.tsx` — Inventory detail
-- `components/store/CustomerDrawer.tsx` — Take-In customer drawer
-- `components/store/AICaptureModal.tsx` — AI Assist capture panel
-- `components/PayoutsModule.tsx` — Payout details
-- `components/RootAdminConsole.tsx` — Store details (Root Admin)
+### Scope
+- Only the **Silverware** category in Take-In Item Specs (`components/store/TakeInBalanced.tsx`).
+- Apply the same cleanup to the **Add Inventory drawer** (`components/inventory/ItemSpecsForm.tsx`) so both intake paths stay consistent.
+- No changes to Jewelry, Watch, Bullion, Stones, or LooseItems.
+- No changes to data shape — `brand` and `size` fields stay in the model; we just stop rendering the duplicate inputs for Silverware.
 
-## Fix strategy — single source of truth
-Instead of patching five files individually, restyle the shared `components/ui/sheet.tsx` so the `side="right"` variant renders the approved spec. Every existing drawer inherits it automatically.
+### Changes
 
-### Changes to `components/ui/sheet.tsx`
-1. **SheetOverlay**: replace `bg-black/80` with the approved soft backdrop: `bg-black/[0.08] backdrop-blur-[2px]`.
-2. **sheetVariants → side: "right"**: replace the full-height edge-anchored styles with:
-   - `top-4 right-4 bottom-4` (16px inset from all edges)
-   - `h-auto` (no longer `h-full`)
-   - `w-full sm:max-w-[440px]`
-   - `rounded-[20px]`
-   - Frosted surface: `bg-white/85 backdrop-blur-xl backdrop-saturate-150`
-   - Ring: `border border-white/60`
-   - Shadow: `shadow-[0_20px_60px_rgba(0,0,0,0.12),0_4px_16px_rgba(0,0,0,0.06)]`
-   - Slide-in: keep `slide-in-from-right` animation
-3. Keep `top`, `bottom`, `left` variants unchanged (they're only used by mobile sidebar).
-4. Move the built-in close `X` button slightly so it lands inside the rounded panel (`right-5 top-5`, `rounded-[10px]`, hover `bg-[#F8F7FB]`) to match the AppDrawer close affordance.
+**1. Take-In — `components/store/TakeInBalanced.tsx` (General section, ~line 1144–1181)**
 
-### Verification list (after change)
-- Take-In → open Customer drawer → matches reference
-- Inventory → click any row → detail drawer matches reference
-- Take-In → AI Assist → capture modal matches reference
-- Payouts → click row → details panel matches reference
-- Root Admin → store details panel matches reference
-- Customers → existing CustomerDetailDrawer already correct (uses bespoke styling) — verify it still looks identical alongside the others
+When `item.category === 'Silverware'`:
+- Hide the **Brand / Maker** input (the Silverware section's "Maker" already covers it; keep that as the single source of truth).
+- Replace **Size** with a more meaningful field for silverware: **Length (in)** — a short text input (e.g., "7in", "12in"), stored on the spec bag as `specs.length`. This is useful for individual flatware pieces and trays without forcing a unit.
+- Keep **Condition** in the General section (still relevant).
+- Result for Silverware: General row shows just **Condition** + **Length (in)** in a clean 2-column grid; the Silverware Details section retains Silver Type / Maker / Pattern / Piece Count etc.
 
-## Out of scope
-- Bottom mobile drawer (`src/components/ui/drawer.tsx`, vaul) — not a side panel.
-- Toasts / dialog modals — different component family.
-- Mobile responsive sidebar Sheet — keeps default styling because it's a navigation surface, not a content drawer.
+**2. Add Inventory drawer — `components/inventory/ItemSpecsForm.tsx` (General section, ~line 244–281)**
 
-## Risk
-Low. The Sheet API doesn't change; only the visual classes for `side="right"` and the overlay change. Any consumer passing `className` for width still works (Tailwind merge) — they'll just inherit the rounded floating shell.
+Mirror the same logic:
+- For Silverware, hide **Brand / Maker** (Maker lives in the Silverware Details section).
+- Replace **Size** with **Length (in)** bound to `specs.length`.
+- Keep Condition.
+
+**3. No data migration needed.** Existing records with `brand` or `size` set on Silverware items remain intact — they just won't be edited via these two removed inputs. The Silverware "Maker" field already writes to `specs.maker`, which is the canonical place going forward.
+
+### QA checklist
+- Open Take-In → add Silverware item → expand Item Specs → confirm only one "Maker" field (in Silverware Details), no "Size" field, and a "Length (in)" field replaces it.
+- Same check in Add Inventory drawer with Silverware category.
+- Jewelry, Watch, Bullion, Stones, LooseItems intake screens unchanged.
 
