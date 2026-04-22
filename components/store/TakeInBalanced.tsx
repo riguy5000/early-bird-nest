@@ -1137,7 +1137,8 @@ export function TakeInBalanced({
                                            </div>
                                          )}
 
-                                          {/* ── A. GENERAL — Brand / Condition / Size (all non-Watch categories) ── */}
+                                          {/* ── A. GENERAL — Brand / Condition / Size (all non-Watch, non-Stones categories) ── */}
+                                          {item.category !== 'Stones' && (
                                           <div>
                                             <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">General</div>
                                             <div className={`grid gap-3 ${item.category === 'Silverware' ? 'grid-cols-2' : 'grid-cols-3'}`}>
@@ -1189,6 +1190,7 @@ export function TakeInBalanced({
                                               )}
                                             </div>
                                           </div>
+                                          )}
 
                                           {/* ── B. HALLMARK / TESTING / DESCRIPTION (Jewelry only) ── */}
                                           {item.category === 'Jewelry' && (
