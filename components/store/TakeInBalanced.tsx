@@ -1432,34 +1432,8 @@ export function TakeInBalanced({
                                             </div>
                                           )}
 
-                                        {/* Section: Carat (Stones) */}
-                                        {item.category === 'Stones' ? (
-                                          <div>
-                                            <div className="flex items-center justify-between mb-3">
-                                              <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider">Carat</div>
-                                              <div className="text-[11px] text-[#A8A3AE]">1 stone</div>
-                                            </div>
-                                            <div className="bg-white rounded-[12px] border border-black/[0.06] overflow-hidden">
-                                              <div className="grid grid-cols-[1.2fr_1fr_auto] gap-3 px-4 py-2.5 bg-black/[0.015] border-b border-black/[0.05]">
-                                                <div className="text-[10px] font-semibold text-[#A8A3AE] uppercase tracking-wider">Stone</div>
-                                                <div className="text-[10px] font-semibold text-[#A8A3AE] uppercase tracking-wider text-right">Weight (ct)</div>
-                                                <div className="text-[10px] font-semibold text-[#A8A3AE] uppercase tracking-wider text-right w-20">Payout</div>
-                                              </div>
-                                              <div className="grid grid-cols-[1.2fr_1fr_auto] gap-3 px-4 py-2.5 items-center text-[13px] text-[#2B2833]">
-                                                <div>{getSpec(item, 'stoneType', 'Stone')}</div>
-                                                <div className="text-right tabular-nums">{Number(getSpec(item, 'caratWeight', 0) || 0).toFixed(2)} ct</div>
-                                                <div className="text-right tabular-nums font-medium w-20">${(item.payoutAmount || 0).toFixed(2)}</div>
-                                              </div>
-                                              <div className="flex items-center justify-between px-4 py-3 border-t border-black/[0.06] bg-black/[0.015]">
-                                                <span className="text-[12px] font-medium text-[#76707F]">Total Carat Value</span>
-                                                <span className="text-[15px] font-semibold text-[#2B2833] tabular-nums">
-                                                  ${(item.payoutAmount || 0).toFixed(2)}
-                                                </span>
-                                              </div>
-                                            </div>
-                                            <div className="text-[11px] text-[#A8A3AE] mt-2">Edit carat weight and offer from the row above.</div>
-                                          </div>
-                                        ) : (item.metals || []).length > 0 && (
+                                        {/* Section: Metals */}
+                                        {(item.metals || []).length > 0 && (
                                           <div>
                                             <div className="flex items-center justify-between mb-3">
                                               <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider">Metals</div>

@@ -161,9 +161,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
     const newItem: Item = {
       id: `item_${Date.now()}`,
       category,
-      metals: category === 'Stones'
-        ? []
-        : [{ id: `metal_${Date.now()}`, type: 'Gold', karat: 14, weight: 0 }],
+      metals: [{ id: `metal_${Date.now()}`, type: 'Gold', karat: 14, weight: 0 }],
       stones: [],
       marketValue: 0,
       payoutPercentage: store.defaultPayoutPercentage,
