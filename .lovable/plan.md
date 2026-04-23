@@ -1,43 +1,61 @@
 
 
-## Refine Loose Stones Take-In
+## Loose Stones — Replace "Metals" with "Carat", Confirm Decimal Carat Input
+
+### Problem
+1. New Stones items are auto-created with a default **Gold 14K** metal row, so the Specs panel renders an irrelevant **"Metals · Weight (g)"** table for loose stones.
+2. The inline `ct` field already accepts `1.25`-style decimals (regex `/^\d*\.?\d{0,2}$/` confirmed in code), but the perceived bug is reinforced by the "Metals/grams" UI making the row look metal-shaped. Once the Stones row stops showing metal language, decimal entry will read correctly.
+3. The user wants the Specs panel to show a **Carat** table for Stones with: stone label · **Weight (ct)** · payout · total — instead of the Metals table.
 
 ### Scope
-Only the **Stones** (Loose Stones) category in Take-In (`components/store/TakeInBalanced.tsx`). No changes to Jewelry, Watch, Bullion, Silverware, or LooseItems.
+Only the **Stones** category in Take-In. Files:
+- `components/store/TakeInPage.tsx` — item creation
+- `components/store/TakeInBalanced.tsx` — Specs panel rendering
+
+No changes to Jewelry, Watch, Bullion, Silverware, LooseItems. No data shape changes.
 
 ### Changes
 
-**1. Inline collapsed row (lines ~461–540) — show stone identity, not metal**
+**1. `components/store/TakeInPage.tsx` (line 160–175) — don't seed a Gold metal for Stones**
 
-Today the row shows: `[ct input] [Shape select] [Offer $] [payout]`. Replace **Shape** with **Stone Type** so the row reads as "Diamond · 1.25 ct · $offer" rather than a metal-looking pill.
+Update `addNewItem` so the default `metals` array is **empty when `category === 'Stones'`** and only seeded with the Gold/14K placeholder for other categories:
 
-- Replace the Shape `<Select>` with a **Stone Type** `<Select>` bound to `specs.stoneType` with options: Diamond, Sapphire, Ruby, Emerald, Opal, Topaz, Amethyst, Aquamarine, Tanzanite, Tourmaline, Garnet, Pearl, Other. Placeholder: "Stone".
-- Keep the carat input + "ct" suffix exactly as-is (regex already allows `1.25`-style decimals — confirmed working: `/^\d*\.?\d{0,2}$/`).
-- Keep Offer $, payout pill, CERT badge, Specs button, delete button.
-- (Shape moves to / stays in the expanded "Stone Details" section where it already exists.)
+```ts
+metals: category === 'Stones'
+  ? []
+  : [{ id: `metal_${Date.now()}`, type: 'Gold', karat: 14, weight: 0 }],
+```
 
-**2. Specs panel — Stones cleanup**
+This single change makes the existing Specs-panel guard `(item.metals || []).length > 0` (line 1436) naturally hide the Metals section for Stones — no metal, no table.
 
-Inside the expanded Specs for `category === 'Stones'`:
+**2. `components/store/TakeInBalanced.tsx` (lines 1435–1466) — render a "Carat" table for Stones**
 
-- **Hide the "General" section's Brand / Maker, Condition, and Size row entirely** for Stones (loose stones don't have a brand or ring size; "Condition" is irrelevant for a gem and "Measurements" already lives in Stone Details for mm dimensions).
-  - Implementation: wrap the entire General block (line 1144 `{/* A. GENERAL */}` … its closing div) in `{item.category !== 'Stones' && (...)}`.
-- **Remove the "Included in offer" checkbox** at line 1037–1040 (the whole loose stone IS the offer, so this toggle is meaningless). Keep the "Mixed stone types" checkbox next to it.
-- **Update Measurements placeholder** (line 996) from `"mm × mm × mm"` → `"e.g., 1mm or 1–3mm"` so it reads as the size guidance the user wants. The label stays "Measurements" (clearer than "Size") and accepts ranges like `1-3mm`.
+Replace the lone `{(item.metals || []).length > 0 && (...)}` Metals block with a category-aware branch:
 
-**3. Carat decimal entry — verify, no code change needed**
+- **If `item.category === 'Stones'`**: render a **Carat** table with columns `Stone | Weight (ct) | Payout` and a "Total Carat Value" footer.
+  - Stone column: `{getSpec(item, 'stoneType', 'Stone')}` (e.g., "Diamond")
+  - Weight column: `{getSpec(item, 'caratWeight', 0).toFixed(2)} ct`
+  - Payout column: `${(item.payoutAmount || 0).toFixed(2)}`
+  - Footer total: `${(item.payoutAmount || 0).toFixed(2)}` labeled "Total Carat Value"
+  - Helper text below: "Edit carat weight and offer from the row above."
+- **Else if `(item.metals || []).length > 0`**: keep the existing Metals table exactly as today (Jewelry, Watch precious, Bullion, etc.).
 
-The regex `/^\d*\.?\d{0,2}$/` on the inline carat input already accepts `1.25`. If the user is hitting a different field, the **Stone Details → Carat Weight** input (line ~397 area) is a plain `<Input>` with no restriction — also accepts decimals. No change required; the perceived bug is likely fixed once the row shows Stone Type instead of Shape (clearer context).
+Section header reads **"Carat"** for Stones and **"Metals"** for everything else. The container/styling matches the existing Metals card (rounded-[12px], white bg, same header bar, same footer band) so nothing visually shifts elsewhere.
+
+**3. Inline `ct` field — verify, no code change**
+
+The collapsed-row carat input (lines 464–479) already uses `inputMode="decimal"` + `/^\d*\.?\d{0,2}$/`. The Stone Details "Carat Wt" sub-stone input (line 1347) is a plain unrestricted `<Input>` — also accepts `1.25`. No regex change needed; once "Metals/grams" is gone the dot will read correctly in context.
 
 ### What is NOT changing
-- Data shape: `brand`, `size`, `condition`, `includedInOffer` fields stay in the model; we just don't render them for Stones.
-- Other categories' rows and specs.
-- Stone Details panel fields (color, clarity, cut, polish, symmetry, fluorescence, lab, report #, origin, treatment, quantity).
+- Jewelry / Watch / Bullion / Silverware / LooseItems creation and Specs.
+- The Stones inline row UI (already correct: ct input, Stone Type, Offer, payout pill).
+- Stone Details panel.
+- Data model (`metals`, `stones`, `caratWeight`, `payoutAmount` all unchanged).
 
 ### QA checklist
-1. Take-In → add a **Loose Stones** item → inline row shows: carat input + "ct" + **Stone Type** select (Diamond/etc.) + Offer $ + payout pill.
-2. Type `1.25` in the carat field → accepts and displays correctly.
-3. Open Specs → no Brand/Maker, no Condition, no Size field.
-4. Stone Details panel: no "Included in offer" checkbox; Measurements placeholder reads `e.g., 1mm or 1–3mm` and accepts a range.
-5. Jewelry, Watch, Bullion, Silverware, LooseItems intake rows and specs are unchanged.
+1. Take-In → add a **Loose Stones** item → open Specs → no Metals table; instead a **Carat** table shows: Stone Type · Weight (ct) · Payout · Total Carat Value.
+2. Type `1.25` in the inline `ct` field → accepts `1.25`, table reflects `1.25 ct`.
+3. Set Offer to `120.50` → Carat table footer reads `$120.50` (Total Carat Value).
+4. Add a **Jewelry** item → Specs still shows the original **Metals** table with grams (unchanged).
+5. Add a **Bullion** / **Watch (precious)** item → Metals table unchanged.
 
