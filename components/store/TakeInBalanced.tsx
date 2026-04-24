@@ -998,10 +998,17 @@ export function TakeInBalanced({
                                            <div>
                                              <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">Stone Details</div>
                                              <div className="grid grid-cols-4 gap-3">
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Stone Type</label>
-                                                 <Input value={getSpec(item, 'stoneType', '')} onChange={(e) => updateSpec(item.id, 'stoneType', e.target.value)} placeholder="e.g., Diamond" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                               </div>
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Stone Type</label>
+                                                  <Select value={getSpec(item, 'stoneType', '')} onValueChange={(v) => updateSpec(item.id, 'stoneType', v)}>
+                                                    <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                                    <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06] max-h-[300px]">
+                                                      {['Diamond','Sapphire','Ruby','Emerald','Opal','Pearl','Alexandrite','Aquamarine','Amethyst','Citrine','Garnet','Peridot','Topaz','Tourmaline','Tanzanite','Spinel','Jade','Moissanite','CZ','Other'].map(s => (
+                                                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                                                      ))}
+                                                    </SelectContent>
+                                                  </Select>
+                                                </div>
                                                <div>
                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Color</label>
                                                  <Input value={getSpec(item, 'color', '')} onChange={(e) => updateSpec(item.id, 'color', e.target.value)} placeholder="e.g., G" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
