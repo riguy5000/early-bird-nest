@@ -699,7 +699,7 @@ export function TakeInBalanced({
                                               e.stopPropagation();
                                               onItemUpdate(item.id, { subType: type });
                                             }}
-                                            className={`px-3 py-1 text-[12px] rounded-full transition-colors cursor-pointer font-medium ${
+                                            className={`px-3 py-1 text-[12px] rounded-full transition-colors cursor-pointer font-medium whitespace-nowrap ${
                                               active
                                                 ? 'bg-[#2B2833] text-white'
                                                 : 'bg-[#F1EFF3] text-[#76707F] hover:bg-[#E8E6EC]'
