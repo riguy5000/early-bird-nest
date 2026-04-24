@@ -53,14 +53,12 @@ export function TakeInSlim({
     }
     updatedMetals[metalIndex] = next;
 
-    const globalPct = store?.defaultPayoutPercentage ?? item.payoutPercentage ?? 75;
-    // Recompute every row with real spot/purity math
+    // Recompute every row with real spot/purity math (no legacy Base Payout fallback)
     const computedMetals = updatedMetals.map((m: any) => {
       const r = computeMetalRow(
-        { type: m.type, karat: m.karat, weight: m.weight, payoutPercentage: m.payoutPercentage ?? item.payoutPercentage },
+        { type: m.type, karat: m.karat, weight: m.weight, payoutPercentage: m.payoutPercentage },
         spotPrices,
-        store?.rateDefaults,
-        globalPct
+        store?.rateDefaults
       );
       return { ...m, marketValue: roundCurrency(r.marketValue), payoutAmount: roundCurrency(r.payoutAmount) };
     });

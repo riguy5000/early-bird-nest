@@ -61,13 +61,17 @@ export function getPurityRatio(metal: MetalType, karatOrPurity: number | string 
  * Resolve a payout percentage for a metal, honoring store settings hierarchy:
  * 1. Per-metal-row override (if explicitly set on the row)
  * 2. Metal-specific default from rateDefaults (e.g. rateDefaults.gold)
- * 3. Global default
+ *
+ * NOTE: The legacy "Base Payout" global fallback has been removed. If neither
+ * an explicit row override nor a metal-specific rate exists, this returns 0
+ * (no silent fallback). The 4th argument is accepted for backward
+ * compatibility but is intentionally ignored.
  */
 export function resolvePayoutPercent(
   metal: MetalType,
   rowPercent: number | undefined | null,
   rateDefaults: Record<string, number> | undefined,
-  globalDefault: number
+  _legacyGlobalDefault?: number
 ): number {
   if (typeof rowPercent === 'number' && isFinite(rowPercent) && rowPercent > 0) {
     return rowPercent;
@@ -77,7 +81,7 @@ export function resolvePayoutPercent(
   if (typeof fromRates === 'number' && isFinite(fromRates) && fromRates > 0) {
     return fromRates;
   }
-  return globalDefault;
+  return 0;
 }
 
 /** Look up spot price (per troy oz) for a metal, case-insensitive. Returns 0 if missing. */
@@ -116,7 +120,7 @@ export function computeMetalRow(
   row: MetalRowInput,
   prices: SpotPrices | undefined,
   rateDefaults: Record<string, number> | undefined,
-  globalPayoutPercent: number
+  _legacyGlobalPayoutPercent?: number
 ): MetalRowResult {
   const spot = getSpotPerOunce(row.type, prices);
   const purity = getPurityRatio(row.type, row.karat ?? row.purity);
@@ -126,7 +130,7 @@ export function computeMetalRow(
   const adjustedPricePerGram = pricePerGram * purity;
   const marketValue = adjustedPricePerGram * weight;
 
-  const payoutPercent = resolvePayoutPercent(row.type, row.payoutPercentage, rateDefaults, globalPayoutPercent);
+  const payoutPercent = resolvePayoutPercent(row.type, row.payoutPercentage, rateDefaults);
   const payoutAmount = marketValue * (payoutPercent / 100);
 
   return {

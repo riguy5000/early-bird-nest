@@ -78,8 +78,9 @@ const s = (extra: Partial<DemoStone>): DemoStone => ({
   ...extra,
 });
 
-export function buildDemoItems(defaultPayoutPercentage = 75): DemoItem[] {
-  const pct = defaultPayoutPercentage;
+export function buildDemoItems(): DemoItem[] {
+  // Base Payout removed — demo items use 0 and rely on metal-specific rateDefaults at compute time.
+  const pct = 0;
 
   const items: DemoItem[] = [
     // ───────── JEWELRY ─────────

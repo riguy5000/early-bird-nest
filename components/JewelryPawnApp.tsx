@@ -44,9 +44,9 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
     { id: 'take-in', name: 'Take-In', icon: Plus, requiresPermission: 'accessTakeIn', component: () => (
       <TakeInPage 
         store={{ 
-          id: storeId, name: storeName, defaultPayoutPercentage: resolved.rateDefaults?.gold ?? 75, 
+          id: storeId, name: storeName, defaultPayoutPercentage: 0, 
           hideProfit: effectiveVisibility.hideProfit, hidePayout: effectiveVisibility.hidePayout, 
-          hideMarketValue: effectiveVisibility.hideMarketValue, enableFastEntry: resolved.enableFastEntry, 
+          hideMarketValue: effectiveVisibility.hideMarketValue, enableFastEntry: resolved.enableFastEntry,
           autoPrintLabels: resolved.enablePrintLabels,
           requireCustomerInfoBeforeCompletion: resolved.requireCustomerInfoBeforeCompletion,
           defaultPayoutMethod: resolved.defaultPayoutMethod,
