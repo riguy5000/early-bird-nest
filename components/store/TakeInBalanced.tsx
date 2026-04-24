@@ -674,6 +674,73 @@ export function TakeInBalanced({
                                   )}
                                 </div>
 
+                                {/* Additional metal rows for jewelry — stacked below */}
+                                {item.category !== 'Watch' && (item.metals || []).length > 1 && (
+                                  <div className="mt-2 pl-11 space-y-2">
+                                    {(item.metals || []).slice(1).map((metal: any) => (
+                                      <div key={metal.id} className="flex items-center gap-2 justify-end">
+                                        <Select value={metal.type} onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}>
+                                          <SelectTrigger className="w-[100px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent className="rounded-[12px] bg-white border-black/[0.06] shadow-xl">
+                                            <SelectItem value="Gold">Gold</SelectItem>
+                                            <SelectItem value="Silver">Silver</SelectItem>
+                                            <SelectItem value="Platinum">Platinum</SelectItem>
+                                            <SelectItem value="Palladium">Palladium</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                        <MetalPuritySelect
+                                          metal={metal.type}
+                                          value={metal.karat}
+                                          onChange={(v) => updateMetal(item.id, metal.id, { karat: v })}
+                                          triggerClassName="w-[96px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]"
+                                        />
+                                        <div className="flex items-center gap-1.5">
+                                          <Input
+                                            ref={(el) => weightInputRefs.current[`${item.id}_${metal.id}`] = el}
+                                            type="text"
+                                            inputMode="decimal"
+                                            value={metal.weightRaw ?? (metal.weight || '')}
+                                            onChange={(e) => {
+                                              const value = e.target.value;
+                                              if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+                                                const numValue = value === '' ? 0 : parseFloat(value) || 0;
+                                                updateMetal(item.id, metal.id, { weight: numValue, weightRaw: value });
+                                              }
+                                            }}
+                                            onBlur={(e) => {
+                                              const numValue = parseFloat(e.target.value) || 0;
+                                              updateMetal(item.id, metal.id, { weight: numValue, weightRaw: undefined });
+                                            }}
+                                            onKeyDown={(e) => handleKeyPress(e, item.id, metal.id)}
+                                            placeholder="0.00"
+                                            className="w-20 h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px] text-right tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                            style={{ MozAppearance: 'textfield' as any }}
+                                            onClick={(e) => e.stopPropagation()}
+                                          />
+                                          <span className="text-[12px] text-[#A8A3AE]">g</span>
+                                        </div>
+                                        <div className="h-10 px-3 flex items-center justify-end min-w-[80px] rounded-[10px] bg-[#E6FBF1] text-[13px] font-semibold text-[#0FB37A] tabular-nums">
+                                          ${(metal.payoutAmount || 0).toFixed(2)}
+                                        </div>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            const updatedMetals = (item.metals || []).filter((m: any) => m.id !== metal.id);
+                                            const totalMarketValue = updatedMetals.reduce((sum: number, m: any) => sum + (m.marketValue || 0), 0);
+                                            const totalPayoutAmount = updatedMetals.reduce((sum: number, m: any) => sum + (m.payoutAmount || 0), 0);
+                                            onItemUpdate(item.id, { metals: updatedMetals, marketValue: totalMarketValue, payoutAmount: totalPayoutAmount });
+                                          }}
+                                          className="h-10 w-10 flex items-center justify-center rounded-[10px] text-[#A8A3AE] hover:text-[#F87171] hover:bg-[#F87171]/[0.08] transition-colors"
+                                        >
+                                          <X className="h-4 w-4" />
+                                        </button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+
                                 {/* Type pills row — below input, indented past badge */}
                                 <div className="flex flex-wrap gap-1.5 mt-2 pl-11">
                                   {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).slice(0, 6).map(type => {
