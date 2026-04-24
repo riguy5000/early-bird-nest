@@ -863,16 +863,22 @@ export function TakeInBalanced({
                                              </SelectContent>
                                            </Select>
                                          </div>
-                                         <div>
-                                           <label className="text-[13px] font-medium text-[#76707F] block mb-1.5">Movement</label>
-                                           <Select value={item.watchMovement || ''} onValueChange={(v) => onItemUpdate(item.id, { watchMovement: v })}>
-                                             <SelectTrigger className="input-glass h-9 text-[13px]"><SelectValue placeholder="Select" /></SelectTrigger>
-                                             <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
-                                               <SelectItem value="With Movement">With Movement</SelectItem>
-                                               <SelectItem value="Without Movement">Without Movement</SelectItem>
-                                             </SelectContent>
-                                           </Select>
-                                         </div>
+                                          <div>
+                                            <label className="text-[13px] font-medium text-[#76707F] block mb-1.5">Movement</label>
+                                            <Select value={item.watchMovement || ''} onValueChange={(v) => onItemUpdate(item.id, { watchMovement: v })}>
+                                              <SelectTrigger className="input-glass h-9 text-[13px]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                              <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
+                                                <SelectItem value="Automatic">Automatic</SelectItem>
+                                                <SelectItem value="Manual">Manual (Hand-Wind)</SelectItem>
+                                                <SelectItem value="Quartz">Quartz / Battery</SelectItem>
+                                                <SelectItem value="Mechanical">Mechanical</SelectItem>
+                                                <SelectItem value="Solar">Solar</SelectItem>
+                                                <SelectItem value="Kinetic">Kinetic</SelectItem>
+                                                <SelectItem value="Smart">Smart</SelectItem>
+                                                <SelectItem value="Other">Other / Unknown</SelectItem>
+                                              </SelectContent>
+                                            </Select>
+                                          </div>
                                          <div>
                                            <label className="text-[13px] font-medium text-[#76707F] block mb-1.5">Band</label>
                                            <Select value={item.watchBand || ''} onValueChange={(v) => onItemUpdate(item.id, { watchBand: v })}>
