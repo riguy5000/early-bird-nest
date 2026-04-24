@@ -668,13 +668,14 @@ export function TakeInBalanced({
                                 {/* Type pills row — below input, indented past badge */}
                                 <div className="flex flex-wrap gap-1.5 mt-2 pl-11">
                                   {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).slice(0, 6).map(type => {
-                                    const active = item.itemType === type;
+                                    const active = item.subType === type || item.itemType === type;
                                     return (
                                       <button
                                         key={type}
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          onItemUpdate(item.id, { itemType: type });
+                                          // Only update the chip selection (subType) — preserve the user's typed description.
+                                          onItemUpdate(item.id, { subType: type });
                                         }}
                                         className={`px-3 py-1 text-[12px] rounded-full transition-colors cursor-pointer font-medium ${
                                           active
