@@ -671,9 +671,12 @@ export function TakeInBalanced({
                                   )}
                                 </div>
 
-                                {/* Additional metal rows for jewelry — stacked below */}
+                                {/* Additional metal rows for jewelry — stacked below, aligned under primary metal group */}
                                 {item.category !== 'Watch' && (item.metals || []).length > 1 && (
-                                  <div className="mt-2 pl-11 space-y-2">
+                                  <div
+                                    className="mt-2 pl-11 space-y-2"
+                                    style={{ paddingRight: store.canDeleteItems !== false ? 142 : 94 }}
+                                  >
                                     {(item.metals || []).slice(1).map((metal: any) => (
                                       <div key={metal.id} className="flex items-center gap-2 justify-end">
                                         <Select value={metal.type} onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}>
