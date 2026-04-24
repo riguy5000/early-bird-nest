@@ -306,6 +306,46 @@ export function TakeInBalanced({
       .join(', ');
   };
 
+  // Auto-select a subtype chip when the user types a keyword that matches one of the
+  // category's subtype labels in the description. Respects manual overrides: once the
+  // current itemType already matches one of the chips for the active category, we skip.
+  useEffect(() => {
+    items.forEach((item: any) => {
+      const text = (item.itemType || '').trim();
+      if (!text) return;
+      const subtypes = itemTypesByCategory[item.category as keyof typeof itemTypesByCategory] || [];
+      if (subtypes.length === 0) return;
+      // If current itemType is already an exact subtype, leave it alone (manual override).
+      if (subtypes.some(s => s.toLowerCase() === text.toLowerCase())) return;
+      // If user previously locked a subType, only auto-update when description clearly
+      // mentions a different subtype keyword.
+      const lower = text.toLowerCase();
+      // Prefer the longest matching subtype label whose keywords all appear in the text.
+      let best: string | null = null;
+      let bestScore = 0;
+      for (const sub of subtypes) {
+        const subLower = sub.toLowerCase();
+        // Direct substring match
+        if (lower.includes(subLower)) {
+          const score = subLower.length;
+          if (score > bestScore) { best = sub; bestScore = score; }
+          continue;
+        }
+        // Word-by-word match (all words of subtype label appear in text)
+        const words = subLower.split(/[\s/]+/).filter(w => w.length > 2);
+        if (words.length > 0 && words.every(w => lower.includes(w))) {
+          const score = words.join('').length;
+          if (score > bestScore) { best = sub; bestScore = score; }
+        }
+      }
+      if (best && best !== item.subType) {
+        onItemUpdate(item.id, { subType: best });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items.map((i: any) => `${i.id}:${i.itemType}:${i.category}`).join('|')]);
+
+
   return (
     <div className="h-full flex overflow-hidden">
       <div className="flex w-full h-full">
