@@ -306,6 +306,46 @@ export function TakeInBalanced({
       .join(', ');
   };
 
+  // Auto-select a subtype chip when the user types a keyword that matches one of the
+  // category's subtype labels in the description. Respects manual overrides: once the
+  // current itemType already matches one of the chips for the active category, we skip.
+  useEffect(() => {
+    items.forEach((item: any) => {
+      const text = (item.itemType || '').trim();
+      if (!text) return;
+      const subtypes = itemTypesByCategory[item.category as keyof typeof itemTypesByCategory] || [];
+      if (subtypes.length === 0) return;
+      // If current itemType is already an exact subtype, leave it alone (manual override).
+      if (subtypes.some(s => s.toLowerCase() === text.toLowerCase())) return;
+      // If user previously locked a subType, only auto-update when description clearly
+      // mentions a different subtype keyword.
+      const lower = text.toLowerCase();
+      // Prefer the longest matching subtype label whose keywords all appear in the text.
+      let best: string | null = null;
+      let bestScore = 0;
+      for (const sub of subtypes) {
+        const subLower = sub.toLowerCase();
+        // Direct substring match
+        if (lower.includes(subLower)) {
+          const score = subLower.length;
+          if (score > bestScore) { best = sub; bestScore = score; }
+          continue;
+        }
+        // Word-by-word match (all words of subtype label appear in text)
+        const words = subLower.split(/[\s/]+/).filter(w => w.length > 2);
+        if (words.length > 0 && words.every(w => lower.includes(w))) {
+          const score = words.join('').length;
+          if (score > bestScore) { best = sub; bestScore = score; }
+        }
+      }
+      if (best && best !== item.subType) {
+        onItemUpdate(item.id, { subType: best });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items.map((i: any) => `${i.id}:${i.itemType}:${i.category}`).join('|')]);
+
+
   return (
     <div className="h-full flex overflow-hidden">
       <div className="flex w-full h-full">
@@ -479,19 +519,8 @@ export function TakeInBalanced({
                                       />
                                       <span className="text-[12px] text-[#A8A3AE] -ml-1">ct</span>
 
-                                      <Select
-                                        value={getSpec(item, 'stoneType', '') || ''}
-                                        onValueChange={(v) => updateSpec(item.id, 'stoneType', v)}
-                                      >
-                                        <SelectTrigger className="w-[130px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
-                                          <SelectValue placeholder="Stone" />
-                                        </SelectTrigger>
-                                        <SelectContent className="rounded-[12px] bg-white border-black/[0.06] shadow-xl">
-                                          {['Diamond', 'Sapphire', 'Ruby', 'Emerald', 'Opal', 'Topaz', 'Amethyst', 'Aquamarine', 'Tanzanite', 'Tourmaline', 'Garnet', 'Pearl', 'Other'].map(s => (
-                                            <SelectItem key={s} value={s} className="text-[13px]">{s}</SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
+                                      {/* Stone Type now lives in the Specs panel — keep the inline row focused on weight + offer */}
+
 
                                       <Input
                                         type="text"
@@ -628,13 +657,14 @@ export function TakeInBalanced({
                                 {/* Type pills row — below input, indented past badge */}
                                 <div className="flex flex-wrap gap-1.5 mt-2 pl-11">
                                   {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).slice(0, 6).map(type => {
-                                    const active = item.itemType === type;
+                                    const active = item.subType === type || item.itemType === type;
                                     return (
                                       <button
                                         key={type}
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          onItemUpdate(item.id, { itemType: type });
+                                          // Only update the chip selection (subType) — preserve the user's typed description.
+                                          onItemUpdate(item.id, { subType: type });
                                         }}
                                         className={`px-3 py-1 text-[12px] rounded-full transition-colors cursor-pointer font-medium ${
                                           active
@@ -822,16 +852,22 @@ export function TakeInBalanced({
                                              </SelectContent>
                                            </Select>
                                          </div>
-                                         <div>
-                                           <label className="text-[13px] font-medium text-[#76707F] block mb-1.5">Movement</label>
-                                           <Select value={item.watchMovement || ''} onValueChange={(v) => onItemUpdate(item.id, { watchMovement: v })}>
-                                             <SelectTrigger className="input-glass h-9 text-[13px]"><SelectValue placeholder="Select" /></SelectTrigger>
-                                             <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
-                                               <SelectItem value="With Movement">With Movement</SelectItem>
-                                               <SelectItem value="Without Movement">Without Movement</SelectItem>
-                                             </SelectContent>
-                                           </Select>
-                                         </div>
+                                          <div>
+                                            <label className="text-[13px] font-medium text-[#76707F] block mb-1.5">Movement</label>
+                                            <Select value={item.watchMovement || ''} onValueChange={(v) => onItemUpdate(item.id, { watchMovement: v })}>
+                                              <SelectTrigger className="input-glass h-9 text-[13px]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                              <SelectContent className="rounded-[12px] bg-white/95 backdrop-blur-xl border-white/60 shadow-xl">
+                                                <SelectItem value="Automatic">Automatic</SelectItem>
+                                                <SelectItem value="Manual">Manual (Hand-Wind)</SelectItem>
+                                                <SelectItem value="Quartz">Quartz / Battery</SelectItem>
+                                                <SelectItem value="Mechanical">Mechanical</SelectItem>
+                                                <SelectItem value="Solar">Solar</SelectItem>
+                                                <SelectItem value="Kinetic">Kinetic</SelectItem>
+                                                <SelectItem value="Smart">Smart</SelectItem>
+                                                <SelectItem value="Other">Other / Unknown</SelectItem>
+                                              </SelectContent>
+                                            </Select>
+                                          </div>
                                          <div>
                                            <label className="text-[13px] font-medium text-[#76707F] block mb-1.5">Band</label>
                                            <Select value={item.watchBand || ''} onValueChange={(v) => onItemUpdate(item.id, { watchBand: v })}>
@@ -873,63 +909,55 @@ export function TakeInBalanced({
                                          {/* ── Subtype pills (full list) — for ALL non-Watch categories ── */}
                                          <div>
                                            <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">Subtype</div>
-                                           <div className="flex flex-wrap gap-1.5 mb-1">
-                                             {(itemTypesByCategory[item.category as keyof typeof itemTypesByCategory] || []).map(type => {
-                                               const active = (item.itemType || '').toLowerCase() === type.toLowerCase();
-                                               return (
-                                                 <button
-                                                   key={type}
-                                                   onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { itemType: type, subType: type }); }}
-                                                   className={`px-3 h-8 text-[12px] rounded-[8px] font-medium transition-all ${active ? 'bg-[#2B2833] text-white shadow-sm' : 'bg-white text-[#76707F] border border-black/[0.08] hover:text-[#2B2833] hover:border-black/[0.15]'}`}
-                                                 >
-                                                   {type}
-                                                 </button>
-                                               );
-                                             })}
-                                           </div>
+                                            <div className="flex flex-wrap gap-1.5 mb-1">
+                                              {(itemTypesByCategory[item.category as keyof typeof itemTypesByCategory] || []).map(type => {
+                                                const active = (item.subType || '').toLowerCase() === type.toLowerCase()
+                                                  || (item.itemType || '').toLowerCase() === type.toLowerCase();
+                                                return (
+                                                  <button
+                                                    key={type}
+                                                    onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { subType: type }); }}
+                                                    className={`px-3 h-8 text-[12px] rounded-[8px] font-medium transition-all ${active ? 'bg-[#2B2833] text-white shadow-sm' : 'bg-white text-[#76707F] border border-black/[0.08] hover:text-[#2B2833] hover:border-black/[0.15]'}`}
+                                                  >
+                                                    {type}
+                                                  </button>
+                                                );
+                                              })}
+                                            </div>
                                          </div>
 
                                          {/* ── Bullion / Coins specifics ── */}
                                          {item.category === 'Bullion' && (
                                            <div>
                                              <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">Bullion / Coin Details</div>
-                                             <div className="grid grid-cols-4 gap-3">
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Purity</label>
-                                                 <Select value={getSpec(item, 'purity', '')} onValueChange={(v) => updateSpec(item.id, 'purity', v)}>
-                                                   <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
-                                                   <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
-                                                     {bullionPurities.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
-                                                   </SelectContent>
-                                                 </Select>
-                                               </div>
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Unit</label>
-                                                 <Select value={getSpec(item, 'unit', 'oz')} onValueChange={(v) => updateSpec(item.id, 'unit', v)}>
-                                                   <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue /></SelectTrigger>
-                                                   <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
-                                                     {bullionUnits.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
-                                                   </SelectContent>
-                                                 </Select>
-                                               </div>
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Quantity</label>
-                                                 <Input type="number" min="1" value={getSpec(item, 'quantity', 1)} onChange={(e) => updateSpec(item.id, 'quantity', parseInt(e.target.value) || 1)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                               </div>
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Mint / Refinery</label>
-                                                 <Input value={getSpec(item, 'mint', '')} onChange={(e) => updateSpec(item.id, 'mint', e.target.value)} placeholder="e.g., PAMP, US Mint" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                               </div>
-                                             </div>
-                                             <div className="grid grid-cols-4 gap-3 mt-3">
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Product Name</label>
-                                                 <Input value={getSpec(item, 'productName', '')} onChange={(e) => updateSpec(item.id, 'productName', e.target.value)} placeholder="e.g., Gold Eagle 1oz" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                               </div>
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Serial #</label>
-                                                 <Input value={getSpec(item, 'serial', '')} onChange={(e) => updateSpec(item.id, 'serial', e.target.value)} placeholder="If bar" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                               </div>
+                                              <div className="grid grid-cols-4 gap-3">
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Mint / Refinery</label>
+                                                  <Input value={getSpec(item, 'mint', '')} onChange={(e) => updateSpec(item.id, 'mint', e.target.value)} placeholder="e.g., PAMP, US Mint" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                                </div>
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Unit</label>
+                                                  <Select value={getSpec(item, 'unit', 'oz')} onValueChange={(v) => updateSpec(item.id, 'unit', v)}>
+                                                    <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue /></SelectTrigger>
+                                                    <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
+                                                      {bullionUnits.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
+                                                    </SelectContent>
+                                                  </Select>
+                                                </div>
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Quantity</label>
+                                                  <Input type="number" min="1" value={getSpec(item, 'quantity', 1)} onChange={(e) => updateSpec(item.id, 'quantity', parseInt(e.target.value) || 1)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                                </div>
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Product Name</label>
+                                                  <Input value={getSpec(item, 'productName', '')} onChange={(e) => updateSpec(item.id, 'productName', e.target.value)} placeholder="e.g., Gold Eagle 1oz" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                                </div>
+                                              </div>
+                                              <div className="grid grid-cols-4 gap-3 mt-3">
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Serial #</label>
+                                                  <Input value={getSpec(item, 'serial', '')} onChange={(e) => updateSpec(item.id, 'serial', e.target.value)} placeholder="If bar" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                                </div>
                                                <div>
                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Year</label>
                                                  <Input value={getSpec(item, 'year', '')} onChange={(e) => updateSpec(item.id, 'year', e.target.value)} placeholder="If coin" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
@@ -961,10 +989,17 @@ export function TakeInBalanced({
                                            <div>
                                              <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">Stone Details</div>
                                              <div className="grid grid-cols-4 gap-3">
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Stone Type</label>
-                                                 <Input value={getSpec(item, 'stoneType', '')} onChange={(e) => updateSpec(item.id, 'stoneType', e.target.value)} placeholder="e.g., Diamond" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                               </div>
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Stone Type</label>
+                                                  <Select value={getSpec(item, 'stoneType', '')} onValueChange={(v) => updateSpec(item.id, 'stoneType', v)}>
+                                                    <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                                    <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06] max-h-[300px]">
+                                                      {['Diamond','Sapphire','Ruby','Emerald','Opal','Pearl','Alexandrite','Aquamarine','Amethyst','Citrine','Garnet','Peridot','Topaz','Tourmaline','Tanzanite','Spinel','Jade','Moissanite','CZ','Other'].map(s => (
+                                                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                                                      ))}
+                                                    </SelectContent>
+                                                  </Select>
+                                                </div>
                                                <div>
                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Color</label>
                                                  <Input value={getSpec(item, 'color', '')} onChange={(e) => updateSpec(item.id, 'color', e.target.value)} placeholder="e.g., G" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
@@ -1043,29 +1078,20 @@ export function TakeInBalanced({
                                          {item.category === 'Silverware' && (
                                            <div>
                                              <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">Silverware Details</div>
-                                             <div className="grid grid-cols-4 gap-3">
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Silver Type</label>
-                                                 <Select value={getSpec(item, 'silverType', 'Sterling (.925)')} onValueChange={(v) => updateSpec(item.id, 'silverType', v)}>
-                                                   <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue /></SelectTrigger>
-                                                   <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
-                                                     {silverTypes.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                                                   </SelectContent>
-                                                 </Select>
-                                               </div>
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Maker</label>
-                                                 <Input value={getSpec(item, 'maker', '')} onChange={(e) => updateSpec(item.id, 'maker', e.target.value)} placeholder="e.g., Gorham" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                               </div>
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Pattern</label>
-                                                 <Input value={getSpec(item, 'pattern', '')} onChange={(e) => updateSpec(item.id, 'pattern', e.target.value)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                               </div>
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Piece Count</label>
-                                                 <Input type="number" min="1" value={getSpec(item, 'pieceCount', 1)} onChange={(e) => updateSpec(item.id, 'pieceCount', parseInt(e.target.value) || 1)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                               </div>
-                                             </div>
+                                              <div className="grid grid-cols-3 gap-3">
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Maker</label>
+                                                  <Input value={getSpec(item, 'maker', '')} onChange={(e) => updateSpec(item.id, 'maker', e.target.value)} placeholder="e.g., Gorham" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                                </div>
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Pattern</label>
+                                                  <Input value={getSpec(item, 'pattern', '')} onChange={(e) => updateSpec(item.id, 'pattern', e.target.value)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                                </div>
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Piece Count</label>
+                                                  <Input type="number" min="1" value={getSpec(item, 'pieceCount', 1)} onChange={(e) => updateSpec(item.id, 'pieceCount', parseInt(e.target.value) || 1)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                                </div>
+                                              </div>
                                              <div className="grid grid-cols-3 gap-3 mt-3">
                                                <div>
                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Markings / Hallmarks</label>
@@ -1141,8 +1167,9 @@ export function TakeInBalanced({
                                           {item.category !== 'Stones' && (
                                           <div>
                                             <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">General</div>
-                                            <div className={`grid gap-3 ${item.category === 'Silverware' ? 'grid-cols-2' : 'grid-cols-3'}`}>
-                                              {item.category !== 'Silverware' && (
+                                            <div className={`grid gap-3 ${item.category === 'Silverware' ? 'grid-cols-4' : 'grid-cols-3'}`}>
+                                              {/* Brand/Maker hidden for Silverware (uses Maker in specs) and Bullion (uses Mint/Refinery + Product Name) */}
+                                              {item.category !== 'Silverware' && item.category !== 'Bullion' && (
                                                 <div>
                                                   <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Brand / Maker</label>
                                                   <Input value={item.brand || ''} onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })} placeholder="e.g., Tiffany & Co." className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
@@ -1162,15 +1189,35 @@ export function TakeInBalanced({
                                                 </Select>
                                               </div>
                                               {item.category === 'Silverware' ? (
-                                                <div>
-                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Length (in)</label>
-                                                  <Input
-                                                    value={getSpec(item, 'length', '')}
-                                                    onChange={(e) => updateSpec(item.id, 'length', e.target.value)}
-                                                    placeholder="e.g., 7in, 12in"
-                                                    className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"
-                                                  />
-                                                </div>
+                                                <>
+                                                  <div>
+                                                    <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Length (in)</label>
+                                                    <Input
+                                                      value={getSpec(item, 'length', '')}
+                                                      onChange={(e) => updateSpec(item.id, 'length', e.target.value)}
+                                                      placeholder="e.g., 12"
+                                                      className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"
+                                                    />
+                                                  </div>
+                                                  <div>
+                                                    <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Width (in)</label>
+                                                    <Input
+                                                      value={getSpec(item, 'width', '')}
+                                                      onChange={(e) => updateSpec(item.id, 'width', e.target.value)}
+                                                      placeholder="e.g., 6"
+                                                      className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"
+                                                    />
+                                                  </div>
+                                                  <div>
+                                                    <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Height (in)</label>
+                                                    <Input
+                                                      value={getSpec(item, 'height', '')}
+                                                      onChange={(e) => updateSpec(item.id, 'height', e.target.value)}
+                                                      placeholder="e.g., 3"
+                                                      className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"
+                                                    />
+                                                  </div>
+                                                </>
                                               ) : (
                                                 <div>
                                                   <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Size</label>
@@ -1432,8 +1479,39 @@ export function TakeInBalanced({
                                             </div>
                                           )}
 
-                                        {/* Section: Metals */}
-                                        {(item.metals || []).length > 0 && (
+                                        {/* Section: Stone Value (Loose Stones) — replaces the Metals table since stones aren't metal */}
+                                        {item.category === 'Stones' && (
+                                          <div>
+                                            <div className="flex items-center justify-between mb-3">
+                                              <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider">Stone Value</div>
+                                              <div className="text-[11px] text-[#A8A3AE]">{getSpec(item, 'quantity', 1)} {(getSpec(item, 'quantity', 1) === 1 ? 'piece' : 'pieces')}</div>
+                                            </div>
+                                            <div className="bg-white rounded-[12px] border border-black/[0.06] overflow-hidden">
+                                              <div className="grid grid-cols-[1.4fr_1fr_1fr_auto] gap-3 px-4 py-2.5 bg-black/[0.015] border-b border-black/[0.05]">
+                                                <div className="text-[10px] font-semibold text-[#A8A3AE] uppercase tracking-wider">Stone</div>
+                                                <div className="text-[10px] font-semibold text-[#A8A3AE] uppercase tracking-wider text-right">Carat (ct)</div>
+                                                <div className="text-[10px] font-semibold text-[#A8A3AE] uppercase tracking-wider text-right">Quantity</div>
+                                                <div className="text-[10px] font-semibold text-[#A8A3AE] uppercase tracking-wider text-right w-20">Offer</div>
+                                              </div>
+                                              <div className="grid grid-cols-[1.4fr_1fr_1fr_auto] gap-3 px-4 py-2.5 items-center text-[13px] text-[#2B2833]">
+                                                <div>{getSpec(item, 'stoneType', 'Stone') || 'Stone'}</div>
+                                                <div className="text-right tabular-nums">{(parseFloat(getSpec(item, 'caratWeight', 0)) || 0).toFixed(2)} ct</div>
+                                                <div className="text-right tabular-nums text-[#76707F]">{getSpec(item, 'quantity', 1)}</div>
+                                                <div className="text-right tabular-nums font-medium w-20">${(item.payoutAmount || 0).toFixed(2)}</div>
+                                              </div>
+                                              <div className="flex items-center justify-between px-4 py-3 border-t border-black/[0.06] bg-black/[0.015]">
+                                                <span className="text-[12px] font-medium text-[#76707F]">Total Stone Value</span>
+                                                <span className="text-[15px] font-semibold text-[#2B2833] tabular-nums">
+                                                  ${(item.payoutAmount || 0).toFixed(2)}
+                                                </span>
+                                              </div>
+                                            </div>
+                                            <div className="text-[11px] text-[#A8A3AE] mt-2">Edit carat weight and offer from the row above. Quantity is set in Stone Details.</div>
+                                          </div>
+                                        )}
+
+                                        {/* Section: Metals (everything except Loose Stones) */}
+                                        {item.category !== 'Stones' && (item.metals || []).length > 0 && (
                                           <div>
                                             <div className="flex items-center justify-between mb-3">
                                               <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider">Metals</div>
