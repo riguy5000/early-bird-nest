@@ -914,20 +914,21 @@ export function TakeInBalanced({
                                          {/* ── Subtype pills (full list) — for ALL non-Watch categories ── */}
                                          <div>
                                            <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">Subtype</div>
-                                           <div className="flex flex-wrap gap-1.5 mb-1">
-                                             {(itemTypesByCategory[item.category as keyof typeof itemTypesByCategory] || []).map(type => {
-                                               const active = (item.itemType || '').toLowerCase() === type.toLowerCase();
-                                               return (
-                                                 <button
-                                                   key={type}
-                                                   onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { itemType: type, subType: type }); }}
-                                                   className={`px-3 h-8 text-[12px] rounded-[8px] font-medium transition-all ${active ? 'bg-[#2B2833] text-white shadow-sm' : 'bg-white text-[#76707F] border border-black/[0.08] hover:text-[#2B2833] hover:border-black/[0.15]'}`}
-                                                 >
-                                                   {type}
-                                                 </button>
-                                               );
-                                             })}
-                                           </div>
+                                            <div className="flex flex-wrap gap-1.5 mb-1">
+                                              {(itemTypesByCategory[item.category as keyof typeof itemTypesByCategory] || []).map(type => {
+                                                const active = (item.subType || '').toLowerCase() === type.toLowerCase()
+                                                  || (item.itemType || '').toLowerCase() === type.toLowerCase();
+                                                return (
+                                                  <button
+                                                    key={type}
+                                                    onClick={(e) => { e.stopPropagation(); onItemUpdate(item.id, { subType: type }); }}
+                                                    className={`px-3 h-8 text-[12px] rounded-[8px] font-medium transition-all ${active ? 'bg-[#2B2833] text-white shadow-sm' : 'bg-white text-[#76707F] border border-black/[0.08] hover:text-[#2B2833] hover:border-black/[0.15]'}`}
+                                                  >
+                                                    {type}
+                                                  </button>
+                                                );
+                                              })}
+                                            </div>
                                          </div>
 
                                          {/* ── Bullion / Coins specifics ── */}
