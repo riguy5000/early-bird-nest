@@ -677,7 +677,8 @@ export function TakeInBalanced({
                                 {/* Type pills row — below input, indented past badge */}
                                 <div className="flex flex-wrap gap-1.5 mt-2 pl-11">
                                   {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).slice(0, 6).map(type => {
-                                    const active = item.subType === type || item.itemType === type;
+                                    const active = (item.subType || '').toLowerCase() === type.toLowerCase()
+                                      || (item.itemType || '').toLowerCase() === type.toLowerCase();
                                     return (
                                       <button
                                         key={type}
