@@ -688,7 +688,7 @@ export function TakeInBalanced({
                                         : 'minmax(0,1fr) 100px 96px max-content 80px 40px max-content',
                                     }}
                                   >
-                                    <div className={`flex gap-1.5 min-w-0 items-center ${(item.metals || []).length > 1 ? 'flex-wrap' : 'flex-nowrap overflow-hidden'}`}>
+                                    <div className={`flex gap-1.5 min-w-0 items-center ${(item.metals || []).length > 1 ? 'flex-wrap' : 'flex-nowrap overflow-x-auto'}`}>
                                       {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).slice(0, 6).map(type => {
                                         const active = (item.subType || '').toLowerCase() === type.toLowerCase()
                                           || (item.itemType || '').toLowerCase() === type.toLowerCase();
