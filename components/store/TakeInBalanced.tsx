@@ -1167,8 +1167,9 @@ export function TakeInBalanced({
                                           {item.category !== 'Stones' && (
                                           <div>
                                             <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">General</div>
-                                            <div className={`grid gap-3 ${item.category === 'Silverware' ? 'grid-cols-2' : 'grid-cols-3'}`}>
-                                              {item.category !== 'Silverware' && (
+                                            <div className={`grid gap-3 ${item.category === 'Silverware' ? 'grid-cols-4' : 'grid-cols-3'}`}>
+                                              {/* Brand/Maker hidden for Silverware (uses Maker in specs) and Bullion (uses Mint/Refinery + Product Name) */}
+                                              {item.category !== 'Silverware' && item.category !== 'Bullion' && (
                                                 <div>
                                                   <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Brand / Maker</label>
                                                   <Input value={item.brand || ''} onChange={(e) => onItemUpdate(item.id, { brand: e.target.value })} placeholder="e.g., Tiffany & Co." className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
@@ -1188,15 +1189,35 @@ export function TakeInBalanced({
                                                 </Select>
                                               </div>
                                               {item.category === 'Silverware' ? (
-                                                <div>
-                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Length (in)</label>
-                                                  <Input
-                                                    value={getSpec(item, 'length', '')}
-                                                    onChange={(e) => updateSpec(item.id, 'length', e.target.value)}
-                                                    placeholder="e.g., 7in, 12in"
-                                                    className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"
-                                                  />
-                                                </div>
+                                                <>
+                                                  <div>
+                                                    <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Length (in)</label>
+                                                    <Input
+                                                      value={getSpec(item, 'length', '')}
+                                                      onChange={(e) => updateSpec(item.id, 'length', e.target.value)}
+                                                      placeholder="e.g., 12"
+                                                      className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"
+                                                    />
+                                                  </div>
+                                                  <div>
+                                                    <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Width (in)</label>
+                                                    <Input
+                                                      value={getSpec(item, 'width', '')}
+                                                      onChange={(e) => updateSpec(item.id, 'width', e.target.value)}
+                                                      placeholder="e.g., 6"
+                                                      className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"
+                                                    />
+                                                  </div>
+                                                  <div>
+                                                    <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Height (in)</label>
+                                                    <Input
+                                                      value={getSpec(item, 'height', '')}
+                                                      onChange={(e) => updateSpec(item.id, 'height', e.target.value)}
+                                                      placeholder="e.g., 3"
+                                                      className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"
+                                                    />
+                                                  </div>
+                                                </>
                                               ) : (
                                                 <div>
                                                   <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Size</label>
