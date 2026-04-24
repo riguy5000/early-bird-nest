@@ -930,43 +930,34 @@ export function TakeInBalanced({
                                          {item.category === 'Bullion' && (
                                            <div>
                                              <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider mb-3">Bullion / Coin Details</div>
-                                             <div className="grid grid-cols-4 gap-3">
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Purity</label>
-                                                 <Select value={getSpec(item, 'purity', '')} onValueChange={(v) => updateSpec(item.id, 'purity', v)}>
-                                                   <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
-                                                   <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
-                                                     {bullionPurities.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
-                                                   </SelectContent>
-                                                 </Select>
-                                               </div>
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Unit</label>
-                                                 <Select value={getSpec(item, 'unit', 'oz')} onValueChange={(v) => updateSpec(item.id, 'unit', v)}>
-                                                   <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue /></SelectTrigger>
-                                                   <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
-                                                     {bullionUnits.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
-                                                   </SelectContent>
-                                                 </Select>
-                                               </div>
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Quantity</label>
-                                                 <Input type="number" min="1" value={getSpec(item, 'quantity', 1)} onChange={(e) => updateSpec(item.id, 'quantity', parseInt(e.target.value) || 1)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                               </div>
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Mint / Refinery</label>
-                                                 <Input value={getSpec(item, 'mint', '')} onChange={(e) => updateSpec(item.id, 'mint', e.target.value)} placeholder="e.g., PAMP, US Mint" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                               </div>
-                                             </div>
-                                             <div className="grid grid-cols-4 gap-3 mt-3">
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Product Name</label>
-                                                 <Input value={getSpec(item, 'productName', '')} onChange={(e) => updateSpec(item.id, 'productName', e.target.value)} placeholder="e.g., Gold Eagle 1oz" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                               </div>
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Serial #</label>
-                                                 <Input value={getSpec(item, 'serial', '')} onChange={(e) => updateSpec(item.id, 'serial', e.target.value)} placeholder="If bar" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                               </div>
+                                              <div className="grid grid-cols-4 gap-3">
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Mint / Refinery</label>
+                                                  <Input value={getSpec(item, 'mint', '')} onChange={(e) => updateSpec(item.id, 'mint', e.target.value)} placeholder="e.g., PAMP, US Mint" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                                </div>
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Unit</label>
+                                                  <Select value={getSpec(item, 'unit', 'oz')} onValueChange={(v) => updateSpec(item.id, 'unit', v)}>
+                                                    <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue /></SelectTrigger>
+                                                    <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
+                                                      {bullionUnits.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
+                                                    </SelectContent>
+                                                  </Select>
+                                                </div>
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Quantity</label>
+                                                  <Input type="number" min="1" value={getSpec(item, 'quantity', 1)} onChange={(e) => updateSpec(item.id, 'quantity', parseInt(e.target.value) || 1)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                                </div>
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Product Name</label>
+                                                  <Input value={getSpec(item, 'productName', '')} onChange={(e) => updateSpec(item.id, 'productName', e.target.value)} placeholder="e.g., Gold Eagle 1oz" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                                </div>
+                                              </div>
+                                              <div className="grid grid-cols-4 gap-3 mt-3">
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Serial #</label>
+                                                  <Input value={getSpec(item, 'serial', '')} onChange={(e) => updateSpec(item.id, 'serial', e.target.value)} placeholder="If bar" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                                </div>
                                                <div>
                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Year</label>
                                                  <Input value={getSpec(item, 'year', '')} onChange={(e) => updateSpec(item.id, 'year', e.target.value)} placeholder="If coin" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
