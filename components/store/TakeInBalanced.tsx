@@ -772,7 +772,13 @@ export function TakeInBalanced({
                                             ${(firstAdditionalMetal.payoutAmount || 0).toFixed(2)}
                                           </div>
                                           <div aria-hidden className="h-10 w-10" />
-                                          <div aria-hidden className="h-10" />
+                                          <div
+                                            aria-hidden
+                                            className="h-10 px-4 flex items-center gap-1 rounded-[10px] opacity-0 pointer-events-none select-none"
+                                          >
+                                            <ChevronRight className="h-3.5 w-3.5" />
+                                            <span className="text-[13px] font-medium">Specs</span>
+                                          </div>
                                           {store.canDeleteItems !== false && (
                                             <button
                                               onClick={(e) => {
@@ -858,7 +864,13 @@ export function TakeInBalanced({
                                           ${(metal.payoutAmount || 0).toFixed(2)}
                                         </div>
                                         <div aria-hidden className="h-10 w-10" />
-                                        <div aria-hidden className="h-10" />
+                                        <div
+                                          aria-hidden
+                                          className="h-10 px-4 flex items-center gap-1 rounded-[10px] opacity-0 pointer-events-none select-none"
+                                        >
+                                          <ChevronRight className="h-3.5 w-3.5" />
+                                          <span className="text-[13px] font-medium">Specs</span>
+                                        </div>
                                         {store.canDeleteItems !== false && (
                                           <button
                                             onClick={(e) => {
