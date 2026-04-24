@@ -679,16 +679,19 @@ export function TakeInBalanced({
                                 </div>
 
                                 {/* Shared row: subtype chips (left) + additional metal rows (right) */}
+                                {(() => {
+                                  const hasAdditionalMetal = item.category !== 'Watch' && (item.metals || []).length > 1;
+                                  return (
                                 <div className="mt-2 pl-11 space-y-2">
                                   <div
-                                    className="grid items-start gap-x-3 gap-y-2"
-                                    style={{
+                                    className={hasAdditionalMetal ? "grid items-start gap-x-3 gap-y-2" : "flex items-start gap-x-3"}
+                                    style={hasAdditionalMetal ? {
                                       gridTemplateColumns: store.canDeleteItems !== false
                                         ? 'minmax(0,1fr) 100px 96px max-content 80px 40px max-content 40px'
                                         : 'minmax(0,1fr) 100px 96px max-content 80px 40px max-content',
-                                    }}
+                                    } : undefined}
                                   >
-                                    <div className={`flex gap-1.5 min-w-0 items-center ${(item.metals || []).length > 1 ? 'flex-wrap' : 'flex-nowrap overflow-hidden'}`}>
+                                    <div className={`flex gap-1.5 items-center ${hasAdditionalMetal ? 'min-w-0 flex-wrap' : 'flex-1 min-w-0 flex-wrap'}`}>
                                       {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).slice(0, 6).map(type => {
                                         const active = (item.subType || '').toLowerCase() === type.toLowerCase()
                                           || (item.itemType || '').toLowerCase() === type.toLowerCase();
@@ -889,6 +892,8 @@ export function TakeInBalanced({
                                     </div>
                                   ))}
                                 </div>
+                                  );
+                                })()}
 
                                 {/* AI source + color notes */}
                                 {(item.source === 'AI Assist' || item.colorNotes) && (
