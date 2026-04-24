@@ -674,43 +674,6 @@ export function TakeInBalanced({
                                   )}
                                 </div>
 
-                                {/* Type pills row — below input, indented past badge */}
-                                <div className="flex flex-wrap gap-1.5 mt-2 pl-11">
-                                  {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).slice(0, 6).map(type => {
-                                    const active = (item.subType || '').toLowerCase() === type.toLowerCase()
-                                      || (item.itemType || '').toLowerCase() === type.toLowerCase();
-                                    return (
-                                      <button
-                                        key={type}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          // Only update the chip selection (subType) — preserve the user's typed description.
-                                          onItemUpdate(item.id, { subType: type });
-                                        }}
-                                        className={`px-3 py-1 text-[12px] rounded-full transition-colors cursor-pointer font-medium ${
-                                          active
-                                            ? 'bg-[#2B2833] text-white'
-                                            : 'bg-[#F1EFF3] text-[#76707F] hover:bg-[#E8E6EC]'
-                                        }`}
-                                      >
-                                        {type}
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-
-                                {/* AI source + color notes */}
-                                {(item.source === 'AI Assist' || item.colorNotes) && (
-                                  <div className="flex items-center gap-2 mt-2 pl-11">
-                                    {item.source === 'AI Assist' && (
-                                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[#E8E6FF] text-[#6B5EF9]">AI</span>
-                                    )}
-                                    {item.colorNotes && (
-                                      <span className="text-[11px] text-[#A8A3AE] italic">{item.colorNotes}</span>
-                                    )}
-                                  </div>
-                                )}
-
                                 {/* Additional metal rows for jewelry — stacked below */}
                                 {item.category !== 'Watch' && (item.metals || []).length > 1 && (
                                   <div className="mt-2 pl-11 space-y-2">
@@ -777,6 +740,44 @@ export function TakeInBalanced({
                                     ))}
                                   </div>
                                 )}
+
+                                {/* Type pills row — below input, indented past badge */}
+                                <div className="flex flex-wrap gap-1.5 mt-2 pl-11">
+                                  {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).slice(0, 6).map(type => {
+                                    const active = (item.subType || '').toLowerCase() === type.toLowerCase()
+                                      || (item.itemType || '').toLowerCase() === type.toLowerCase();
+                                    return (
+                                      <button
+                                        key={type}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          // Only update the chip selection (subType) — preserve the user's typed description.
+                                          onItemUpdate(item.id, { subType: type });
+                                        }}
+                                        className={`px-3 py-1 text-[12px] rounded-full transition-colors cursor-pointer font-medium ${
+                                          active
+                                            ? 'bg-[#2B2833] text-white'
+                                            : 'bg-[#F1EFF3] text-[#76707F] hover:bg-[#E8E6EC]'
+                                        }`}
+                                      >
+                                        {type}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+
+                                {/* AI source + color notes */}
+                                {(item.source === 'AI Assist' || item.colorNotes) && (
+                                  <div className="flex items-center gap-2 mt-2 pl-11">
+                                    {item.source === 'AI Assist' && (
+                                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[#E8E6FF] text-[#6B5EF9]">AI</span>
+                                    )}
+                                    {item.colorNotes && (
+                                      <span className="text-[11px] text-[#A8A3AE] italic">{item.colorNotes}</span>
+                                    )}
+                                  </div>
+                                )}
+
 
                                 {/* Watch precious-metal weight rows — stacked below */}
                                 {item.category === 'Watch' && isWatchPreciousMaterial(item.watchMaterial || '') && (item.metals || []).length > 0 && (
