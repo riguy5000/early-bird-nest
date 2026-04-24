@@ -167,7 +167,8 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
         : [{ id: `metal_${Date.now()}`, type: 'Gold', karat: 14, weight: 0 }],
       stones: [],
       marketValue: 0,
-      payoutPercentage: store.defaultPayoutPercentage,
+      // No legacy Base Payout — payout derives from metal-specific rateDefaults only
+      payoutPercentage: 0,
       payoutAmount: 0,
       photos: [],
       notes: '',
@@ -175,7 +176,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
     };
     setItems(prev => [...prev, newItem]);
     setActiveItemId(newItem.id);
-  }, [store.defaultPayoutPercentage]);
+  }, []);
 
   const updateItem = useCallback((itemId: string, updates: Partial<Item>) => {
     setItems(prev => prev.map(item => item.id === itemId ? { ...item, ...updates } : item));
