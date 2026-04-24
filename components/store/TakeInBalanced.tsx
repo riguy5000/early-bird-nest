@@ -1479,8 +1479,39 @@ export function TakeInBalanced({
                                             </div>
                                           )}
 
-                                        {/* Section: Metals */}
-                                        {(item.metals || []).length > 0 && (
+                                        {/* Section: Stone Value (Loose Stones) — replaces the Metals table since stones aren't metal */}
+                                        {item.category === 'Stones' && (
+                                          <div>
+                                            <div className="flex items-center justify-between mb-3">
+                                              <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider">Stone Value</div>
+                                              <div className="text-[11px] text-[#A8A3AE]">{getSpec(item, 'quantity', 1)} {(getSpec(item, 'quantity', 1) === 1 ? 'piece' : 'pieces')}</div>
+                                            </div>
+                                            <div className="bg-white rounded-[12px] border border-black/[0.06] overflow-hidden">
+                                              <div className="grid grid-cols-[1.4fr_1fr_1fr_auto] gap-3 px-4 py-2.5 bg-black/[0.015] border-b border-black/[0.05]">
+                                                <div className="text-[10px] font-semibold text-[#A8A3AE] uppercase tracking-wider">Stone</div>
+                                                <div className="text-[10px] font-semibold text-[#A8A3AE] uppercase tracking-wider text-right">Carat (ct)</div>
+                                                <div className="text-[10px] font-semibold text-[#A8A3AE] uppercase tracking-wider text-right">Quantity</div>
+                                                <div className="text-[10px] font-semibold text-[#A8A3AE] uppercase tracking-wider text-right w-20">Offer</div>
+                                              </div>
+                                              <div className="grid grid-cols-[1.4fr_1fr_1fr_auto] gap-3 px-4 py-2.5 items-center text-[13px] text-[#2B2833]">
+                                                <div>{getSpec(item, 'stoneType', 'Stone') || 'Stone'}</div>
+                                                <div className="text-right tabular-nums">{(parseFloat(getSpec(item, 'caratWeight', 0)) || 0).toFixed(2)} ct</div>
+                                                <div className="text-right tabular-nums text-[#76707F]">{getSpec(item, 'quantity', 1)}</div>
+                                                <div className="text-right tabular-nums font-medium w-20">${(item.payoutAmount || 0).toFixed(2)}</div>
+                                              </div>
+                                              <div className="flex items-center justify-between px-4 py-3 border-t border-black/[0.06] bg-black/[0.015]">
+                                                <span className="text-[12px] font-medium text-[#76707F]">Total Stone Value</span>
+                                                <span className="text-[15px] font-semibold text-[#2B2833] tabular-nums">
+                                                  ${(item.payoutAmount || 0).toFixed(2)}
+                                                </span>
+                                              </div>
+                                            </div>
+                                            <div className="text-[11px] text-[#A8A3AE] mt-2">Edit carat weight and offer from the row above. Quantity is set in Stone Details.</div>
+                                          </div>
+                                        )}
+
+                                        {/* Section: Metals (everything except Loose Stones) */}
+                                        {item.category !== 'Stones' && (item.metals || []).length > 0 && (
                                           <div>
                                             <div className="flex items-center justify-between mb-3">
                                               <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider">Metals</div>
