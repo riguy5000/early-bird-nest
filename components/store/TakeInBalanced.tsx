@@ -143,15 +143,15 @@ export function TakeInBalanced({
   const addMetal = (itemId: string) => {
     const item = items.find(i => i.id === itemId);
     if (!item) return;
-    const defaultPct = store?.rateDefaults?.gold ?? store?.defaultPayoutPercentage ?? 75;
-    const newMetal = { id: `metal_${Date.now()}`, type: 'Gold', karat: 14, weight: 0, payoutPercentage: defaultPct, marketValue: 0, payoutAmount: 0 };
+    // Do NOT seed a payoutPercentage here — the pricing engine will derive
+    // it from metal-specific rateDefaults only. No legacy "Base Payout".
+    const newMetal = { id: `metal_${Date.now()}`, type: 'Gold', karat: 14, weight: 0, marketValue: 0, payoutAmount: 0 };
     onItemUpdate(itemId, { metals: [...item.metals, newMetal] });
   };
 
   const updateMetal = (itemId: string, metalId: string, updates: any) => {
     const item = items.find(i => i.id === itemId);
     if (!item) return;
-    const globalPct = store?.defaultPayoutPercentage ?? 75;
     const updatedMetals = item.metals.map((m: any) => {
       if (m.id !== metalId) return m;
       const updated = { ...m, ...updates };
@@ -162,14 +162,13 @@ export function TakeInBalanced({
       const result = computeMetalRow(
         { type: updated.type, karat: updated.karat, weight: updated.weight, payoutPercentage: updated.payoutPercentage },
         spotPrices,
-        store?.rateDefaults,
-        globalPct
+        store?.rateDefaults
       );
       updated.marketValue = roundCurrency(result.marketValue);
       updated.payoutAmount = roundCurrency(result.payoutAmount);
       // keep effective payout % visible on the row when not explicitly set
       if (updated.payoutPercentage === undefined || updated.payoutPercentage === null) {
-        updated.payoutPercentage = result.payoutPercent;
+        updated.payoutPercentage = result.payoutPercent || undefined;
       }
       return updated;
     });
@@ -182,7 +181,6 @@ export function TakeInBalanced({
   // (e.g. demo data loaded after spotPrices already resolved). Without items.length in
   // deps, freshly-seeded items keep stale $0 marketValue/payoutAmount.
   useEffect(() => {
-    const globalPct = store?.defaultPayoutPercentage ?? 75;
     items.forEach((item: any) => {
       if (!item?.metals?.length) return;
       let changed = false;
@@ -190,8 +188,7 @@ export function TakeInBalanced({
         const result = computeMetalRow(
           { type: m.type, karat: m.karat, weight: m.weight, payoutPercentage: m.payoutPercentage },
           spotPrices,
-          store?.rateDefaults,
-          globalPct
+          store?.rateDefaults
         );
         const newMarket = roundCurrency(result.marketValue);
         const newPayout = roundCurrency(result.payoutAmount);
@@ -1561,7 +1558,7 @@ export function TakeInBalanced({
                                                 <div key={metal.id} className={`grid grid-cols-[1.2fr_1fr_1fr_auto] gap-3 px-4 py-2.5 items-center text-[13px] text-[#2B2833] ${mi > 0 ? 'border-t border-black/[0.04]' : ''}`}>
                                                   <div>{metal.type} <span className="text-[#76707F]">{formatPurityLabel(metal.type, metal.karat)}</span></div>
                                                   <div className="text-right tabular-nums">{(metal.weight || 0).toFixed(2)}</div>
-                                                  <div className="text-right tabular-nums text-[#76707F]">{metal.payoutPercentage ?? 75}%</div>
+                                                  <div className="text-right tabular-nums text-[#76707F]">{typeof metal.payoutPercentage === 'number' && metal.payoutPercentage > 0 ? `${metal.payoutPercentage}%` : '—'}</div>
                                                   <div className="text-right tabular-nums font-medium w-16">${(metal.payoutAmount || 0).toFixed(2)}</div>
                                                 </div>
                                               ))}
