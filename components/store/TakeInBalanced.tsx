@@ -892,6 +892,8 @@ export function TakeInBalanced({
                                     </div>
                                   ))}
                                 </div>
+                                  );
+                                })()}
 
                                 {/* AI source + color notes */}
                                 {(item.source === 'AI Assist' || item.colorNotes) && (
