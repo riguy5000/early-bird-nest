@@ -591,7 +591,14 @@ export function TakeInBalanced({
                                       const firstMetal = metals[0];
                                       if (!firstMetal) return null;
                                       return (
-                                        <div className="flex items-center gap-2 flex-shrink-0">
+                                        <div
+                                          className="grid items-center gap-2 flex-shrink-0"
+                                          style={{
+                                            gridTemplateColumns: store.canDeleteItems !== false
+                                              ? '100px 96px max-content 80px 40px max-content 40px'
+                                              : '100px 96px max-content 80px 40px max-content',
+                                          }}
+                                        >
                                           <Select value={firstMetal.type} onValueChange={(value) => updateMetal(item.id, firstMetal.id, { type: value })}>
                                             <SelectTrigger className="w-[100px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
                                               <SelectValue />
@@ -699,12 +706,15 @@ export function TakeInBalanced({
 
                                   {/* Additional metal rows inline on shared row, aligned under primary metal fields with X at far right */}
                                   {item.category !== 'Watch' && (item.metals || []).length > 1 && (
-                                    <div
-                                      className="flex flex-col gap-2 shrink-0"
-                                      style={{ marginRight: store.canDeleteItems !== false ? 132 : 84 }}
-                                    >
+                                    <div className="flex flex-col gap-2 shrink-0">
                                       {(item.metals || []).slice(1).map((metal: any) => (
-                                        <div key={metal.id} className="flex items-center gap-2 justify-end">
+                                        <div
+                                          key={metal.id}
+                                          className="grid items-center gap-2"
+                                          style={{
+                                            gridTemplateColumns: '100px 96px max-content 80px 40px max-content 40px',
+                                          }}
+                                        >
                                           <Select value={metal.type} onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}>
                                             <SelectTrigger className="w-[100px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
                                               <SelectValue />
@@ -750,6 +760,8 @@ export function TakeInBalanced({
                                           <div className="h-10 px-3 flex items-center justify-end min-w-[80px] rounded-[10px] bg-[#E6FBF1] text-[13px] font-semibold text-[#0FB37A] tabular-nums">
                                             ${(metal.payoutAmount || 0).toFixed(2)}
                                           </div>
+                                          <div aria-hidden className="h-10 w-10" />
+                                          <div aria-hidden className="h-10" />
                                           <button
                                             onClick={(e) => {
                                               e.stopPropagation();
