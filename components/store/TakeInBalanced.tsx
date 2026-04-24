@@ -1010,6 +1010,17 @@ export function TakeInBalanced({
                                                   </Select>
                                                 </div>
                                                <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Shape</label>
+                                                 <Select value={getSpec(item, 'shape', '')} onValueChange={(v) => updateSpec(item.id, 'shape', v)}>
+                                                   <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                                   <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06] max-h-[300px]">
+                                                     {['Round','Princess','Cushion','Oval','Emerald','Pear','Marquise','Radiant','Asscher','Heart','Trillion','Baguette','Tapered Baguette','Cabochon','Briolette','Rose Cut','Old European','Old Mine','Fancy','Other'].map(s => (
+                                                       <SelectItem key={s} value={s}>{s}</SelectItem>
+                                                     ))}
+                                                   </SelectContent>
+                                                 </Select>
+                                               </div>
+                                               <div>
                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Color</label>
                                                  <Input value={getSpec(item, 'color', '')} onChange={(e) => updateSpec(item.id, 'color', e.target.value)} placeholder="e.g., G" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
                                                </div>
