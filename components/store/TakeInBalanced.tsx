@@ -697,9 +697,12 @@ export function TakeInBalanced({
                                     })}
                                   </div>
 
-                                  {/* Additional metal rows inline on the same row, aligned under primary metal fields with X at far right */}
+                                  {/* Additional metal rows inline on shared row, aligned under primary metal fields with X at far right */}
                                   {item.category !== 'Watch' && (item.metals || []).length > 1 && (
-                                    <div className="flex flex-col gap-2 w-full">
+                                    <div
+                                      className="flex flex-col gap-2 shrink-0"
+                                      style={{ marginRight: store.canDeleteItems !== false ? 132 : 84 }}
+                                    >
                                       {(item.metals || []).slice(1).map((metal: any) => (
                                         <div key={metal.id} className="flex items-center gap-2 justify-end">
                                           <Select value={metal.type} onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}>
@@ -747,8 +750,6 @@ export function TakeInBalanced({
                                           <div className="h-10 px-3 flex items-center justify-end min-w-[80px] rounded-[10px] bg-[#E6FBF1] text-[13px] font-semibold text-[#0FB37A] tabular-nums">
                                             ${(metal.payoutAmount || 0).toFixed(2)}
                                           </div>
-                                          {/* Spacer matches Plus(40) + gap(8) + Specs(~84) widths so the X aligns under the main row X */}
-                                          <div aria-hidden className="h-10 shrink-0" style={{ width: 132 }} />
                                           <button
                                             onClick={(e) => {
                                               e.stopPropagation();
