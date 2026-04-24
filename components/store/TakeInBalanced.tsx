@@ -504,7 +504,12 @@ export function TakeInBalanced({
                                       <Input
                                         type="text"
                                         inputMode="decimal"
-                                        value={getSpec(item, 'caratWeightRaw', getSpec(item, 'caratWeight', ''))}
+                                        value={(() => {
+                                          const raw = getSpec(item, 'caratWeightRaw', undefined);
+                                          if (raw !== undefined && raw !== null) return raw;
+                                          const cw = getSpec(item, 'caratWeight', '');
+                                          return cw === 0 || cw === '0' ? '' : String(cw);
+                                        })()}
                                         onChange={(e) => {
                                           const value = e.target.value;
                                           if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
@@ -512,7 +517,11 @@ export function TakeInBalanced({
                                             updateSpec(item.id, 'caratWeight', value === '' ? 0 : parseFloat(value) || 0);
                                           }
                                         }}
-                                        onBlur={() => updateSpec(item.id, 'caratWeightRaw', undefined)}
+                                        onBlur={(e) => {
+                                          const numValue = parseFloat(e.target.value) || 0;
+                                          updateSpec(item.id, 'caratWeight', numValue);
+                                          updateSpec(item.id, 'caratWeightRaw', undefined);
+                                        }}
                                         placeholder="ct"
                                         className="w-20 h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px] text-right tabular-nums"
                                         onClick={(e) => e.stopPropagation()}
