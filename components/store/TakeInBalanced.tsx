@@ -691,7 +691,7 @@ export function TakeInBalanced({
                                         : 'minmax(0,1fr) 100px 96px max-content 80px 40px max-content',
                                     } : undefined}
                                   >
-                                    <div className={`flex gap-1.5 items-center ${hasAdditionalMetal ? 'min-w-0 flex-wrap' : 'flex-1 flex-nowrap flex-wrap'}`}>
+                                    <div className={`flex gap-1.5 items-center ${hasAdditionalMetal ? 'min-w-0 flex-wrap' : 'flex-1 min-w-0 flex-wrap'}`}>
                                       {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).slice(0, 6).map(type => {
                                         const active = (item.subType || '').toLowerCase() === type.toLowerCase()
                                           || (item.itemType || '').toLowerCase() === type.toLowerCase();
