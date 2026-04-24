@@ -261,11 +261,11 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
   const handleAIAssist = useCallback(() => { setShowAICaptureModal(true); }, []);
 
   const handleLoadDemoData = useCallback(() => {
-    const demoItems = buildDemoItems(store.defaultPayoutPercentage) as unknown as Item[];
+    const demoItems = buildDemoItems() as unknown as Item[];
     setItems(prev => [...prev, ...demoItems]);
     if (demoItems.length > 0) setActiveItemId(demoItems[0].id);
     toast.success(`Loaded ${demoItems.length} demo items across all categories`);
-  }, [store.defaultPayoutPercentage]);
+  }, []);
 
   const handleItemsDetected = useCallback((detectedItems: Array<{ type: string; count: number; notes?: string; color_notes?: string; cropUrl?: string }>, batchPhotoUrlArg: string) => {
     if (batchPhotoUrlArg) setBatchPhotoUrl(batchPhotoUrlArg);
@@ -286,7 +286,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
           category: category as Item['category'],
           subType: detected.type, itemType: detected.type,
           metals: category === 'Watch' ? [] : [{ id: `metal_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`, type: 'Gold', karat: 14, weight: 0 }],
-          stones: [], marketValue: 0, payoutPercentage: store.defaultPayoutPercentage,
+          stones: [], marketValue: 0, payoutPercentage: 0,
           payoutAmount: 0, photos, notes: detected.notes || '', colorNotes: detected.color_notes || '',
           status: 'In Stock', source: 'AI Assist',
         });
@@ -294,7 +294,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
     }
     setItems(prev => [...prev, ...newItems]);
     if (newItems.length > 0) setActiveItemId(newItems[0].id);
-  }, [store.defaultPayoutPercentage]);
+  }, []);
 
   const totals = calculateTotals();
 
