@@ -688,7 +688,7 @@ export function TakeInBalanced({
                                         : 'minmax(0,1fr) 100px 96px max-content 80px 40px max-content',
                                     }}
                                   >
-                                    <div className={`flex gap-1.5 min-w-0 items-center ${(item.metals || []).length > 1 ? 'flex-wrap' : 'flex-nowrap overflow-x-auto'}`}>
+                                    <div className={`flex gap-1.5 min-w-0 items-center ${(item.metals || []).length > 1 ? 'flex-wrap' : 'flex-nowrap overflow-hidden'}`}>
                                       {(itemTypesByCategory[category as keyof typeof itemTypesByCategory] || []).slice(0, 6).map(type => {
                                         const active = (item.subType || '').toLowerCase() === type.toLowerCase()
                                           || (item.itemType || '').toLowerCase() === type.toLowerCase();
@@ -699,7 +699,7 @@ export function TakeInBalanced({
                                               e.stopPropagation();
                                               onItemUpdate(item.id, { subType: type });
                                             }}
-                                            className={`px-3 py-1 text-[12px] rounded-full transition-colors cursor-pointer font-medium whitespace-nowrap shrink-0 ${
+                                            className={`px-3 py-1 text-[12px] rounded-full transition-colors cursor-pointer font-medium whitespace-nowrap ${
                                               active
                                                 ? 'bg-[#2B2833] text-white'
                                                 : 'bg-[#F1EFF3] text-[#76707F] hover:bg-[#E8E6EC]'
