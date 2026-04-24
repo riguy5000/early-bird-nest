@@ -519,19 +519,8 @@ export function TakeInBalanced({
                                       />
                                       <span className="text-[12px] text-[#A8A3AE] -ml-1">ct</span>
 
-                                      <Select
-                                        value={getSpec(item, 'stoneType', '') || ''}
-                                        onValueChange={(v) => updateSpec(item.id, 'stoneType', v)}
-                                      >
-                                        <SelectTrigger className="w-[130px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
-                                          <SelectValue placeholder="Stone" />
-                                        </SelectTrigger>
-                                        <SelectContent className="rounded-[12px] bg-white border-black/[0.06] shadow-xl">
-                                          {['Diamond', 'Sapphire', 'Ruby', 'Emerald', 'Opal', 'Topaz', 'Amethyst', 'Aquamarine', 'Tanzanite', 'Tourmaline', 'Garnet', 'Pearl', 'Other'].map(s => (
-                                            <SelectItem key={s} value={s} className="text-[13px]">{s}</SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
+                                      {/* Stone Type now lives in the Specs panel — keep the inline row focused on weight + offer */}
+
 
                                       <Input
                                         type="text"
