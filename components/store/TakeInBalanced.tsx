@@ -307,36 +307,47 @@ export function TakeInBalanced({
   };
 
   // Auto-select a subtype chip when the user types a keyword that matches one of the
-  // category's subtype labels in the description. Respects manual overrides: once the
-  // current itemType already matches one of the chips for the active category, we skip.
+  // category's subtype labels in the description. Uses case-insensitive whole-word matching
+  // so "earrings" does NOT match "ring". Picks the single best (longest) match. Respects
+  // manual overrides — if the user has locked a subType, only switch when a clearly
+  // different whole-word subtype keyword appears in the description.
   useEffect(() => {
+    const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Whole-phrase, case-insensitive match. Word boundaries treat "/" and spaces as breaks.
+    const phraseMatches = (phrase: string, haystack: string) => {
+      const p = phrase.trim();
+      if (!p) return false;
+      // Build a regex with \b boundaries; for multi-word phrases allow flexible whitespace.
+      const pattern = p.split(/\s+/).map(escapeRegex).join('\\s+');
+      const re = new RegExp(`(?:^|[^a-zA-Z0-9])${pattern}(?![a-zA-Z0-9])`, 'i');
+      return re.test(haystack);
+    };
+
     items.forEach((item: any) => {
       const text = (item.itemType || '').trim();
       if (!text) return;
       const subtypes = itemTypesByCategory[item.category as keyof typeof itemTypesByCategory] || [];
       if (subtypes.length === 0) return;
-      // If current itemType is already an exact subtype, leave it alone (manual override).
+      // If current itemType already exactly equals a subtype label, leave it alone.
       if (subtypes.some(s => s.toLowerCase() === text.toLowerCase())) return;
-      // If user previously locked a subType, only auto-update when description clearly
-      // mentions a different subtype keyword.
-      const lower = text.toLowerCase();
-      // Prefer the longest matching subtype label whose keywords all appear in the text.
+
+      // For each subtype, try whole-phrase match against the full label first, then against
+      // each token of the label (e.g., "Brooch / Pin" → tokens ["Brooch", "Pin"]).
+      // Score = length of the longest matching token/phrase, so longer/more specific wins
+      // (e.g., "Pocket Watch" beats "Watch"; "Earrings" beats "Ring").
       let best: string | null = null;
       let bestScore = 0;
       for (const sub of subtypes) {
-        const subLower = sub.toLowerCase();
-        // Direct substring match
-        if (lower.includes(subLower)) {
-          const score = subLower.length;
-          if (score > bestScore) { best = sub; bestScore = score; }
-          continue;
+        let matchLen = 0;
+        if (phraseMatches(sub, text)) {
+          matchLen = sub.replace(/\s+/g, '').length;
+        } else {
+          const tokens = sub.split(/[\s/]+/).filter(w => w.length >= 3);
+          for (const tok of tokens) {
+            if (phraseMatches(tok, text) && tok.length > matchLen) matchLen = tok.length;
+          }
         }
-        // Word-by-word match (all words of subtype label appear in text)
-        const words = subLower.split(/[\s/]+/).filter(w => w.length > 2);
-        if (words.length > 0 && words.every(w => lower.includes(w))) {
-          const score = words.join('').length;
-          if (score > bestScore) { best = sub; bestScore = score; }
-        }
+        if (matchLen > bestScore) { best = sub; bestScore = matchLen; }
       }
       if (best && best !== item.subType) {
         onItemUpdate(item.id, { subType: best });
