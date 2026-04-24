@@ -1057,22 +1057,7 @@ function IntakePayoutTab({ intake, setIntake, payout, setPayout, rates, setRates
         <ToggleRow label="Allow batch-wide rate edits" checked={payout.allowBatchRateEdits} onChange={v => setP('allowBatchRateEdits', v)} />
       </SettingsCard>
 
-      <SettingsCard title="Base Payout Percentage" description="Global fallback used when no metal/category-specific payout is set">
-        <div className="flex items-center justify-between">
-          <span className="text-[14px] font-medium text-[#2B2833]">Base Payout %</span>
-          <div className="flex items-center gap-1.5">
-            <Input
-              type="number" min={0} max={100}
-              value={(payout.basePayoutPercent ?? 75) as number}
-              onChange={e => setP('basePayoutPercent', parseFloat(e.target.value) || 0)}
-              className="w-20 text-center text-[14px]"
-            />
-            <span className="text-[14px] text-[#76707F]">%</span>
-          </div>
-        </div>
-      </SettingsCard>
-
-      <SettingsCard title="Default Payout % per Metal / Category" description="Specific rates override the base payout. Watches use manual / comp-based pricing — no blanket payout %.">
+      <SettingsCard title="Default Payout % per Metal / Category" description="Each metal/category uses its own payout rate. Watches use manual / comp-based pricing — no blanket payout %.">
         <div className="space-y-3">
           {([
             ['gold', 'Gold'],
