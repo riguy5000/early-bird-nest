@@ -1112,6 +1112,15 @@ export function TakeInBalanced({
                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Grade</label>
                                                  <Input value={getSpec(item, 'grade', '')} onChange={(e) => updateSpec(item.id, 'grade', e.target.value)} placeholder="e.g., MS65" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
                                                </div>
+                                               <div>
+                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Testing Method</label>
+                                                 <Select value={getSpec(item, 'testMethod', '')} onValueChange={(v) => updateSpec(item.id, 'testMethod', v)}>
+                                                   <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                                   <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
+                                                     {['Loop', 'Acid', 'XRF', 'Melt', 'Magnet', 'Specific Gravity'].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                                                   </SelectContent>
+                                                 </Select>
+                                               </div>
                                              </div>
                                              <div className="flex items-center gap-4 mt-3">
                                                <label className="flex items-center gap-2 text-[12px] text-[#76707F]">
@@ -1249,20 +1258,29 @@ export function TakeInBalanced({
                                                   <Input type="number" min="1" value={getSpec(item, 'pieceCount', 1)} onChange={(e) => updateSpec(item.id, 'pieceCount', parseInt(e.target.value) || 1)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
                                                 </div>
                                               </div>
-                                             <div className="grid grid-cols-3 gap-3 mt-3">
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Markings / Hallmarks</label>
-                                                 <Input value={getSpec(item, 'hallmarks', '')} onChange={(e) => updateSpec(item.id, 'hallmarks', e.target.value)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                               </div>
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Gross Weight (g)</label>
-                                                 <Input type="number" step="0.01" value={getSpec(item, 'grossWeight', '')} onChange={(e) => updateSpec(item.id, 'grossWeight', parseFloat(e.target.value) || 0)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                               </div>
-                                               <div>
-                                                 <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Net Silver Weight (g)</label>
-                                                 <Input type="number" step="0.01" value={getSpec(item, 'netWeight', '')} onChange={(e) => updateSpec(item.id, 'netWeight', parseFloat(e.target.value) || 0)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
-                                               </div>
-                                             </div>
+                                              <div className="grid grid-cols-4 gap-3 mt-3">
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Markings / Hallmarks</label>
+                                                  <Input value={getSpec(item, 'hallmarks', '')} onChange={(e) => updateSpec(item.id, 'hallmarks', e.target.value)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                                </div>
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Gross Weight (g)</label>
+                                                  <Input type="number" step="0.01" value={getSpec(item, 'grossWeight', '')} onChange={(e) => updateSpec(item.id, 'grossWeight', parseFloat(e.target.value) || 0)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                                </div>
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Net Silver Weight (g)</label>
+                                                  <Input type="number" step="0.01" value={getSpec(item, 'netWeight', '')} onChange={(e) => updateSpec(item.id, 'netWeight', parseFloat(e.target.value) || 0)} className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                                </div>
+                                                <div>
+                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Testing Method</label>
+                                                  <Select value={getSpec(item, 'testMethod', '')} onValueChange={(v) => updateSpec(item.id, 'testMethod', v)}>
+                                                    <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                                    <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
+                                                      {['Loop', 'Acid', 'XRF', 'Melt', 'Magnet', 'Specific Gravity'].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                                                    </SelectContent>
+                                                  </Select>
+                                                </div>
+                                              </div>
                                              <div className="flex items-center gap-4 mt-3">
                                                <label className="flex items-center gap-2 text-[12px] text-[#76707F]">
                                                  <input type="checkbox" checked={!!getSpec(item, 'weighted', false)} onChange={(e) => updateSpec(item.id, 'weighted', e.target.checked)} />
