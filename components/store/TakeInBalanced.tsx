@@ -1259,7 +1259,7 @@ export function TakeInBalanced({
                                                </div>
                                                <div>
                                                  <label className="text-[12px] font-medium text-[#76707F] block mb-1.5">Measurements</label>
-                                                 <Input value={getSpec(item, 'measurements', '')} onChange={(e) => updateSpec(item.id, 'measurements', e.target.value)} placeholder="e.g., 1mm or 1–3mm" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
+                                                 <Input value={getSpec(item, 'measurements', '')} onChange={(e) => updateSpec(item.id, 'measurements', e.target.value)} placeholder="e.g. 7.25, small, 12mm, 2x4" className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]" />
                                                </div>
                                              </div>
                                              <div className="grid grid-cols-4 gap-3 mt-3">
