@@ -1513,8 +1513,8 @@ export function TakeInBalanced({
                                             </div>
                                           )}
 
-                                          {/* ── C. STONES (Jewelry only) — multiple rows ── */}
-                                          {item.category === 'Jewelry' && (
+                                          {/* ── C. STONES (Jewelry + Loose Items) — multiple rows ── */}
+                                          {(item.category === 'Jewelry' || item.category === 'LooseItems') && (
                                             <div>
                                               <div className="flex items-center justify-between mb-3">
                                                 <div className="text-[11px] font-semibold text-[#A8A3AE] uppercase tracking-wider">Stones</div>
