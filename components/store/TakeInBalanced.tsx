@@ -1617,7 +1617,7 @@ export function TakeInBalanced({
                                                               next[si] = { ...next[si], sizeMm: e.target.value };
                                                               onItemUpdate(item.id, { stones: next });
                                                             }}
-                                                            placeholder="6.5×4.5"
+                                                            placeholder="e.g. 7.25, small, 12mm, 2x4"
                                                             className="bg-white h-8 text-[12px] rounded-[8px] border border-black/[0.08]"
                                                           />
                                                         </div>
