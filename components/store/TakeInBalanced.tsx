@@ -1122,11 +1122,10 @@ export function TakeInBalanced({
                                                     key={type}
                                                     onClick={(e) => {
                                                       e.stopPropagation();
-                                                      const allSubtypes = itemTypesByCategory[item.category as keyof typeof itemTypesByCategory] || [];
-                                                      const currentText = (item.itemType || '').trim();
-                                                      const isAutoFilled = !currentText || allSubtypes.some(s => s.toLowerCase() === currentText.toLowerCase());
                                                       const updates: any = { subType: type };
-                                                      if (isAutoFilled) updates.itemType = type;
+                                                      if (isAutoFilledDescription(item)) {
+                                                        updates.itemType = buildAutoDescription(type, (item.metals || [])[0]);
+                                                      }
                                                       onItemUpdate(item.id, updates);
                                                     }}
                                                     className={`px-3 h-8 text-[12px] rounded-[8px] font-medium transition-all ${active ? 'bg-[#2B2833] text-white shadow-sm' : 'bg-white text-[#76707F] border border-black/[0.08] hover:text-[#2B2833] hover:border-black/[0.15]'}`}
