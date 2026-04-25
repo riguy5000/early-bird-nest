@@ -145,7 +145,7 @@ export function TakeInBalanced({
     if (!item) return;
     // Do NOT seed a payoutPercentage here — the pricing engine will derive
     // it from metal-specific rateDefaults only. No legacy "Base Payout".
-    const newMetal = { id: `metal_${Date.now()}`, type: 'Gold', karat: 14, weight: 0, marketValue: 0, payoutAmount: 0 };
+    const newMetal = { id: `metal_${Date.now()}`, type: '', karat: 0, weight: 0, marketValue: 0, payoutAmount: 0 };
     onItemUpdate(itemId, { metals: [...item.metals, newMetal] });
   };
 
@@ -155,9 +155,9 @@ export function TakeInBalanced({
     const updatedMetals = item.metals.map((m: any) => {
       if (m.id !== metalId) return m;
       const updated = { ...m, ...updates };
-      // If the metal type changed, reset purity to a sensible default for that metal
-      if (updates.type && updates.type !== m.type) {
-        updated.karat = getDefaultPurityForMetal(updates.type);
+      // If the metal type changed, clear purity so the user picks it explicitly
+      if (updates.type !== undefined && updates.type !== m.type) {
+        updated.karat = 0;
       }
       const result = computeMetalRow(
         { type: updated.type, karat: updated.karat, weight: updated.weight, payoutPercentage: updated.payoutPercentage },
@@ -166,7 +166,6 @@ export function TakeInBalanced({
       );
       updated.marketValue = roundCurrency(result.marketValue);
       updated.payoutAmount = roundCurrency(result.payoutAmount);
-      // keep effective payout % visible on the row when not explicitly set
       if (updated.payoutPercentage === undefined || updated.payoutPercentage === null) {
         updated.payoutPercentage = result.payoutPercent || undefined;
       }
@@ -174,7 +173,13 @@ export function TakeInBalanced({
     });
     const totalMarketValue = roundCurrency(updatedMetals.reduce((sum: number, m: any) => sum + (m.marketValue || 0), 0));
     const totalPayoutAmount = roundCurrency(updatedMetals.reduce((sum: number, m: any) => sum + (m.payoutAmount || 0), 0));
-    onItemUpdate(itemId, { metals: updatedMetals, marketValue: totalMarketValue, payoutAmount: totalPayoutAmount });
+    const patch: any = { metals: updatedMetals, marketValue: totalMarketValue, payoutAmount: totalPayoutAmount };
+    // Auto-rebuild description from subtype + first metal when safe
+    if (isAutoFilledDescription(item) && item.subType) {
+      const auto = buildAutoDescription(item.subType, updatedMetals[0]);
+      if (auto) patch.itemType = auto;
+    }
+    onItemUpdate(itemId, patch);
   };
 
   // Recompute all metal rows whenever live spot prices change OR new items appear
@@ -264,6 +269,50 @@ export function TakeInBalanced({
     Silverware: ['Flatware', 'Hollowware', 'Tea / Coffee Set', 'Serving Piece', 'Tray / Plate', 'Candlestick', 'Trophy / Award', 'Decorative Object', 'Mixed Silver Lot', 'Other Silver Object'],
     LooseItems: ['Broken Jewelry Lot', 'Mixed Precious Metal Lot', 'Dental Gold', 'Findings / Components', 'Unmatched Earrings', 'Scrap Chain Lot', 'Watch Scrap / Parts', 'Unknown Precious Item', 'Mixed Lot'],
   };
+
+  // ── Auto-description helpers ──────────────────────────────────────
+  const buildAutoDescription = (subType?: string, metal?: { type?: string; karat?: number }) => {
+    const sub = (subType || '').trim();
+    const mType = (metal?.type || '').trim();
+    const k = Number(metal?.karat || 0);
+    const parts: string[] = [];
+    if (k > 0 && mType) {
+      if (mType === 'Gold') {
+        parts.push(k <= 24 ? `${k} Karat` : `.${k}`);
+        parts.push('Gold');
+      } else if (mType === 'Silver') {
+        if (k === 925) parts.push('925 Sterling Silver');
+        else parts.push(`${k} Silver`);
+      } else if (mType === 'Platinum') {
+        parts.push(`${k} Platinum`);
+      } else if (mType === 'Palladium') {
+        parts.push(`${k} Palladium`);
+      } else {
+        parts.push(`${k} ${mType}`);
+      }
+    } else if (mType) {
+      parts.push(mType);
+    }
+    if (sub) parts.push(sub);
+    return parts.join(' ').trim();
+  };
+
+  const isAutoFilledDescription = (item: any) => {
+    const text = (item?.itemType || '').trim().toLowerCase();
+    if (!text) return true;
+    const subs = itemTypesByCategory[item.category as keyof typeof itemTypesByCategory] || [];
+    if (subs.some(s => s.toLowerCase() === text)) return true;
+    const firstMetal = (item.metals || [])[0];
+    const variants = new Set<string>();
+    const sub = item.subType || '';
+    if (sub) {
+      variants.add(buildAutoDescription(sub).toLowerCase());
+      if (firstMetal) variants.add(buildAutoDescription(sub, firstMetal).toLowerCase());
+      if (firstMetal?.type) variants.add(buildAutoDescription(sub, { type: firstMetal.type, karat: 0 }).toLowerCase());
+    }
+    return variants.has(text);
+  };
+  // ──────────────────────────────────────────────────────────────────
 
   const silverTypes = ['Sterling (.925)', 'Coin Silver', '800 Silver', '830 Silver', '835 Silver', '900 Silver', '950 Silver', 'Silver Plate', 'Weighted Sterling', 'Unknown'];
   const bullionPurities = ['.999 Fine', '.9999 Fine', '.9995 Fine', '24K', '22K', '21K', '18K', '14K', '90% Silver', '40% Silver'];
@@ -599,9 +648,9 @@ export function TakeInBalanced({
                                               : '100px 96px max-content 80px 40px max-content',
                                           }}
                                         >
-                                          <Select value={firstMetal.type} onValueChange={(value) => updateMetal(item.id, firstMetal.id, { type: value })}>
+                                          <Select value={firstMetal.type || ""} onValueChange={(value) => updateMetal(item.id, firstMetal.id, { type: value })}>
                                             <SelectTrigger className="w-[100px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
-                                              <SelectValue />
+                                              <SelectValue placeholder="Metal" />
                                             </SelectTrigger>
                                             <SelectContent className="rounded-[12px] bg-white border-black/[0.06] shadow-xl">
                                               <SelectItem value="Gold">Gold</SelectItem>
@@ -700,11 +749,10 @@ export function TakeInBalanced({
                                             key={type}
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              const allSubtypes = itemTypesByCategory[item.category as keyof typeof itemTypesByCategory] || [];
-                                              const currentText = (item.itemType || '').trim();
-                                              const isAutoFilled = !currentText || allSubtypes.some(s => s.toLowerCase() === currentText.toLowerCase());
                                               const updates: any = { subType: type };
-                                              if (isAutoFilled) updates.itemType = type;
+                                              if (isAutoFilledDescription(item)) {
+                                                updates.itemType = buildAutoDescription(type, (item.metals || [])[0]);
+                                              }
                                               onItemUpdate(item.id, updates);
                                             }}
                                             className={`px-3 py-1 text-[12px] rounded-full transition-colors cursor-pointer font-medium whitespace-nowrap ${
@@ -734,9 +782,9 @@ export function TakeInBalanced({
                                               : '100px 96px max-content 80px 40px max-content',
                                           }}
                                         >
-                                          <Select value={firstAdditionalMetal.type} onValueChange={(value) => updateMetal(item.id, firstAdditionalMetal.id, { type: value })}>
+                                          <Select value={firstAdditionalMetal.type || ""} onValueChange={(value) => updateMetal(item.id, firstAdditionalMetal.id, { type: value })}>
                                             <SelectTrigger className="w-[100px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
-                                              <SelectValue />
+                                              <SelectValue placeholder="Metal" />
                                             </SelectTrigger>
                                             <SelectContent className="rounded-[12px] bg-white border-black/[0.06] shadow-xl">
                                               <SelectItem value="Gold">Gold</SelectItem>
@@ -826,9 +874,9 @@ export function TakeInBalanced({
                                             : '100px 96px max-content 80px 40px max-content',
                                         }}
                                       >
-                                        <Select value={metal.type} onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}>
+                                        <Select value={metal.type || ""} onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}>
                                           <SelectTrigger className="w-[100px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
-                                            <SelectValue />
+                                            <SelectValue placeholder="Metal" />
                                           </SelectTrigger>
                                           <SelectContent className="rounded-[12px] bg-white border-black/[0.06] shadow-xl">
                                             <SelectItem value="Gold">Gold</SelectItem>
@@ -1074,11 +1122,10 @@ export function TakeInBalanced({
                                                     key={type}
                                                     onClick={(e) => {
                                                       e.stopPropagation();
-                                                      const allSubtypes = itemTypesByCategory[item.category as keyof typeof itemTypesByCategory] || [];
-                                                      const currentText = (item.itemType || '').trim();
-                                                      const isAutoFilled = !currentText || allSubtypes.some(s => s.toLowerCase() === currentText.toLowerCase());
                                                       const updates: any = { subType: type };
-                                                      if (isAutoFilled) updates.itemType = type;
+                                                      if (isAutoFilledDescription(item)) {
+                                                        updates.itemType = buildAutoDescription(type, (item.metals || [])[0]);
+                                                      }
                                                       onItemUpdate(item.id, updates);
                                                     }}
                                                     className={`px-3 h-8 text-[12px] rounded-[8px] font-medium transition-all ${active ? 'bg-[#2B2833] text-white shadow-sm' : 'bg-white text-[#76707F] border border-black/[0.08] hover:text-[#2B2833] hover:border-black/[0.15]'}`}

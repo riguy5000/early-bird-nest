@@ -94,13 +94,14 @@ interface MetalPuritySelectProps {
   onChange: (purity: number) => void;
   className?: string;
   triggerClassName?: string;
+  placeholder?: string;
 }
 
 /**
  * Dropdown that adapts its options to the selected metal.
  * Silver/Platinum/Palladium will NOT show gold karats.
  */
-export function MetalPuritySelect({ metal, value, onChange, triggerClassName }: MetalPuritySelectProps) {
+export function MetalPuritySelect({ metal, value, onChange, triggerClassName, placeholder = 'Karat' }: MetalPuritySelectProps) {
   const options = getPurityOptionsForMetal(metal);
   const current = value != null ? String(value) : undefined;
 
@@ -112,7 +113,7 @@ export function MetalPuritySelect({ metal, value, onChange, triggerClassName }: 
   return (
     <Select value={isValid ? current : undefined} onValueChange={(v) => onChange(parseInt(v, 10))}>
       <SelectTrigger className={triggerClassName || 'w-[88px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]'}>
-        <SelectValue placeholder="—">{compact || '—'}</SelectValue>
+        <SelectValue placeholder={placeholder}>{compact || undefined}</SelectValue>
       </SelectTrigger>
       <SelectContent className="rounded-[12px] bg-white border-black/[0.06] shadow-xl">
         {options.map(opt => (
