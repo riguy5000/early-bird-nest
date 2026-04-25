@@ -155,9 +155,9 @@ export function TakeInBalanced({
     const updatedMetals = item.metals.map((m: any) => {
       if (m.id !== metalId) return m;
       const updated = { ...m, ...updates };
-      // If the metal type changed, reset purity to a sensible default for that metal
-      if (updates.type && updates.type !== m.type) {
-        updated.karat = getDefaultPurityForMetal(updates.type);
+      // If the metal type changed, clear purity so the user picks it explicitly
+      if (updates.type !== undefined && updates.type !== m.type) {
+        updated.karat = 0;
       }
       const result = computeMetalRow(
         { type: updated.type, karat: updated.karat, weight: updated.weight, payoutPercentage: updated.payoutPercentage },
@@ -166,7 +166,6 @@ export function TakeInBalanced({
       );
       updated.marketValue = roundCurrency(result.marketValue);
       updated.payoutAmount = roundCurrency(result.payoutAmount);
-      // keep effective payout % visible on the row when not explicitly set
       if (updated.payoutPercentage === undefined || updated.payoutPercentage === null) {
         updated.payoutPercentage = result.payoutPercent || undefined;
       }
@@ -174,7 +173,13 @@ export function TakeInBalanced({
     });
     const totalMarketValue = roundCurrency(updatedMetals.reduce((sum: number, m: any) => sum + (m.marketValue || 0), 0));
     const totalPayoutAmount = roundCurrency(updatedMetals.reduce((sum: number, m: any) => sum + (m.payoutAmount || 0), 0));
-    onItemUpdate(itemId, { metals: updatedMetals, marketValue: totalMarketValue, payoutAmount: totalPayoutAmount });
+    const patch: any = { metals: updatedMetals, marketValue: totalMarketValue, payoutAmount: totalPayoutAmount };
+    // Auto-rebuild description from subtype + first metal when safe
+    if (isAutoFilledDescription(item) && item.subType) {
+      const auto = buildAutoDescription(item.subType, updatedMetals[0]);
+      if (auto) patch.itemType = auto;
+    }
+    onItemUpdate(itemId, patch);
   };
 
   // Recompute all metal rows whenever live spot prices change OR new items appear
