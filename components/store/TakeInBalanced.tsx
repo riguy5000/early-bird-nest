@@ -648,7 +648,7 @@ export function TakeInBalanced({
                                               : '100px 96px max-content 80px 40px max-content',
                                           }}
                                         >
-                                          <Select value={firstMetal.type || undefined} onValueChange={(value) => updateMetal(item.id, firstMetal.id, { type: value })}>
+                                          <Select value={firstMetal.type || ""} onValueChange={(value) => updateMetal(item.id, firstMetal.id, { type: value })}>
                                             <SelectTrigger className="w-[100px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
                                               <SelectValue placeholder="Metal" />
                                             </SelectTrigger>
@@ -782,7 +782,7 @@ export function TakeInBalanced({
                                               : '100px 96px max-content 80px 40px max-content',
                                           }}
                                         >
-                                          <Select value={firstAdditionalMetal.type || undefined} onValueChange={(value) => updateMetal(item.id, firstAdditionalMetal.id, { type: value })}>
+                                          <Select value={firstAdditionalMetal.type || ""} onValueChange={(value) => updateMetal(item.id, firstAdditionalMetal.id, { type: value })}>
                                             <SelectTrigger className="w-[100px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
                                               <SelectValue placeholder="Metal" />
                                             </SelectTrigger>
@@ -874,7 +874,7 @@ export function TakeInBalanced({
                                             : '100px 96px max-content 80px 40px max-content',
                                         }}
                                       >
-                                        <Select value={metal.type || undefined} onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}>
+                                        <Select value={metal.type || ""} onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}>
                                           <SelectTrigger className="w-[100px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
                                             <SelectValue placeholder="Metal" />
                                           </SelectTrigger>
