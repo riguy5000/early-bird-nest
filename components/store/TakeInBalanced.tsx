@@ -145,7 +145,7 @@ export function TakeInBalanced({
     if (!item) return;
     // Do NOT seed a payoutPercentage here — the pricing engine will derive
     // it from metal-specific rateDefaults only. No legacy "Base Payout".
-    const newMetal = { id: `metal_${Date.now()}`, type: 'Gold', karat: 14, weight: 0, marketValue: 0, payoutAmount: 0 };
+    const newMetal = { id: `metal_${Date.now()}`, type: '', karat: 0, weight: 0, marketValue: 0, payoutAmount: 0 };
     onItemUpdate(itemId, { metals: [...item.metals, newMetal] });
   };
 
