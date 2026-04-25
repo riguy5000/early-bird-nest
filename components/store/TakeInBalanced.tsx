@@ -1435,7 +1435,7 @@ export function TakeInBalanced({
                                                     <Input
                                                       value={getSpec(item, 'length', '')}
                                                       onChange={(e) => updateSpec(item.id, 'length', e.target.value)}
-                                                      placeholder="e.g., 12"
+                                                      placeholder="e.g. 7.25, small, 12mm, 2x4"
                                                       className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"
                                                     />
                                                   </div>
@@ -1444,7 +1444,7 @@ export function TakeInBalanced({
                                                     <Input
                                                       value={getSpec(item, 'width', '')}
                                                       onChange={(e) => updateSpec(item.id, 'width', e.target.value)}
-                                                      placeholder="e.g., 6"
+                                                      placeholder="e.g. 7.25, small, 12mm, 2x4"
                                                       className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"
                                                     />
                                                   </div>
@@ -1453,7 +1453,7 @@ export function TakeInBalanced({
                                                     <Input
                                                       value={getSpec(item, 'height', '')}
                                                       onChange={(e) => updateSpec(item.id, 'height', e.target.value)}
-                                                      placeholder="e.g., 3"
+                                                      placeholder="e.g. 7.25, small, 12mm, 2x4"
                                                       className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"
                                                     />
                                                   </div>
@@ -1464,13 +1464,7 @@ export function TakeInBalanced({
                                                   <Input
                                                     value={item.size || ''}
                                                     onChange={(e) => onItemUpdate(item.id, { size: e.target.value })}
-                                                    placeholder={
-                                                      item.category === 'Jewelry'
-                                                        ? (item.itemType === 'Ring' ? 'e.g., 7'
-                                                            : (item.itemType === 'Chain' || item.itemType === 'Necklace' || item.itemType === 'Bracelet' || item.itemType === 'Anklet') ? 'e.g., 18in'
-                                                            : 'e.g., 12mm, Small, 1.5in')
-                                                        : 'e.g., 7, 18in'
-                                                    }
+                                                    placeholder="e.g. 7.25, small, 12mm, 2x4"
                                                     className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"
                                                   />
                                                 </div>
