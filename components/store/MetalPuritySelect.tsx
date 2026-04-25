@@ -103,17 +103,19 @@ interface MetalPuritySelectProps {
  */
 export function MetalPuritySelect({ metal, value, onChange, triggerClassName, placeholder = 'Karat' }: MetalPuritySelectProps) {
   const options = getPurityOptionsForMetal(metal);
-  const current = value != null ? String(value) : undefined;
-
-  // If current value is not in the options for this metal (e.g., metal just changed),
-  // display nothing selected — the parent should reset the value when metal changes.
-  const isValid = options.some(o => o.value === Number(current));
-  const compact = isValid ? formatPurityCompact(metal, value) : '';
+  const numValue = value != null ? Number(value) : NaN;
+  const isValid = Number.isFinite(numValue) && options.some(o => o.value === numValue);
+  const current = isValid ? String(numValue) : undefined;
+  const compact = isValid ? formatPurityCompact(metal || 'Gold', numValue) : '';
 
   return (
-    <Select value={isValid ? current : undefined} onValueChange={(v) => onChange(parseInt(v, 10))}>
+    <Select value={current} onValueChange={(v) => onChange(parseInt(v, 10))}>
       <SelectTrigger className={triggerClassName || 'w-[88px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]'}>
-        <SelectValue placeholder={placeholder}>{compact || undefined}</SelectValue>
+        {compact ? (
+          <span className="text-[13px] text-[#2B2833] truncate">{compact}</span>
+        ) : (
+          <SelectValue placeholder={placeholder} />
+        )}
       </SelectTrigger>
       <SelectContent className="rounded-[12px] bg-white border-black/[0.06] shadow-xl">
         {options.map(opt => (
