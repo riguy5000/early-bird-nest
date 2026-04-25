@@ -165,8 +165,6 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
       metals: category === 'Stones'
         ? []
         : [{ id: `metal_${Date.now()}`, type: '', karat: 0, weight: 0 }],
-        ? []
-        : [{ id: `metal_${Date.now()}`, type: 'Gold', karat: 14, weight: 0 }],
       stones: [],
       marketValue: 0,
       // No legacy Base Payout — payout derives from metal-specific rateDefaults only
