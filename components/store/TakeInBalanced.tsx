@@ -749,11 +749,10 @@ export function TakeInBalanced({
                                             key={type}
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              const allSubtypes = itemTypesByCategory[item.category as keyof typeof itemTypesByCategory] || [];
-                                              const currentText = (item.itemType || '').trim();
-                                              const isAutoFilled = !currentText || allSubtypes.some(s => s.toLowerCase() === currentText.toLowerCase());
                                               const updates: any = { subType: type };
-                                              if (isAutoFilled) updates.itemType = type;
+                                              if (isAutoFilledDescription(item)) {
+                                                updates.itemType = buildAutoDescription(type, (item.metals || [])[0]);
+                                              }
                                               onItemUpdate(item.id, updates);
                                             }}
                                             className={`px-3 py-1 text-[12px] rounded-full transition-colors cursor-pointer font-medium whitespace-nowrap ${
