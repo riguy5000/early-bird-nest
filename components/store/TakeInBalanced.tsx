@@ -265,6 +265,50 @@ export function TakeInBalanced({
     LooseItems: ['Broken Jewelry Lot', 'Mixed Precious Metal Lot', 'Dental Gold', 'Findings / Components', 'Unmatched Earrings', 'Scrap Chain Lot', 'Watch Scrap / Parts', 'Unknown Precious Item', 'Mixed Lot'],
   };
 
+  // ── Auto-description helpers ──────────────────────────────────────
+  const buildAutoDescription = (subType?: string, metal?: { type?: string; karat?: number }) => {
+    const sub = (subType || '').trim();
+    const mType = (metal?.type || '').trim();
+    const k = Number(metal?.karat || 0);
+    const parts: string[] = [];
+    if (k > 0 && mType) {
+      if (mType === 'Gold') {
+        parts.push(k <= 24 ? `${k} Karat` : `.${k}`);
+        parts.push('Gold');
+      } else if (mType === 'Silver') {
+        if (k === 925) parts.push('925 Sterling Silver');
+        else parts.push(`${k} Silver`);
+      } else if (mType === 'Platinum') {
+        parts.push(`${k} Platinum`);
+      } else if (mType === 'Palladium') {
+        parts.push(`${k} Palladium`);
+      } else {
+        parts.push(`${k} ${mType}`);
+      }
+    } else if (mType) {
+      parts.push(mType);
+    }
+    if (sub) parts.push(sub);
+    return parts.join(' ').trim();
+  };
+
+  const isAutoFilledDescription = (item: any) => {
+    const text = (item?.itemType || '').trim().toLowerCase();
+    if (!text) return true;
+    const subs = itemTypesByCategory[item.category as keyof typeof itemTypesByCategory] || [];
+    if (subs.some(s => s.toLowerCase() === text)) return true;
+    const firstMetal = (item.metals || [])[0];
+    const variants = new Set<string>();
+    const sub = item.subType || '';
+    if (sub) {
+      variants.add(buildAutoDescription(sub).toLowerCase());
+      if (firstMetal) variants.add(buildAutoDescription(sub, firstMetal).toLowerCase());
+      if (firstMetal?.type) variants.add(buildAutoDescription(sub, { type: firstMetal.type, karat: 0 }).toLowerCase());
+    }
+    return variants.has(text);
+  };
+  // ──────────────────────────────────────────────────────────────────
+
   const silverTypes = ['Sterling (.925)', 'Coin Silver', '800 Silver', '830 Silver', '835 Silver', '900 Silver', '950 Silver', 'Silver Plate', 'Weighted Sterling', 'Unknown'];
   const bullionPurities = ['.999 Fine', '.9999 Fine', '.9995 Fine', '24K', '22K', '21K', '18K', '14K', '90% Silver', '40% Silver'];
   const bullionUnits = ['oz', 'g', 'dwt', 'kg', 'face value'];
