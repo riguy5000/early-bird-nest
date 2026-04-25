@@ -874,9 +874,9 @@ export function TakeInBalanced({
                                             : '100px 96px max-content 80px 40px max-content',
                                         }}
                                       >
-                                        <Select value={metal.type} onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}>
+                                        <Select value={metal.type || undefined} onValueChange={(value) => updateMetal(item.id, metal.id, { type: value })}>
                                           <SelectTrigger className="w-[100px] h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px]">
-                                            <SelectValue />
+                                            <SelectValue placeholder="Metal" />
                                           </SelectTrigger>
                                           <SelectContent className="rounded-[12px] bg-white border-black/[0.06] shadow-xl">
                                             <SelectItem value="Gold">Gold</SelectItem>
