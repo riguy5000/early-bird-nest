@@ -392,18 +392,28 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
             { key: 'Silverware', label: 'Silverware' },
             { key: 'LooseItems', label: 'Loose Items' },
           ] as { key: Item['category']; label: string }[]).map(({ key, label }) => {
-            const isActive = items.some(item => item.category === key);
+            const count = items.filter(item => item.category === key).length;
+            const isActive = count > 0;
             return (
               <button
                 key={key}
                 onClick={() => addNewItem(key)}
-                className={`px-4 py-2 rounded-[10px] text-[14px] font-medium transition-all ring-2 ring-white/80 ${
+                className={`px-4 py-2 rounded-[10px] text-[14px] font-medium transition-all ring-2 ring-white/80 inline-flex items-center gap-1.5 ${
                   isActive
                     ? 'bg-[#2B2833] text-white shadow-sm'
                     : 'bg-white text-[#76707F] hover:text-[#2B2833] shadow-sm'
                 }`}
               >
-                {label}
+                <span>{label}</span>
+                {count > 0 && (
+                  <span
+                    className={`inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5 rounded-full text-[11px] font-semibold tabular-nums ${
+                      isActive ? 'bg-white/20 text-white' : 'bg-[#F1EFF3] text-[#2B2833]'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                )}
               </button>
             );
           })}
