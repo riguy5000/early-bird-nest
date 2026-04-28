@@ -36,6 +36,10 @@ import { computeMetalRow, roundCurrency } from '@/lib/pricing';
 import { MetalPuritySelect, getDefaultPurityForMetal, formatPurityLabel, formatPurityCompact } from './MetalPuritySelect';
 import { supabase } from '@/integrations/supabase/client';
 
+// Shared option lists — keep Jewelry stones and Loose Stones consistent
+const STONE_TYPE_OPTIONS = ['Diamond','Sapphire','Ruby','Emerald','Opal','Pearl','Alexandrite','Aquamarine','Amethyst','Citrine','Garnet','Peridot','Topaz','Tourmaline','Tanzanite','Spinel','Jade','Moissanite','CZ','Other'];
+const STONE_SHAPE_OPTIONS = ['Round','Princess','Cushion','Oval','Emerald','Pear','Marquise','Radiant','Asscher','Heart','Trillion','Baguette','Tapered Baguette','Cabochon','Briolette','Rose Cut','Old European','Old Mine','Fancy','Other'];
+
 interface TakeInBalancedProps {
   items: any[];
   activeItemId: string | null;
