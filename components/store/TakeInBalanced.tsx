@@ -1601,16 +1601,19 @@ export function TakeInBalanced({
                                                         </div>
                                                         <div>
                                                           <label className="text-[11px] font-medium text-[#76707F] block mb-1">Shape</label>
-                                                          <Input
+                                                          <Select
                                                             value={stone.shape || ''}
-                                                            onChange={(e) => {
+                                                            onValueChange={(v) => {
                                                               const next = [...(item.stones || [])];
-                                                              next[si] = { ...next[si], shape: e.target.value };
+                                                              next[si] = { ...next[si], shape: v };
                                                               onItemUpdate(item.id, { stones: next });
                                                             }}
-                                                            placeholder="Round, Oval…"
-                                                            className="bg-white h-8 text-[12px] rounded-[8px] border border-black/[0.08]"
-                                                          />
+                                                          >
+                                                            <SelectTrigger className="bg-white h-8 text-[12px] rounded-[8px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                                            <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06] max-h-[300px]">
+                                                              {STONE_SHAPE_OPTIONS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                                            </SelectContent>
+                                                          </Select>
                                                         </div>
                                                         <div>
                                                           <label className="text-[11px] font-medium text-[#76707F] block mb-1">Size (mm)</label>
