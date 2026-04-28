@@ -1218,7 +1218,7 @@ export function TakeInBalanced({
                                                   <Select value={getSpec(item, 'stoneType', '')} onValueChange={(v) => updateSpec(item.id, 'stoneType', v)}>
                                                     <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
                                                     <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06] max-h-[300px]">
-                                                      {['Diamond','Sapphire','Ruby','Emerald','Opal','Pearl','Alexandrite','Aquamarine','Amethyst','Citrine','Garnet','Peridot','Topaz','Tourmaline','Tanzanite','Spinel','Jade','Moissanite','CZ','Other'].map(s => (
+                                                       {STONE_TYPE_OPTIONS.map(s => (
                                                         <SelectItem key={s} value={s}>{s}</SelectItem>
                                                       ))}
                                                     </SelectContent>
