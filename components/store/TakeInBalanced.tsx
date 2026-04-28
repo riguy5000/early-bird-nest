@@ -36,6 +36,10 @@ import { computeMetalRow, roundCurrency } from '@/lib/pricing';
 import { MetalPuritySelect, getDefaultPurityForMetal, formatPurityLabel, formatPurityCompact } from './MetalPuritySelect';
 import { supabase } from '@/integrations/supabase/client';
 
+// Shared option lists — keep Jewelry stones and Loose Stones consistent
+const STONE_TYPE_OPTIONS = ['Diamond','Sapphire','Ruby','Emerald','Opal','Pearl','Alexandrite','Aquamarine','Amethyst','Citrine','Garnet','Peridot','Topaz','Tourmaline','Tanzanite','Spinel','Jade','Moissanite','CZ','Other'];
+const STONE_SHAPE_OPTIONS = ['Round','Princess','Cushion','Oval','Emerald','Pear','Marquise','Radiant','Asscher','Heart','Trillion','Baguette','Tapered Baguette','Cabochon','Briolette','Rose Cut','Old European','Old Mine','Fancy','Other'];
+
 interface TakeInBalancedProps {
   items: any[];
   activeItemId: string | null;
@@ -1214,7 +1218,7 @@ export function TakeInBalanced({
                                                   <Select value={getSpec(item, 'stoneType', '')} onValueChange={(v) => updateSpec(item.id, 'stoneType', v)}>
                                                     <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
                                                     <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06] max-h-[300px]">
-                                                      {['Diamond','Sapphire','Ruby','Emerald','Opal','Pearl','Alexandrite','Aquamarine','Amethyst','Citrine','Garnet','Peridot','Topaz','Tourmaline','Tanzanite','Spinel','Jade','Moissanite','CZ','Other'].map(s => (
+                                                       {STONE_TYPE_OPTIONS.map(s => (
                                                         <SelectItem key={s} value={s}>{s}</SelectItem>
                                                       ))}
                                                     </SelectContent>
@@ -1225,7 +1229,7 @@ export function TakeInBalanced({
                                                  <Select value={getSpec(item, 'shape', '')} onValueChange={(v) => updateSpec(item.id, 'shape', v)}>
                                                    <SelectTrigger className="bg-white h-9 text-[13px] rounded-[10px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
                                                    <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06] max-h-[300px]">
-                                                     {['Round','Princess','Cushion','Oval','Emerald','Pear','Marquise','Radiant','Asscher','Heart','Trillion','Baguette','Tapered Baguette','Cabochon','Briolette','Rose Cut','Old European','Old Mine','Fancy','Other'].map(s => (
+                                                     {STONE_SHAPE_OPTIONS.map(s => (
                                                        <SelectItem key={s} value={s}>{s}</SelectItem>
                                                      ))}
                                                    </SelectContent>
@@ -1576,8 +1580,8 @@ export function TakeInBalanced({
                                                             }}
                                                           >
                                                             <SelectTrigger className="bg-white h-8 text-[12px] rounded-[8px] border border-black/[0.08]"><SelectValue /></SelectTrigger>
-                                                            <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
-                                                              {['Diamond', 'Sapphire', 'Ruby', 'Emerald', 'Moissanite', 'CZ', 'Pearl', 'Opal', 'Other'].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                                                            <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06] max-h-[300px]">
+                                                              {STONE_TYPE_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                                                             </SelectContent>
                                                           </Select>
                                                         </div>
@@ -1597,16 +1601,19 @@ export function TakeInBalanced({
                                                         </div>
                                                         <div>
                                                           <label className="text-[11px] font-medium text-[#76707F] block mb-1">Shape</label>
-                                                          <Input
+                                                          <Select
                                                             value={stone.shape || ''}
-                                                            onChange={(e) => {
+                                                            onValueChange={(v) => {
                                                               const next = [...(item.stones || [])];
-                                                              next[si] = { ...next[si], shape: e.target.value };
+                                                              next[si] = { ...next[si], shape: v };
                                                               onItemUpdate(item.id, { stones: next });
                                                             }}
-                                                            placeholder="Round, Oval…"
-                                                            className="bg-white h-8 text-[12px] rounded-[8px] border border-black/[0.08]"
-                                                          />
+                                                          >
+                                                            <SelectTrigger className="bg-white h-8 text-[12px] rounded-[8px] border border-black/[0.08]"><SelectValue placeholder="Select" /></SelectTrigger>
+                                                            <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06] max-h-[300px]">
+                                                              {STONE_SHAPE_OPTIONS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                                            </SelectContent>
+                                                          </Select>
                                                         </div>
                                                         <div>
                                                           <label className="text-[11px] font-medium text-[#76707F] block mb-1">Size (mm)</label>
