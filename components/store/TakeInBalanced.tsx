@@ -1580,8 +1580,8 @@ export function TakeInBalanced({
                                                             }}
                                                           >
                                                             <SelectTrigger className="bg-white h-8 text-[12px] rounded-[8px] border border-black/[0.08]"><SelectValue /></SelectTrigger>
-                                                            <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06]">
-                                                              {['Diamond', 'Sapphire', 'Ruby', 'Emerald', 'Moissanite', 'CZ', 'Pearl', 'Opal', 'Other'].map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                                                            <SelectContent className="rounded-[12px] bg-white shadow-xl border border-black/[0.06] max-h-[300px]">
+                                                              {STONE_TYPE_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                                                             </SelectContent>
                                                           </Select>
                                                         </div>
