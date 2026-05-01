@@ -587,8 +587,11 @@ export function TakeInBalanced({
                                         onBlur={(e) => {
                                           const numValue = parseFloat(e.target.value) || 0;
                                           const current = items.find(i => i.id === item.id);
-                                          const nextSpecs = { ...(current?.specs || {}), caratWeight: numValue };
-                                          delete (nextSpecs as any).caratWeightRaw;
+                                          const nextSpecs = {
+                                            ...(current?.specs || {}),
+                                            caratWeight: numValue,
+                                            caratWeightRaw: e.target.value === '' ? '' : String(numValue),
+                                          };
                                           onItemUpdate(item.id, { specs: nextSpecs });
                                         }}
                                         placeholder="ct"
