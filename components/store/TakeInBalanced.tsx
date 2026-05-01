@@ -574,14 +574,22 @@ export function TakeInBalanced({
                                         onChange={(e) => {
                                           const value = e.target.value;
                                           if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
-                                            updateSpec(item.id, 'caratWeightRaw', value);
-                                            updateSpec(item.id, 'caratWeight', value === '' ? 0 : parseFloat(value) || 0);
+                                            const current = items.find(i => i.id === item.id);
+                                            onItemUpdate(item.id, {
+                                              specs: {
+                                                ...(current?.specs || {}),
+                                                caratWeightRaw: value,
+                                                caratWeight: value === '' ? 0 : parseFloat(value) || 0,
+                                              },
+                                            });
                                           }
                                         }}
                                         onBlur={(e) => {
                                           const numValue = parseFloat(e.target.value) || 0;
-                                          updateSpec(item.id, 'caratWeight', numValue);
-                                          updateSpec(item.id, 'caratWeightRaw', undefined);
+                                          const current = items.find(i => i.id === item.id);
+                                          const nextSpecs = { ...(current?.specs || {}), caratWeight: numValue };
+                                          delete (nextSpecs as any).caratWeightRaw;
+                                          onItemUpdate(item.id, { specs: nextSpecs });
                                         }}
                                         placeholder="ct"
                                         className="w-20 h-10 text-[13px] bg-white border border-black/[0.06] rounded-[10px] text-right tabular-nums"
