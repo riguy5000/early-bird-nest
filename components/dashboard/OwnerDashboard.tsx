@@ -148,7 +148,7 @@ export function OwnerDashboard({ storeId, storeName, onNavigate }: OwnerDashboar
               <div key={symbol} className="flex flex-col p-3 rounded-[12px] bg-white/60 border border-black/[0.04]">
                 <span className="text-[11px] text-[#A8A3AE] uppercase tracking-wider">{label} / oz</span>
                 <span className="text-[22px] font-semibold text-[#2B2833] tabular-nums tracking-tight mt-0.5">
-                  {price > 0 ? `$${price.toFixed(2)}` : '—'}
+                  {price > 0 ? fmtFull(price) : '—'}
                 </span>
               </div>
             );

@@ -307,7 +307,7 @@ export function MetalApiKeysSettings() {
               {prices.map((p) => (
                 <div key={p.metal} className="p-3 bg-muted/50 rounded-lg">
                   <div className="text-sm font-medium">{p.metal}</div>
-                  <div className="text-lg font-bold">${Number(p.price_usd).toFixed(2)}</div>
+                  <div className="text-lg font-bold">${Number(p.price_usd).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                   <div className={`text-xs ${Number(p.change_percent) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {Number(p.change_percent) >= 0 ? '+' : ''}{Number(p.change_percent).toFixed(2)}%
                   </div>

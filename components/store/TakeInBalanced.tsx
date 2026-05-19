@@ -35,6 +35,7 @@ import { useMetalPrices } from '@/hooks/useMetalPrices';
 import { computeMetalRow, roundCurrency } from '@/lib/pricing';
 import { MetalPuritySelect, getDefaultPurityForMetal, formatPurityLabel, formatPurityCompact } from './MetalPuritySelect';
 import { supabase } from '@/integrations/supabase/client';
+import { formatUSD } from '@/lib/utils';
 
 // Shared option lists — keep Jewelry stones and Loose Stones consistent
 const STONE_TYPE_OPTIONS = ['Diamond','Sapphire','Ruby','Emerald','Opal','Pearl','Alexandrite','Aquamarine','Amethyst','Citrine','Garnet','Peridot','Topaz','Tourmaline','Tanzanite','Spinel','Jade','Moissanite','CZ','Other'];
@@ -494,7 +495,7 @@ export function TakeInBalanced({
                             <div className="flex items-baseline gap-2">
                               <span className="text-[13px] text-[#A8A3AE]">Section Total</span>
                               <span className="text-[18px] font-bold text-[#2B2833] tabular-nums">
-                                ${(categoryItems as any[]).reduce((s: number, i: any) => s + (i.payoutAmount || 0), 0).toFixed(2)}
+                                {formatUSD((categoryItems as any[]).reduce((s: number, i: any) => s + (i.payoutAmount || 0), 0))}
                               </span>
                             </div>
                             <Button
@@ -574,7 +575,7 @@ export function TakeInBalanced({
                                       />
 
                                       <div className="h-10 px-3 flex items-center justify-end min-w-[80px] rounded-[10px] bg-[#E6FBF1] text-[13px] font-semibold text-[#0FB37A] tabular-nums">
-                                        ${(item.payoutAmount || 0).toFixed(2)}
+                                        {formatUSD(item.payoutAmount || 0)}
                                       </div>
 
                                       <button
@@ -657,7 +658,7 @@ export function TakeInBalanced({
                                       />
 
                                       <div className="h-10 px-3 flex items-center justify-end min-w-[80px] rounded-[10px] bg-[#E6FBF1] text-[13px] font-semibold text-[#0FB37A] tabular-nums">
-                                        ${(item.payoutAmount || 0).toFixed(2)}
+                                        {formatUSD(item.payoutAmount || 0)}
                                       </div>
 
                                       {getSpec(item, 'reportNumber') && (
@@ -744,7 +745,7 @@ export function TakeInBalanced({
                                           </div>
 
                                           <div className="h-10 px-3 flex items-center justify-end min-w-[80px] rounded-[10px] bg-[#E6FBF1] text-[13px] font-semibold text-[#0FB37A] tabular-nums">
-                                            ${(firstMetal.payoutAmount || 0).toFixed(2)}
+                                            {formatUSD(firstMetal.payoutAmount || 0)}
                                           </div>
 
                                           <button
@@ -875,7 +876,7 @@ export function TakeInBalanced({
                                             <span className="text-[12px] text-[#A8A3AE]">g</span>
                                           </div>
                                           <div className="h-10 px-3 flex items-center justify-end min-w-[80px] rounded-[10px] bg-[#E6FBF1] text-[13px] font-semibold text-[#0FB37A] tabular-nums">
-                                            ${(firstAdditionalMetal.payoutAmount || 0).toFixed(2)}
+                                            {formatUSD(firstAdditionalMetal.payoutAmount || 0)}
                                           </div>
                                           <div aria-hidden className="h-10 w-10" />
                                           <div
@@ -967,7 +968,7 @@ export function TakeInBalanced({
                                           <span className="text-[12px] text-[#A8A3AE]">g</span>
                                         </div>
                                         <div className="h-10 px-3 flex items-center justify-end min-w-[80px] rounded-[10px] bg-[#E6FBF1] text-[13px] font-semibold text-[#0FB37A] tabular-nums">
-                                          ${(metal.payoutAmount || 0).toFixed(2)}
+                                          {formatUSD(metal.payoutAmount || 0)}
                                         </div>
                                         <div aria-hidden className="h-10 w-10" />
                                         <div
@@ -1784,12 +1785,12 @@ export function TakeInBalanced({
                                                 <div>{getSpec(item, 'stoneType', 'Stone') || 'Stone'}</div>
                                                 <div className="text-right tabular-nums">{(parseFloat(getSpec(item, 'caratWeight', 0)) || 0).toFixed(2)} ct</div>
                                                 <div className="text-right tabular-nums text-[#76707F]">{getSpec(item, 'quantity', 1)}</div>
-                                                <div className="text-right tabular-nums font-medium w-20">${(item.payoutAmount || 0).toFixed(2)}</div>
+                                                <div className="text-right tabular-nums font-medium w-20">{formatUSD(item.payoutAmount || 0)}</div>
                                               </div>
                                               <div className="flex items-center justify-between px-4 py-3 border-t border-black/[0.06] bg-black/[0.015]">
                                                 <span className="text-[12px] font-medium text-[#76707F]">Total Stone Value</span>
                                                 <span className="text-[15px] font-semibold text-[#2B2833] tabular-nums">
-                                                  ${(item.payoutAmount || 0).toFixed(2)}
+                                                  {formatUSD(item.payoutAmount || 0)}
                                                 </span>
                                               </div>
                                             </div>
@@ -1816,13 +1817,13 @@ export function TakeInBalanced({
                                                   <div>{metal.type} <span className="text-[#76707F]">{formatPurityLabel(metal.type, metal.karat)}</span></div>
                                                   <div className="text-right tabular-nums">{(metal.weight || 0).toFixed(2)}</div>
                                                   <div className="text-right tabular-nums text-[#76707F]">{typeof metal.payoutPercentage === 'number' && metal.payoutPercentage > 0 ? `${metal.payoutPercentage}%` : '—'}</div>
-                                                  <div className="text-right tabular-nums font-medium w-16">${(metal.payoutAmount || 0).toFixed(2)}</div>
+                                                  <div className="text-right tabular-nums font-medium w-16">{formatUSD(metal.payoutAmount || 0)}</div>
                                                 </div>
                                               ))}
                                               <div className="flex items-center justify-between px-4 py-3 border-t border-black/[0.06] bg-black/[0.015]">
                                                 <span className="text-[12px] font-medium text-[#76707F]">Total Metal Value</span>
                                                 <span className="text-[15px] font-semibold text-[#2B2833] tabular-nums">
-                                                  ${(item.metals || []).reduce((s: number, m: any) => s + (m.payoutAmount || 0), 0).toFixed(2)}
+                                                  {formatUSD((item.metals || []).reduce((s: number, m: any) => s + (m.payoutAmount || 0), 0))}
                                                 </span>
                                               </div>
                                             </div>
@@ -1947,7 +1948,7 @@ export function TakeInBalanced({
           {/* ── Payout Total — large number first, label below (screenshot layout) ── */}
           <div className="px-5 pt-6 pb-5 border-b border-black/[0.06]">
             <div className="text-[40px] font-semibold text-[#2B2833] tabular-nums tracking-tight leading-none">
-              ${totalPayout.toFixed(2)}
+              {formatUSD(totalPayout)}
             </div>
             <div className="text-[12px] text-[#76707F] mt-1.5">Total Payout</div>
           </div>
@@ -2047,7 +2048,7 @@ export function TakeInBalanced({
             {!store.hideMarketValue && (
               <div className="flex justify-between text-[14px]">
                 <span className="text-[#76707F]">Market Value</span>
-                <span className="font-medium text-[#2B2833] tabular-nums">${totalMarket.toFixed(2)}</span>
+                <span className="font-medium text-[#2B2833] tabular-nums">{formatUSD(totalMarket)}</span>
               </div>
             )}
 
@@ -2063,7 +2064,7 @@ export function TakeInBalanced({
             <div className="flex justify-between items-baseline pt-1 border-t border-black/[0.04]">
               <span className="text-[14px] font-semibold text-[#2B2833]">Total Payout</span>
               <span className="text-[22px] font-semibold text-[#6B5EF9] tabular-nums tracking-tight">
-                ${totalPayout.toFixed(2)}
+                {formatUSD(totalPayout)}
               </span>
             </div>
 
@@ -2071,7 +2072,7 @@ export function TakeInBalanced({
             {!store.hideProfit && (
               <div className="flex justify-between text-[13px]">
                 <span className="text-[#A8A3AE]">Profit</span>
-                <span className="font-medium text-[#4ADB8A] tabular-nums">${profit.toFixed(2)}</span>
+                <span className="font-medium text-[#4ADB8A] tabular-nums">{formatUSD(profit)}</span>
               </div>
             )}
 

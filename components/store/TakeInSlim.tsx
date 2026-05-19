@@ -15,6 +15,7 @@ import {
 import { useMetalPrices } from '@/hooks/useMetalPrices';
 import { computeMetalRow, roundCurrency } from '@/lib/pricing';
 import { MetalPuritySelect, getDefaultPurityForMetal } from './MetalPuritySelect';
+import { formatUSD } from '@/lib/utils';
 
 interface TakeInSlimProps {
   items: any[];
@@ -105,7 +106,7 @@ export function TakeInSlim({
             {!store.hidePayout && (
               <div className="text-right">
                 <div className="text-2xl font-bold text-primary">
-                  ${totalPayout.toFixed(2)}
+                  {formatUSD(totalPayout)}
                 </div>
                 <div className="text-xs text-muted-foreground">Total Payout</div>
               </div>
@@ -205,7 +206,7 @@ export function TakeInSlim({
                   <div className="flex items-center">
                     {!store.hidePayout && (
                       <div className="font-semibold text-primary text-sm">
-                        ${(metal.payoutAmount || 0).toFixed(2)}
+                        {formatUSD(metal.payoutAmount || 0)}
                       </div>
                     )}
                   </div>
