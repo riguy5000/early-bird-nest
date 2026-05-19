@@ -35,6 +35,7 @@ import { useMetalPrices } from '@/hooks/useMetalPrices';
 import { computeMetalRow, roundCurrency } from '@/lib/pricing';
 import { MetalPuritySelect, getDefaultPurityForMetal, formatPurityLabel, formatPurityCompact } from './MetalPuritySelect';
 import { supabase } from '@/integrations/supabase/client';
+import { formatUSD } from '@/lib/utils';
 
 // Shared option lists — keep Jewelry stones and Loose Stones consistent
 const STONE_TYPE_OPTIONS = ['Diamond','Sapphire','Ruby','Emerald','Opal','Pearl','Alexandrite','Aquamarine','Amethyst','Citrine','Garnet','Peridot','Topaz','Tourmaline','Tanzanite','Spinel','Jade','Moissanite','CZ','Other'];
