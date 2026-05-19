@@ -41,7 +41,7 @@ export function MetalPriceTicker() {
         <div key={metal} className="flex flex-col">
           <span className="text-[11px] text-[#A8A3AE] uppercase tracking-wider">{metalLabel(metal)}</span>
           <span className="text-[22px] font-semibold text-[#2B2833] tabular-nums tracking-tight">
-            ${Number(price_usd).toFixed(2)}
+            ${Number(price_usd).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
         </div>
       ))}
