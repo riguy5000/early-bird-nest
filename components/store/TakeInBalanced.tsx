@@ -423,9 +423,15 @@ export function TakeInBalanced({
           const m = pickBest(STONE_SHAPE_OPTIONS);
           if (m) patch.shape = m;
         }
-        if (!specs.color) {
+        {
           const m = pickBest(COLOR_KEYWORDS);
-          if (m) patch.color = m;
+          // Update color whenever the description mentions a color keyword,
+          // unless the user has manually entered a non-keyword color value.
+          if (m && m.toLowerCase() !== String(specs.color || '').toLowerCase()) {
+            const currentIsKeywordOrEmpty = !specs.color
+              || COLOR_KEYWORDS.some(c => c.toLowerCase() === String(specs.color).toLowerCase());
+            if (currentIsKeywordOrEmpty) patch.color = m;
+          }
         }
         if (Object.keys(patch).length) {
           onItemUpdate(item.id, { specs: { ...specs, ...patch } });
