@@ -66,12 +66,12 @@ export function SummaryFooter({
           <div className="flex items-center gap-6 text-sm">
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">Market</span>
-              <span className="font-semibold tabular-nums">${totals.totalMarketValue.toFixed(2)}</span>
+              <span className="font-semibold tabular-nums">{formatUSD(totals.totalMarketValue)}</span>
             </div>
             {!hidePayout && (
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">Payout</span>
-                <span className="font-semibold text-primary tabular-nums">${totals.totalPayout.toFixed(2)}</span>
+                <span className="font-semibold text-primary tabular-nums">{formatUSD(totals.totalPayout)}</span>
               </div>
             )}
             <div className="flex items-center gap-2">
@@ -81,7 +81,7 @@ export function SummaryFooter({
             {!hideProfit && (
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">Profit</span>
-                <span className="font-semibold text-green-600 tabular-nums">${totals.profit.toFixed(2)}</span>
+                <span className="font-semibold text-green-600 tabular-nums">{formatUSD(totals.profit)}</span>
               </div>
             )}
           </div>
