@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { syncTakeInToInventory } from '../inventory/syncTakeInToInventory';
 import { buildDemoItems } from './demoTakeInData';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { formatUSD } from '@/lib/utils';
 import {
   Zap,
   Clock,
