@@ -106,7 +106,7 @@ export function TakeInSlim({
             {!store.hidePayout && (
               <div className="text-right">
                 <div className="text-2xl font-bold text-primary">
-                  ${totalPayout.toFixed(2)}
+                  {formatUSD(totalPayout)}
                 </div>
                 <div className="text-xs text-muted-foreground">Total Payout</div>
               </div>
