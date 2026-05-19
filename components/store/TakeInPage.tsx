@@ -509,7 +509,7 @@ export function TakeInPage({ store, employee, onComplete, onClose }: TakeInPageP
               Confirm Purchase
             </DialogTitle>
             <DialogDescription className="text-[14px] text-[#76707F]">
-              You are about to complete this purchase for <strong className="text-[#2B2833]">${totals.totalPayout.toFixed(2)}</strong> with {items.length} item(s).
+              You are about to complete this purchase for <strong className="text-[#2B2833]">{formatUSD(totals.totalPayout)}</strong> with {items.length} item(s).
               {customer && <> Customer: <strong className="text-[#2B2833]">{customer.name}</strong>.</>}
               {' '}This action will create inventory records and cannot be undone.
             </DialogDescription>
