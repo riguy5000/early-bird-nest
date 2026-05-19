@@ -1948,7 +1948,7 @@ export function TakeInBalanced({
           {/* ── Payout Total — large number first, label below (screenshot layout) ── */}
           <div className="px-5 pt-6 pb-5 border-b border-black/[0.06]">
             <div className="text-[40px] font-semibold text-[#2B2833] tabular-nums tracking-tight leading-none">
-              ${totalPayout.toFixed(2)}
+              {formatUSD(totalPayout)}
             </div>
             <div className="text-[12px] text-[#76707F] mt-1.5">Total Payout</div>
           </div>
@@ -2048,7 +2048,7 @@ export function TakeInBalanced({
             {!store.hideMarketValue && (
               <div className="flex justify-between text-[14px]">
                 <span className="text-[#76707F]">Market Value</span>
-                <span className="font-medium text-[#2B2833] tabular-nums">${totalMarket.toFixed(2)}</span>
+                <span className="font-medium text-[#2B2833] tabular-nums">{formatUSD(totalMarket)}</span>
               </div>
             )}
 
@@ -2064,7 +2064,7 @@ export function TakeInBalanced({
             <div className="flex justify-between items-baseline pt-1 border-t border-black/[0.04]">
               <span className="text-[14px] font-semibold text-[#2B2833]">Total Payout</span>
               <span className="text-[22px] font-semibold text-[#6B5EF9] tabular-nums tracking-tight">
-                ${totalPayout.toFixed(2)}
+                {formatUSD(totalPayout)}
               </span>
             </div>
 
@@ -2072,7 +2072,7 @@ export function TakeInBalanced({
             {!store.hideProfit && (
               <div className="flex justify-between text-[13px]">
                 <span className="text-[#A8A3AE]">Profit</span>
-                <span className="font-medium text-[#4ADB8A] tabular-nums">${profit.toFixed(2)}</span>
+                <span className="font-medium text-[#4ADB8A] tabular-nums">{formatUSD(profit)}</span>
               </div>
             )}
 
