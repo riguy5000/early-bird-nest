@@ -206,7 +206,7 @@ export function TakeInSlim({
                   <div className="flex items-center">
                     {!store.hidePayout && (
                       <div className="font-semibold text-primary text-sm">
-                        ${(metal.payoutAmount || 0).toFixed(2)}
+                        {formatUSD(metal.payoutAmount || 0)}
                       </div>
                     )}
                   </div>
