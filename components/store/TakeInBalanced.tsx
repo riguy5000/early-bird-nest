@@ -403,6 +403,34 @@ export function TakeInBalanced({
       if (best && best !== item.subType) {
         onItemUpdate(item.id, { subType: best });
       }
+
+      // Loose Stones: also auto-fill Stone Type / Shape / Color in Stone Details
+      if (item.category === 'Stones') {
+        const specs = item.specs || {};
+        const pickBest = (list: string[]) => {
+          let bestW = ''; let len = 0;
+          for (const w of list) {
+            if (phraseMatches(w, text) && w.length > len) { bestW = w; len = w.length; }
+          }
+          return bestW;
+        };
+        const patch: Record<string, string> = {};
+        if (!specs.stoneType) {
+          const m = pickBest(STONE_TYPE_OPTIONS);
+          if (m) patch.stoneType = m;
+        }
+        if (!specs.shape) {
+          const m = pickBest(STONE_SHAPE_OPTIONS);
+          if (m) patch.shape = m;
+        }
+        if (!specs.color) {
+          const m = pickBest(COLOR_KEYWORDS);
+          if (m) patch.color = m;
+        }
+        if (Object.keys(patch).length) {
+          onItemUpdate(item.id, { specs: { ...specs, ...patch } });
+        }
+      }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items.map((i: any) => `${i.id}:${i.itemType}:${i.category}`).join('|')]);
