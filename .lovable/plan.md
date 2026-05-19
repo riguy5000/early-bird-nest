@@ -1,50 +1,82 @@
+# Auto-fill Stone Details from Description (Loose Stones)
 
+## Goal
 
-## Move Additional Metal Rows Directly Under the Main Row
+In the Loose Stones tab, when the user types into the item description (e.g. "round red diamond"), the **Stone Details** section should auto-populate:
 
-### Scope
-`components/store/TakeInBalanced.tsx` only. No design, color, spacing, or styling changes. Pure reorder.
+- **Stone Type** (e.g. Diamond)
+- **Shape** (e.g. Round)
+- **Color** (e.g. Red)
 
-Applies to: **Jewelry, Silverware, Loose Items** (already grouped under the existing `item.category !== 'Watch'` guard — no logic change needed). Watch and Stones unaffected.
+This mirrors the behavior that already exists for `subType` chips, but extends it to the three Stone Details fields shown directly below the description.
 
-### Problem
-When a user adds a 2nd/3rd metal via the `+` button, the extra metal rows currently render **below the subtype chips and AI/color notes**, visually separated from the primary metal row they belong to.
+## Scope
 
-Current vertical order in the item card right-column:
-1. Main row: `[Metal] [Karat] [Weight g] [$Price] [+] [Specs] [X]`
-2. Subtype chips (Ring, Pendant, …)
-3. AI / color notes
-4. **Additional metal rows** ← lives here today
+- File: `components/store/TakeInBalanced.tsx`
+- Category: **Stones** only — no other category is touched
+- UI/styling/layout: unchanged
+- Persistence: uses the existing `updateSpec` / `onItemUpdate` path so values persist on save like any other spec
 
-### Change
-Move the "Additional metal rows" block so it renders **immediately under the main row**, before the chips, sharing the same stacked group:
+## Behavior rules
 
-New order:
-1. Main row
-2. **Additional metal rows** (only when count > 1)
-3. Subtype chips
-4. AI / color notes
+1. Trigger: runs in the same `useEffect` keyed on description (`item.itemType`) for Stones items.
+2. Matching: case-insensitive, whole-word (same `phraseMatches` helper already in the file). "Ruby" matches "ruby" but not "rubylike".
+3. Source lists:
+   - Stone Type → existing `STONE_TYPE_OPTIONS` constant
+   - Shape → existing `STONE_SHAPE_OPTIONS` constant
+   - Color → new small list of common color keywords: Red, Blue, Green, Yellow, Pink, Purple, White, Black, Brown, Orange, Champagne, Colorless (free-text field stays free-text — the auto-fill just writes the matched word)
+4. Respect manual input — only auto-fill a field if it is currently empty. If the user has typed/selected a value for Stone Type, Shape, or Color, do not overwrite it. (Same philosophy used for subType, but stricter: no replacement on later keyword changes for these fields.)
+5. If multiple keywords from the same list match, pick the longest (same tie-break used for subType).
+6. Single batched update per item via `onItemUpdate(item.id, { specs: { ...current.specs, ... } })` to avoid the race condition pattern already documented in this file.
 
-### Implementation
-In `components/store/TakeInBalanced.tsx`:
+## Technical sketch
 
-- **Cut** the JSX block at lines **714–779** (the comment `{/* Additional metal rows for jewelry — stacked below */}` and its `{item.category !== 'Watch' && (item.metals || []).length > 1 && (...)}` wrapper).
-- **Paste** it directly after the main row's closing `</div>` at line **675**, before the `{/* Type pills row */}` block at line 677.
-- No changes to the inner JSX, classes, handlers, or the `item.category !== 'Watch'` condition (which already includes Jewelry, Silverware, Loose Items, Bullion, Stones — and Stones already won't render rows because it has empty `metals`).
-- Keep `mt-2 pl-11` spacing classes as-is so each additional row remains aligned under the main inputs (past the leading badge).
+In the existing description-watching `useEffect` (around line 364), add a second pass for `item.category === 'Stones'`:
 
-### What is NOT changing
-- Watch precious-metal rows block (lines 781–811) stays where it is.
-- No styling, sizing, or color changes.
-- No data model changes.
-- Subtype chips and AI notes remain in their current positions, just now appear after the additional metal rows.
+```ts
+if (item.category === 'Stones') {
+  const text = (item.itemType || '').trim();
+  const specs = item.specs || {};
+  const patch: Record<string, string> = {};
 
-### QA checklist
-1. Jewelry item → click `+` to add a 2nd metal → the 2nd metal row appears **directly below** the main metal row, above the subtype chips.
-2. Silverware item → same behavior.
-3. Loose Items item → same behavior.
-4. With only 1 metal, no extra row renders (unchanged).
-5. Watch item → unchanged.
-6. Loose Stones item → still no metals UI (unchanged).
-7. Subtype chips and AI/color notes still render correctly, just below the metals stack.
+  const pickBest = (list: string[]) => {
+    let best = ''; let len = 0;
+    for (const w of list) {
+      if (phraseMatches(w, text) && w.length > len) { best = w; len = w.length; }
+    }
+    return best;
+  };
 
+  if (!specs.stoneType) {
+    const m = pickBest(STONE_TYPE_OPTIONS);
+    if (m) patch.stoneType = m;
+  }
+  if (!specs.shape) {
+    const m = pickBest(STONE_SHAPE_OPTIONS);
+    if (m) patch.shape = m;
+  }
+  if (!specs.color) {
+    const m = pickBest(COLOR_KEYWORDS);
+    if (m) patch.color = m;
+  }
+
+  if (Object.keys(patch).length) {
+    onItemUpdate(item.id, { specs: { ...specs, ...patch } });
+  }
+}
+```
+
+Add a module-level constant near the existing stone option lists:
+
+```ts
+const COLOR_KEYWORDS = ['Red','Blue','Green','Yellow','Pink','Purple','White','Black','Brown','Orange','Champagne','Colorless'];
+```
+
+## Verification
+
+1. Add a Loose Stones item, type "round red diamond" in the description → Stone Type = Diamond, Shape = Round, Color = Red.
+2. Clear description, type "oval sapphire" → Stone Type = Sapphire, Shape = Oval (Color stays whatever it was, since not empty).
+3. Manually select Stone Type = Ruby, then type "diamond" in description → Stone Type stays Ruby (no overwrite).
+4. Confirm subType chips still behave as before (unchanged code path).
+5. Save the item, reopen — populated values persist.
+6. Confirm no visual/layout changes anywhere.
