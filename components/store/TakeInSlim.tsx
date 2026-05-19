@@ -15,6 +15,7 @@ import {
 import { useMetalPrices } from '@/hooks/useMetalPrices';
 import { computeMetalRow, roundCurrency } from '@/lib/pricing';
 import { MetalPuritySelect, getDefaultPurityForMetal } from './MetalPuritySelect';
+import { formatUSD } from '@/lib/utils';
 
 interface TakeInSlimProps {
   items: any[];
