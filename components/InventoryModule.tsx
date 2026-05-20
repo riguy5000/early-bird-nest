@@ -257,6 +257,8 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
             onArchiveItem={handleArchive}
             onDispositionChange={handleDispositionChange}
           />
+        ) : activeTab === 'sendout-scrap' ? (
+          <SendOutScrapView storeId={storeId} employeeId={employeeId} allItems={items} />
         ) : loading ? (
           <div className="flex items-center justify-center py-16 gap-3">
             <div className="h-5 w-5 border-2 border-[#6B5EF9] border-t-transparent rounded-full animate-spin" />
