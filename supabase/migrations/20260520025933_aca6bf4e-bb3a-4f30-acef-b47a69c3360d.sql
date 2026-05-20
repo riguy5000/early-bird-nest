@@ -1,0 +1,1 @@
+UPDATE inventory_items SET disposition='Scrap Candidate' WHERE id IN ('9dcdb614-996a-437b-a132-49a79c59cbd8','2f3f05de-fc7c-4d2e-bffd-35b43d916dbc','8ac614a6-c6f1-4711-9784-287e67cfd97f');
