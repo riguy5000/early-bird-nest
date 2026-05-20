@@ -83,6 +83,9 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
       case 'scrap':       return scrapItems;
       case 'components':  return componentItems;
       case 'archive':     return archivedItems;
+      case 'dept-scrap':      return items.filter(i => i.disposition === 'Scrap Candidate');
+      case 'dept-partout':    return items.filter(i => i.disposition === 'Part-Out Candidate');
+      case 'dept-investment': return items.filter(i => i.disposition === 'Investment Candidate');
       default:            return activeItems;
     }
   };
@@ -99,7 +102,11 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
     { id: 'scrap',      label: 'Credit' },
     { id: 'components', label: 'Consignment' },
     { id: 'archive',    label: 'Auction' },
+    { id: 'dept-scrap',      label: 'Scrap' },
+    { id: 'dept-partout',    label: 'Part-Out' },
+    { id: 'dept-investment', label: 'Investment' },
   ];
+
 
   // ── Stat cards — match approved screenshot (flat white, uppercase label) ──
   const summaryCards = [
