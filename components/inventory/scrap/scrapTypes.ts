@@ -6,8 +6,12 @@ export interface ScrapBatchRecord {
   store_id: string;
   batch_number: string;
   status: ScrapBatchStatus;
+  refiner_id: string | null;
   refiner_name: string;
   refiner_contact: string;
+  refiner_address: string;
+  refiner_phone: string;
+  refiner_email: string;
   shipping_method: string;
   tracking_number: string;
   insurance_amount: number;
@@ -64,6 +68,20 @@ export interface ScrapBatchActivityRecord {
   created_at: string;
 }
 
+export interface RefinerRecord {
+  id: string;
+  store_id: string;
+  name: string;
+  contact_person: string;
+  phone: string;
+  email: string;
+  address: string;
+  notes: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export const SCRAP_STATUS_LABELS: Record<ScrapBatchStatus, string> = {
   draft: 'Draft',
   sent: 'Sent to Refiner',
@@ -71,3 +89,17 @@ export const SCRAP_STATUS_LABELS: Record<ScrapBatchStatus, string> = {
   settled: 'Settled',
   closed: 'Closed',
 };
+
+/** Format a metal purity for display. Gold karats get a trailing "K". */
+export function formatPurity(metal: string, purity: string): string {
+  if (!purity) return '—';
+  const m = (metal || '').toLowerCase();
+  const p = String(purity).trim();
+  if (m === 'gold') {
+    // Already has K?
+    if (/k$/i.test(p)) return p.toUpperCase();
+    // Numeric karat like "14"
+    if (/^\d{1,2}(\.\d+)?$/.test(p)) return `${p}K`;
+  }
+  return p;
+}
