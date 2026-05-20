@@ -7,6 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { CustomerModule } from './CustomerModule';
 import { TakeInPage } from './store/TakeInPage';
 import { InventoryModule } from './InventoryModule';
+import { ScrapModule } from './ScrapModule';
 import { PayoutsModule } from './PayoutsModule';
 import { StoreSettingsModule } from './StoreSettingsModule';
 import { OwnerDashboard } from './dashboard/OwnerDashboard';
@@ -70,6 +71,7 @@ export function JewelryPawnApp({ user, onLogout }: JewelryPawnAppProps) {
       />
     )},
     { id: 'inventory', name: 'Inventory', icon: Package, requiresPermission: 'accessInventory', component: () => <InventoryModule currentStore={{ id: storeId, name: storeName }} employeeId={employeeId} hideProfit={effectiveVisibility.hideProfit} permissions={userPermissions} /> },
+    { id: 'scrap', name: 'Send Out Scrap', icon: Package, requiresPermission: 'accessInventory', component: () => <ScrapModule currentStore={{ id: storeId, name: storeName }} employeeId={employeeId} /> },
     { id: 'customers', name: 'Customers', icon: Users, requiresPermission: 'accessCustomers', component: () => <CustomerModule user={user} /> },
     { id: 'payouts', name: 'Payouts', icon: DollarSign, requiresPermission: 'accessPayouts', component: () => <PayoutsModule currentStore={{ id: storeId, name: storeName }} /> },
     { id: 'analytics', name: 'Analytics', icon: TrendingUp, requiresPermission: 'accessStatistics', component: () => <AnalyticsModule storeId={storeId} storeName={storeName} /> },

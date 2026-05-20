@@ -103,7 +103,7 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
     { id: 'scrap',      label: 'Credit' },
     { id: 'components', label: 'Consignment' },
     { id: 'archive',    label: 'Auction' },
-    { id: 'sendout-scrap',   label: 'Send Out Scrap' },
+    
     { id: 'dept-scrap',      label: 'Scrap' },
     { id: 'dept-partout',    label: 'Part-Out' },
     { id: 'dept-investment', label: 'Investment' },
