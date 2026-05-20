@@ -690,6 +690,48 @@ export type Database = {
         }
         Relationships: []
       }
+      refiners: {
+        Row: {
+          address: string
+          contact_person: string
+          created_at: string
+          email: string
+          id: string
+          is_active: boolean
+          name: string
+          notes: string
+          phone: string
+          store_id: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string
+          contact_person?: string
+          created_at?: string
+          email?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string
+          phone?: string
+          store_id: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          contact_person?: string
+          created_at?: string
+          email?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string
+          phone?: string
+          store_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       refinery_lots: {
         Row: {
           actual_settlement: number | null
@@ -849,9 +891,13 @@ export type Database = {
           insurance_amount: number
           loss_notes: string
           notes: string
+          refiner_address: string
           refiner_contact: string
+          refiner_email: string
           refiner_fee_actual: number
+          refiner_id: string | null
           refiner_name: string
+          refiner_phone: string
           refiner_reference: string
           sent_at: string | null
           settled_at: string | null
@@ -882,9 +928,13 @@ export type Database = {
           insurance_amount?: number
           loss_notes?: string
           notes?: string
+          refiner_address?: string
           refiner_contact?: string
+          refiner_email?: string
           refiner_fee_actual?: number
+          refiner_id?: string | null
           refiner_name?: string
+          refiner_phone?: string
           refiner_reference?: string
           sent_at?: string | null
           settled_at?: string | null
@@ -915,9 +965,13 @@ export type Database = {
           insurance_amount?: number
           loss_notes?: string
           notes?: string
+          refiner_address?: string
           refiner_contact?: string
+          refiner_email?: string
           refiner_fee_actual?: number
+          refiner_id?: string | null
           refiner_name?: string
+          refiner_phone?: string
           refiner_reference?: string
           sent_at?: string | null
           settled_at?: string | null
