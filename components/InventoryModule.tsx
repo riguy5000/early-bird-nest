@@ -96,7 +96,7 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
 
   // ── Tab definitions — labels match approved screenshot exactly ──
   const tabs = [
-    { id: 'active',     label: 'Active' },
+    { id: 'active',     label: 'All' },
     { id: 'batches',    label: 'Batches' },
     { id: 'showroom',   label: 'Showroom' },
     { id: 'scrap',      label: 'Credit' },
