@@ -1037,16 +1037,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_employee_store_id: { Args: { _user_id: string }; Returns: string }
-      is_platform_admin: { Args: { _user_id: string }; Returns: boolean }
-      is_store_member: {
-        Args: { _store_id: string; _user_id: string }
-        Returns: boolean
-      }
-      owns_store: {
-        Args: { _store_id: string; _user_id: string }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
