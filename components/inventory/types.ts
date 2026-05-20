@@ -95,7 +95,7 @@ export interface InventoryFilters {
 }
 
 export const CATEGORIES = ['Jewelry', 'Watch', 'Bullion', 'Stones', 'Silverware', 'LooseItems', 'Components'];
-export const DISPOSITIONS = ['Undecided', 'Scrap Candidate', 'Showroom Candidate', 'Part-Out Candidate'];
+export const DISPOSITIONS = ['Undecided', 'Scrap Candidate', 'Showroom Candidate', 'Part-Out Candidate', 'Investment Candidate'];
 export const PROCESSING_STATUSES = [
   'In Stock', 'Under Review', 'Tagged', 'Ready for Scrap', 'Sent to Refinery',
   'Ready for Showroom', 'In Showcase', 'Listed for Sale', 'Sold', 'Parted Out', 'Archived'
