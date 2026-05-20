@@ -230,7 +230,7 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
           {tabs.map(tab => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => setActiveTab(prev => prev === tab.id ? 'active' : tab.id)}
               className={`px-4 py-1.5 rounded-[8px] text-[14px] font-medium transition-all ${
                 activeTab === tab.id
                   ? 'bg-[#2B2833] text-white shadow-sm'
