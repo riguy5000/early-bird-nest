@@ -228,7 +228,7 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
         </div>
 
         {/* Tabs row — separated by border, inside the same card */}
-        <div className="px-5 py-3 flex items-center gap-1.5">
+        <div className="px-5 py-3 flex flex-wrap items-center gap-1.5">
           {tabs.map(tab => (
             <button
               key={tab.id}
