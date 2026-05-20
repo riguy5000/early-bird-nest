@@ -368,6 +368,7 @@ export type Database = {
           processing_status: string
           refinery_lot_id: string | null
           sale_channel: string | null
+          scrap_batch_id: string | null
           selling_price: number | null
           sent_to_refinery_date: string | null
           showroom_location: string | null
@@ -413,6 +414,7 @@ export type Database = {
           processing_status?: string
           refinery_lot_id?: string | null
           sale_channel?: string | null
+          scrap_batch_id?: string | null
           selling_price?: number | null
           sent_to_refinery_date?: string | null
           showroom_location?: string | null
@@ -458,6 +460,7 @@ export type Database = {
           processing_status?: string
           refinery_lot_id?: string | null
           sale_channel?: string | null
+          scrap_batch_id?: string | null
           selling_price?: number | null
           sent_to_refinery_date?: string | null
           showroom_location?: string | null
@@ -501,6 +504,13 @@ export type Database = {
             columns: ["parent_item_id"]
             isOneToOne: false
             referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_items_scrap_batch_id_fkey"
+            columns: ["scrap_batch_id"]
+            isOneToOne: false
+            referencedRelation: "scrap_batches"
             referencedColumns: ["id"]
           },
           {
@@ -732,6 +742,193 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      scrap_batch_activity: {
+        Row: {
+          actor_id: string | null
+          batch_id: string
+          created_at: string
+          details: Json
+          event_type: string
+          id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          batch_id: string
+          created_at?: string
+          details?: Json
+          event_type: string
+          id?: string
+        }
+        Update: {
+          actor_id?: string | null
+          batch_id?: string
+          created_at?: string
+          details?: Json
+          event_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scrap_batch_activity_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "scrap_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scrap_batch_items: {
+        Row: {
+          batch_id: string
+          created_at: string
+          estimated_value: number
+          id: string
+          inventory_item_id: string
+          metal: string
+          notes: string
+          original_weight: number
+          purity: string
+          send_out_weight: number
+          updated_at: string
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          estimated_value?: number
+          id?: string
+          inventory_item_id: string
+          metal?: string
+          notes?: string
+          original_weight?: number
+          purity?: string
+          send_out_weight?: number
+          updated_at?: string
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          estimated_value?: number
+          id?: string
+          inventory_item_id?: string
+          metal?: string
+          notes?: string
+          original_weight?: number
+          purity?: string
+          send_out_weight?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scrap_batch_items_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "scrap_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scrap_batches: {
+        Row: {
+          assay_data: Json
+          assay_received_at: string | null
+          attachment_urls: string[]
+          batch_number: string
+          cash_payment_method: string
+          cash_received: number
+          cash_received_at: string | null
+          cash_reference: string
+          closed_at: string | null
+          created_at: string
+          created_by: string | null
+          estimated_fee: number
+          estimated_gross_value: number
+          estimated_net_value: number
+          final_settlement_amount: number
+          id: string
+          insurance_amount: number
+          loss_notes: string
+          notes: string
+          refiner_contact: string
+          refiner_fee_actual: number
+          refiner_name: string
+          refiner_reference: string
+          sent_at: string | null
+          settled_at: string | null
+          settlement_method: string
+          shipping_method: string
+          status: string
+          store_id: string
+          tracking_number: string
+          updated_at: string
+        }
+        Insert: {
+          assay_data?: Json
+          assay_received_at?: string | null
+          attachment_urls?: string[]
+          batch_number?: string
+          cash_payment_method?: string
+          cash_received?: number
+          cash_received_at?: string | null
+          cash_reference?: string
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          estimated_fee?: number
+          estimated_gross_value?: number
+          estimated_net_value?: number
+          final_settlement_amount?: number
+          id?: string
+          insurance_amount?: number
+          loss_notes?: string
+          notes?: string
+          refiner_contact?: string
+          refiner_fee_actual?: number
+          refiner_name?: string
+          refiner_reference?: string
+          sent_at?: string | null
+          settled_at?: string | null
+          settlement_method?: string
+          shipping_method?: string
+          status?: string
+          store_id: string
+          tracking_number?: string
+          updated_at?: string
+        }
+        Update: {
+          assay_data?: Json
+          assay_received_at?: string | null
+          attachment_urls?: string[]
+          batch_number?: string
+          cash_payment_method?: string
+          cash_received?: number
+          cash_received_at?: string | null
+          cash_reference?: string
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          estimated_fee?: number
+          estimated_gross_value?: number
+          estimated_net_value?: number
+          final_settlement_amount?: number
+          id?: string
+          insurance_amount?: number
+          loss_notes?: string
+          notes?: string
+          refiner_contact?: string
+          refiner_fee_actual?: number
+          refiner_name?: string
+          refiner_reference?: string
+          sent_at?: string | null
+          settled_at?: string | null
+          settlement_method?: string
+          shipping_method?: string
+          status?: string
+          store_id?: string
+          tracking_number?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       store_settings: {
         Row: {

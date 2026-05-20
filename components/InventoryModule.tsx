@@ -9,6 +9,7 @@ import { InventoryDetailDrawer } from './inventory/InventoryDetailDrawer';
 import { AddInventoryModal } from './inventory/AddInventoryModal';
 import { PartOutModal } from './inventory/PartOutModal';
 import { BatchView } from './inventory/BatchView';
+import { SendOutScrapView } from './inventory/scrap/SendOutScrapView';
 import { CATEGORIES, DISPOSITIONS } from './inventory/types';
 import type { InventoryItemRecord } from './inventory/types';
 
@@ -102,6 +103,7 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
     { id: 'scrap',      label: 'Credit' },
     { id: 'components', label: 'Consignment' },
     { id: 'archive',    label: 'Auction' },
+    { id: 'sendout-scrap',   label: 'Send Out Scrap' },
     { id: 'dept-scrap',      label: 'Scrap' },
     { id: 'dept-partout',    label: 'Part-Out' },
     { id: 'dept-investment', label: 'Investment' },
@@ -255,6 +257,8 @@ export function InventoryModule({ currentStore, employeeId = '', hideProfit, per
             onArchiveItem={handleArchive}
             onDispositionChange={handleDispositionChange}
           />
+        ) : activeTab === 'sendout-scrap' ? (
+          <SendOutScrapView storeId={storeId} employeeId={employeeId} allItems={items} />
         ) : loading ? (
           <div className="flex items-center justify-center py-16 gap-3">
             <div className="h-5 w-5 border-2 border-[#6B5EF9] border-t-transparent rounded-full animate-spin" />

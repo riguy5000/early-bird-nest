@@ -5,7 +5,8 @@ export interface InventoryItemRecord {
   category: string;
   subcategory: string;
   description: string;
-  disposition: 'Undecided' | 'Scrap Candidate' | 'Showroom Candidate' | 'Part-Out Candidate';
+  disposition: 'Undecided' | 'Scrap Candidate' | 'Showroom Candidate' | 'Part-Out Candidate' | 'Investment Candidate';
+  scrap_batch_id?: string | null;
   processing_status: string;
   metals: any[];
   stones: any[];
