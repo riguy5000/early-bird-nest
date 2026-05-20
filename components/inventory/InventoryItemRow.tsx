@@ -27,18 +27,20 @@ const statusStyles: Record<string, string> = {
 
 // ── Disposition pills — match approved screenshot ──
 const dispositionStyles: Record<string, string> = {
-  'Undecided':          'bg-[#F5F5F5]   text-[#76707F]',
-  'Scrap Candidate':    'bg-[#E8F5E9]   text-[#2E7D32]',
-  'Showroom Candidate': 'bg-[#E3F2FD]   text-[#1565C0]',
-  'Part-Out Candidate': 'bg-[#F3E8FF]   text-[#7C3AED]',
+  'Undecided':            'bg-[#F5F5F5]   text-[#76707F]',
+  'Scrap Candidate':      'bg-[#E8F5E9]   text-[#2E7D32]',
+  'Showroom Candidate':   'bg-[#E3F2FD]   text-[#1565C0]',
+  'Part-Out Candidate':   'bg-[#F3E8FF]   text-[#7C3AED]',
+  'Investment Candidate': 'bg-[#FFF4E5]   text-[#B45309]',
 };
 
 // ── Approved screen label map ──
 const dispositionLabel: Record<string, string> = {
-  'Undecided':          'Not Set Available',
-  'Scrap Candidate':    'Scrap Available',
-  'Showroom Candidate': 'Investment Available',
-  'Part-Out Candidate': 'Part-Out Available',
+  'Undecided':            'Undecided',
+  'Scrap Candidate':      'Scrap Candidate',
+  'Showroom Candidate':   'Showroom Candidate',
+  'Part-Out Candidate':   'Part-Out Candidate',
+  'Investment Candidate': 'Investment Candidate',
 };
 
 function fmt(n: number) {
