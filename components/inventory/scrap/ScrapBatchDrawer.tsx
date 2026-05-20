@@ -45,9 +45,6 @@ export function ScrapBatchDrawer(props: Props) {
     }
   }, [batch, tab]);
 
-  if (!batch) return null;
-  const isDraft = batch.status === 'draft';
-  const isClosed = batch.status === 'closed';
   const linkedItems = useMemo(() =>
     batchItems.map(bi => ({ bi, inv: allInventory.find(i => i.id === bi.inventory_item_id) }))
   , [batchItems, allInventory]);
@@ -57,6 +54,10 @@ export function ScrapBatchDrawer(props: Props) {
     const overrides = linkedItems.flatMap(li => li.inv ? [{ itemId: li.inv.id, metalIndex: 0, sendOutWeight: li.bi.send_out_weight }] : []);
     return computeBatchTotals(invItems, prices, undefined, overrides);
   }, [linkedItems, prices]);
+
+  if (!batch) return null;
+  const isDraft = batch.status === 'draft';
+  const isClosed = batch.status === 'closed';
 
   const tabs: { id: TabId; label: string }[] = [
     { id: 'items', label: 'Items' },
