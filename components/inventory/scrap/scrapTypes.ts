@@ -35,6 +35,11 @@ export interface ScrapBatchRecord {
   cash_reference: string;
   cash_received_at: string | null;
   attachment_urls: string[];
+  assay_gold_spot_price: number;
+  assay_silver_spot_price: number;
+  assay_platinum_spot_price: number;
+  assay_palladium_spot_price: number;
+  assay_spot_price_timestamp: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -86,9 +91,15 @@ export const SCRAP_STATUS_LABELS: Record<ScrapBatchStatus, string> = {
   draft: 'Draft',
   sent: 'Sent to Refiner',
   assay_received: 'Assay Received',
-  settled: 'Settled',
+  settled: 'Closed',
   closed: 'Closed',
 };
+
+/** Map any internal status to one of the 4 main user-facing statuses. */
+export function displayStatus(s: ScrapBatchStatus): 'draft' | 'sent' | 'assay_received' | 'closed' {
+  if (s === 'settled' || s === 'closed') return 'closed';
+  return s;
+}
 
 /** Format a metal purity for display. Gold karats get a trailing "K". */
 export function formatPurity(metal: string, purity: string): string {

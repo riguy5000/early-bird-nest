@@ -5,13 +5,15 @@ import { useMetalPrices } from '@/hooks/useMetalPrices';
 import { computeBatchTotals } from './scrapCalc';
 import { MetalSummaryPanel } from './MetalSummaryPanel';
 import { RefinerFormDialog } from './RefinerFormDialog';
+import { ClosedBatchSummary } from './ClosedBatchSummary';
 import {
-  SCRAP_STATUS_LABELS,
+  SCRAP_STATUS_LABELS, displayStatus, formatPurity,
   type ScrapBatchRecord, type ScrapBatchItemRecord, type AssayData,
   type SettlementMethod, type ScrapBatchActivityRecord, type RefinerRecord,
 } from './scrapTypes';
 import type { InventoryItemRecord } from '../types';
 import { supabase } from '@/integrations/supabase/client';
+import type { SpotPrices } from '@/lib/pricing';
 import { toast } from 'sonner';
 import { Trash2, Plus, ChevronDown, ChevronUp, Sparkles, Upload, Loader2, AlertTriangle } from 'lucide-react';
 
@@ -31,13 +33,14 @@ interface Props {
     estimates: { gross: number; fee: number; net: number },
     inventoryItemIds: string[],
   ) => Promise<boolean>;
-  onRecordAssay: (batchId: string, assay: AssayData, fee: number, lossNotes: string, refinerRef: string, finalAmount: number) => Promise<boolean>;
+  onRecordAssay: (batchId: string, assay: AssayData, fee: number, lossNotes: string, refinerRef: string, finalAmount: number, spotPrices?: { gold: number; silver: number; platinum: number; palladium: number }) => Promise<boolean>;
   onRecordSettlement: (batchId: string, method: SettlementMethod, cash: { amount: number; method: string; reference: string } | null) => Promise<boolean>;
   onAddReturnedMetal: (batchId: string, info: any) => Promise<boolean>;
   onCloseBatch: (batchId: string) => Promise<boolean>;
   onDeleteDraft: (batchId: string) => Promise<boolean>;
   onSaveRefiner: (input: Partial<RefinerRecord> & { name: string }) => Promise<string | null>;
   loadActivity: (batchId: string) => Promise<ScrapBatchActivityRecord[]>;
+  livePrices?: SpotPrices;
 }
 
 type TabId = 'items' | 'shipping' | 'summary' | 'assay' | 'settlement';
@@ -55,7 +58,15 @@ export function ScrapBatchDrawer(props: Props) {
   const [tab, setTab] = useState<TabId>('items');
   const [showHistory, setShowHistory] = useState(false);
   const [activity, setActivity] = useState<ScrapBatchActivityRecord[]>([]);
-  const prices = useMetalPrices();
+  const livePrices = useMetalPrices();
+  const prices = props.livePrices || livePrices;
+
+  // Reset tab when the open batch changes, defaulting to "summary" for closed batches.
+  useEffect(() => {
+    if (!batch) return;
+    setTab(displayStatus(batch.status) === 'closed' ? 'summary' : 'items');
+    setShowHistory(false);
+  }, [batch?.id]);
 
   useEffect(() => {
     if (batch && showHistory) props.loadActivity(batch.id).then(setActivity);
@@ -73,7 +84,7 @@ export function ScrapBatchDrawer(props: Props) {
 
   if (!batch) return null;
   const isDraft = batch.status === 'draft';
-  const isClosed = batch.status === 'closed';
+  const isClosed = displayStatus(batch.status) === 'closed';
   const currentTab = TABS.find(t => t.id === tab)!;
 
   return (
@@ -120,15 +131,19 @@ export function ScrapBatchDrawer(props: Props) {
               hasItems={linkedItems.length > 0}
             />
           )}
-          {tab === 'summary' && <MetalSummaryPanel totals={totals} feePercent={0} />}
-          {tab === 'assay' && <AssayTab batch={batch} onRecord={props.onRecordAssay} disabled={batch.status === 'draft' || batch.status === 'closed'} />}
+          {tab === 'summary' && (
+            isClosed
+              ? <ClosedBatchSummary batch={batch} linkedItems={linkedItems} totals={totals} />
+              : <MetalSummaryPanel totals={totals} feePercent={0} />
+          )}
+          {tab === 'assay' && <AssayTab batch={batch} onRecord={props.onRecordAssay} disabled={batch.status === 'draft' || isClosed} livePrices={prices} />}
           {tab === 'settlement' && (
             <SettlementTab
               batch={batch}
               onRecord={props.onRecordSettlement}
               onAddReturnedMetal={props.onAddReturnedMetal}
               onClose={props.onCloseBatch}
-              disabled={batch.status === 'draft' || batch.status === 'closed'}
+              disabled={batch.status === 'draft' || isClosed}
             />
           )}
         </div>
@@ -161,14 +176,14 @@ export function ScrapBatchDrawer(props: Props) {
 }
 
 function StatusBadge({ status }: { status: ScrapBatchRecord['status'] }) {
+  const d = displayStatus(status);
   const colors: Record<string, string> = {
     draft: 'bg-amber-100 text-amber-800',
     sent: 'bg-blue-100 text-blue-800',
     assay_received: 'bg-indigo-100 text-indigo-800',
-    settled: 'bg-emerald-100 text-emerald-800',
-    closed: 'bg-slate-200 text-slate-700',
+    closed: 'bg-emerald-100 text-emerald-800',
   };
-  return <span className={`px-2 py-0.5 rounded-[6px] text-[11px] font-semibold ${colors[status]}`}>{SCRAP_STATUS_LABELS[status]}</span>;
+  return <span className={`px-2 py-0.5 rounded-[6px] text-[11px] font-semibold ${colors[d]}`}>{SCRAP_STATUS_LABELS[status]}</span>;
 }
 
 // --- Items tab ---
@@ -376,7 +391,7 @@ function ShippingTab({ batch, isDraft, isClosed, refiners, onUpdate, onSaveRefin
 }
 
 // --- Assay tab ---
-function AssayTab({ batch, onRecord, disabled }: { batch: ScrapBatchRecord; onRecord: Props['onRecordAssay']; disabled: boolean }) {
+function AssayTab({ batch, onRecord, disabled, livePrices }: { batch: ScrapBatchRecord; onRecord: Props['onRecordAssay']; disabled: boolean; livePrices?: SpotPrices }) {
   const a = batch.assay_data || {};
   const [form, setForm] = useState({
     gold_recovered: a.gold_recovered || 0,
@@ -463,6 +478,18 @@ function AssayTab({ batch, onRecord, disabled }: { batch: ScrapBatchRecord; onRe
       <Input label="Refiner fee / deduction" type="number" value={String(form.refiner_fee_actual)} onChange={v => setForm(f => ({ ...f, refiner_fee_actual: Number(v) || 0 }))} />
       <TextArea label="Stone / dust / loss notes" value={form.loss_notes} onChange={v => setForm(f => ({ ...f, loss_notes: v }))} />
       <Input label="Final settlement amount" type="number" value={String(form.final_settlement_amount)} onChange={v => setForm(f => ({ ...f, final_settlement_amount: Number(v) || 0 }))} />
+      {livePrices && (
+        <div className="rounded-[10px] bg-[#FAF8F2] border border-black/[0.06] p-3">
+          <div className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-1">Current spot prices (USD / oz)</div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[12px]">
+            <div><span className="text-[#76707F]">Gold:</span> <span className="font-medium text-[#2B2833]">{formatUSD(livePrices.Gold || 0)}</span></div>
+            <div><span className="text-[#76707F]">Silver:</span> <span className="font-medium text-[#2B2833]">{formatUSD(livePrices.Silver || 0)}</span></div>
+            <div><span className="text-[#76707F]">Platinum:</span> <span className="font-medium text-[#2B2833]">{formatUSD(livePrices.Platinum || 0)}</span></div>
+            <div><span className="text-[#76707F]">Palladium:</span> <span className="font-medium text-[#2B2833]">{formatUSD(livePrices.Palladium || 0)}</span></div>
+          </div>
+          <p className="text-[11px] text-[#76707F] mt-1.5">These prices will be saved with this batch when you save the assay.</p>
+        </div>
+      )}
       <div className="flex justify-end">
         <button
           disabled={disabled}
@@ -470,7 +497,13 @@ function AssayTab({ batch, onRecord, disabled }: { batch: ScrapBatchRecord; onRe
             gold_recovered: form.gold_recovered, silver_recovered: form.silver_recovered,
             platinum_recovered: form.platinum_recovered, palladium_recovered: form.palladium_recovered,
             purity_breakdown: form.purity_breakdown,
-          }, form.refiner_fee_actual, form.loss_notes, form.refiner_reference, form.final_settlement_amount)}
+          }, form.refiner_fee_actual, form.loss_notes, form.refiner_reference, form.final_settlement_amount,
+          livePrices ? {
+            gold: livePrices.Gold || 0,
+            silver: livePrices.Silver || 0,
+            platinum: livePrices.Platinum || 0,
+            palladium: livePrices.Palladium || 0,
+          } : undefined)}
           className="px-4 py-2 rounded-[8px] text-[13px] bg-[#2B2833] text-white hover:opacity-90 disabled:opacity-40"
         >
           Save assay
@@ -563,12 +596,7 @@ function SettlementTab({ batch, onRecord, onAddReturnedMetal, onClose, disabled 
           disabled={disabled}
           onClick={() => onRecord(batch.id, method, showCash ? { amount, method: payMethod, reference: ref } : null)}
           className="px-4 py-2 rounded-[8px] text-[13px] bg-[#2B2833] text-white hover:opacity-90 disabled:opacity-40"
-        >Record settlement</button>
-        {batch.status === 'settled' && (
-          <button onClick={() => onClose(batch.id)} className="px-4 py-2 rounded-[8px] text-[13px] bg-emerald-600 text-white hover:opacity-90">
-            Close batch
-          </button>
-        )}
+        >Record settlement &amp; close batch</button>
       </div>
     </div>
   );
