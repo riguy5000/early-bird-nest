@@ -4,7 +4,7 @@ import { formatUSD } from '@/lib/utils';
 import { formatPurity } from './scrapTypes';
 import type { InventoryItemRecord } from '../types';
 import { primaryMetalForItem } from './scrapCalc';
-import { Plus, ExternalLink } from 'lucide-react';
+import { Plus, ExternalLink, X } from 'lucide-react';
 
 interface Props {
   open: boolean;
@@ -13,19 +13,21 @@ interface Props {
   isSelected: boolean;
   inDraft: boolean;
   onToggleSelect: (id: string) => void;
+  onRemoveFromCandidates?: (item: InventoryItemRecord) => void;
 }
 
-export function ScrapCandidateDrawer({ open, onClose, item, isSelected, inDraft, onToggleSelect }: Props) {
+export function ScrapCandidateDrawer({ open, onClose, item, isSelected, inDraft, onToggleSelect, onRemoveFromCandidates }: Props) {
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
       <SheetContent className="overflow-y-auto p-6 bg-white/85 backdrop-blur-2xl w-full sm:max-w-[480px]">
-        {item && <Body item={item} isSelected={isSelected} inDraft={inDraft} onToggleSelect={onToggleSelect} onClose={onClose} />}
+        {item && <Body item={item} isSelected={isSelected} inDraft={inDraft} onToggleSelect={onToggleSelect} onClose={onClose} onRemoveFromCandidates={onRemoveFromCandidates} />}
       </SheetContent>
     </Sheet>
   );
 }
 
-function Body({ item, isSelected, inDraft, onToggleSelect, onClose }: { item: InventoryItemRecord; isSelected: boolean; inDraft: boolean; onToggleSelect: (id: string) => void; onClose: () => void }) {
+
+function Body({ item, isSelected, inDraft, onToggleSelect, onClose, onRemoveFromCandidates }: { item: InventoryItemRecord; isSelected: boolean; inDraft: boolean; onToggleSelect: (id: string) => void; onClose: () => void; onRemoveFromCandidates?: (item: InventoryItemRecord) => void }) {
   const p = primaryMetalForItem(item);
   const photo = item.photos?.[0];
   const estValue = item.estimated_scrap_value || item.market_value_at_intake || 0;
@@ -81,6 +83,14 @@ function Body({ item, isSelected, inDraft, onToggleSelect, onClose }: { item: In
           <div className="px-3 py-2.5 rounded-[10px] text-[12px] text-amber-800 bg-amber-50 border border-amber-200 text-center">
             Already in a draft scrap batch.
           </div>
+        )}
+        {!inDraft && onRemoveFromCandidates && (
+          <button
+            onClick={() => onRemoveFromCandidates(item)}
+            className="px-3 py-2 rounded-[10px] text-[13px] text-red-600 bg-white border border-red-100 hover:bg-red-50 flex items-center justify-center gap-1.5"
+          >
+            <X className="h-3.5 w-3.5" /> Remove from Scrap Candidates
+          </button>
         )}
         <button
           onClick={onClose}
