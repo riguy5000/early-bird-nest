@@ -391,7 +391,7 @@ function ShippingTab({ batch, isDraft, isClosed, refiners, onUpdate, onSaveRefin
 }
 
 // --- Assay tab ---
-function AssayTab({ batch, onRecord, disabled }: { batch: ScrapBatchRecord; onRecord: Props['onRecordAssay']; disabled: boolean }) {
+function AssayTab({ batch, onRecord, disabled, livePrices }: { batch: ScrapBatchRecord; onRecord: Props['onRecordAssay']; disabled: boolean; livePrices?: SpotPrices }) {
   const a = batch.assay_data || {};
   const [form, setForm] = useState({
     gold_recovered: a.gold_recovered || 0,
