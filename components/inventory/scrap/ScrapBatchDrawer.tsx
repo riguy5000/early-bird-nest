@@ -58,7 +58,15 @@ export function ScrapBatchDrawer(props: Props) {
   const [tab, setTab] = useState<TabId>('items');
   const [showHistory, setShowHistory] = useState(false);
   const [activity, setActivity] = useState<ScrapBatchActivityRecord[]>([]);
-  const prices = useMetalPrices();
+  const livePrices = useMetalPrices();
+  const prices = props.livePrices || livePrices;
+
+  // Reset tab when the open batch changes, defaulting to "summary" for closed batches.
+  useEffect(() => {
+    if (!batch) return;
+    setTab(displayStatus(batch.status) === 'closed' ? 'summary' : 'items');
+    setShowHistory(false);
+  }, [batch?.id]);
 
   useEffect(() => {
     if (batch && showHistory) props.loadActivity(batch.id).then(setActivity);
@@ -76,7 +84,7 @@ export function ScrapBatchDrawer(props: Props) {
 
   if (!batch) return null;
   const isDraft = batch.status === 'draft';
-  const isClosed = batch.status === 'closed';
+  const isClosed = displayStatus(batch.status) === 'closed';
   const currentTab = TABS.find(t => t.id === tab)!;
 
   return (
