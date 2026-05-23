@@ -33,13 +33,14 @@ interface Props {
     estimates: { gross: number; fee: number; net: number },
     inventoryItemIds: string[],
   ) => Promise<boolean>;
-  onRecordAssay: (batchId: string, assay: AssayData, fee: number, lossNotes: string, refinerRef: string, finalAmount: number) => Promise<boolean>;
+  onRecordAssay: (batchId: string, assay: AssayData, fee: number, lossNotes: string, refinerRef: string, finalAmount: number, spotPrices?: { gold: number; silver: number; platinum: number; palladium: number }) => Promise<boolean>;
   onRecordSettlement: (batchId: string, method: SettlementMethod, cash: { amount: number; method: string; reference: string } | null) => Promise<boolean>;
   onAddReturnedMetal: (batchId: string, info: any) => Promise<boolean>;
   onCloseBatch: (batchId: string) => Promise<boolean>;
   onDeleteDraft: (batchId: string) => Promise<boolean>;
   onSaveRefiner: (input: Partial<RefinerRecord> & { name: string }) => Promise<string | null>;
   loadActivity: (batchId: string) => Promise<ScrapBatchActivityRecord[]>;
+  livePrices?: SpotPrices;
 }
 
 type TabId = 'items' | 'shipping' | 'summary' | 'assay' | 'settlement';
