@@ -137,8 +137,16 @@ export function useScrapBatches(storeId: string) {
     return true;
   }, [load]);
 
-  const recordAssay = useCallback(async (batchId: string, assay: AssayData, fee: number, lossNotes: string, refinerRef: string, finalAmount: number) => {
-    const { error } = await sb.from('scrap_batches').update({
+  const recordAssay = useCallback(async (
+    batchId: string,
+    assay: AssayData,
+    fee: number,
+    lossNotes: string,
+    refinerRef: string,
+    finalAmount: number,
+    spotPrices?: { gold: number; silver: number; platinum: number; palladium: number },
+  ) => {
+    const patch: any = {
       assay_data: assay,
       refiner_fee_actual: fee,
       loss_notes: lossNotes,
@@ -146,7 +154,15 @@ export function useScrapBatches(storeId: string) {
       final_settlement_amount: finalAmount,
       status: 'assay_received' as ScrapBatchStatus,
       assay_received_at: new Date().toISOString(),
-    }).eq('id', batchId);
+    };
+    if (spotPrices) {
+      patch.assay_gold_spot_price = spotPrices.gold;
+      patch.assay_silver_spot_price = spotPrices.silver;
+      patch.assay_platinum_spot_price = spotPrices.platinum;
+      patch.assay_palladium_spot_price = spotPrices.palladium;
+      patch.assay_spot_price_timestamp = new Date().toISOString();
+    }
+    const { error } = await sb.from('scrap_batches').update(patch).eq('id', batchId);
     if (error) { toast.error(error.message); return false; }
     await logActivity(batchId, 'assay_received', { final_amount: finalAmount });
     toast.success('Assay recorded');
@@ -159,21 +175,24 @@ export function useScrapBatches(storeId: string) {
     method: SettlementMethod,
     cash: { amount: number; method: string; reference: string } | null,
   ) => {
+    const now = new Date().toISOString();
     const patch: any = {
       settlement_method: method,
-      status: 'settled' as ScrapBatchStatus,
-      settled_at: new Date().toISOString(),
+      status: 'closed' as ScrapBatchStatus,
+      settled_at: now,
+      closed_at: now,
     };
     if (cash) {
       patch.cash_received = cash.amount;
       patch.cash_payment_method = cash.method;
       patch.cash_reference = cash.reference;
-      patch.cash_received_at = new Date().toISOString();
+      patch.cash_received_at = now;
     }
     const { error } = await sb.from('scrap_batches').update(patch).eq('id', batchId);
     if (error) { toast.error(error.message); return false; }
     await logActivity(batchId, 'settlement_recorded', { method, cash });
-    toast.success('Settlement recorded');
+    await logActivity(batchId, 'batch_closed', {});
+    toast.success('Batch closed');
     await load();
     return true;
   }, [load]);
