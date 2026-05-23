@@ -131,15 +131,19 @@ export function ScrapBatchDrawer(props: Props) {
               hasItems={linkedItems.length > 0}
             />
           )}
-          {tab === 'summary' && <MetalSummaryPanel totals={totals} feePercent={0} />}
-          {tab === 'assay' && <AssayTab batch={batch} onRecord={props.onRecordAssay} disabled={batch.status === 'draft' || batch.status === 'closed'} />}
+          {tab === 'summary' && (
+            isClosed
+              ? <ClosedBatchSummary batch={batch} linkedItems={linkedItems} totals={totals} />
+              : <MetalSummaryPanel totals={totals} feePercent={0} />
+          )}
+          {tab === 'assay' && <AssayTab batch={batch} onRecord={props.onRecordAssay} disabled={batch.status === 'draft' || isClosed} livePrices={prices} />}
           {tab === 'settlement' && (
             <SettlementTab
               batch={batch}
               onRecord={props.onRecordSettlement}
               onAddReturnedMetal={props.onAddReturnedMetal}
               onClose={props.onCloseBatch}
-              disabled={batch.status === 'draft' || batch.status === 'closed'}
+              disabled={batch.status === 'draft' || isClosed}
             />
           )}
         </div>
