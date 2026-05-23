@@ -596,12 +596,7 @@ function SettlementTab({ batch, onRecord, onAddReturnedMetal, onClose, disabled 
           disabled={disabled}
           onClick={() => onRecord(batch.id, method, showCash ? { amount, method: payMethod, reference: ref } : null)}
           className="px-4 py-2 rounded-[8px] text-[13px] bg-[#2B2833] text-white hover:opacity-90 disabled:opacity-40"
-        >Record settlement</button>
-        {batch.status === 'settled' && (
-          <button onClick={() => onClose(batch.id)} className="px-4 py-2 rounded-[8px] text-[13px] bg-emerald-600 text-white hover:opacity-90">
-            Close batch
-          </button>
-        )}
+        >Record settlement &amp; close batch</button>
       </div>
     </div>
   );
