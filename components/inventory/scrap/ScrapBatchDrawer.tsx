@@ -5,13 +5,15 @@ import { useMetalPrices } from '@/hooks/useMetalPrices';
 import { computeBatchTotals } from './scrapCalc';
 import { MetalSummaryPanel } from './MetalSummaryPanel';
 import { RefinerFormDialog } from './RefinerFormDialog';
+import { ClosedBatchSummary } from './ClosedBatchSummary';
 import {
-  SCRAP_STATUS_LABELS,
+  SCRAP_STATUS_LABELS, displayStatus, formatPurity,
   type ScrapBatchRecord, type ScrapBatchItemRecord, type AssayData,
   type SettlementMethod, type ScrapBatchActivityRecord, type RefinerRecord,
 } from './scrapTypes';
 import type { InventoryItemRecord } from '../types';
 import { supabase } from '@/integrations/supabase/client';
+import type { SpotPrices } from '@/lib/pricing';
 import { toast } from 'sonner';
 import { Trash2, Plus, ChevronDown, ChevronUp, Sparkles, Upload, Loader2, AlertTriangle } from 'lucide-react';
 
