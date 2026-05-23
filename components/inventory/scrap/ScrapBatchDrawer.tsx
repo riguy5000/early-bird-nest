@@ -176,14 +176,14 @@ export function ScrapBatchDrawer(props: Props) {
 }
 
 function StatusBadge({ status }: { status: ScrapBatchRecord['status'] }) {
+  const d = displayStatus(status);
   const colors: Record<string, string> = {
     draft: 'bg-amber-100 text-amber-800',
     sent: 'bg-blue-100 text-blue-800',
     assay_received: 'bg-indigo-100 text-indigo-800',
-    settled: 'bg-emerald-100 text-emerald-800',
-    closed: 'bg-slate-200 text-slate-700',
+    closed: 'bg-emerald-100 text-emerald-800',
   };
-  return <span className={`px-2 py-0.5 rounded-[6px] text-[11px] font-semibold ${colors[status]}`}>{SCRAP_STATUS_LABELS[status]}</span>;
+  return <span className={`px-2 py-0.5 rounded-[6px] text-[11px] font-semibold ${colors[d]}`}>{SCRAP_STATUS_LABELS[status]}</span>;
 }
 
 // --- Items tab ---
