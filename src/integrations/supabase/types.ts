@@ -873,7 +873,12 @@ export type Database = {
       scrap_batches: {
         Row: {
           assay_data: Json
+          assay_gold_spot_price: number
+          assay_palladium_spot_price: number
+          assay_platinum_spot_price: number
           assay_received_at: string | null
+          assay_silver_spot_price: number
+          assay_spot_price_timestamp: string | null
           attachment_urls: string[]
           batch_number: string
           cash_payment_method: string
@@ -910,7 +915,12 @@ export type Database = {
         }
         Insert: {
           assay_data?: Json
+          assay_gold_spot_price?: number
+          assay_palladium_spot_price?: number
+          assay_platinum_spot_price?: number
           assay_received_at?: string | null
+          assay_silver_spot_price?: number
+          assay_spot_price_timestamp?: string | null
           attachment_urls?: string[]
           batch_number?: string
           cash_payment_method?: string
@@ -947,7 +957,12 @@ export type Database = {
         }
         Update: {
           assay_data?: Json
+          assay_gold_spot_price?: number
+          assay_palladium_spot_price?: number
+          assay_platinum_spot_price?: number
           assay_received_at?: string | null
+          assay_silver_spot_price?: number
+          assay_spot_price_timestamp?: string | null
           attachment_urls?: string[]
           batch_number?: string
           cash_payment_method?: string
