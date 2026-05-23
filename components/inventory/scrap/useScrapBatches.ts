@@ -296,10 +296,21 @@ export function useScrapBatches(storeId: string) {
     return data?.id as string;
   }, [storeId, load]);
 
+  /** Remove an item from Scrap Candidates without deleting it (returns to Undecided). */
+  const removeCandidate = useCallback(async (inventoryItemId: string) => {
+    const { error } = await sb.from('inventory_items')
+      .update({ disposition: 'Undecided' })
+      .eq('id', inventoryItemId);
+    if (error) { toast.error(error.message); return false; }
+    toast.success('Removed from Scrap Candidates');
+    return true;
+  }, []);
+
   return {
     batches, items, refiners, loading, refetch: load,
     createDraft, updateBatch, updateBatchItem, removeBatchItem,
     finalizeSendOut, recordAssay, recordSettlement, addReturnedMetal,
     closeBatch, deleteDraft, archiveBatch, loadActivity, saveRefiner,
+    removeCandidate,
   };
 }
