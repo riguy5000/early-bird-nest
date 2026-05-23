@@ -478,6 +478,18 @@ function AssayTab({ batch, onRecord, disabled, livePrices }: { batch: ScrapBatch
       <Input label="Refiner fee / deduction" type="number" value={String(form.refiner_fee_actual)} onChange={v => setForm(f => ({ ...f, refiner_fee_actual: Number(v) || 0 }))} />
       <TextArea label="Stone / dust / loss notes" value={form.loss_notes} onChange={v => setForm(f => ({ ...f, loss_notes: v }))} />
       <Input label="Final settlement amount" type="number" value={String(form.final_settlement_amount)} onChange={v => setForm(f => ({ ...f, final_settlement_amount: Number(v) || 0 }))} />
+      {livePrices && (
+        <div className="rounded-[10px] bg-[#FAF8F2] border border-black/[0.06] p-3">
+          <div className="text-[11px] font-semibold text-[#76707F] uppercase tracking-wider mb-1">Current spot prices (USD / oz)</div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[12px]">
+            <div><span className="text-[#76707F]">Gold:</span> <span className="font-medium text-[#2B2833]">{formatUSD(livePrices.Gold || 0)}</span></div>
+            <div><span className="text-[#76707F]">Silver:</span> <span className="font-medium text-[#2B2833]">{formatUSD(livePrices.Silver || 0)}</span></div>
+            <div><span className="text-[#76707F]">Platinum:</span> <span className="font-medium text-[#2B2833]">{formatUSD(livePrices.Platinum || 0)}</span></div>
+            <div><span className="text-[#76707F]">Palladium:</span> <span className="font-medium text-[#2B2833]">{formatUSD(livePrices.Palladium || 0)}</span></div>
+          </div>
+          <p className="text-[11px] text-[#76707F] mt-1.5">These prices will be saved with this batch when you save the assay.</p>
+        </div>
+      )}
       <div className="flex justify-end">
         <button
           disabled={disabled}
@@ -485,7 +497,13 @@ function AssayTab({ batch, onRecord, disabled, livePrices }: { batch: ScrapBatch
             gold_recovered: form.gold_recovered, silver_recovered: form.silver_recovered,
             platinum_recovered: form.platinum_recovered, palladium_recovered: form.palladium_recovered,
             purity_breakdown: form.purity_breakdown,
-          }, form.refiner_fee_actual, form.loss_notes, form.refiner_reference, form.final_settlement_amount)}
+          }, form.refiner_fee_actual, form.loss_notes, form.refiner_reference, form.final_settlement_amount,
+          livePrices ? {
+            gold: livePrices.Gold || 0,
+            silver: livePrices.Silver || 0,
+            platinum: livePrices.Platinum || 0,
+            palladium: livePrices.Palladium || 0,
+          } : undefined)}
           className="px-4 py-2 rounded-[8px] text-[13px] bg-[#2B2833] text-white hover:opacity-90 disabled:opacity-40"
         >
           Save assay
