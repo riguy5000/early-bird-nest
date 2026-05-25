@@ -456,9 +456,11 @@ export function SendOutScrapView({ storeId, employeeId, allItems }: Props) {
             <tbody className="divide-y divide-black/[0.04]">
               {filteredCandidates.length === 0 && (
                 <tr><td colSpan={10} className="px-3 py-8 text-center text-[13px] text-[#76707F]">
-                  {metalFilter
-                    ? <>No candidates match this filter. <button onClick={() => setMetalFilter(null)} className="text-[#2B2833] underline">Clear filter</button>.</>
-                    : <>No scrap candidate items. Mark items as <b>Scrap Candidate</b> in Inventory to see them here.</>}
+                  {query
+                    ? <>No scrap candidates match <span className="font-medium text-[#2B2833]">"{search}"</span>. <button onClick={() => setSearch('')} className="text-[#2B2833] underline">Clear search</button>.</>
+                    : metalFilter
+                      ? <>No candidates match this filter. <button onClick={() => setMetalFilter(null)} className="text-[#2B2833] underline">Clear filter</button>.</>
+                      : <>No scrap candidate items. Mark items as <b>Scrap Candidate</b> in Inventory to see them here.</>}
                 </td></tr>
               )}
               {filteredCandidates.map(item => {
