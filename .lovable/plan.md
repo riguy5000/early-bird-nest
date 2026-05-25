@@ -1,87 +1,48 @@
-## Send Out Scrap Workflow
+## Goal
 
-Add a new "Send Out Scrap" tab to Inventory that manages the full refining lifecycle: select scrap candidates → create batch → finalize send-out → record assay → settle as cash, metal return, or both.
+Reset the currently logged-in store to a clean slate, then seed 150 realistic inventory items with mixed metals and karats so you can stress-test Inventory and Send Out Scrap.
 
-### Database (new tables via migration)
+## Scope
 
-**`scrap_batches`**
-- `id`, `store_id`, `batch_number` (auto, e.g. `SB-0001`)
-- `status`: `draft | sent | assay_received | settled | closed`
-- `refiner_name`, `refiner_contact`, `shipping_method`, `tracking_number`, `insurance_amount`, `notes`
-- `created_by` (employee_id), `sent_at`, `assay_received_at`, `settled_at`, `closed_at`
-- `estimated_gross_value`, `estimated_fee`, `estimated_net_value`
-- `assay_data` (jsonb) — actual recovered metals + purity breakdown
-- `refiner_reference`, `refiner_fee_actual`, `loss_notes`, `final_settlement_amount`
-- `settlement_method`: `cash | metal | partial`
-- `cash_received`, `cash_payment_method`, `cash_reference`, `cash_received_at`
-- `attachment_urls` (text[])
-- timestamps
+- **Current store only** (scoped by `store_id` — other stores untouched).
+- **No schema changes.** Pure data wipe + insert via the DB insert tool.
+- **No code changes.**
 
-**`scrap_batch_items`** (junction)
-- `id`, `batch_id`, `inventory_item_id`, `send_out_weight` (editable), `original_weight`, `metal`, `purity`, `estimated_value`, `notes`
+## Step 1 — Wipe (current store)
 
-**`scrap_batch_activity`** (audit log)
-- `id`, `batch_id`, `event_type`, `details` (jsonb), `actor_id`, `created_at`
+Delete in dependency order so nothing orphans:
 
-**`inventory_items` additions**
-- `scrap_batch_id` (nullable uuid) — link to batch when added
-- Extend `processing_status` usage to include `In Scrap Draft`, `Sent to Refiner`
-- Extend `archive_reason` usage; reuse existing `is_archived` for finalized items
+1. `scrap_batch_activity` where batch belongs to store
+2. `scrap_batch_items` where batch belongs to store
+3. `scrap_batches` where `store_id = <current>`
+4. `inventory_status_history` where item belongs to store
+5. `inventory_items` where `store_id = <current>`
+6. `inventory_batches` where `store_id = <current>`
+7. `refinery_lots` where `store_id = <current>`
+8. `refiners` where `store_id = <current>`
+9. `customers` where `store_id = <current>`
 
-RLS: store members read/insert, owners manage — same pattern as other inventory tables.
+Platform settings, store settings, employees, and auth are preserved.
 
-### Frontend
+## Step 2 — Seed 150 inventory items
 
-**`components/InventoryModule.tsx`**
-- Add `'sendout-scrap'` tab labeled "Send Out Scrap"
-- New branch in `getTabItems` filters to scrap candidates not yet in a finalized batch
-- Render `<SendOutScrapView>` for this tab instead of standard `InventoryItemTable`
+One synthetic `inventory_batches` row (source `manual`, note "Seed data"), then 150 `inventory_items` linked to it.
 
-**New `components/inventory/scrap/` directory**
+**Mix:**
+- Categories: ~70% Jewelry, ~20% Bullion, ~10% Watches
+- Metals (random per item, sometimes 2 metals on one item):
+  - Gold: 10K, 14K, 18K, 22K, 24K
+  - Silver: 925, 999
+  - Platinum: 950
+  - Palladium: 950
+- Weight: random 1.5g – 85g
+- Disposition: ~60% Undecided, ~25% Scrap Candidate, ~10% Showroom Candidate, ~5% Investment Candidate
+- Location: mostly `safe`, some `showroom`
+- Cost basis + estimated values computed from a reasonable % of spot
+- Descriptions like "14K Yellow Gold Chain", "925 Silver Bracelet", "1oz Gold Bar", etc.
 
-1. `SendOutScrapView.tsx` — main panel:
-   - Candidate items table with select checkboxes (columns per spec)
-   - Sticky batch summary panel (counts, totals per metal, est. value, est. payout)
-   - "Create Scrap Batch" CTA
-   - "Existing Batches" section listing drafts + sent/settled batches with status badge
+This guarantees the Scrap Candidate list, metal/purity filter chips, and live "Selected to send" summary all have real data to play with.
 
-2. `ScrapBatchDrawer.tsx` — right-side drawer (reuses existing drawer pattern):
-   - Header: batch ID, status, refiner, dates
-   - Tabs/sections: Items · Shipping · Metal Summary · Assay/Settlement · Cash · Returned Metal · Activity
-   - Editable send-out weights while `draft`
-   - "Finalize Send-Out" button (validates tracking + refiner)
+## Confirmation needed
 
-3. `MetalSummaryPanel.tsx` — grouped by metal + purity (10K/14K/18K/22K/24K, 925/999, Pt 900/950, Pd 950), gross/fee/net
-
-4. `AssaySettlementForm.tsx` — actual recovered metals, fee, settlement amount, method radio (cash/metal/partial), file upload to existing `batch-photos` bucket
-
-5. `ReturnedMetalForm.tsx` — adds bullion items back to inventory linked to the scrap batch (creates new `inventory_items` rows with `source = 'refiner-return'`, links via `notes` or new `parent_batch_id` reference)
-
-6. `ScrapBatchList.tsx` — list/cards of all scrap batches with status filter
-
-**Hook: `useScrapBatches.ts`**
-- Fetch batches, items, activity log
-- `createDraft`, `updateDraft`, `addItems`, `removeItems`, `updateWeights`
-- `finalizeSendOut` — archives source items, sets `scrap_batch_id`, `processing_status = 'Sent to Refiner'`, `is_archived = true`, logs activity
-- `recordAssay`, `recordCashSettlement`, `addReturnedMetal`, `closeBatch`, `cancelDraft` (releases items)
-
-### Calculations
-Reuse `src/lib/pricing.ts` and `useMetalPrices` hook. Formula already in memory: `(weight × purity / 31.1035) × spot`.
-
-### Status / locking rules
-- `draft`: fully editable, items not archived
-- `sent`: items locked, archived, can edit tracking/notes, can add assay
-- `assay_received`: can add settlement
-- `settled` / `closed`: read-only except notes
-
-### Currency formatting
-Use existing `fmt()` / `formatCurrency` with thousand separators (already in `src/lib/utils.ts` per prior task).
-
-### Out of scope
-- No changes to take-in, payouts, customers, settings, dashboard
-- No changes to existing inventory tabs other than adding the new one
-- Settings > Refining tab deferred (optional per spec)
-
-### Files
-**New:** migration; `components/inventory/scrap/SendOutScrapView.tsx`, `ScrapBatchDrawer.tsx`, `ScrapBatchList.tsx`, `MetalSummaryPanel.tsx`, `AssaySettlementForm.tsx`, `ReturnedMetalForm.tsx`, `useScrapBatches.ts`, `scrapTypes.ts`, `scrapCalc.ts`
-**Edited:** `components/InventoryModule.tsx` (add tab + branch), `components/inventory/types.ts` (extend status enums), `components/inventory/useInventoryData.ts` (exclude archived-scrap from active)
+This is destructive. Approving the plan = approving the wipe. After approval I'll switch to build mode and execute the deletes + inserts in one shot, then confirm row counts.
