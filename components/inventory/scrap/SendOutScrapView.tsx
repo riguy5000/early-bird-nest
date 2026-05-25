@@ -281,7 +281,73 @@ export function SendOutScrapView({ storeId, employeeId, allItems }: Props) {
           })}
         </div>
 
+      {/* Unified search — applies to both batches and candidates */}
+      <div className="relative">
+        <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#76707F]" />
+        <input
+          value={search}
+          onChange={e => { setSearch(e.target.value); setVisibleBatches(BATCH_PAGE_SIZE); }}
+          placeholder="Search batches and candidates — ID, metal, purity, description, refiner, tracking…"
+          className="h-10 w-full pl-9 pr-9 rounded-[10px] border border-black/[0.08] bg-white text-[13px] focus:outline-none focus:border-[#2B2833]/30 focus:ring-2 focus:ring-[#2B2833]/5"
+        />
+        {search && (
+          <button
+            onClick={() => { setSearch(''); setVisibleBatches(BATCH_PAGE_SIZE); }}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md text-[#76707F] hover:bg-black/[0.05]"
+            title="Clear search"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+
+      {/* Batches section */}
+      <section>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+          <div>
+            <h3 className="text-[15px] font-semibold text-[#2B2833]">
+              Scrap batches
+              {query && (
+                <span className="ml-2 text-[12px] font-normal text-[#76707F]">
+                  · {filteredBatches.length} of {scrap.batches.length}
+                </span>
+              )}
+            </h3>
+            <p className="text-[12px] text-[#76707F]">Track every batch you're sending to a refiner.</p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {FILTERS.map(f => {
+            const count = f.id === 'all'
+              ? scrap.batches.length
+              : scrap.batches.filter(b => displayStatus(b.status) === f.id).length;
+            const active = filter === f.id;
+            return (
+              <button
+                key={f.id}
+                onClick={() => { setFilter(f.id); setVisibleBatches(BATCH_PAGE_SIZE); }}
+                className={`px-3 py-1.5 rounded-full text-[12px] font-medium transition-all border ${
+                  active
+                    ? 'bg-[#2B2833] text-white border-[#2B2833]'
+                    : 'bg-white text-[#2B2833] border-black/[0.08] hover:bg-black/[0.02]'
+                }`}
+              >
+                {f.label} <span className={active ? 'text-white/70' : 'text-[#76707F]'}>· {count}</span>
+              </button>
+            );
+          })}
+        </div>
+
         {filteredBatches.length === 0 ? (
+          <div className="rounded-[12px] border border-dashed border-black/[0.08] bg-white p-6 text-center">
+            <p className="text-[13px] text-[#76707F]">
+              {query
+                ? <>No batches match <span className="font-medium text-[#2B2833]">"{search}"</span>.</>
+                : <>No batches match. Select scrap candidates below to create one.</>}
+            </p>
+          </div>
+        ) : (
           <div className="rounded-[12px] border border-dashed border-black/[0.08] bg-white p-6 text-center">
             <p className="text-[13px] text-[#76707F]">No batches match. Select scrap candidates below to create one.</p>
           </div>
