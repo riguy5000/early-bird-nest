@@ -82,19 +82,51 @@ export function SendOutScrapView({ storeId, employeeId, allItems }: Props) {
     };
   }, [candidates]);
 
+  // Lookup for inventory items by id — used by batch search to match item descriptions/categories
+  const inventoryById = useMemo(() => {
+    const map = new Map<string, InventoryItemRecord>();
+    allItems.forEach(it => map.set(it.id, it));
+    return map;
+  }, [allItems]);
+
+  const query = search.trim().toLowerCase();
+  const queryNum = query && !isNaN(Number(query)) ? Number(query) : null;
+
   const filteredCandidates = useMemo(() => {
-    if (!metalFilter) return candidates;
     return candidates.filter(item => {
+      if (metalFilter) {
+        const metals = Array.isArray(item.metals) ? item.metals : [];
+        const matchesMetal = metals.some((m: any) => {
+          const metal = String(m?.type || m?.metal || '');
+          const purity = String(m?.karat || m?.purity || '');
+          if (metalFilter.metal && metal !== metalFilter.metal) return false;
+          if (metalFilter.purity && purity !== metalFilter.purity) return false;
+          return true;
+        });
+        if (!matchesMetal) return false;
+      }
+      if (!query) return true;
+
       const metals = Array.isArray(item.metals) ? item.metals : [];
-      return metals.some((m: any) => {
-        const metal = String(m?.type || m?.metal || '');
-        const purity = String(m?.karat || m?.purity || '');
-        if (metalFilter.metal && metal !== metalFilter.metal) return false;
-        if (metalFilter.purity && purity !== metalFilter.purity) return false;
-        return true;
-      });
+      const haystack = [
+        item.id,
+        item.take_in_item_ref || '',
+        item.category || '',
+        item.subcategory || '',
+        item.description || '',
+        item.notes || '',
+        ...metals.flatMap((m: any) => [String(m?.type || m?.metal || ''), String(m?.karat || m?.purity || '')]),
+      ].join(' ').toLowerCase();
+
+      if (haystack.includes(query)) return true;
+
+      if (queryNum !== null) {
+        const w = Number(item.weight) || 0;
+        if (Math.abs(w - queryNum) < 0.05) return true;
+      }
+      return false;
     });
-  }, [candidates, metalFilter]);
+  }, [candidates, metalFilter, query, queryNum]);
 
   const selectedItems = useMemo(() => candidates.filter(i => selectedIds.has(i.id)), [candidates, selectedIds]);
   const totals = useMemo(() => computeBatchTotals(selectedItems, prices), [selectedItems, prices]);
@@ -118,22 +150,30 @@ export function SendOutScrapView({ storeId, employeeId, allItems }: Props) {
   }, [selectedItems]);
 
   const filteredBatches = useMemo(() => {
-    const q = search.trim().toLowerCase();
     return scrap.batches.filter(b => {
       if (filter !== 'all' && displayStatus(b.status) !== filter) return false;
-      if (!q) return true;
-      const itemMatch = scrap.items.some(i =>
-        i.batch_id === b.id && (i.inventory_item_id.toLowerCase().includes(q) || i.metal.toLowerCase().includes(q) || i.purity.toLowerCase().includes(q))
-      );
+      if (!query) return true;
+      const batchItems = scrap.items.filter(i => i.batch_id === b.id);
+      const itemMatch = batchItems.some(i => {
+        if (i.inventory_item_id.toLowerCase().includes(query)) return true;
+        if (i.metal.toLowerCase().includes(query)) return true;
+        if (i.purity.toLowerCase().includes(query)) return true;
+        const inv = inventoryById.get(i.inventory_item_id);
+        if (inv) {
+          const hay = `${inv.description || ''} ${inv.category || ''} ${inv.subcategory || ''} ${inv.take_in_item_ref || ''}`.toLowerCase();
+          if (hay.includes(query)) return true;
+        }
+        return false;
+      });
       return (
-        b.batch_number.toLowerCase().includes(q) ||
-        b.refiner_name.toLowerCase().includes(q) ||
-        b.tracking_number.toLowerCase().includes(q) ||
-        SCRAP_STATUS_LABELS[b.status].toLowerCase().includes(q) ||
+        b.batch_number.toLowerCase().includes(query) ||
+        b.refiner_name.toLowerCase().includes(query) ||
+        b.tracking_number.toLowerCase().includes(query) ||
+        SCRAP_STATUS_LABELS[b.status].toLowerCase().includes(query) ||
         itemMatch
       );
     });
-  }, [scrap.batches, scrap.items, search, filter]);
+  }, [scrap.batches, scrap.items, inventoryById, query, filter]);
 
   // Summary: clearly-labeled cards
   const summary = useMemo(() => {
@@ -201,21 +241,40 @@ export function SendOutScrapView({ storeId, employeeId, allItems }: Props) {
         />
       </div>
 
+
+      {/* Unified search — applies to both batches and candidates */}
+      <div className="relative">
+        <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#76707F]" />
+        <input
+          value={search}
+          onChange={e => { setSearch(e.target.value); setVisibleBatches(BATCH_PAGE_SIZE); }}
+          placeholder="Search batches and candidates — ID, metal, purity, description, refiner, tracking…"
+          className="h-10 w-full pl-9 pr-9 rounded-[10px] border border-black/[0.08] bg-white text-[13px] focus:outline-none focus:border-[#2B2833]/30 focus:ring-2 focus:ring-[#2B2833]/5"
+        />
+        {search && (
+          <button
+            onClick={() => { setSearch(''); setVisibleBatches(BATCH_PAGE_SIZE); }}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md text-[#76707F] hover:bg-black/[0.05]"
+            title="Clear search"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+
       {/* Batches section */}
       <section>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
           <div>
-            <h3 className="text-[15px] font-semibold text-[#2B2833]">Scrap batches</h3>
+            <h3 className="text-[15px] font-semibold text-[#2B2833]">
+              Scrap batches
+              {query && (
+                <span className="ml-2 text-[12px] font-normal text-[#76707F]">
+                  · {filteredBatches.length} of {scrap.batches.length}
+                </span>
+              )}
+            </h3>
             <p className="text-[12px] text-[#76707F]">Track every batch you're sending to a refiner.</p>
-          </div>
-          <div className="relative">
-            <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#76707F]" />
-            <input
-              value={search}
-              onChange={e => { setSearch(e.target.value); setVisibleBatches(BATCH_PAGE_SIZE); }}
-              placeholder="Search batch, refiner, tracking, metal…"
-              className="h-9 w-[280px] pl-8 pr-3 rounded-[10px] border border-black/[0.08] bg-white text-[13px]"
-            />
           </div>
         </div>
 
@@ -243,7 +302,11 @@ export function SendOutScrapView({ storeId, employeeId, allItems }: Props) {
 
         {filteredBatches.length === 0 ? (
           <div className="rounded-[12px] border border-dashed border-black/[0.08] bg-white p-6 text-center">
-            <p className="text-[13px] text-[#76707F]">No batches match. Select scrap candidates below to create one.</p>
+            <p className="text-[13px] text-[#76707F]">
+              {query
+                ? <>No batches match <span className="font-medium text-[#2B2833]">"{search}"</span>.</>
+                : <>No batches match. Select scrap candidates below to create one.</>}
+            </p>
           </div>
         ) : (
           <>
@@ -276,7 +339,14 @@ export function SendOutScrapView({ storeId, employeeId, allItems }: Props) {
       <section>
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h3 className="text-[15px] font-semibold text-[#2B2833]">Scrap candidates</h3>
+            <h3 className="text-[15px] font-semibold text-[#2B2833]">
+              Scrap candidates
+              {query && (
+                <span className="ml-2 text-[12px] font-normal text-[#76707F]">
+                  · {filteredCandidates.length} of {candidates.length}
+                </span>
+              )}
+            </h3>
             <p className="text-[12px] text-[#76707F]">Click an item to inspect it, or select multiple to start a batch.</p>
           </div>
           {selectedItems.length > 0 && (
@@ -386,9 +456,11 @@ export function SendOutScrapView({ storeId, employeeId, allItems }: Props) {
             <tbody className="divide-y divide-black/[0.04]">
               {filteredCandidates.length === 0 && (
                 <tr><td colSpan={10} className="px-3 py-8 text-center text-[13px] text-[#76707F]">
-                  {metalFilter
-                    ? <>No candidates match this filter. <button onClick={() => setMetalFilter(null)} className="text-[#2B2833] underline">Clear filter</button>.</>
-                    : <>No scrap candidate items. Mark items as <b>Scrap Candidate</b> in Inventory to see them here.</>}
+                  {query
+                    ? <>No scrap candidates match <span className="font-medium text-[#2B2833]">"{search}"</span>. <button onClick={() => setSearch('')} className="text-[#2B2833] underline">Clear search</button>.</>
+                    : metalFilter
+                      ? <>No candidates match this filter. <button onClick={() => setMetalFilter(null)} className="text-[#2B2833] underline">Clear filter</button>.</>
+                      : <>No scrap candidate items. Mark items as <b>Scrap Candidate</b> in Inventory to see them here.</>}
                 </td></tr>
               )}
               {filteredCandidates.map(item => {
