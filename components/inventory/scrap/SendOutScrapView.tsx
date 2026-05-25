@@ -309,10 +309,6 @@ export function SendOutScrapView({ storeId, employeeId, allItems }: Props) {
             </p>
           </div>
         ) : (
-          <div className="rounded-[12px] border border-dashed border-black/[0.08] bg-white p-6 text-center">
-            <p className="text-[13px] text-[#76707F]">No batches match. Select scrap candidates below to create one.</p>
-          </div>
-        ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {shownBatches.map(b => (
