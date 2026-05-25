@@ -82,19 +82,51 @@ export function SendOutScrapView({ storeId, employeeId, allItems }: Props) {
     };
   }, [candidates]);
 
+  // Lookup for inventory items by id — used by batch search to match item descriptions/categories
+  const inventoryById = useMemo(() => {
+    const map = new Map<string, InventoryItemRecord>();
+    allItems.forEach(it => map.set(it.id, it));
+    return map;
+  }, [allItems]);
+
+  const query = search.trim().toLowerCase();
+  const queryNum = query && !isNaN(Number(query)) ? Number(query) : null;
+
   const filteredCandidates = useMemo(() => {
-    if (!metalFilter) return candidates;
     return candidates.filter(item => {
+      if (metalFilter) {
+        const metals = Array.isArray(item.metals) ? item.metals : [];
+        const matchesMetal = metals.some((m: any) => {
+          const metal = String(m?.type || m?.metal || '');
+          const purity = String(m?.karat || m?.purity || '');
+          if (metalFilter.metal && metal !== metalFilter.metal) return false;
+          if (metalFilter.purity && purity !== metalFilter.purity) return false;
+          return true;
+        });
+        if (!matchesMetal) return false;
+      }
+      if (!query) return true;
+
       const metals = Array.isArray(item.metals) ? item.metals : [];
-      return metals.some((m: any) => {
-        const metal = String(m?.type || m?.metal || '');
-        const purity = String(m?.karat || m?.purity || '');
-        if (metalFilter.metal && metal !== metalFilter.metal) return false;
-        if (metalFilter.purity && purity !== metalFilter.purity) return false;
-        return true;
-      });
+      const haystack = [
+        item.id,
+        item.take_in_item_ref || '',
+        item.category || '',
+        item.subcategory || '',
+        item.description || '',
+        item.notes || '',
+        ...metals.flatMap((m: any) => [String(m?.type || m?.metal || ''), String(m?.karat || m?.purity || '')]),
+      ].join(' ').toLowerCase();
+
+      if (haystack.includes(query)) return true;
+
+      if (queryNum !== null) {
+        const w = Number(item.weight) || 0;
+        if (Math.abs(w - queryNum) < 0.05) return true;
+      }
+      return false;
     });
-  }, [candidates, metalFilter]);
+  }, [candidates, metalFilter, query, queryNum]);
 
   const selectedItems = useMemo(() => candidates.filter(i => selectedIds.has(i.id)), [candidates, selectedIds]);
   const totals = useMemo(() => computeBatchTotals(selectedItems, prices), [selectedItems, prices]);
@@ -118,22 +150,30 @@ export function SendOutScrapView({ storeId, employeeId, allItems }: Props) {
   }, [selectedItems]);
 
   const filteredBatches = useMemo(() => {
-    const q = search.trim().toLowerCase();
     return scrap.batches.filter(b => {
       if (filter !== 'all' && displayStatus(b.status) !== filter) return false;
-      if (!q) return true;
-      const itemMatch = scrap.items.some(i =>
-        i.batch_id === b.id && (i.inventory_item_id.toLowerCase().includes(q) || i.metal.toLowerCase().includes(q) || i.purity.toLowerCase().includes(q))
-      );
+      if (!query) return true;
+      const batchItems = scrap.items.filter(i => i.batch_id === b.id);
+      const itemMatch = batchItems.some(i => {
+        if (i.inventory_item_id.toLowerCase().includes(query)) return true;
+        if (i.metal.toLowerCase().includes(query)) return true;
+        if (i.purity.toLowerCase().includes(query)) return true;
+        const inv = inventoryById.get(i.inventory_item_id);
+        if (inv) {
+          const hay = `${inv.description || ''} ${inv.category || ''} ${inv.subcategory || ''} ${inv.take_in_item_ref || ''}`.toLowerCase();
+          if (hay.includes(query)) return true;
+        }
+        return false;
+      });
       return (
-        b.batch_number.toLowerCase().includes(q) ||
-        b.refiner_name.toLowerCase().includes(q) ||
-        b.tracking_number.toLowerCase().includes(q) ||
-        SCRAP_STATUS_LABELS[b.status].toLowerCase().includes(q) ||
+        b.batch_number.toLowerCase().includes(query) ||
+        b.refiner_name.toLowerCase().includes(query) ||
+        b.tracking_number.toLowerCase().includes(query) ||
+        SCRAP_STATUS_LABELS[b.status].toLowerCase().includes(query) ||
         itemMatch
       );
     });
-  }, [scrap.batches, scrap.items, search, filter]);
+  }, [scrap.batches, scrap.items, inventoryById, query, filter]);
 
   // Summary: clearly-labeled cards
   const summary = useMemo(() => {
