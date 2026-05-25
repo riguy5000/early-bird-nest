@@ -339,7 +339,14 @@ export function SendOutScrapView({ storeId, employeeId, allItems }: Props) {
       <section>
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h3 className="text-[15px] font-semibold text-[#2B2833]">Scrap candidates</h3>
+            <h3 className="text-[15px] font-semibold text-[#2B2833]">
+              Scrap candidates
+              {query && (
+                <span className="ml-2 text-[12px] font-normal text-[#76707F]">
+                  · {filteredCandidates.length} of {candidates.length}
+                </span>
+              )}
+            </h3>
             <p className="text-[12px] text-[#76707F]">Click an item to inspect it, or select multiple to start a batch.</p>
           </div>
           {selectedItems.length > 0 && (
