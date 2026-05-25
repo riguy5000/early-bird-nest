@@ -1,0 +1,1 @@
+-- See /tmp/seed.sql; this contains the full SQL. Re-pasting inline:
