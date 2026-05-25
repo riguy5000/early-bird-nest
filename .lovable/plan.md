@@ -1,48 +1,50 @@
-## Goal
+## Problem
 
-Reset the currently logged-in store to a clean slate, then seed 150 realistic inventory items with mixed metals and karats so you can stress-test Inventory and Send Out Scrap.
+The search box at the top of **Send Out Scrap** only filters the **Scrap batches** grid. When you type something like `palladium` or an inventory ID, it shows "No batches match" even though there are matching items in the **Scrap candidates** table below. The candidates table has no search at all, so the box looks broken.
 
-## Scope
+Also, the batch-side search only matches against `batch_number`, `refiner_name`, `tracking_number`, status label, and a few item fields — but it ignores item `description`, `category`, and `subcategory`, so searching by what's *in* a batch (e.g. "chain", "bar") often misses.
 
-- **Current store only** (scoped by `store_id` — other stores untouched).
-- **No schema changes.** Pure data wipe + insert via the DB insert tool.
-- **No code changes.**
+## Fix
 
-## Step 1 — Wipe (current store)
+Make one unified search that filters both sections at the same time, and broaden what it matches.
 
-Delete in dependency order so nothing orphans:
+### 1. Reposition + relabel the search
+- Move the search input out of the "Scrap batches" header into the page header row (just under the summary cards), so it visually applies to the whole view.
+- Placeholder: `Search batches and candidates — ID, metal, purity, description, refiner, tracking…`
+- Add a small `×` clear button inside the input when there's a query.
 
-1. `scrap_batch_activity` where batch belongs to store
-2. `scrap_batch_items` where batch belongs to store
-3. `scrap_batches` where `store_id = <current>`
-4. `inventory_status_history` where item belongs to store
-5. `inventory_items` where `store_id = <current>`
-6. `inventory_batches` where `store_id = <current>`
-7. `refinery_lots` where `store_id = <current>`
-8. `refiners` where `store_id = <current>`
-9. `customers` where `store_id = <current>`
+### 2. Filter Scrap candidates by the same query
+Apply the query (case-insensitive) against each candidate's:
+- `id` / `take_in_item_ref`
+- `category`, `subcategory`
+- `description`, `notes`
+- every entry in `metals[]` (`type`/`metal` and `karat`/`purity`)
+- numeric weight if the query is a pure number (match weight rounded to 1 decimal)
 
-Platform settings, store settings, employees, and auth are preserved.
+Combine with the existing `metalFilter` chip — both must pass.
 
-## Step 2 — Seed 150 inventory items
+### 3. Broaden Scrap batches search
+In addition to today's fields, also match:
+- batch item `description`, `category`, `subcategory` (joined from `allItems` via `inventory_item_id`)
+- refiner contact (already covered via `refiner_name`, leave as-is)
 
-One synthetic `inventory_batches` row (source `manual`, note "Seed data"), then 150 `inventory_items` linked to it.
+### 4. Empty-state clarity
+- Batches section: if query is set and zero matches → "No batches match **'palladium'**". If no query and zero batches → keep current copy.
+- Candidates section: if query is set and zero matches → "No scrap candidates match **'palladium'**. Try clearing the search or filter."
 
-**Mix:**
-- Categories: ~70% Jewelry, ~20% Bullion, ~10% Watches
-- Metals (random per item, sometimes 2 metals on one item):
-  - Gold: 10K, 14K, 18K, 22K, 24K
-  - Silver: 925, 999
-  - Platinum: 950
-  - Palladium: 950
-- Weight: random 1.5g – 85g
-- Disposition: ~60% Undecided, ~25% Scrap Candidate, ~10% Showroom Candidate, ~5% Investment Candidate
-- Location: mostly `safe`, some `showroom`
-- Cost basis + estimated values computed from a reasonable % of spot
-- Descriptions like "14K Yellow Gold Chain", "925 Silver Bracelet", "1oz Gold Bar", etc.
+### 5. Result counts
+Show inline counts next to each section header when a query is active, e.g. `Scrap batches · 2 of 14` and `Scrap candidates · 7 of 40`.
 
-This guarantees the Scrap Candidate list, metal/purity filter chips, and live "Selected to send" summary all have real data to play with.
+## Technical notes
 
-## Confirmation needed
+- All changes scoped to `components/inventory/scrap/SendOutScrapView.tsx`. No schema, hook, or other module changes.
+- Reuse the existing `search` state; just consume it in the `filteredCandidates` memo alongside the `metalFilter` check.
+- Build a `Map<string, InventoryItemRecord>` from `allItems` once per render to resolve `scrap.items[].inventory_item_id → description/category` for the batch search without N² scans.
+- Keep current keyboard behavior (typing resets `visibleBatches` to the page size).
+- No design-token or layout-style changes — keep the existing Bravo CRM card/input styling.
 
-This is destructive. Approving the plan = approving the wipe. After approval I'll switch to build mode and execute the deletes + inserts in one shot, then confirm row counts.
+## Out of scope
+
+- No changes to `useScrapBatches`, candidate drawer, or batch drawer.
+- No new filter dimensions beyond what's listed above.
+- No saved searches / URL sync.
